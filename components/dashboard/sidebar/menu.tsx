@@ -6,9 +6,13 @@ import { LuLayoutDashboard } from "react-icons/lu";
 import { FaRegFileAlt, FaRegHandshake, FaUsers } from "react-icons/fa";
 import { LiaChalkboardTeacherSolid } from "react-icons/lia";
 import { FaQuran } from "react-icons/fa";
-import { MdOutlinePeopleAlt, MdOutlineMosque, MdOutlineTravelExplore } from "react-icons/md";
+import {
+  MdOutlinePeopleAlt,
+  MdOutlineMosque,
+  MdOutlineTravelExplore,
+} from "react-icons/md";
 import { BsMoonStars } from "react-icons/bs";
-
+import Image from "next/image";
 
 const SidebarMenu = () => {
   const menuList = [
@@ -63,10 +67,19 @@ const SidebarMenu = () => {
       url: "/dashboard/sofor",
     },
   ];
-  
 
   return (
     <nav className="grow space-y-2 overflow-y-auto p-6">
+      <div className="size-16 mb-6">
+        <Image
+          src="/logo_img.png"
+          alt="Logo"
+          width={85}
+          height={85}
+          className="object-contain"
+        />
+      </div>
+      {/* <hr /> */}
       {menuList.map((menu, index) => {
         return <MenuItem key={index} {...menu} />;
       })}
