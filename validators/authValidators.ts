@@ -1,6 +1,5 @@
 import * as yup from "yup";
 
-// Sign In Schema
 export const signInSchema = yup.object().shape({
   email: yup
     .string()
