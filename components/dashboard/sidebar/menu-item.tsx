@@ -17,10 +17,10 @@ const MenuItem = ({ icon, title, url }: MenuItemProps) => {
     <Link
       href={url}
       className={cn(
-        "flex items-center gap-2 rounded-md px-3 py-2 text-lg font-medium transition-colors",
+        "flex items-center gap-2 rounded-md px-3 py-2 font-medium transition-colors",
         {
-          "bg-secondary text-secondary-foreground": active,
-          "text-secondary-foreground/70 hover:bg-secondary": !active,
+          "bg-cyan-600 text-white": active,
+          "text-white/70 hover:text-white": !active,
         }
       )}
     >

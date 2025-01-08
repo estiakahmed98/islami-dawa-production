@@ -19,10 +19,21 @@ const Header = () => {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b px-6 dark:bg-slate-900">
+    <header className="flex h-20 bg-[#155E75] text-white shrink-0 items-center justify-between border-b px-6 dark:bg-slate-900">
       <Button onClick={toggleSidebar} size="icon" variant="secondary">
         <Menu />
       </Button>
+
+      <div>
+        {/* <p>Islami Dawa Institute</p> */}
+        {/* Title Section */}
+        <div className="flex flex-col justify-center items-center col-span-8 space-y-1">
+          <h1 className="text-sm md:text-lg font-semibold leading-tight text-center">
+            ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ
+          </h1>
+            <div className="text-sm">দাওয়াতি বছর ২০২৪ ইং / ১৪৪৫ হিজ</div>
+        </div>
+      </div>
       <div className="flex items-center gap-4">
         <ThemeSwitcher />
         <DropdownMenu modal={false}>
