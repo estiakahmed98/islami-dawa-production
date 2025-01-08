@@ -31,7 +31,9 @@ const Header = () => {
           <h1 className="text-sm md:text-lg font-semibold leading-tight text-center">
             ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ
           </h1>
-            <div className="text-sm">দাওয়াতি বছর ২০২৪ ইং / ১৪৪৫ হিজ</div>
+          <div className="text-sm">
+            দাওয়াতি বছর {new Date().getFullYear()} ইং / ১৪৪৫ হিজ
+          </div>
         </div>
       </div>
       <div className="flex items-center gap-4">
