@@ -26,6 +26,7 @@ export default function SigninForm() {
 
     if (res?.ok) {
       router.push("/dashboard");
+    } else {
       alert("Invalid email or password");
     }
     console.log("Sign-in Response:", res);
