@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -72,4 +72,22 @@ model VerificationToken {
   expires DateTime
 
   @@unique([email, token])
+}
+
+
+model amoliMuhasabaData {
+  id           Int      @id @default(autoincrement())
+  tahajjud String
+  ayat String
+  zikir String
+  ishraq String
+  jamat String
+  sirat String
+  Dua String
+  ilm String
+  tasbih String
+  dayeeAmol String
+  amoliSura String
+  ayamroja String
+  hijbulBahar String
 }
