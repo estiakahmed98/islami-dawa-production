@@ -1,69 +1,108 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { signIn } from "next-auth/react";
+import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-
-import { useRouter } from "next/navigation";
 import { signInSchema } from "@/validators/authValidators";
+import { useForm } from "react-hook-form";
 
-export default function SigninForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormFieldset,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
+
+const SigninForm = () => {
+  const form = useForm<yup.InferType<typeof signInSchema>>({
     resolver: yupResolver(signInSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
-  const router = useRouter();
-
-  const onSubmit = async (data: { email: string; password: string }) => {
-    const res = await signIn("credentials", {
-      ...data,
-      redirect: false,
+  const onSubmit = async (values: yup.InferType<typeof signInSchema>) => {
+    signIn("credentials", {
+      ...values,
+      redirectTo: "/dashboard",
     });
-
-    if (res?.ok) {
-      router.push("/dashboard");
-    } else {
-      alert("Invalid email or password");
-    }
-    console.log("Sign-in Response:", res);
   };
 
   return (
-    <div className="max-w-lg shadow-md p-10 rounded-xl">
-      <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg">
-        <div className="flex flex-col rounded-lg">
-          <label className="p-2 rounded-lg">Email</label>
-          <input
-            type="text"
-            {...register("email")}
-            placeholder="Enter your email"
-            className="p-2 rounded-lg"
-          />
-          {errors.email && <p>{errors.email.message}</p>}
-        </div>
-        <div className="flex flex-col ">
-          <label className="p-2 rounded-lg">Password</label>
-          <input
-            type="password"
-            {...register("password")}
-            placeholder="Enter your password"
-            className="p-2 rounded-lg"
-          />
-          {errors.password && <p>{errors.password.message}</p>}
-        </div>
-        <div className="align-middle">
-          <button
-            type="submit"
-            className="mt-5 py-3 px-5 bg-green-800 rounded-xl text-white"
+    <Card>
+      <CardHeader className="items-center">
+        <CardTitle className="text-2xl">Sign In</CardTitle>
+        <CardDescription>Enter your account details to login</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <FormFieldset>
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="Enter email address"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Enter password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </FormFieldset>
+            <Button type="submit" className="mt-4 w-full">
+              Sign In
+            </Button>
+          </form>
+        </Form>
+        <div className="mt-5 space-x-1 text-center text-sm">
+          <Link
+            href="/auth/sign-up"
+            className="text-sm text-muted-foreground hover:underline"
           >
-            Sign In
-          </button>
+            Forgot password?
+          </Link>
         </div>
-      </form>
-    </div>
+      </CardContent>
+    </Card>
   );
-}
+};
+
+export default SigninForm;

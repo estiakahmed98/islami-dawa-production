@@ -14,8 +14,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSidebar } from "@/providers/sidebar-provider";
+import { signOut, useSession } from "next-auth/react";
 
 const Header = () => {
+  const session = useSession();
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -54,10 +56,10 @@ const Header = () => {
           <DropdownMenuContent align="end" className="max-w-64">
             <DropdownMenuLabel className="flex min-w-0 flex-col">
               <span className="truncate text-sm font-medium text-foreground">
-                Mason Alex
+                {session.data?.user?.name}
               </span>
               <span className="truncate text-sm font-medium text-muted-foreground">
-                mason@example.com
+                {session.data?.user?.email}
               </span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -66,7 +68,7 @@ const Header = () => {
                 <UserRound className="opacity-60" aria-hidden="true" />
                 <span>Profile</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => signOut()}>
                 <LogOut className="opacity-60" aria-hidden="true" />
                 <span>Logout</span>
               </DropdownMenuItem>
