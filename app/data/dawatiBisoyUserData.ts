@@ -14,5 +14,14 @@ export const userDawatiBisoyData = {
       "publicSatheyMojlish": "55",
       "nonMuslimSaptahikGasht": "33"
     }
+  },
+  "rashid@gmail.com": {
+    "2025-01-09": {
+      "nonMuslimDawat": "34",
+      "murtadDawat": "44",
+      "alemderSatheyMojlish": "33",
+      "publicSatheyMojlish": "55",
+      "nonMuslimSaptahikGasht": "33"
+    }
   }
 };

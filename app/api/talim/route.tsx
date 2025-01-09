@@ -2,9 +2,18 @@ import fs from "fs";
 import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 
-const userDataPath = path.join(process.cwd(), "/src/app/data/talimBisoyUserData.ts");
+const userDataPath = path.join(process.cwd(), "app/data/talimBisoyUserData.ts");
 
-export async function POST(req: NextRequest) {
+interface TalimBisoyData {
+  [email: string]: {
+    [date: string]: {
+      mohilaTalim: string;
+      TalimOngshoGrohon: string;
+    };
+  };
+}
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const { mohilaTalim, TalimOngshoGrohon, email } = await req.json();
 
@@ -16,47 +25,59 @@ export async function POST(req: NextRequest) {
 
     // Basic validation
     if (!email || !mohilaTalim || !TalimOngshoGrohon) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+      return new NextResponse("All fields are required", { status: 400 });
     }
 
     // Get the current date in YYYY-MM-DD format
     const currentDate = new Date().toISOString().split("T")[0];
 
     // Read the existing user data file
-    const fileContent = fs.readFileSync(userDataPath, "utf-8");
+    let fileContent = "{}";
+    if (fs.existsSync(userDataPath)) {
+      fileContent = fs.readFileSync(userDataPath, "utf-8");
+    }
 
     // Parse existing data
-    let userTalimData: Record<string, any> = {};
-    const startIndex = fileContent.indexOf("{");
-    const endIndex = fileContent.lastIndexOf("}");
-    if (startIndex !== -1 && endIndex !== -1) {
-      const jsonString = fileContent.slice(startIndex, endIndex + 1);
-      userTalimData = JSON.parse(jsonString); // Safely parse JSON
+    let userTalimBisoyData: TalimBisoyData = {};
+    try {
+      const startIndex = fileContent.indexOf("{");
+      const endIndex = fileContent.lastIndexOf("}");
+      if (startIndex !== -1 && endIndex !== -1) {
+        const jsonString = fileContent.slice(startIndex, endIndex + 1);
+        userTalimBisoyData = JSON.parse(jsonString);
+      }
+    } catch (e) {
+      console.error("Error parsing JSON:", e);
     }
 
     // Ensure the user's data is organized by email
-    if (!userTalimData[email]) {
-      userTalimData[email] = {};
+    if (!userTalimBisoyData[email]) {
+      userTalimBisoyData[email] = {};
     }
 
     // Add form data under the current date
-    userTalimData[email][currentDate] = {
+    userTalimBisoyData[email][currentDate] = {
       mohilaTalim,
       TalimOngshoGrohon,
     };
 
-    // Write the updated userTalimData back to the file
-    const updatedFileContent = `export const userTalimData = ${JSON.stringify(
-      userTalimData,
+    // Write the updated userData back to the file
+    const updatedFileContent = `export const userTalimBisoyData = ${JSON.stringify(
+      userTalimBisoyData,
       null,
       2
     )};`;
     fs.writeFileSync(userDataPath, updatedFileContent, "utf-8");
 
     console.log("Data saved under date:", currentDate);
-    return NextResponse.json({ email, currentDate }, { status: 201 });
+    return new NextResponse(
+      JSON.stringify(userTalimBisoyData[email][currentDate]),
+      {
+        status: 201,
+      }
+    );
   } catch (error) {
-    console.error("Error saving user data:", error);
-    return NextResponse.json({ error: "Failed to save user data" }, { status: 500 });
+    console.error("Error saving data:", error);
+    return new NextResponse("Failed to save user data", { status: 500 });
   }
 }
