@@ -33,35 +33,37 @@ export default function SigninForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="flex flex-col rounded-lg">
-        <label className="p-2 rounded-lg">Email</label>
-        <input
-          type="text"
-          {...register("email")}
-          placeholder="Enter your email"
-          className="p-2 rounded-lg"
-        />
-        {errors.email && <p>{errors.email.message}</p>}
-      </div>
-      <div className="flex flex-col ">
-        <label className="p-2 rounded-lg">Password</label>
-        <input
-          type="password"
-          {...register("password")}
-          placeholder="Enter your password"
-          className="p-2 rounded-lg"
-        />
-        {errors.password && <p>{errors.password.message}</p>}
-      </div>
-      <div className="align-middle">
-        <button
-          type="submit"
-          className="mt-5 py-3 px-5 bg-green-800 rounded-xl"
-        >
-          Sign In
-        </button>
-      </div>
-    </form>
+    <div className="max-w-lg shadow-md p-10 rounded-xl">
+      <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg">
+        <div className="flex flex-col rounded-lg">
+          <label className="p-2 rounded-lg">Email</label>
+          <input
+            type="text"
+            {...register("email")}
+            placeholder="Enter your email"
+            className="p-2 rounded-lg"
+          />
+          {errors.email && <p>{errors.email.message}</p>}
+        </div>
+        <div className="flex flex-col ">
+          <label className="p-2 rounded-lg">Password</label>
+          <input
+            type="password"
+            {...register("password")}
+            placeholder="Enter your password"
+            className="p-2 rounded-lg"
+          />
+          {errors.password && <p>{errors.password.message}</p>}
+        </div>
+        <div className="align-middle">
+          <button
+            type="submit"
+            className="mt-5 py-3 px-5 bg-green-800 rounded-xl text-white"
+          >
+            Sign In
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
