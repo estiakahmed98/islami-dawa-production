@@ -1,4 +1,5 @@
 import AmoliMuhasabaForm from "@/components/AmoliMuhasabaForm";
+import DynamicTable from "@/components/ReportTable";
 import {
   Tabs,
   TabsContent,
