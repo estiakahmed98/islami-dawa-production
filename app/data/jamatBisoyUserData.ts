@@ -14,5 +14,11 @@ export const userJamatBisoyUserData = {
       "jamatBerHoise": "100",
       "jamatSathi": "5000"
     }
+  },
+  "rashid@gmail.com": {
+    "2025-01-09": {
+      "jamatBerHoise": "100",
+      "jamatSathi": "5000"
+    }
   }
 };

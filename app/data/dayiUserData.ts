@@ -27,5 +27,10 @@ export const userDayeData = {
     "2025-01-07": {
       "sohojogiDayeToiri": "12"
     }
+  },
+  "rashid@gmail.com": {
+    "2025-01-09": {
+      "sohojogiDayeToiri": "1000"
+    }
   }
 };

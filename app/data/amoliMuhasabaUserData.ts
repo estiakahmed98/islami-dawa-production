@@ -1,4 +1,4 @@
-export const userAmoliData = {
+export const userAmoliBisoyData = {
   "labelMap": {
     "tahajjud": "তাহাজ্জুদ",
     "ayat": "তিলাওয়াতুল কোরআন তাদাব্বুর",
@@ -258,6 +258,23 @@ export const userAmoliData = {
       "Dua": " না ",
       "ilm": "Hadis",
       "tasbih": "সকাল",
+      "dayeeAmol": "হ্যাঁ",
+      "amoliSura": "হ্যাঁ",
+      "ayamroja": "হ্যাঁ",
+      "hijbulBahar": "হ্যাঁ"
+    }
+  },
+  "rashid@gmail.com": {
+    "2025-01-09": {
+      "tahajjud": "500",
+      "ayat": "sura Baqara",
+      "zikir": "যিকির",
+      "ishraq": "ফজরের পর",
+      "jamat": "5",
+      "sirat": "Hadis",
+      "Dua": "হ্যাঁ",
+      "ilm": "Hadis",
+      "tasbih": "হ্যাঁ",
       "dayeeAmol": "হ্যাঁ",
       "amoliSura": "হ্যাঁ",
       "ayamroja": "হ্যাঁ",

@@ -2,10 +2,7 @@ import fs from "fs";
 import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 
-const userDataPath = path.join(
-  process.cwd(),
-  "/src/app/data/dawatiBisoyUserData.tsx"
-);
+const userDataPath = path.join(process.cwd(), "app/data/dawatiBisoyUserData.ts");
 
 interface DawatiBisoyData {
   [email: string]: {
@@ -62,15 +59,22 @@ export async function POST(req: NextRequest) {
     const currentDate = new Date().toISOString().split("T")[0];
 
     // Read the existing user data file
-    const fileContent = fs.readFileSync(userDataPath, "utf-8");
+    let fileContent = "{}";
+    if (fs.existsSync(userDataPath)) {
+      fileContent = fs.readFileSync(userDataPath, "utf-8");
+    }
 
     // Parse existing data
     let userDawatiBisoyData: DawatiBisoyData = {};
-    const startIndex = fileContent.indexOf("{");
-    const endIndex = fileContent.lastIndexOf("}");
-    if (startIndex !== -1 && endIndex !== -1) {
-      const jsonString = fileContent.slice(startIndex, endIndex + 1);
-      userDawatiBisoyData = eval(`(${jsonString})`);
+    try {
+      const startIndex = fileContent.indexOf("{");
+      const endIndex = fileContent.lastIndexOf("}");
+      if (startIndex !== -1 && endIndex !== -1) {
+        const jsonString = fileContent.slice(startIndex, endIndex + 1);
+        userDawatiBisoyData = JSON.parse(jsonString);
+      }
+    } catch (e) {
+      console.error("Error parsing JSON:", e);
     }
 
     // Ensure the user's data is organized by email
@@ -96,7 +100,12 @@ export async function POST(req: NextRequest) {
     fs.writeFileSync(userDataPath, updatedFileContent, "utf-8");
 
     console.log("Data saved under date:", currentDate);
-    return NextResponse.json({ [email]: userDawatiBisoyData[email][currentDate] }, { status: 201 });
+    return new NextResponse(
+      JSON.stringify(userDawatiBisoyData[email][currentDate]),
+      {
+        status: 201,
+      }
+    );
   } catch (error) {
     console.error("Error saving data:", error);
     return new NextResponse("Failed to save user data", { status: 500 });

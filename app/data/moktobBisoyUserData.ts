@@ -1,4 +1,4 @@
-export const userMoktobBisoyData = {
+export const userAmoliBisoyData = {
   "labelMap": {
     "MoktobChalu": "নতুন মক্তব চালু হয়েছে",
     "MoktobAdmit": "মক্তব থেকে ছাত্রছাত্রী মাদ্রাসায় ভর্তি হয়েছে",
@@ -253,6 +253,23 @@ export const userMoktobBisoyData = {
       "TotalAgeSikkha": "800",
       "MadrasahAdmit": "900",
       "NewMuslim": "1000"
+    }
+  },
+  "rashid@gmail.com": {
+    "2025-01-09": {
+      "tahajjud": "100",
+      "ayat": "sura Fatiha",
+      "zikir": "অযিকির",
+      "ishraq": "ফজরের পর",
+      "jamat": "5",
+      "sirat": "Hadis",
+      "Dua": "হ্যাঁ",
+      "ilm": "Hadis",
+      "tasbih": "না",
+      "dayeeAmol": "হ্যাঁ",
+      "amoliSura": "না",
+      "ayamroja": "হ্যাঁ",
+      "hijbulBahar": "হ্যাঁ"
     }
   }
 };

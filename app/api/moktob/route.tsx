@@ -4,28 +4,25 @@ import { NextRequest, NextResponse } from "next/server";
 
 const userDataPath = path.join(
   process.cwd(),
-  "/src/app/data/moktobBisoyUserData.tsx"
+  "app/data/moktobBisoyUserData.ts"
 );
 
-interface UserMoktobBisoyData {
-  [email: string]: {
-    [date: string]: {
-      MoktobChalu: number;
-      MoktobAdmit: number;
-      NewMoktob: number;
-      Sikkha: number;
-      TotalStudent: number;
-      TotalSikkha: number;
-      GurdianMeeting: number;
-      TotalAgeSikkha: number;
-      MadrasahAdmit: number;
-      NewMuslim: number;
-    };
-  };
-}
+type MoktobBisoyData = {
+  MoktobChalu: string;
+  MoktobAdmit: string;
+  NewMoktob: string;
+  Sikkha: string;
+  TotalStudent: string;
+  TotalSikkha: string;
+  GurdianMeeting: string;
+  TotalAgeSikkha: string;
+  MadrasahAdmit: string;
+  NewMuslim: string;
+};
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
+    const body = await req.json();
     const {
       MoktobChalu,
       MoktobAdmit,
@@ -38,47 +35,23 @@ export async function POST(req: NextRequest) {
       MadrasahAdmit,
       NewMuslim,
       email,
-    }: {
-      MoktobChalu: number;
-      MoktobAdmit: number;
-      NewMoktob: number;
-      Sikkha: number;
-      TotalStudent: number;
-      TotalSikkha: number;
-      GurdianMeeting: number;
-      TotalAgeSikkha: number;
-      MadrasahAdmit: number;
-      NewMuslim: number;
-      email: string;
-    } = await req.json();
+    } = body as MoktobBisoyData & { email: string };
 
-    console.log("Received data:", {
-      MoktobChalu,
-      MoktobAdmit,
-      NewMoktob,
-      Sikkha,
-      TotalStudent,
-      TotalSikkha,
-      GurdianMeeting,
-      TotalAgeSikkha,
-      MadrasahAdmit,
-      NewMuslim,
-      email,
-    });
+    console.log("Received data:", body);
 
     // Basic validation
     if (
       !email ||
-      MoktobChalu == null ||
-      MoktobAdmit == null ||
-      NewMoktob == null ||
-      Sikkha == null ||
-      TotalStudent == null ||
-      TotalSikkha == null ||
-      GurdianMeeting == null ||
-      TotalAgeSikkha == null ||
-      MadrasahAdmit == null ||
-      NewMuslim == null
+      !MoktobChalu ||
+      !MoktobAdmit ||
+      !NewMoktob ||
+      !Sikkha ||
+      !TotalStudent ||
+      !TotalSikkha ||
+      !GurdianMeeting ||
+      !TotalAgeSikkha ||
+      !MadrasahAdmit ||
+      !NewMuslim
     ) {
       return new NextResponse("All fields are required", { status: 400 });
     }
@@ -86,11 +59,23 @@ export async function POST(req: NextRequest) {
     // Get the current date in YYYY-MM-DD format
     const currentDate = new Date().toISOString().split("T")[0];
 
+    // Check if the file exists; if not, initialize it
+    if (!fs.existsSync(userDataPath)) {
+      fs.writeFileSync(
+        userDataPath,
+        `export const userMoktobBisoyData = {};`,
+        "utf-8"
+      );
+    }
+
     // Read the existing user data file
     const fileContent = fs.readFileSync(userDataPath, "utf-8");
 
     // Parse existing data
-    let userMoktobBisoyData: UserMoktobBisoyData = {};
+    let userMoktobBisoyData: Record<
+      string,
+      Record<string, MoktobBisoyData>
+    > = {};
     const startIndex = fileContent.indexOf("{");
     const endIndex = fileContent.lastIndexOf("}");
     if (startIndex !== -1 && endIndex !== -1) {
@@ -117,7 +102,7 @@ export async function POST(req: NextRequest) {
       NewMuslim,
     };
 
-    // Write the updated user data back to the file
+    // Write the updated userData back to the file
     const updatedFileContent = `export const userMoktobBisoyData = ${JSON.stringify(
       userMoktobBisoyData,
       null,
@@ -126,12 +111,14 @@ export async function POST(req: NextRequest) {
     fs.writeFileSync(userDataPath, updatedFileContent, "utf-8");
 
     console.log("Data saved under date:", currentDate);
-    return NextResponse.json(
-      { [email]: userMoktobBisoyData[email][currentDate] },
-      { status: 201 }
+    return new NextResponse(
+      JSON.stringify(userMoktobBisoyData[email][currentDate]),
+      {
+        status: 201,
+      }
     );
   } catch (error) {
-    console.error("Error saving data:", error);
+    console.error(error);
     return new NextResponse("Failed to save user data", { status: 500 });
   }
 }
