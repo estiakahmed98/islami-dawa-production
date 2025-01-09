@@ -1,35 +1,34 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import fileDownload from "js-file-download";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { string } from "yup";
 
 interface UserData {
-  labelMap: { [key: string]: string };
-  [email: string]:
-    | {
-        [date: string]: {
-          [label: string]: string | undefined;
-        };
-      }
-    | undefined;
+  labelMap: { [key: string]: string }; // Maps labels to their display names.
+  data?: {
+    [email: string]: {
+      [date: string]: {
+        [label: string]: string | undefined;
+      };
+    };
+  };
 }
 
 interface AmoliTableShowProps {
   userData: UserData;
 }
 
-const DynamicTable: React.FC<AmoliTableShowProps> = ({ userData }) => {
+const AmoliTableShow: React.FC<AmoliTableShowProps> = ({ userData }) => {
   const [monthDays, setMonthDays] = useState<number[]>([]);
   const [monthName, setMonthName] = useState<string>("");
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [transposedData, setTransposedData] = useState<
-    { label: string; [key: string]: string }[]
+    { label: string; [key: number]: string }[]
   >([]);
-  const [userEmail, setUserEmail] = useState<string | null>("");
+  const [userEmail, setUserEmail] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
-  const [editColumn, setEditColumn] = useState<number | null>(null); // For column editing
+  const [editColumn, setEditColumn] = useState<number | null>(null);
   const [columnFormData, setColumnFormData] = useState<
     { label: string; value: string }[]
   >([]);
@@ -52,7 +51,7 @@ const DynamicTable: React.FC<AmoliTableShowProps> = ({ userData }) => {
     setMonthName(today.toLocaleString("default", { month: "long" }));
     setYear(currentYear);
 
-    const email = localStorage.getItem("userEmail");
+    const email = localStorage.getItem("userEmail") || "";
     setUserEmail(email);
 
     const labels = userData.labelMap;
@@ -65,7 +64,7 @@ const DynamicTable: React.FC<AmoliTableShowProps> = ({ userData }) => {
         const date = `${currentYear}-${(currentMonth + 1)
           .toString()
           .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-        row[day] = userData[email || ""]?.[date]?.[label] || "N/A";
+        row[day] = userData[email]?.[date]?.[label] || "N/A";
       });
       return row;
     });
@@ -194,7 +193,7 @@ const DynamicTable: React.FC<AmoliTableShowProps> = ({ userData }) => {
             {monthDays.map((day) => (
               <th
                 key={day}
-                className="border border-gray-300 px-6 py-2 text-center whitespace-nowrap relative group"
+                className="border border-gray-300 px-6 py-2 text-center"
               >
                 Day {day}
               </th>
@@ -204,18 +203,18 @@ const DynamicTable: React.FC<AmoliTableShowProps> = ({ userData }) => {
         <tbody>
           {transposedData.map((row, rowIndex) => (
             <tr key={rowIndex} className="hover:bg-gray-100">
-              <td className="border font-semibold border-gray-300 px-6 py-2 whitespace-nowrap">
+              <td className="border font-semibold border-gray-300 px-6 py-2">
                 {row.label}
               </td>
               {monthDays.map((day) => (
                 <td
                   key={day}
-                  className="border border-gray-300 px-6 py-2 text-center relative group"
+                  className="border border-gray-300 px-6 py-2 text-center"
                 >
                   {row[day]}
                   <button
                     onClick={() => handleEditCellClick(rowIndex, day)}
-                    className="absolute top-1/2 right-2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-blue-600"
+                    className="absolute top-1/2 right-2 -translate-y-1/2 text-blue-600"
                   >
                     ✏️
                   </button>
@@ -224,24 +223,6 @@ const DynamicTable: React.FC<AmoliTableShowProps> = ({ userData }) => {
             </tr>
           ))}
         </tbody>
-        <tfoot>
-          <tr>
-            <td className="border border-gray-300 px-6 py-2 text-center font-bold"></td>
-            {monthDays.map((day) => (
-              <td
-                key={day}
-                className="border border-gray-300 px-6 py-2 text-center"
-              >
-                <button
-                  onClick={() => handleColumnEdit(day)}
-                  className="bg-blue-500 text-white py-1 px-3 rounded"
-                >
-                  Edit
-                </button>
-              </td>
-            ))}
-          </tr>
-        </tfoot>
       </table>
 
       {/* Cell Edit Modal */}
@@ -280,48 +261,8 @@ const DynamicTable: React.FC<AmoliTableShowProps> = ({ userData }) => {
           </div>
         </div>
       )}
-
-      {/* Column Edit Modal */}
-      {editColumn && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-10 pr-20 rounded-xl shadow-lg w-2/5 max-h-[80vh] overflow-y-auto scrollbar">
-            <h3 className="text-lg font-bold mb-4">
-              Edit Column: Day {editColumn}
-            </h3>
-            {columnFormData.map((item, index) => (
-              <div className="mb-4" key={index}>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {item.label}
-                </label>
-                <input
-                  type="text"
-                  className="border border-gray-300 p-2 w-full"
-                  value={item.value || ""}
-                  onChange={(e) =>
-                    handleColumnInputChange(index, e.target.value)
-                  }
-                />
-              </div>
-            ))}
-            <div className="flex justify-end gap-4">
-              <button
-                className="p-2 bg-gray-300 rounded"
-                onClick={() => setEditColumn(null)}
-              >
-                Cancel
-              </button>
-              <button
-                className="p-2 bg-teal-700 text-white rounded"
-                onClick={handleSaveColumnEdit}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-export default DynamicTable;
+export default AmoliTableShow;
