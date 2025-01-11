@@ -33,7 +33,6 @@ const Dashboard: React.FC = () => {
   const userEmail: string | null =
     typeof window !== "undefined" ? localStorage.getItem("userEmail") : null;
 
-
   return (
     <div>
       <div>
@@ -43,7 +42,7 @@ const Dashboard: React.FC = () => {
       <div>
         <h1>Table Show Component:</h1>
       </div>
-
+      {/* <Dashboard /> */}
     </div>
   );
 };

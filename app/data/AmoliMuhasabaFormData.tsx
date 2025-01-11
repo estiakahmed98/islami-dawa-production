@@ -171,13 +171,19 @@ export const ayatOptions = [
 ];
 
 export const zikirOptions = [
-  { value: "যিকির", label: "যিকির" },
-  { value: "অযিকির", label: "অযিকির" },
+  { value: "সকাল-সন্ধ্যা ", label: "সকাল-সন্ধ্যা " },
+  { value: "সকাল", label: "সকাল" },
+  { value: "সন্ধ্যা", label: "সন্ধ্যা" },
 ];
 
 export const ishraqOptions = [
-  { value: "ফজরের পর", label: "ফজরের পর" },
-  { value: "অফরদ", label: "অফরদ" },
+  { value: "ইশরাক", label: "ইশরাক" },
+  { value: "আওয়াবীন", label: "আওয়াবীন" },
+  { value: "চাশ্ত", label: "চাশ্ত" },
+  { value: "ইশরাক-আওয়াবীন", label: "ইশরাক-আওয়াবীন" },
+  { value: "ইশরাক-চাশ্ত", label: "ইশরাক-চাশ্ত" },
+  { value: "আওয়াবীন-চাশ্ত", label: "আওয়াবীন-চাশ্ত" },
+  { value: "ইশরাক-আওয়াবীন-চাশ্ত", label: "ইশরাক-আওয়াবীন-চাশ্ত" },
 ];
 
 export const jamatOptions = [
@@ -216,8 +222,8 @@ export const amoliSuraOptions = [
 ];
 
 export const AyamOptions = [
-    { value: "হ্যাঁ", label: "হ্যাঁ" },
-    { value: " না ", label: " না " },
+  { value: "হ্যাঁ", label: "হ্যাঁ" },
+  { value: " না ", label: " না " },
 ];
 export const hijbulBaharOptions = [
   { value: "হ্যাঁ", label: "হ্যাঁ" },

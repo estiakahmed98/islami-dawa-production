@@ -87,6 +87,22 @@ const JamatBishoyForm = () => {
                 className="text-red-500"
               />
             </div>
+
+            <div>
+              <label className="mb-2 block text-gray-700">জামাতের স্থান</label>
+              <Field
+                as="textarea"
+                name="jamatlocation"
+                placeholder="জামাতের স্থান নাম লিখুন"
+                rows="4" // Adjust the number of rows for the textarea
+                className="w-full rounded border border-gray-300 px-4 py-2 mb-3 resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <ErrorMessage
+                name="jamatlocation"
+                component="div"
+                className="text-red-500"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end">

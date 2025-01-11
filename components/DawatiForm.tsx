@@ -136,6 +136,22 @@ const DawatiForm = () => {
                 className="text-red-500"
               />
             </div>
+
+            <div>
+              <label className="mb-2 block text-gray-700">মতামত লিখুন</label>
+              <Field
+                as="textarea"
+                name="motamotdin"
+                placeholder="মতামত লিখুন"
+                rows="1"
+                className="w-full rounded border border-gray-300 px-4 py-2 mb-3 resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <ErrorMessage
+                name="motamotdin"
+                component="div"
+                className="text-red-500"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end mt-4">

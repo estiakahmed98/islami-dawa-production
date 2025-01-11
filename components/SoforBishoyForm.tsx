@@ -1,39 +1,37 @@
 "use client";
+import React from "react";
+import { Formik, Form, Field, FieldArray, ErrorMessage } from "formik";
 import { Button } from "@/components/ui/button";
-import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/SoforBishoyData";
 import { useRouter } from "next/navigation";
 
-// Define the type for form values
 interface FormValues {
-  madrasaVisit: string;
-  moktobVisit: string;
-  schoolCollegeVisit: string;
+  madrasaVisits: string[];
+  schoolCollegeVisits: string[];
 }
 
 const SoforBishoyForm = () => {
-  let router = useRouter();
+  const router = useRouter();
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">
       <h2 className="mb-6 text-2xl">সফর বিষয়</h2>
       <Formik<FormValues>
-        initialValues={initialFormData}
+        initialValues={{
+          madrasaVisits: [""],
+          schoolCollegeVisits: [""],
+        }}
         validationSchema={validationSchema}
         onSubmit={async (values) => {
-          // Retrieve email from localStorage
           const email = localStorage.getItem("userEmail");
 
-          // Check if email is available
           if (!email) {
             alert("User email is not set. Please log in.");
             return;
           }
 
-          // Include email in the form data
           const formData = { ...values, email };
 
-          // Send form data to the API
           const response = await fetch("/api/soforbisoy", {
             method: "POST",
             body: JSON.stringify(formData),
@@ -42,76 +40,137 @@ const SoforBishoyForm = () => {
             },
           });
 
-          console.log("response", response);
-
-          // Handle API response
           if (response.ok) {
             router.push("/dashboard");
             alert("Form submission successful!");
           } else {
             alert("Form submission failed! Try again.");
           }
-
-          console.log(formData);
         }}
       >
-        <Form>
-          <div className="grid grid-cols-2 gap-5">
-            <div>
-              <label className="mb-2 block text-gray-700">
-                মাদ্রাসা সফর হয়েছে
-              </label>
-              <Field
-                name="madrasaVisit"
-                placeholder="Enter value"
-                className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-              />
-              <ErrorMessage
-                name="madrasaVisit"
-                component="div"
-                className="text-red-500"
-              />
+        {({ values }) => (
+          <Form>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="mb-2 block text-gray-700">
+                  চলমান মক্তব পরিদর্শন হয়েছে
+                </label>
+                <Field
+                  name="moktobVisit"
+                  placeholder="Enter Value"
+                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                />
+              </div>
+              {/* Dynamic Madrasa Visits */}
+              <div>
+                <label className="mb-2 block text-gray-700">
+                  মাদ্রাসা সফর হয়েছে
+                </label>
+                <FieldArray
+                  name="madrasaVisits"
+                  render={(arrayHelpers) => (
+                    <div>
+                      {values.madrasaVisits &&
+                      values.madrasaVisits.length > 0 ? (
+                        values.madrasaVisits.map((_, index) => (
+                          <div key={index} className="mb-3 flex items-center">
+                            <Field
+                              name={`madrasaVisits.${index}`}
+                              placeholder={`Name of Madrasa ${index + 1}`}
+                              className="w-full rounded border border-gray-300 px-4 py-2"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={() => arrayHelpers.remove(index)} // Remove a madrasa
+                              className="ml-2"
+                            >
+                              -
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={() => arrayHelpers.insert(index + 1, "")} // Add a new madrasa
+                              className="ml-2"
+                            >
+                              +
+                            </Button>
+                          </div>
+                        ))
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => arrayHelpers.push("")} // Add first madrasa
+                        >
+                          Add a Madrasa
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                />
+              </div>
+
+              {/* Dynamic School/College Visits */}
+              <div>
+                <label className="mb-2 block text-gray-700">
+                  স্কুল/কলেজ/ভার্সিটি দাওয়াতী সফর হয়েছে
+                </label>
+                <FieldArray
+                  name="schoolCollegeVisits"
+                  render={(arrayHelpers) => (
+                    <div>
+                      {values.schoolCollegeVisits &&
+                      values.schoolCollegeVisits.length > 0 ? (
+                        values.schoolCollegeVisits.map((_, index) => (
+                          <div key={index} className="mb-3 flex items-center">
+                            <Field
+                              name={`schoolCollegeVisits.${index}`}
+                              placeholder={`Name of School/College/University ${
+                                index + 1
+                              }`}
+                              className="w-full rounded border border-gray-300 px-4 py-2"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={() => arrayHelpers.remove(index)} // Remove a school/college
+                              className="ml-2"
+                            >
+                              -
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={() => arrayHelpers.insert(index + 1, "")} // Add a new school/college
+                              className="ml-2"
+                            >
+                              +
+                            </Button>
+                          </div>
+                        ))
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => arrayHelpers.push("")} // Add first school/college
+                        >
+                          Add a School/College
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="mb-2 block text-gray-700">
-                চলমান মক্তব পরিদর্শন হয়েছে
-              </label>
-              <Field
-                name="moktobVisit"
-                placeholder="Enter Value"
-                className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-              />
-              <ErrorMessage
-                name="moktobVisit"
-                component="div"
-                className="text-red-500"
-              />
+            <div className="flex justify-end mt-6">
+              <Button variant="ghost" size="default" type="submit">
+                Submit
+              </Button>
             </div>
-
-            <div>
-              <label className="mb-2 block text-gray-700">
-                স্কুল/কলেজ/ভার্সিটি দাওয়াতী সফর হয়েছে
-              </label>
-              <Field
-                name="schoolCollegeVisit"
-                placeholder="Enter Value"
-                className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-              />
-              <ErrorMessage
-                name="schoolCollegeVisit"
-                component="div"
-                className="text-red-500"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <Button variant="ghost" size="default" type="submit">
-              Submit
-            </Button>
-          </div>
-        </Form>
+          </Form>
+        )}
       </Formik>
     </div>
   );
