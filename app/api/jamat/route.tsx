@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const userDataPath = path.join(
   process.cwd(),
-  "/src/app/data/jamatBisoyUserData.tsx"
+  "app/data/jamatBisoyUserData.ts"
 );
 
 interface UserJamatBisoyData {
