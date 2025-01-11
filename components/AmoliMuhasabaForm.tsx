@@ -15,6 +15,7 @@ import {
   AyamOptions,
   hijbulBaharOptions,
 } from "@/app/data/AmoliMuhasabaFormData";
+import * as Yup from "yup";
 
 // Define the types for the form fields
 interface AmoliMuhasabaFormValues {
@@ -36,13 +37,23 @@ interface AmoliMuhasabaFormValues {
 const AmoliMuhasabaForm = () => {
   const router = useRouter();
 
+  const validationSchema = Yup.object({
+    jamat: Yup.number()
+      .min(0, "Value should not be less than 0")
+      .max(5, "Value should not exceed 5")
+      .required("This field is required"),
+  });
+
   return (
-    <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">
+    <div className="mx-auto mt-8 rounded bg-white p-10 shadow-lg">
       <h2 className="mb-6 text-2xl">আ’মলি মুহাসাবা</h2>
       <Formik
         initialValues={initialFormData}
         validationSchema={validationSchema}
-        onSubmit={async (values: AmoliMuhasabaFormValues, { setSubmitting }: FormikHelpers<AmoliMuhasabaFormValues>) => {
+        onSubmit={async (
+          values: AmoliMuhasabaFormValues,
+          { setSubmitting }: FormikHelpers<AmoliMuhasabaFormValues>
+        ) => {
           // Retrieve email from localStorage
           const email = localStorage.getItem("userEmail");
 
@@ -81,7 +92,7 @@ const AmoliMuhasabaForm = () => {
       >
         {({ handleSubmit, isSubmitting }) => (
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-10">
+            <div className="grid sm:sm:grid-cols-2 gap-10">
               <div>
                 <label className="mb-2 block text-gray-700">তাহাজ্জুদ </label>
                 <Field
@@ -120,7 +131,7 @@ const AmoliMuhasabaForm = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-10">
+            <div className="grid sm:sm:grid-cols-2 gap-10">
               <div>
                 <label className="mb-2 block text-gray-700">
                   সকাল-সন্ধ্যা দোয়া ও জিকির
@@ -169,20 +180,19 @@ const AmoliMuhasabaForm = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-10">
+            <div className="grid sm:sm:grid-cols-2 gap-10">
               <div>
-                <label className="mb-2 block text-gray-700">
-                  জামাতে সালাত
-                </label>
+                <label className="mb-2 block text-gray-700">জামাতে সালাত</label>
                 <Field
                   name="jamat"
+                  type="number"
                   placeholder="কত ওয়াক্ত"
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                  className="w-full rounded border border-gray-300 px-4 py-2 mb-1"
                 />
                 <ErrorMessage
                   name="jamat"
                   component="div"
-                  className="text-red-500"
+                  className="text-red-500 mb-1"
                 />
               </div>
 
@@ -204,7 +214,7 @@ const AmoliMuhasabaForm = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-10">
+            <div className="grid sm:sm:grid-cols-2 gap-10">
               <div>
                 <label className="mb-2 block text-gray-700">
                   দু’আ আনাস ইবনে মালেক
@@ -246,7 +256,7 @@ const AmoliMuhasabaForm = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-10">
+            <div className="grid sm:sm:grid-cols-2 gap-10">
               <div>
                 <label className="mb-2 block text-gray-700">
                   তিন তাসবীহ (সকাল- সন্ধ্যা)
@@ -294,7 +304,7 @@ const AmoliMuhasabaForm = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-10">
+            <div className="grid sm:sm:grid-cols-2 gap-10">
               <div>
                 <label className="mb-2 block text-gray-700">
                   দৈনিক আমলি সুরা পাঠ
@@ -342,7 +352,7 @@ const AmoliMuhasabaForm = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-10">
+            <div className="grid sm:grid-cols-2 gap-10">
               <div>
                 <label className="mb-2 block text-gray-700">
                   দৈনিক হিজবুল বাহার পাঠ
@@ -368,7 +378,12 @@ const AmoliMuhasabaForm = () => {
             </div>
 
             <div className="flex justify-end">
-              <Button variant="ghost" size="default" type="submit" disabled={isSubmitting}>
+              <Button
+                variant="ghost"
+                size="default"
+                type="submit"
+                disabled={isSubmitting}
+              >
                 Submit
               </Button>
             </div>
