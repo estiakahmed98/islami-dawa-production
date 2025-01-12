@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import fileDownload from "js-file-download";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
+
 interface AmoliTableProps {
   userData: any;
 }
@@ -17,7 +18,10 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [editColumn, setEditColumn] = useState<number | null>(null); // For column editing
   const [columnFormData, setColumnFormData] = useState<any[]>([]); // Data for column editing
-  const [editCell, setEditCell] = useState<{ rowIndex: number, day: number } | null>(null); // For cell editing
+  const [editCell, setEditCell] = useState<{
+    rowIndex: number;
+    day: number;
+  } | null>(null); // For cell editing
   const [newCellValue, setNewCellValue] = useState<string>(""); // New cell value for editing
 
   useEffect(() => {
@@ -34,17 +38,22 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     setYear(currentYear);
 
     const email = localStorage.getItem("userEmail");
+    // const email = "jewel@gmail.com";
     setUserEmail(email || "");
 
     const labels = userData.labelMap;
 
     const transposed = Object.keys(labels).map((label) => {
-      const row = { label: labels[label] };
+      const row: { label: string; [key: number]: any } = {
+        label: labels[label],
+      };
       daysArray.forEach((day) => {
         const date = `${currentYear}-${(currentMonth + 1)
           .toString()
           .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-        row[day] = userData[email]?.[date]?.[label] || "N/A";
+        row[day] = email
+          ? userData.records[email]?.[date]?.[label] || "N/A"
+          : "N/A";
       });
       return row;
     });
@@ -113,34 +122,88 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   };
 
   // PDF Export
+  // const convertToPDF = () => {
+  //   const doc = new jsPDF();
+  //   doc.text(`${monthName} ${year} - User: ${userEmail}`, 14, 10);
+
+  //   const headers = ["Label", ...monthDays.map((day) => `Day ${day}`)];
+  //   const rows = transposedData.map((row) => [
+  //     row.label,
+  //     ...monthDays.map((day) => row[day]),
+  //   ]);
+
+  //   autoTable(doc, {
+  //     head: [headers],
+  //     body: rows,
+  //     startY: 20,
+  //     theme: "striped",
+  //     headStyles: {
+  //       fillColor: [22, 160, 133],
+  //       halign: "center",
+  //     },
+  //     bodyStyles: {
+  //       textColor: 50,
+  //     },
+  //     styles: {
+  //       halign: "center",
+  //     },
+  //   });
+
+  //   doc.save("amoli-table.pdf");
+  // };
+
+  // PDF Export Function
   const convertToPDF = () => {
+    // Validate Input Data
+    if (
+      !monthName ||
+      !year ||
+      !userEmail ||
+      !Array.isArray(transposedData) ||
+      !Array.isArray(monthDays)
+    ) {
+      console.error("Invalid data for PDF generation");
+      return;
+    }
+
+    // Initialize jsPDF
     const doc = new jsPDF();
+
+    // Add Header Text
     doc.text(`${monthName} ${year} - User: ${userEmail}`, 14, 10);
 
-    const headers = ["Label", ...monthDays.map((day) => `Day ${day}`)];
-    const rows = transposedData.map((row) => [
-      row.label,
-      ...monthDays.map((day) => row[day]),
+    // Prepare Table Data
+    const labels = transposedData.map((row) => row.label); // Extract labels for the table header row
+    const headers = ["Day", ...labels]; // First column is 'Day', followed by all labels
+    const rows = monthDays.map((day) => [
+      `Day ${day}`, // First column contains the day label
+      ...transposedData.map((row) => row[day] || "-"), // Add user data for each label and day
     ]);
 
-    doc.autoTable({
-      head: [headers],
-      body: rows,
-      startY: 20,
-      theme: "striped",
+    // Create the Table with autoTable
+    autoTable(doc, {
+      head: [headers], // Set table headers
+      body: rows, // Set table rows
+      startY: 20, // Vertical offset for the table
+      theme: "striped", // Table theme
       headStyles: {
-        fillColor: [22, 160, 133],
-        halign: "center",
+        fillColor: [22, 160, 133], // Header background color
+        halign: "center", // Center-align header text
       },
       bodyStyles: {
-        textColor: 50,
+        textColor: 50, // Text color for table body
       },
       styles: {
-        halign: "center",
+        halign: "center", // Center-align all text
+        fontSize: 10, // Smaller font size for large tables
+        cellWidth: "wrap", // Wrap text inside cells
       },
+      margin: { top: 20 }, // Top margin for the table
+      pageBreak: "auto", // Automatically handle page breaks
     });
 
-    doc.save("amoli-table.pdf");
+    // Save the PDF File
+    doc.save(`${monthName}_${year}_user_data.pdf`);
   };
 
   if (loading) {
@@ -148,11 +211,11 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   }
 
   return (
-    <div className="overflow-x-auto p-4">
+    <div>
       <h2 className="text-2xl font-bold text-cyan-800 mb-4">
         {`User: ${userEmail} | Month: ${monthName} ${year}`}
       </h2>
-      <div className="flex justify-end gap-4 mb-4">
+      <div className="flex justify-start gap-4 mb-4">
         <button
           className="p-2 text-white border-2 bg-teal-700 rounded-md"
           onClick={convertToCSV}
@@ -166,62 +229,64 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           Download PDF
         </button>
       </div>
-      <table className="table-auto border-collapse border border-gray-300 w-full text-sm md:text-base">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="border border-gray-300 px-4 py-2">Label</th>
-            {monthDays.map((day) => (
-              <th
-                key={day}
-                className="border border-gray-300 px-6 py-2 text-center whitespace-nowrap relative group"
-              >
-                Day {day}
-              </th>
+      <div className="overflow-auto">
+        <table className="border-collapse border border-gray-300 w-full table-auto text-sm md:text-base">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="border border-gray-300 px-4 py-2">Label</th>
+              {monthDays.map((day) => (
+                <th
+                  key={day}
+                  className="border border-gray-300 px-6 py-2 text-center relative group whitespace-nowrap"
+                >
+                  Day {day}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {transposedData.map((row, rowIndex) => (
+              <tr key={rowIndex} className="hover:bg-gray-100">
+                <td className="border font-semibold border-gray-300 px-6 py-2 whitespace-nowrap">
+                  {row.label}
+                </td>
+                {monthDays.map((day) => (
+                  <td
+                    key={day}
+                    className="border border-gray-300 px-6 py-2 text-center relative group"
+                  >
+                    {row[day]}
+                    <button
+                      onClick={() => handleEditCellClick(rowIndex, day)}
+                      className="absolute top-1/2 right-2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-blue-600"
+                    >
+                      ✏️
+                    </button>
+                  </td>
+                ))}
+              </tr>
             ))}
-          </tr>
-        </thead>
-        <tbody>
-          {transposedData.map((row, rowIndex) => (
-            <tr key={rowIndex} className="hover:bg-gray-100">
-              <td className="border font-semibold border-gray-300 px-6 py-2 whitespace-nowrap">
-                {row.label}
-              </td>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td className="border border-gray-300 px-6 py-2 text-center font-bold"></td>
               {monthDays.map((day) => (
                 <td
                   key={day}
-                  className="border border-gray-300 px-6 py-2 text-center relative group"
+                  className="border border-gray-300 px-6 py-2 text-center"
                 >
-                  {row[day]}
                   <button
-                    onClick={() => handleEditCellClick(rowIndex, day)}
-                    className="absolute top-1/2 right-2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-blue-600"
+                    onClick={() => handleColumnEdit(day)}
+                    className="bg-blue-500 text-white py-1 px-3 rounded"
                   >
-                    ✏️
+                    Edit
                   </button>
                 </td>
               ))}
             </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td className="border border-gray-300 px-6 py-2 text-center font-bold"></td>
-            {monthDays.map((day) => (
-              <td
-                key={day}
-                className="border border-gray-300 px-6 py-2 text-center"
-              >
-                <button
-                  onClick={() => handleColumnEdit(day)}
-                  className="bg-blue-500 text-white py-1 px-3 rounded"
-                >
-                  Edit
-                </button>
-              </td>
-            ))}
-          </tr>
-        </tfoot>
-      </table>
+          </tfoot>
+        </table>
+      </div>
 
       {/* Cell Edit Modal */}
       {editCell && (
