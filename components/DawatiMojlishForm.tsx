@@ -171,8 +171,14 @@ const DawatiMojlishForm = () => {
                 as="textarea"
                 name="motamotdin"
                 placeholder="মতামত লিখুন"
-                rows="1"
-                className="w-full rounded border border-gray-300 px-4 py-2 mb-3 resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                rows={1}
+                onInput={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                  const target = e.target;
+                  target.style.height = "auto";
+                  target.style.height = `${target.scrollHeight}px`;
+                }}
+                style={{ resize: "both" }}
+                className="w-full rounded border border-gray-300 px-4 py-2 mb-3 resize focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
               <ErrorMessage
                 name="motamotdin"

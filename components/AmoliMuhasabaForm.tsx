@@ -16,6 +16,9 @@ import {
   hijbulBaharOptions,
 } from "@/app/data/AmoliMuhasabaFormData";
 import * as Yup from "yup";
+import { useEffect, useState } from "react";
+import moment from "moment";
+import "moment-hijri";
 
 // Define the types for the form fields
 interface AmoliMuhasabaFormValues {
@@ -34,8 +37,18 @@ interface AmoliMuhasabaFormValues {
   hijbulBahar: string;
 }
 
+declare module "moment" {
+  interface Moment {
+    iDate(): number;
+    iMonth(): number;
+    iYear(): number;
+  }
+}
+
 const AmoliMuhasabaForm = () => {
   const router = useRouter();
+  const [showAyamRoja, setShowAyamRoja] = useState(false);
+  const [hijriDate, setHijriDate] = useState<number>(0);
 
   const validationSchema = Yup.object({
     jamat: Yup.number()
@@ -43,6 +56,12 @@ const AmoliMuhasabaForm = () => {
       .max(5, "Value should not exceed 5")
       .required("This field is required"),
   });
+
+  useEffect(() => {
+    const hijriDate = moment().date();
+    setShowAyamRoja(hijriDate === 13 || hijriDate === 14 || hijriDate === 15);
+    setHijriDate(hijriDate);
+  }, []);
 
   return (
     <div className="mx-auto mt-8 rounded bg-white p-10 shadow-lg">
@@ -330,31 +349,6 @@ const AmoliMuhasabaForm = () => {
 
               <div>
                 <label className="mb-2 block text-gray-700">
-                  আজ সোমবার আইয়্যামে বীজের রোজা রেখেছেন তো?
-                </label>
-                <Field
-                  as="select"
-                  name="ayamroja"
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                >
-                  <option value="">Select Option</option>
-                  {AyamOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Field>
-                <ErrorMessage
-                  name="ayamroja"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-10">
-              <div>
-                <label className="mb-2 block text-gray-700">
                   দৈনিক হিজবুল বাহার পাঠ
                 </label>
                 <Field
@@ -375,6 +369,34 @@ const AmoliMuhasabaForm = () => {
                   className="text-red-500"
                 />
               </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-10">
+              {/* Conditionally Render Ayam Roja Section */}
+              {showAyamRoja && (
+                <div>
+                  <label className="mb-2 block text-gray-700">
+                    আজ {hijriDate} তারিখ আইয়্যামে বীজের রোজা রেখেছেন তো?
+                  </label>
+                  <Field
+                    as="select"
+                    name="ayamroja"
+                    className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                  >
+                    <option value="">Select Option</option>
+                    {AyamOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </Field>
+                  <ErrorMessage
+                    name="ayamroja"
+                    component="div"
+                    className="text-red-500"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end">
