@@ -185,7 +185,7 @@ const SoforBishoyForm = () => {
                       target.style.height = `${target.scrollHeight}px`;
                     }}
                     style={{ resize: "both" }}
-                    className="w-full rounded border border-gray-300 px-4 py-2 mb-3 resize focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full rounded border border-gray-300 px-4 py-2 mb-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                   <ErrorMessage
                     name="motamotdin"
