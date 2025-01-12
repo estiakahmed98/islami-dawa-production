@@ -50,117 +50,149 @@ const SoforBishoyForm = () => {
       >
         {({ values }) => (
           <Form>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  চলমান মক্তব পরিদর্শন হয়েছে
-                </label>
-                <Field
-                  name="moktobVisit"
-                  placeholder="Enter Value"
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                />
-              </div>
-              {/* Dynamic Madrasa Visits */}
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  মাদ্রাসা সফর হয়েছে
-                </label>
-                <FieldArray
-                  name="madrasaVisits"
-                  render={(arrayHelpers) => (
-                    <div>
-                      {values.madrasaVisits &&
-                      values.madrasaVisits.length > 0 ? (
-                        values.madrasaVisits.map((_, index) => (
-                          <div key={index} className="mb-3 flex items-center">
-                            <Field
-                              name={`madrasaVisits.${index}`}
-                              placeholder={`Name of Madrasa ${index + 1}`}
-                              className="w-full rounded border border-gray-300 px-4 py-2"
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onClick={() => arrayHelpers.remove(index)} // Remove a madrasa
-                              className="ml-2"
-                            >
-                              -
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onClick={() => arrayHelpers.insert(index + 1, "")} // Add a new madrasa
-                              className="ml-2"
-                            >
-                              +
-                            </Button>
-                          </div>
-                        ))
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => arrayHelpers.push("")} // Add first madrasa
-                        >
-                          Add a Madrasa
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+              <div className="space-y-5">
+                <div>
+                  <label className="mb-2 block text-gray-700">
+                    চলমান মক্তব পরিদর্শন হয়েছে
+                  </label>
+                  <Field
+                    name="moktobVisit"
+                    placeholder="Enter Value"
+                    className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                  />
+                </div>
+                {/* Dynamic Madrasa Visits */}
+                <div>
+                  <label className="mb-2 block text-gray-700">
+                    মাদ্রাসা সফর হয়েছে
+                  </label>
+                  <FieldArray
+                    name="madrasaVisits"
+                    render={(arrayHelpers) => (
+                      <div>
+                        {values.madrasaVisits &&
+                        values.madrasaVisits.length > 0 ? (
+                          values.madrasaVisits.map((_, index) => (
+                            <div key={index} className="mb-3 flex items-center">
+                              <Field
+                                name={`madrasaVisits.${index}`}
+                                placeholder={`Name of Madrasa ${index + 1}`}
+                                className="w-full rounded border border-gray-300 px-4 py-2"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => arrayHelpers.remove(index)} // Remove a madrasa
+                                className="ml-2"
+                              >
+                                -
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() =>
+                                  arrayHelpers.insert(index + 1, "")
+                                } // Add a new madrasa
+                                className="ml-2"
+                              >
+                                +
+                              </Button>
+                            </div>
+                          ))
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => arrayHelpers.push("")} // Add first madrasa
+                          >
+                            Add a Madrasa
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
               </div>
 
               {/* Dynamic School/College Visits */}
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  স্কুল/কলেজ/ভার্সিটি দাওয়াতী সফর হয়েছে
-                </label>
-                <FieldArray
-                  name="schoolCollegeVisits"
-                  render={(arrayHelpers) => (
-                    <div>
-                      {values.schoolCollegeVisits &&
-                      values.schoolCollegeVisits.length > 0 ? (
-                        values.schoolCollegeVisits.map((_, index) => (
-                          <div key={index} className="mb-3 flex items-center">
-                            <Field
-                              name={`schoolCollegeVisits.${index}`}
-                              placeholder={`Name of School/College/University ${
-                                index + 1
-                              }`}
-                              className="w-full rounded border border-gray-300 px-4 py-2"
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onClick={() => arrayHelpers.remove(index)} // Remove a school/college
-                              className="ml-2"
-                            >
-                              -
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onClick={() => arrayHelpers.insert(index + 1, "")} // Add a new school/college
-                              className="ml-2"
-                            >
-                              +
-                            </Button>
-                          </div>
-                        ))
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => arrayHelpers.push("")} // Add first school/college
-                        >
-                          Add a School/College
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                />
+
+              <div className="space-y-8">
+                <div>
+                  <label className="mb-2 block text-gray-700">
+                    স্কুল/কলেজ/ভার্সিটি দাওয়াতী সফর হয়েছে
+                  </label>
+                  <FieldArray
+                    name="schoolCollegeVisits"
+                    render={(arrayHelpers) => (
+                      <div>
+                        {values.schoolCollegeVisits &&
+                        values.schoolCollegeVisits.length > 0 ? (
+                          values.schoolCollegeVisits.map((_, index) => (
+                            <div key={index} className="mb-3 flex items-center">
+                              <Field
+                                name={`schoolCollegeVisits.${index}`}
+                                placeholder={`Name of School/College/University ${
+                                  index + 1
+                                }`}
+                                className="w-full rounded border border-gray-300 px-4 py-2"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => arrayHelpers.remove(index)} // Remove a school/college
+                                className="ml-2"
+                              >
+                                -
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() =>
+                                  arrayHelpers.insert(index + 1, "")
+                                } // Add a new school/college
+                                className="ml-2"
+                              >
+                                +
+                              </Button>
+                            </div>
+                          ))
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => arrayHelpers.push("")} // Add first school/college
+                          >
+                            Add a School/College
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-gray-700">
+                    মতামত লিখুন
+                  </label>
+                  <Field
+                    as="textarea"
+                    name="motamotdin"
+                    placeholder="মতামত লিখুন"
+                    rows={1}
+                    onInput={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                      const target = e.target;
+                      target.style.height = "auto";
+                      target.style.height = `${target.scrollHeight}px`;
+                    }}
+                    style={{ resize: "both" }}
+                    className="w-full rounded border border-gray-300 px-4 py-2 mb-3 resize focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                  <ErrorMessage
+                    name="motamotdin"
+                    component="div"
+                    className="text-red-500"
+                  />
+                </div>
               </div>
             </div>
 

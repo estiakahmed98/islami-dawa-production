@@ -89,16 +89,22 @@ const JamatBishoyForm = () => {
             </div>
 
             <div>
-              <label className="mb-2 block text-gray-700">জামাতের স্থান</label>
+              <label className="mb-2 block text-gray-700">মতামত লিখুন</label>
               <Field
                 as="textarea"
-                name="jamatlocation"
-                placeholder="জামাতের স্থান নাম লিখুন"
-                rows="4" // Adjust the number of rows for the textarea
-                className="w-full rounded border border-gray-300 px-4 py-2 mb-3 resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                name="motamotdin"
+                placeholder="মতামত লিখুন"
+                rows={1}
+                onInput={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                  const target = e.target;
+                  target.style.height = "auto";
+                  target.style.height = `${target.scrollHeight}px`;
+                }}
+                style={{ resize: "both" }}
+                className="w-full rounded border border-gray-300 px-4 py-2 mb-3 resize focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
               <ErrorMessage
-                name="jamatlocation"
+                name="motamotdin"
                 component="div"
                 className="text-red-500"
               />
