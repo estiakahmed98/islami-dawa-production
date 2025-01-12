@@ -121,36 +121,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     fileDownload(csvContent, "amoli-table.csv");
   };
 
-  // PDF Export
-  // const convertToPDF = () => {
-  //   const doc = new jsPDF();
-  //   doc.text(`${monthName} ${year} - User: ${userEmail}`, 14, 10);
-
-  //   const headers = ["Label", ...monthDays.map((day) => `Day ${day}`)];
-  //   const rows = transposedData.map((row) => [
-  //     row.label,
-  //     ...monthDays.map((day) => row[day]),
-  //   ]);
-
-  //   autoTable(doc, {
-  //     head: [headers],
-  //     body: rows,
-  //     startY: 20,
-  //     theme: "striped",
-  //     headStyles: {
-  //       fillColor: [22, 160, 133],
-  //       halign: "center",
-  //     },
-  //     bodyStyles: {
-  //       textColor: 50,
-  //     },
-  //     styles: {
-  //       halign: "center",
-  //     },
-  //   });
-
-  //   doc.save("amoli-table.pdf");
-  // };
 
   // PDF Export Function
   const convertToPDF = () => {
