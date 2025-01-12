@@ -22,6 +22,13 @@ export const userDawatiBisoyData = {
       "alemderSatheyMojlish": "33",
       "publicSatheyMojlish": "55",
       "nonMuslimSaptahikGasht": "33"
+    },
+    "2025-01-12": {
+      "nonMuslimDawat": "34",
+      "murtadDawat": "44",
+      "alemderSatheyMojlish": "33",
+      "publicSatheyMojlish": "55",
+      "nonMuslimSaptahikGasht": "33"
     }
   }
 };

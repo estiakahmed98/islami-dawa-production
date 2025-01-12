@@ -18,5 +18,11 @@ export const userDineFeraData = {
       "omuslimKalemaPoreche": "1000",
       "murtadDineFireasa": "2500"
     }
+  },
+  "moni@gmail.com": {
+    "2025-01-12": {
+      "omuslimKalemaPoreche": "1000",
+      "murtadDineFireasa": "2500"
+    }
   }
 };

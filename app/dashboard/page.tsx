@@ -5,8 +5,7 @@ import AmoliChart from "@/components/AmoliCharts";
 import TalimDonutChart from "@/components/TalimBisoyChart";
 import { allData } from "../data/allData";
 import dynamic from "next/dynamic";
-import { userAmoliData } from "@/app/data/amoliMuhasabaUserData";
-// import AmoliTableShow from "./AmoliTableShow";
+import { userAmoliBisoyData } from "../data/amoliMuhasabaUserData";
 import Tally from "@/components/Tally";
 import { userMoktobBisoyData } from "@/app/data/moktobBisoyUserData";
 import { userTalimData } from "@/app/data/talimBisoyUserData";
@@ -22,6 +21,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/TabButton";
+import AmoliTableShow from "@/components/TableShow";
+import DemoComp from "@/components/DemoComp";
 
 interface DashboardData {
   AmoliChartData?: any[];
@@ -35,12 +36,18 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
+      <DemoComp />
       <div>
         <h1>Chart and Tally Show Component:</h1>
+        <Tally
+          userData={userMoktobBisoyData}
+          email={"moni@gmail.com"}
+          title="Moktob Tally"
+        />
       </div>
 
       <div>
-        <h1>Table Show Component:</h1>
+        <AmoliTableShow userData={userAmoliBisoyData} />
       </div>
       {/* <Dashboard /> */}
     </div>
