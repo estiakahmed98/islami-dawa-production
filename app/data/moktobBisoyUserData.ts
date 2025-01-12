@@ -1,4 +1,4 @@
-export const userAmoliBisoyData = {
+export const userMoktobBisoyData = {
   "labelMap": {
     "MoktobChalu": "নতুন মক্তব চালু হয়েছে",
     "MoktobAdmit": "মক্তব থেকে ছাত্রছাত্রী মাদ্রাসায় ভর্তি হয়েছে",
@@ -270,6 +270,18 @@ export const userAmoliBisoyData = {
       "amoliSura": "না",
       "ayamroja": "হ্যাঁ",
       "hijbulBahar": "হ্যাঁ"
+    },
+    "2025-01-12": {
+      "MoktobChalu": 1000,
+      "MoktobAdmit": 2,
+      "NewMoktob": 3,
+      "Sikkha": 200,
+      "TotalStudent": 250,
+      "TotalSikkha": 300,
+      "GurdianMeeting": 700,
+      "TotalAgeSikkha": 800,
+      "MadrasahAdmit": 900,
+      "NewMuslim": 1000
     }
   }
 };
