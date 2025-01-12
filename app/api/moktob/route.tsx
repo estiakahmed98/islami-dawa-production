@@ -193,7 +193,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // Add form data under the current date
     userMoktobBisoyData.records[email][currentDate] = {
-      ...userMoktobBisoyData.records[email][currentDate], // Preserve existing data for the date
+      ...userMoktobBisoyData.records[email][currentDate ], // Preserve existing data for the date
       ...data, // Merge new data
     };
 

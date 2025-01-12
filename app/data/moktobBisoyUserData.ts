@@ -242,7 +242,7 @@ export const userMoktobBisoyData = {
         "NewMuslim": "1000"
       },
       "2025-01-12": {
-        "MoktobChalu": 100000,
+        "MoktobChalu": 1000,
         "MoktobAdmit": 2,
         "NewMoktob": 3,
         "Sikkha": 200,

@@ -3,28 +3,31 @@ export const userJamatBisoyUserData = {
     "jamatBerHoise": "জামাত বের হয়েছে",
     "jamatSathi": "জামাতের মোট সাথী ছিল"
   },
-  "jewel@gmail.com": {
-    "2025-01-06": {
-      "jamatBerHoise": "100",
-      "jamatSathi": "5000"
-    }
-  },
-  "tushar@gmail.com": {
-    "2025-01-06": {
-      "jamatBerHoise": "100",
-      "jamatSathi": "5000"
-    }
-  },
-  "rashid@gmail.com": {
-    "2025-01-09": {
-      "jamatBerHoise": "100",
-      "jamatSathi": "5000"
-    }
-  },
-  "moni@gmail.com": {
-    "2025-01-12": {
-      "jamatBerHoise": "100",
-      "jamatSathi": "5000"
+  "records": {
+    "jewel@gmail.com": {
+      "2025-01-06": {
+        "jamatBerHoise": "100",
+        "jamatSathi": "5000"
+      }
+    },
+    "tushar@gmail.com": {
+      "2025-01-06": {
+        "jamatBerHoise": "100",
+        "jamatSathi": "5000"
+      }
+    },
+    "rashid@gmail.com": {
+      "2025-01-09": {
+        "jamatBerHoise": "100",
+        "jamatSathi": "5000"
+      }
+    },
+    "moni@gmail.com": {
+      "2025-01-12": {
+        "jamatBerHoise": "2000",
+        "jamatSathi": "5000",
+        "motamotdin": "hiiiiiiii"
+      }
     }
   }
 };

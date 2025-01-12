@@ -8,10 +8,10 @@ import dynamic from "next/dynamic";
 import { userAmoliBisoyData } from "../data/amoliMuhasabaUserData";
 import Tally from "@/components/Tally";
 import { userMoktobBisoyData } from "@/app/data/moktobBisoyUserData";
-import { userTalimData } from "@/app/data/talimBisoyUserData";
+import { userDawatiMojlishData } from "../data/dawatiMojlishUserData";
+import { userTalimBisoyData } from "../data/talimBisoyUserData";
 import { userDayeData } from "@/app/data/dayiUserData";
 import { userDawatiBisoyData } from "@/app/data/dawatiBisoyUserData";
-import { userDawatiMojlishData } from "@/app/data/dawatiMojlishUserData";
 import { userJamatBisoyUserData } from "@/app/data/jamatBisoyUserData";
 import { userDineFeraData } from "@/app/data/dineferaUserData";
 import { userSoforBisoyData } from "@/app/data/userSoforBisoyData";
@@ -36,13 +36,47 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
-      <DemoComp />
-      <div>
-        <h1>Chart and Tally Show Component:</h1>
+      {/* <DemoComp /> */}
+      <div className="grid grid-cols-3 gap-6">
         <Tally
           userData={userMoktobBisoyData}
           email={"moni@gmail.com"}
           title="Moktob Tally"
+        />
+
+        <Tally
+          userData={userDawatiBisoyData}
+          email={"moni@gmail.com"}
+          title="Dawati Bisoy Tally"
+        />
+        <Tally
+          userData={userDawatiMojlishData}
+          email={"moni@gmail.com"}
+          title="Dawati Mojlish Tally"
+        />
+
+        <Tally
+          userData={userJamatBisoyUserData}
+          email={"moni@gmail.com"}
+          title="Jamat Bisoy Tally"
+        />
+
+        <Tally
+          userData={userDineFeraData}
+          email={"moni@gmail.com"}
+          title="Dine Fireche Tally"
+        />
+
+        <Tally
+          userData={userTalimBisoyData}
+          email={"moni@gmail.com"}
+          title="Talim Bisoy Tally"
+        />
+
+        <Tally
+          userData={userDayeData}
+          email={"moni@gmail.com"}
+          title="Dayee Bisoy Tally"
         />
       </div>
 
