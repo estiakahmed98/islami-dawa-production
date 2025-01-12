@@ -14,21 +14,30 @@ datasource db {
 }
 
 model User {
-  id            String          @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String          @unique
+  role          String
+  email         String    @unique
   emailVerified DateTime?
   password      String
   image         String?
   accounts      Account[]
   sessions      Session[]
+  division      String
+  district      String
+  area          String
+  upazila       String
+  union         String
+  markaz        String?
+  phone         String
+
   // Optional for WebAuthn support
   Authenticator Authenticator[]
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
- 
+
 model Account {
   userId            String
   type              String
@@ -41,33 +50,33 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([provider, providerAccountId])
 }
- 
+
 model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
- 
+
 model VerificationToken {
   identifier String
   token      String
   expires    DateTime
- 
+
   @@id([identifier, token])
 }
- 
+
 // Optional for WebAuthn support
 model Authenticator {
   credentialID         String  @unique
@@ -78,99 +87,84 @@ model Authenticator {
   credentialDeviceType String
   credentialBackedUp   Boolean
   transports           String?
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([userId, credentialID])
 }
 
-
 model MasterTableDawa {
-  id                      Int      @id @default(autoincrement())
-  fullName                String
-  role                    String
-  division                String
-  district                String
-  upazila                 String
-  tunion                  String
-  markaz                  String
-  phoneNumber             String
-  email                   String   @unique
-  password                String
-  tahajjud                String?
-  ayat                   String?
-  zikir                   String?
-  ishraq                  String?
-  jamat                   String?
-  sirat                   String?
-  Dua                     String?
-  ilm                     String?
-  tasbih                  String?
-  dayeeAmol               String?
-  amoliSura               String?
-  ayamroja                String?
-  hijbulBahar             String?
-  nonMuslimDawat          Int?
-  murtadDawat             Int?
-  alemderSatheyMojlish    Int?
-  publicSatheyMojlish     Int?
-  nonMuslimSaptahikGasht  Int?
-  dawatterGuruttoMojlish  Int?
-  mojlisheOnshogrohon     Int?
+  id                         Int     @id @default(autoincrement())
+  fullName                   String
+  role                       String
+  division                   String
+  district                   String
+  upazila                    String
+  tunion                     String
+  markaz                     String
+  phoneNumber                String
+  email                      String  @unique
+  password                   String
+  tahajjud                   String?
+  ayat                       String?
+  zikir                      String?
+  ishraq                     String?
+  jamat                      String?
+  sirat                      String?
+  Dua                        String?
+  ilm                        String?
+  tasbih                     String?
+  dayeeAmol                  String?
+  amoliSura                  String?
+  ayamroja                   String?
+  hijbulBahar                String?
+  nonMuslimDawat             Int?
+  murtadDawat                Int?
+  alemderSatheyMojlish       Int?
+  publicSatheyMojlish        Int?
+  nonMuslimSaptahikGasht     Int?
+  dawatterGuruttoMojlish     Int?
+  mojlisheOnshogrohon        Int?
   prosikkhonKormoshalaAyojon Int?
-  prosikkhonOnshogrohon   Int?
-  jummahAlochona          Int?
-  dhormoSova              Int?
-  mashwaraPoint           Int?
-  jamatBerHoise           Int?
-  jamatSathi              Int?
-  madrasaVisit            Int?
-  moktobVisit             Int?
-  schoolCollegeVisit      Int?
-  sohojogiDayeToiri       Int?
-  nonMuslimMuslimHoise    Int?
-  murtadIslamFireche      Int?
-  notunMoktobChalu        Int?
-  totalMoktob             Int?
-  totalStudent            Int?
-  obhibhabokConference    Int?
+  prosikkhonOnshogrohon      Int?
+  jummahAlochona             Int?
+  dhormoSova                 Int?
+  mashwaraPoint              Int?
+  jamatBerHoise              Int?
+  jamatSathi                 Int?
+  madrasaVisit               Int?
+  moktobVisit                Int?
+  schoolCollegeVisit         Int?
+  sohojogiDayeToiri          Int?
+  nonMuslimMuslimHoise       Int?
+  murtadIslamFireche         Int?
+  notunMoktobChalu           Int?
+  totalMoktob                Int?
+  totalStudent               Int?
+  obhibhabokConference       Int?
   moktoThekeMadrasaAdmission Int?
-  notunBoyoskoShikkha     Int?
-  totalBoyoskoShikkha     Int?
-  boyoskoShikkhaOnshogrohon Int?
-  newMuslimeDinerFikir    Int?
-  mohilaTalim             Int?
-  mohilaOnshogrohon       Int?
-}
-
-model NewUser {
-  id          Int      @id @default(autoincrement())
-  fullName    String
-  role        String
-  division    String
-  district    String
-  upazila     String
-  tunion      String
-  markaz      String
-  phoneNumber String
-  email       String   @unique
-  password    String
+  notunBoyoskoShikkha        Int?
+  totalBoyoskoShikkha        Int?
+  boyoskoShikkhaOnshogrohon  Int?
+  newMuslimeDinerFikir       Int?
+  mohilaTalim                Int?
+  mohilaOnshogrohon          Int?
 }
 
 model AmoliMuhasabaData {
-  id         Int    @id @default(autoincrement())
-  tahajjud   String
-  ayat       String
-  zikir      String
-  ishraq     String
-  jamat      String
-  sirat      String
-  Dua        String
-  ilm        String
-  tasbih     String
-  dayeeAmol  String
-  amoliSura  String
-  ayamroja   String
+  id          Int    @id @default(autoincrement())
+  tahajjud    String
+  ayat        String
+  zikir       String
+  ishraq      String
+  jamat       String
+  sirat       String
+  Dua         String
+  ilm         String
+  tasbih      String
+  dayeeAmol   String
+  amoliSura   String
+  ayamroja    String
   hijbulBahar String
 }
 
@@ -184,27 +178,27 @@ model DawatiBisoy {
 }
 
 model DawatiMojlish {
-  id                          Int @id @default(autoincrement())
-  dawatterGuruttoMojlish      Int
-  mojlisheOnshogrohon         Int
-  prosikkhonKormoshalaAyojon  Int
-  prosikkhonOnshogrohon       Int
-  jummahAlochona              Int
-  dhormoSova                  Int
-  mashwaraPoint               Int
+  id                         Int @id @default(autoincrement())
+  dawatterGuruttoMojlish     Int
+  mojlisheOnshogrohon        Int
+  prosikkhonKormoshalaAyojon Int
+  prosikkhonOnshogrohon      Int
+  jummahAlochona             Int
+  dhormoSova                 Int
+  mashwaraPoint              Int
 }
 
 model JamatBisoy {
-  id           Int @id @default(autoincrement())
+  id            Int @id @default(autoincrement())
   jamatBerHoise Int
   jamatSathi    Int
 }
 
 model SoforBisoy {
-  id                  Int @id @default(autoincrement())
-  madrasaVisit        Int
-  moktobVisit         Int
-  schoolCollegeVisit  Int
+  id                 Int @id @default(autoincrement())
+  madrasaVisit       Int
+  moktobVisit        Int
+  schoolCollegeVisit Int
 }
 
 model DayeBisoy {
@@ -213,26 +207,26 @@ model DayeBisoy {
 }
 
 model DinerDikeFireche {
-  id                  Int @id @default(autoincrement())
+  id                   Int @id @default(autoincrement())
   nonMuslimMuslimHoise Int
   murtadIslamFireche   Int
 }
 
 model MoktobBisoy {
-  id                     Int @id @default(autoincrement())
-  notunMoktobChalu       Int
-  totalMoktob            Int
-  totalStudent           Int
-  obhibhabokConference   Int
+  id                         Int @id @default(autoincrement())
+  notunMoktobChalu           Int
+  totalMoktob                Int
+  totalStudent               Int
+  obhibhabokConference       Int
   moktoThekeMadrasaAdmission Int
-  notunBoyoskoShikkha    Int
-  totalBoyoskoShikkha    Int
-  boyoskoShikkhaOnshogrohon Int
-  newMuslimeDinerFikir   Int
+  notunBoyoskoShikkha        Int
+  totalBoyoskoShikkha        Int
+  boyoskoShikkhaOnshogrohon  Int
+  newMuslimeDinerFikir       Int
 }
 
 model TalimBisoy {
-  id              Int @id @default(autoincrement())
-  mohilaTalim     Int
+  id                Int @id @default(autoincrement())
+  mohilaTalim       Int
   mohilaOnshogrohon Int
 }
