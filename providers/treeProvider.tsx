@@ -1,16 +1,15 @@
 "use client";
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-// Define the shape of the context
+// Define the context type
 interface TreeContextType {
   selectedUser: string;
   setSelectedUser: React.Dispatch<React.SetStateAction<string>>;
 }
 
-// Create the context with the correct type or undefined as the default
+// Create the context with a proper type or undefined as the default
 const TreeContext = createContext<TreeContextType | undefined>(undefined);
 
-// Define the props for the provider
 interface TreeProviderProps {
   children: ReactNode;
 }
@@ -25,7 +24,8 @@ const TreeProvider: React.FC<TreeProviderProps> = ({ children }) => {
   );
 };
 
-// Custom hook to use the TreeContext
+export default TreeProvider;
+
 export const useSelectedUser = (): TreeContextType => {
   const context = useContext(TreeContext);
   if (!context) {
@@ -33,5 +33,3 @@ export const useSelectedUser = (): TreeContextType => {
   }
   return context;
 };
-
-export default TreeProvider;

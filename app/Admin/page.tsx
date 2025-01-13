@@ -4,6 +4,13 @@
 // import TalimDonutChart from "@/components/TalimBisoyChart";
 // import Tally from "@/components/Tally";
 
+import OnItemClick from "@/components/MuiTreeView";
+
+interface OnItemClickProps {
+  loggedInUser: string;
+  onItemClick: (user: string) => void;
+}
+
 // // Import data for Faysal and Jewel
 // import { allData } from "@/app/data/data_faysal";
 
@@ -422,8 +429,17 @@
 // };
 
 // export default Dashboard;
+const navigateToUserPage = (user: string) => {
+  console.log(`Navigating to user page for ${user}`);
+};
+
 const Page = () => {
-  return <div>It is admin dashboard</div>;
+  return (
+    <div>
+      It is admin dashboard
+      <OnItemClick loggedInUser={"moni@gmail.com"} onItemClick={navigateToUserPage} />
+    </div>
+  );
 };
 
 export default Page;

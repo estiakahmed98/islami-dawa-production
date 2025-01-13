@@ -20,7 +20,7 @@ const renderLegend: React.FC<RenderLegendProps> = ({ payload }) => {
   }
 
   return (
-    <ul className="flex space-x-4">
+    <ul className="xl:flex xl:gap-4 grid xl:justify-center">
       {payload.map((entry, index) => (
         <li
           key={`item-${index}`}

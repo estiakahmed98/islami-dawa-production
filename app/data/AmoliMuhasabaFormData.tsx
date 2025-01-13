@@ -171,7 +171,7 @@ export const ayatOptions = [
 ];
 
 export const zikirOptions = [
-  { value: "সকাল-সন্ধ্যা ", label: "সকাল-সন্ধ্যা " },
+  { value: "সকাল-সন্ধ্যা", label: "সকাল-সন্ধ্যা" },
   { value: "সকাল", label: "সকাল" },
   { value: "সন্ধ্যা", label: "সন্ধ্যা" },
 ];

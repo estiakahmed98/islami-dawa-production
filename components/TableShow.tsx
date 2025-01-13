@@ -37,8 +37,8 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     setMonthName(today.toLocaleString("default", { month: "long" }));
     setYear(currentYear);
 
-    const email = localStorage.getItem("userEmail");
-    // const email = "jewel@gmail.com";
+    // const email = localStorage.getItem("userEmail");
+    const email = "moni@gmail.com";
     setUserEmail(email || "");
 
     const labels = userData.labelMap;
@@ -120,7 +120,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     ].join("\n");
     fileDownload(csvContent, "amoli-table.csv");
   };
-
 
   // PDF Export Function
   const convertToPDF = () => {

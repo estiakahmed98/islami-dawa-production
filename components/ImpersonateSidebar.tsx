@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import SidebarAdmin from "./SidebarAdmin";
 import Sidebar from "./dashboard/sidebar";
 import TreeExample from "./SidebarAdmin";
-import OnItemClick from "./MuiTreeView";
+// import OnItemClick from "./MuiTreeView";
 import {
   LuArrowLeftFromLine,
   LuArrowRightToLine,
@@ -14,25 +14,27 @@ import { IoPersonAddSharp } from "react-icons/io5";
 import { MdPeople } from "react-icons/md";
 import { FcAcceptDatabase } from "react-icons/fc";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import OnItemClick from "./MuiTreeView";
 
-const ImpersonateSidebar = () => {
-  const [showUserSidebar, setShowUserSidebar] = useState(false);
-  const pathname = usePathname(); // Get the current route
-  const isActive = (path) => pathname === path;
+const ImpersonateSidebar: React.FC = () => {
+  const [showUserSidebar, setShowUserSidebar] = useState<boolean>(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const toggleView = () => {
+  const isActive = (path: string): boolean => pathname === path;
+
+  const toggleView = (): void => {
     setShowUserSidebar(!showUserSidebar);
   };
 
-  const [userName, setUserName] = useState("");
+  const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
     const userEmail = localStorage.getItem("userEmail");
-    setUserName(userEmail);
+    setUserName(userEmail || "");
   }, []);
 
-  // Define menu items with roles
   const allMenuItems = [
     {
       href: "/admin",
@@ -51,7 +53,7 @@ const ImpersonateSidebar = () => {
       href: "/admin/register",
       icon: <IoPersonAddSharp />,
       label: "দায়ী এড করা",
-      roles: ["centraladmin"], // Only visible to centraladmin
+      roles: ["centraladmin"],
     },
     {
       href: "/admin/users",
@@ -81,7 +83,7 @@ const ImpersonateSidebar = () => {
     },
   ];
 
-  const navigateToUserPage = () => {
+  const navigateToUserPage = (): void => {
     router.push("/admin/user");
   };
 
