@@ -8,6 +8,16 @@ export const userJamatBisoyUserData = {
       "2025-01-06": {
         "jamatBerHoise": "100",
         "jamatSathi": "5000"
+      },
+      "2025-01-08": {
+        "jamatBerHoise": "100",
+        "jamatSathi": "500",
+        "motamotdin": "Hello"
+      },
+      "2025-01-14": {
+        "jamatBerHoise": "100",
+        "jamatSathi": "500",
+        "motamotdin": "Good"
       }
     },
     "tushar@gmail.com": {

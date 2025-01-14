@@ -16,6 +16,26 @@ export const userDawatiBisoyData = {
         "nonMuslimSaptahikGasht": "33",
         "motamotdin": "Hello Dawati"
       }
+    },
+    "rashid@gmail.com": {
+      "2025-01-14": {
+        "nonMuslimDawat": "500",
+        "murtadDawat": "44",
+        "alemderSatheyMojlish": "33",
+        "publicSatheyMojlish": "55",
+        "nonMuslimSaptahikGasht": "33",
+        "motamotdin": "Helloooooooo"
+      }
+    },
+    "jewel@gmail.com": {
+      "2025-01-14": {
+        "nonMuslimDawat": "500",
+        "murtadDawat": "44",
+        "alemderSatheyMojlish": "33",
+        "publicSatheyMojlish": "55",
+        "nonMuslimSaptahikGasht": "33",
+        "motamotdin": "good"
+      }
     }
   }
 };

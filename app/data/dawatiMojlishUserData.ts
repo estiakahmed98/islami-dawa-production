@@ -20,6 +20,18 @@ export const userDawatiMojlishData = {
         "mashwaraPoint": "7",
         "motamotdin": "hiiiii"
       }
+    },
+    "jewel@gmail.com": {
+      "2025-01-14": {
+        "dawatterGuruttoMojlish": "100",
+        "mojlisheOnshogrohon": "26",
+        "prosikkhonKormoshalaAyojon": "10",
+        "prosikkhonOnshogrohon": "55",
+        "jummahAlochona": "5",
+        "dhormoSova": "6",
+        "mashwaraPoint": "7",
+        "motamotdin": "Hello"
+      }
     }
   }
 };

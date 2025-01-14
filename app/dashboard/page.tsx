@@ -21,70 +21,69 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/TabButton";
+import { useSession } from "next-auth/react";
 import AmoliTableShow from "@/components/TableShow";
-import DemoComp from "@/components/DemoComp";
-
-interface DashboardData {
-  AmoliChartData?: any[];
-  TalimDonutChartData1?: any[];
-  TalimDonutChartData2?: any[];
-}
 
 const Dashboard: React.FC = () => {
-  const userEmail: string | null =
-    typeof window !== "undefined" ? localStorage.getItem("userEmail") : null;
+ 
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email || "";
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2>User Logged In:</h2>
+        <h1>Welcome, {session?.user?.email}</h1>
+      </div>
       <div className="grid xl:grid-cols-3 gap-6">
         <AmoliChart
           data={userAmoliBisoyData.records}
-          userEmail="moni@gmail.com"
+          userEmail={userEmail}
         />
         <Tally
           userData={userMoktobBisoyData}
-          email={"moni@gmail.com"}
+          email={userEmail}
           title="Moktob Tally"
         />
 
         <Tally
           userData={userDawatiBisoyData}
-          email={"moni@gmail.com"}
+          email={userEmail}
           title="Dawati Bisoy Tally"
         />
         <Tally
           userData={userDawatiMojlishData}
-          email={"moni@gmail.com"}
+          email={userEmail}
           title="Dawati Mojlish Tally"
         />
 
         <Tally
           userData={userJamatBisoyUserData}
-          email={"moni@gmail.com"}
+          email={userEmail}
           title="Jamat Bisoy Tally"
         />
 
         <Tally
           userData={userDineFeraData}
-          email={"moni@gmail.com"}
+          email={userEmail}
           title="Dine Fireche Tally"
         />
 
         <Tally
           userData={userTalimBisoyData}
-          email={"moni@gmail.com"}
+          email={userEmail}
           title="Talim Bisoy Tally"
         />
 
         <Tally
           userData={userSoforBisoyData}
-          email={"moni@gmail.com"}
+          email={userEmail}
           title="Sofor Bisoy Tally"
         />
 
         <Tally
           userData={userDayeData}
-          email={"moni@gmail.com"}
+          email={userEmail}
           title="Dayee Bisoy Tally"
         />
       </div>

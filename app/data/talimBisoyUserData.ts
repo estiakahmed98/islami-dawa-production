@@ -18,6 +18,10 @@ export const userTalimBisoyData = {
       "2025-01-06": {
         "mohilaTalim": "10",
         "TalimOngshoGrohon": "100"
+      },
+      "2025-01-14": {
+        "mohilaTalim": "500",
+        "TalimOngshoGrohon": "1000"
       }
     },
     "faysal@gmail.com": {

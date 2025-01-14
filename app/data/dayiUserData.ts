@@ -8,6 +8,12 @@ export const userDayeData = {
         "sohojogiDayeToiri": "5000",
         "motamotdin": "gui87yrfdtsrzz"
       }
+    },
+    "jewel@gmail.com": {
+      "2025-01-14": {
+        "sohojogiDayeToiri": "50",
+        "motamotdin": "Hello"
+      }
     }
   }
 };

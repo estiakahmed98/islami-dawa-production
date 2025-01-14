@@ -95,6 +95,22 @@ export const userAmoliBisoyData = {
         "ayamroja": "হ্যাঁ",
         "hijbulBahar": " না ",
         "percentage": "80.00"
+      },
+      "2025-01-14": {
+        "tahajjud": 40,
+        "ayat": "sura Al-Imran",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "হ্যাঁ",
+        "hijbulBahar": "হ্যাঁ",
+        "percentage": "100.00"
       }
     },
     "moni@gmail.com": {

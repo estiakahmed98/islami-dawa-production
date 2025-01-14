@@ -4,6 +4,7 @@ import { Formik, Form, Field, FieldArray, ErrorMessage } from "formik";
 import { Button } from "@/components/ui/button";
 import { initialFormData, validationSchema } from "@/app/data/SoforBishoyData";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface FormValues {
   madrasaVisits: string[];
@@ -12,6 +13,9 @@ interface FormValues {
 
 const SoforBishoyForm = () => {
   const router = useRouter();
+  // User Logged in email collection
+  const { data: session } = useSession();
+  const email = session?.user?.email || "";
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">
@@ -23,8 +27,6 @@ const SoforBishoyForm = () => {
         }}
         validationSchema={validationSchema}
         onSubmit={async (values) => {
-          const email = localStorage.getItem("userEmail");
-
           if (!email) {
             alert("User email is not set. Please log in.");
             return;

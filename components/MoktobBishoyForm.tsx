@@ -4,9 +4,14 @@ import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/MoktobBishoyData";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const MoktobBishoyForm = () => {
   const router = useRouter();
+
+  // User Logged in email collection
+  const { data: session } = useSession();
+  const email = session?.user?.email || "";
 
   return (
     <div className="w-full mx-auto mt-8 rounded bg-white p-10 shadow-lg">
@@ -16,9 +21,6 @@ const MoktobBishoyForm = () => {
         validationSchema={validationSchema}
         onSubmit={async (values, { setSubmitting }) => {
           try {
-            // Retrieve email from localStorage
-            const email = localStorage.getItem("userEmail");
-
             if (!email) {
               alert("User email is not set. Please log in.");
               setSubmitting(false);

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/DineFirecheData";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 // Define form values type
 interface FormValues {
@@ -12,6 +13,9 @@ interface FormValues {
 
 const DineFirecheForm: React.FC = () => {
   const router = useRouter();
+  // User Logged in email collection
+  const { data: session } = useSession();
+  const email = session?.user?.email || "";
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">
@@ -20,9 +24,6 @@ const DineFirecheForm: React.FC = () => {
         initialValues={initialFormData}
         validationSchema={validationSchema}
         onSubmit={async (values: FormValues) => {
-          // Retrieve email from localStorage
-          const email = localStorage.getItem("userEmail");
-
           // Check if email is available
           if (!email) {
             alert("User email is not set. Please log in.");

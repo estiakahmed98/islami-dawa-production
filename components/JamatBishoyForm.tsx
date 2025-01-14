@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/JamatBishoyData";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 // Type for form data
 interface FormData {
@@ -13,6 +14,10 @@ interface FormData {
 const JamatBishoyForm = () => {
   const router = useRouter();
 
+  // User Logged in email collection
+  const { data: session } = useSession();
+  const email = session?.user?.email || "";
+
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">
       <h2 className="mb-6 text-2xl">জামাত বিষয়</h2>
@@ -20,8 +25,6 @@ const JamatBishoyForm = () => {
         initialValues={initialFormData}
         validationSchema={validationSchema}
         onSubmit={async (values: FormData) => {
-          // Retrieve email from localStorage
-          const email = localStorage.getItem("userEmail");
 
           // Check if email is available
           if (!email) {

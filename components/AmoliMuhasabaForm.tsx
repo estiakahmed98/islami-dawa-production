@@ -16,6 +16,7 @@ import {
 import moment from "moment";
 import "moment-hijri";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface AmoliMuhasabaFormValues {
   tahajjud: number;
@@ -149,11 +150,14 @@ const AmoliMuhasabaForm = () => {
   const maxPoints = 65; // 13 fields * 5 max points each
   const percentage = ((totalPoints / maxPoints) * 100).toFixed(2);
 
+  // User Logged in email collection
+  const { data: session } = useSession();
+    const email = session?.user?.email || "";
+
   const handleSubmit = async (
     values: AmoliMuhasabaFormValues,
     { setSubmitting }: FormikHelpers<AmoliMuhasabaFormValues>
   ) => {
-    const email = localStorage.getItem("userEmail");
 
     if (!email) {
       alert("User email is not set. Please log in.");

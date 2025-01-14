@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/DawatiData";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 // Define the type for form values
 interface DawatiFormData {
@@ -16,6 +17,9 @@ interface DawatiFormData {
 const DawatiForm = () => {
   const router = useRouter();
 
+  const { data: session } = useSession();
+  const email = session?.user?.email || "";
+
   return (
     <div className="w-full mx-auto mt-8 rounded bg-white p-10 shadow-lg">
       <h2 className="mb-6 text-2xl">দাওয়াতি বিষয়</h2>
@@ -23,10 +27,6 @@ const DawatiForm = () => {
         initialValues={initialFormData}
         validationSchema={validationSchema}
         onSubmit={async (values: DawatiFormData) => {
-          // Retrieve email from localStorage
-          const email = localStorage.getItem("userEmail");
-
-          // Check if email is available
           if (!email) {
             alert("User email is not set. Please log in.");
             return;

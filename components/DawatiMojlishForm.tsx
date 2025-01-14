@@ -7,10 +7,15 @@ import {
   DawatiFormData,
 } from "@/app/data/DawatiMojlishData";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 // Component for the Dawati Mojlish Form
 const DawatiMojlishForm = () => {
   const router = useRouter();
+
+  // User Logged in email collection
+  const { data: session } = useSession();
+  const email = session?.user?.email || "";
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">
@@ -19,9 +24,6 @@ const DawatiMojlishForm = () => {
         initialValues={initialFormData}
         validationSchema={validationSchema}
         onSubmit={async (values: DawatiFormData) => {
-          // Retrieve email from localStorage
-          const email = localStorage.getItem("userEmail");
-
           // Check if email is available
           if (!email) {
             alert("User email is not set. Please log in.");

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/TalimData";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 // Define the types for the form values
 interface TalimFormValues {
@@ -13,6 +14,9 @@ interface TalimFormValues {
 
 const TalimForm: React.FC = () => {
   const router = useRouter();
+  // User Logged in email collection
+  const { data: session } = useSession();
+  const email = session?.user?.email || "";
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">
@@ -21,9 +25,6 @@ const TalimForm: React.FC = () => {
         initialValues={initialFormData as TalimFormValues}
         validationSchema={validationSchema}
         onSubmit={async (values: TalimFormValues) => {
-          // Retrieve email from localStorage
-          const email = localStorage.getItem("userEmail");
-
           // Check if email is available
           if (!email) {
             alert("User email is not set. Please log in.");
