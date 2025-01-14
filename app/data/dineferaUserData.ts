@@ -37,8 +37,8 @@ export const userDineFeraData = {
         "omuslimKalemaPoreche": "120",
         "murtadDineFireasa": "231"
       },
-      "2025-01-14": {
-        "omuslimKalemaPoreche": "12",
+      "2025-01-13": {
+        "omuslimKalemaPoreche": "10",
         "murtadDineFireasa": "5"
       }
     },
@@ -46,6 +46,35 @@ export const userDineFeraData = {
       "2025-01-14": {
         "omuslimKalemaPoreche": "1000",
         "murtadDineFireasa": "2500"
+      }
+    },
+    "estiak@gmail.com": {
+      "2025-01-13": {
+        "omuslimKalemaPoreche": "150",
+        "murtadDineFireasa": "20",
+        "editorContent": "<p><strong>sfffdsgadfzfgszdhgfsgjfzsghgh</strong></p>"
+      },
+      "2025-01-12": {
+        "omuslimKalemaPoreche": "100",
+        "murtadDineFireasa": "15",
+        "editorContent": "<p>sdfniofjoidgkao-s[dlflrflgoplf,ogk,fok,gpopf,gpo</p>"
+      },
+      "2025-01-14": {
+        "omuslimKalemaPoreche": "1500",
+        "murtadDineFireasa": "500",
+        "editorContent": "<p>asdfsfdsgdfg</p>"
+      }
+    },
+    "faysal@gmail.com": {
+      "2025-01-13": {
+        "omuslimKalemaPoreche": "12",
+        "murtadDineFireasa": "20",
+        "editorContent": "<p>Hello faysal</p>"
+      },
+      "2025-01-14": {
+        "omuslimKalemaPoreche": "dfd",
+        "murtadDineFireasa": "fd",
+        "editorContent": "<p>dfdff</p>"
       }
     }
   }

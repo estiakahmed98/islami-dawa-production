@@ -1,4 +1,3 @@
-
 "use client";
 import { useState } from "react";
 import { Formik, Field, ErrorMessage, FormikHelpers } from "formik";
@@ -19,6 +18,7 @@ import "moment-hijri";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import moment from "moment-hijri";
+import { toast } from "sonner";
 
 interface AmoliMuhasabaFormValues {
   tahajjud: number;
@@ -182,10 +182,10 @@ const AmoliMuhasabaForm = () => {
       });
 
       if (response.ok) {
-        alert("Form submission successful!");
+        toast.success("Submited Succesfully...");
         router.push("/dashboard");
       } else {
-        alert("Form submission failed! Try again.");
+        toast.error("Form submission failed! Try again.");
       }
     } catch (error) {
       console.error("Form submission error:", error);

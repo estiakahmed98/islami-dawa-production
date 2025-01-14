@@ -212,6 +212,24 @@ export const userAmoliBisoyData = {
         "hijbulBahar": "হ্যাঁ",
         "percentage": "100.00"
       }
+    },
+    "faysal@gmail.com": {
+      "2025-01-14": {
+        "tahajjud": 12,
+        "ayat": "sura Al-Imran",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক-আওয়াবীন-চাশ্ত",
+        "jamat": 5,
+        "sirat": "bukhari",
+        "Dua": "হ্যাঁ",
+        "ilm": "muslim",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "হ্যাঁ",
+        "hijbulBahar": "হ্যাঁ",
+        "percentage": "96.92"
+      }
     }
   }
 };
