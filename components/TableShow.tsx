@@ -57,8 +57,8 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           .toString()
           .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
         row[day] = email
-          ? userData.records[email]?.[date]?.[label] || "N/A"
-          : "N/A";
+          ? userData.records[email]?.[date]?.[label] || "- -"
+          : "- -";
       });
       return row;
     });
@@ -186,8 +186,8 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <h2 className="text-2xl font-bold text-cyan-800 mb-4">
+      <div className="flex justify-between px-6 py-2">
+        <h2 className="text-2xl font-bold text-cyan-800 mb-4 flex items-center">
           {`Month: ${monthName} ${year}`}
         </h2>
         <div className="flex gap-4 mb-4">

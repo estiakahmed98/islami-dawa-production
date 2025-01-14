@@ -43,7 +43,7 @@ const Dashboard: React.FC<TallyProps> = ({ userData, email, title }) => {
           </span>
         </h1>
       </div>
-      <div className="grid xl:grid-cols-3 h-[500px] p-6 gap-6 overflow-y-auto border border-[#155E75] rounded-xl">
+      <div className="grid xl:grid-cols-3 p-6 gap-6 overflow-y-auto border border-[#155E75] rounded-xl">
         <AmoliChart data={userAmoliBisoyData.records} userEmail={userEmail} />
         <Tally
           userData={userMoktobBisoyData}
@@ -93,7 +93,7 @@ const Dashboard: React.FC<TallyProps> = ({ userData, email, title }) => {
         />
       </div>
 
-      <div className="border border-[#155E75] max-h-[500px] p-6 mt-10 rounded-xl overflow-y-auto">
+      <div className="border border-[#155E75] p-6 mt-10 rounded-xl overflow-y-auto">
         <Tabs defaultValue="Amolimusahaba" className="w-full p-4">
           <TabsList className="mx-10 my-6">
             <TabsTrigger value="Amolimusahaba">Amolimusahaba</TabsTrigger>
