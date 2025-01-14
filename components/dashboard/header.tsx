@@ -15,10 +15,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSidebar } from "@/providers/sidebar-provider";
 import { signOut, useSession } from "next-auth/react";
+import "moment-hijri";
+import moment from "moment-hijri";
 
 const Header = () => {
   const session = useSession();
   const { toggleSidebar } = useSidebar();
+
+  moment.locale("bn");
+  const hijriDate = moment().format("iD");
 
   return (
     <header className="flex h-20 bg-[#155E75] text-white shrink-0 items-center justify-between border-b px-6 dark:bg-slate-900">
@@ -34,7 +39,8 @@ const Header = () => {
             ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ
           </h1>
           <div className="text-[8px] md:text-lg">
-            দাওয়াতি বছর {new Date().getFullYear()} ইং / ১৪৪৫ হিজ
+            দাওয়াতি বছর {new Date().getFullYear()} ইং /
+            {moment().format(" iD iMMMM iYYYY")} হিজ
           </div>
         </div>
       </div>
