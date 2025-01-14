@@ -38,6 +38,13 @@ export const userJamatBisoyUserData = {
         "jamatSathi": "5000",
         "motamotdin": "hiiiiiiii"
       }
+    },
+    "zisan@gmail.com": {
+      "2025-01-14": {
+        "jamatBerHoise": "100",
+        "jamatSathi": "500",
+        "motamotdin": "helloooooooooooooo"
+      }
     }
   }
 };

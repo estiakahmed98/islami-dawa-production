@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import fileDownload from "js-file-download";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { useSession } from "next-auth/react";
 
 interface AmoliTableProps {
   userData: any;
@@ -24,6 +25,9 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   } | null>(null); // For cell editing
   const [newCellValue, setNewCellValue] = useState<string>(""); // New cell value for editing
 
+  const { data: session } = useSession();
+  const email = session?.user?.email;
+  
   useEffect(() => {
     const today = new Date();
     const currentYear = today.getFullYear();
@@ -38,7 +42,8 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     setYear(currentYear);
 
     // const email = localStorage.getItem("userEmail");
-    const email = "moni@gmail.com";
+    // const email = "moni@gmail.com";
+
     setUserEmail(email || "");
 
     const labels = userData.labelMap;

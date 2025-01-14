@@ -25,21 +25,22 @@ import { useSession } from "next-auth/react";
 import AmoliTableShow from "@/components/TableShow";
 
 const Dashboard: React.FC = () => {
- 
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
+  // console.log("Session", session);
 
   return (
     <div className="space-y-4">
       <div>
-        <h2>User Logged In:</h2>
-        <h1>Welcome, {session?.user?.email}</h1>
+        <h1 className="text-xl font-semibold">
+          Welcome,{"  "}
+          <span className="text-2xl text-emerald-600">
+            {session?.user?.email}
+          </span>
+        </h1>
       </div>
       <div className="grid xl:grid-cols-3 gap-6">
-        <AmoliChart
-          data={userAmoliBisoyData.records}
-          userEmail={userEmail}
-        />
+        <AmoliChart data={userAmoliBisoyData.records} userEmail={userEmail} />
         <Tally
           userData={userMoktobBisoyData}
           email={userEmail}
@@ -88,10 +89,6 @@ const Dashboard: React.FC = () => {
         />
       </div>
 
-      {/* <div>
-        <AmoliTableShow userData={userAmoliBisoyData} />
-      </div> */}
-      {/* <Dashboard /> */}
       <div className="border border-[#155E75] mt-10 rounded-xl overflow-y-auto">
         <Tabs defaultValue="Amolimusahaba" className="w-full p-4">
           <TabsList className="mx-10 my-6">
@@ -109,7 +106,6 @@ const Dashboard: React.FC = () => {
           {/* Tab Content */}
           <TabsContent value="Amolimusahaba">
             <div className="bg-gray-50 rounded shadow">
-              {/* <AmoliTableShow userData={userAmoliData} /> */}
               <AmoliTableShow userData={userAmoliBisoyData} />
             </div>
           </TabsContent>
@@ -145,13 +141,11 @@ const Dashboard: React.FC = () => {
           </TabsContent>
           <TabsContent value="dinefera">
             <div className="bg-gray-50 rounded shadow">
-              {/* <FinalReportTable /> */}
               <AmoliTableShow userData={userDineFeraData} />
             </div>
           </TabsContent>
           <TabsContent value="sofor">
             <div className="bg-gray-50 rounded shadow">
-              {/* <FinalReportTable /> */}
               <AmoliTableShow userData={userSoforBisoyData} />
             </div>
           </TabsContent>

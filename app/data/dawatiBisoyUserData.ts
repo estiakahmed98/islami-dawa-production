@@ -36,6 +36,16 @@ export const userDawatiBisoyData = {
         "nonMuslimSaptahikGasht": "33",
         "motamotdin": "good"
       }
+    },
+    "zisan@gmail.com": {
+      "2025-01-14": {
+        "nonMuslimDawat": "50",
+        "murtadDawat": "44",
+        "alemderSatheyMojlish": "33",
+        "publicSatheyMojlish": "55",
+        "nonMuslimSaptahikGasht": "33",
+        "motamotdin": "Hello"
+      }
     }
   }
 };

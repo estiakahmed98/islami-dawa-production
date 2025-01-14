@@ -10,9 +10,18 @@ export const userDayeData = {
       }
     },
     "jewel@gmail.com": {
-      "2025-01-14": {
+      "2025-01-12": {
         "sohojogiDayeToiri": "50",
         "motamotdin": "Hello"
+      },
+      "2025-01-14": {
+        "sohojogiDayeToiri": "50"
+      }
+    },
+    "zisan@gmail.com": {
+      "2025-01-14": {
+        "sohojogiDayeToiri": "50",
+        "motamotdin": "good"
       }
     }
   }

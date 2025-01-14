@@ -1,3 +1,4 @@
+
 export const userMoktobBisoyData = {
   "labelMap": {
     "MoktobChalu": "নতুন মক্তব চালু হয়েছে",
@@ -290,6 +291,18 @@ export const userMoktobBisoyData = {
         "TotalAgeSikkha": "800",
         "MadrasahAdmit": "900",
         "NewMuslim": "1000"
+      },
+      "2025-01-14": {
+        "MoktobChalu": 100,
+        "MoktobAdmit": 100,
+        "NewMoktob": 150,
+        "Sikkha": 200,
+        "TotalStudent": 250,
+        "TotalSikkha": 300,
+        "GurdianMeeting": 700,
+        "TotalAgeSikkha": 400,
+        "MadrasahAdmit": 5,
+        "NewMuslim": 500
       }
     },
     "rashid@gmail.com": {

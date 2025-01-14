@@ -152,7 +152,7 @@ const AmoliMuhasabaForm = () => {
 
   // User Logged in email collection
   const { data: session } = useSession();
-    const email = session?.user?.email || "";
+  const email = session?.user?.email || "";
 
   const handleSubmit = async (
     values: AmoliMuhasabaFormValues,

@@ -29,6 +29,12 @@ export const userTalimBisoyData = {
         "mohilaTalim": "10",
         "TalimOngshoGrohon": "100"
       }
+    },
+    "zisan@gmail.com": {
+      "2025-01-14": {
+        "mohilaTalim": "500",
+        "TalimOngshoGrohon": "1000"
+      }
     }
   }
 };

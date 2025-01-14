@@ -37,6 +37,12 @@ export const userDineFeraData = {
         "omuslimKalemaPoreche": "120",
         "murtadDineFireasa": "231"
       }
+    },
+    "zisan@gmail.com": {
+      "2025-01-14": {
+        "omuslimKalemaPoreche": "1000",
+        "murtadDineFireasa": "2500"
+      }
     }
   }
 };
