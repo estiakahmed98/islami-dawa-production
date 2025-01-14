@@ -33,16 +33,17 @@ import TreeProvider from "@/providers/treeProvider";
 const AdmindLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
-      <div className="flex fixed size-full">
-        {/* <Sidebar /> */}
-        {/* <ImpersonateSidebar/> */}
-        <div className="w-full overflow-hidden">
-          <Header />
-          <main className="h-[calc(100vh-80px)] overflow-y-auto p-6">
-            <TreeProvider>{children}</TreeProvider>
-          </main>
+      <TreeProvider>
+        <div className="flex fixed size-full">
+          <ImpersonateSidebar />
+          <div className="w-full overflow-hidden">
+            <Header />
+            <main className="h-[calc(100vh-80px)] overflow-y-auto p-6">
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
+      </TreeProvider>
     </SidebarProvider>
   );
 };

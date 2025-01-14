@@ -88,8 +88,8 @@ const ImpersonateSidebar: React.FC = () => {
   };
 
   return (
-    <div className="flex">
-      <div className="overflow-y-auto bg-sky-900 scrollbar">
+    <div className="flex h-screen">
+      <div className="overflow-y-auto bg-sky-900">
         <div className="py-4 px-6">
           <div className="mb-4 flex justify-end">
             <button
@@ -131,7 +131,7 @@ const ImpersonateSidebar: React.FC = () => {
 
       <div>
         {showUserSidebar && (
-          <div className="h-full transition-all duration-500">
+          <div className="transition-all duration-500">
             <Sidebar />
           </div>
         )}
