@@ -1,6 +1,7 @@
 import { LayoutGrid } from "lucide-react";
 import MenuItem from "./menu-item";
 
+
 // Importing React icons
 import { LuLayoutDashboard } from "react-icons/lu";
 import { FaRegFileAlt, FaRegHandshake, FaUsers } from "react-icons/fa";
@@ -13,8 +14,11 @@ import {
 } from "react-icons/md";
 import { BsMoonStars } from "react-icons/bs";
 import Image from "next/image";
+import { useSidebar } from "@/providers/sidebar-provider";
+
 
 const SidebarMenu = () => {
+  const { isMobile } = useSidebar();
   const menuList = [
     {
       title: "ড্যাশবোর্ড",
@@ -70,15 +74,17 @@ const SidebarMenu = () => {
 
   return (
     <nav className="grow space-y-2 overflow-y-auto p-6">
-      <div className="size-16 mb-6">
-        <Image
-          src="/logo_img.png"
-          alt="Logo"
-          width={85}
-          height={85}
-          className="object-contain"
-        />
-      </div>
+      {!isMobile && (
+        <div className="mb-6">
+          <Image
+            src="/logo_img.png"
+            alt="Logo"
+            width={85}
+            height={85}
+            className="object-contain"
+          />
+        </div>
+      )}
       {/* <hr /> */}
       {menuList.map((menu, index) => {
         return <MenuItem key={index} {...menu} />;

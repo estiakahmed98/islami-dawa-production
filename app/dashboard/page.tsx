@@ -24,6 +24,7 @@ import {
 import { useSession } from "next-auth/react";
 import AmoliTableShow from "@/components/TableShow";
 
+
 const Dashboard: React.FC = () => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
@@ -35,7 +36,7 @@ const Dashboard: React.FC = () => {
         <h1 className="text-xl font-semibold">
           Welcome,{"  "}
           <span className="text-2xl text-emerald-600">
-            {session?.user?.email}
+            {session?.user?.name}
           </span>
         </h1>
       </div>

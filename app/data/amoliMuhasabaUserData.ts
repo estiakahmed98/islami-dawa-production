@@ -97,18 +97,18 @@ export const userAmoliBisoyData = {
         "percentage": "80.00"
       },
       "2025-01-14": {
-        "tahajjud": 40,
-        "ayat": "sura Al-Imran",
+        "tahajjud": 27,
+        "ayat": "sura Rad",
         "zikir": "সকাল-সন্ধ্যা",
-        "ishraq": "ইশরাক",
+        "ishraq": "চাশ্ত",
         "jamat": 5,
-        "sirat": "Hadis",
+        "sirat": "Ar Rahikul maktum",
         "Dua": "হ্যাঁ",
         "ilm": "Hadis",
         "tasbih": "হ্যাঁ",
         "dayeeAmol": "হ্যাঁ",
         "amoliSura": "হ্যাঁ",
-        "ayamroja": "হ্যাঁ",
+        "ayamroja": "",
         "hijbulBahar": "হ্যাঁ",
         "percentage": "100.00"
       }

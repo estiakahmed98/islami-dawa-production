@@ -31,9 +31,9 @@ const Sidebar = () => {
   if (isMobile) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile}>
-        <SheetContent>
+        <SheetContent className="bg-[#155E75]">
           <SheetHeader>
-            <SheetTitle className="text-xl font-medium">Brand Logo</SheetTitle>
+            <SheetTitle className="text-xl text-white font-medium">Islami Dawa</SheetTitle>
             <SheetClose asChild>
               <Button variant="outline" size="icon">
                 <X />
