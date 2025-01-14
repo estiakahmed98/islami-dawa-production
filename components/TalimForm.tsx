@@ -5,6 +5,8 @@ import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/TalimData";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
+import JoditEditorComponent from "./richTextEditor";
 
 // Define the types for the form values
 interface TalimFormValues {
@@ -14,6 +16,12 @@ interface TalimFormValues {
 
 const TalimForm: React.FC = () => {
   const router = useRouter();
+  const [editorContent, setEditorContent] = useState("<p>মতামত লিখুন...</p>");
+
+  const handleContentChange = (content: string) => {
+    setEditorContent(content);
+  };
+
   // User Logged in email collection
   const { data: session } = useSession();
   const email = session?.user?.email || "";
@@ -78,7 +86,6 @@ const TalimForm: React.FC = () => {
                 className="text-red-500"
               />
             </div>
-
             {/* Field: মহিলাদের তালিমে মোট অংশগ্রহণ করেছে */}
             <div>
               <label
@@ -98,6 +105,18 @@ const TalimForm: React.FC = () => {
                 component="div"
                 className="text-red-500"
               />
+            </div>
+            <div className="col-span-2 pb-4">
+              <h1 className=" pb-3">মতামত লিখুন</h1>
+              <JoditEditorComponent
+                placeholder="Start typing here..."
+                initialValue={editorContent}
+                onContentChange={handleContentChange}
+                height="300px"
+                width="100%"
+              />
+              {/* <h2>Output:</h2>
+                  <div dangerouslySetInnerHTML={{ __html: editorContent }} /> */}
             </div>
           </div>
 
