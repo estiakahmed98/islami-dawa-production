@@ -20,8 +20,8 @@ export const userTalimBisoyData = {
         "TalimOngshoGrohon": "100"
       },
       "2025-01-14": {
-        "mohilaTalim": "500",
-        "TalimOngshoGrohon": "1000"
+        "mohilaTalim": "1000",
+        "TalimOngshoGrohon": "2000"
       }
     },
     "faysal@gmail.com": {
