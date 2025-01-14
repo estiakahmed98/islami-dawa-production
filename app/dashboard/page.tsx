@@ -2,8 +2,6 @@
 
 import React from "react";
 import AmoliChart from "@/components/AmoliCharts";
-import TalimDonutChart from "@/components/TalimBisoyChart";
-import { allData } from "../data/allData";
 import dynamic from "next/dynamic";
 import { userAmoliBisoyData } from "../data/amoliMuhasabaUserData";
 import Tally from "@/components/Tally";
@@ -24,7 +22,13 @@ import {
 import { useSession } from "next-auth/react";
 import AmoliTableShow from "@/components/TableShow";
 
-const Dashboard: React.FC = () => {
+interface TallyProps {
+  userData: Record<string, any>;
+  email: string;
+  title: string;
+}
+
+const Dashboard: React.FC<TallyProps> = ({ userData, email, title }) => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
   // console.log("Session", session);
@@ -39,7 +43,7 @@ const Dashboard: React.FC = () => {
           </span>
         </h1>
       </div>
-      <div className="grid xl:grid-cols-3 gap-6">
+      <div className="grid xl:grid-cols-3 h-[500px] p-6 gap-6 overflow-y-auto border border-[#155E75] rounded-xl">
         <AmoliChart data={userAmoliBisoyData.records} userEmail={userEmail} />
         <Tally
           userData={userMoktobBisoyData}
@@ -89,7 +93,7 @@ const Dashboard: React.FC = () => {
         />
       </div>
 
-      <div className="border border-[#155E75] mt-10 rounded-xl overflow-y-auto">
+      <div className="border border-[#155E75] max-h-[500px] p-6 mt-10 rounded-xl overflow-y-auto">
         <Tabs defaultValue="Amolimusahaba" className="w-full p-4">
           <TabsList className="mx-10 my-6">
             <TabsTrigger value="Amolimusahaba">Amolimusahaba</TabsTrigger>
