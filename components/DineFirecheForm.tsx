@@ -18,7 +18,7 @@ const DineFirecheForm: React.FC = () => {
   // User Logged in email collection
   const { data: session } = useSession();
   const email = session?.user?.email || "";
-  const [editorContent, setEditorContent] = useState("<p>মতামত লিখুন...</p>");
+  const [editorContent, setEditorContent] = useState("");
 
   const handleContentChange = (content: string) => {
     setEditorContent(content);
@@ -100,7 +100,7 @@ const DineFirecheForm: React.FC = () => {
             <div className="col-span-2">
               <h1 className=" pb-3">মতামত লিখুন</h1>
               <JoditEditorComponent
-                placeholder="Start typing here..."
+                placeholder="আপনার মতামত লিখুন"
                 initialValue={editorContent}
                 onContentChange={handleContentChange}
                 height="300px"

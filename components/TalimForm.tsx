@@ -16,7 +16,7 @@ interface TalimFormValues {
 
 const TalimForm: React.FC = () => {
   const router = useRouter();
-  const [editorContent, setEditorContent] = useState("<p>মতামত লিখুন...</p>");
+  const [editorContent, setEditorContent] = useState("");
 
   const handleContentChange = (content: string) => {
     setEditorContent(content);
@@ -109,7 +109,7 @@ const TalimForm: React.FC = () => {
             <div className="col-span-2 pb-4">
               <h1 className=" pb-3">মতামত লিখুন</h1>
               <JoditEditorComponent
-                placeholder="Start typing here..."
+                placeholder="আপনার মতামত লিখুন..."
                 initialValue={editorContent}
                 onContentChange={handleContentChange}
                 height="300px"

@@ -10,7 +10,7 @@ import JoditEditorComponent from "./richTextEditor";
 
 const DayeeBishoyForm = () => {
   const router = useRouter();
-  const [editorContent, setEditorContent] = useState("<p>মতামত লিখুন...</p>");
+  const [editorContent, setEditorContent] = useState("");
 
   const handleContentChange = (content: string) => {
     setEditorContent(content);
@@ -89,7 +89,7 @@ const DayeeBishoyForm = () => {
               <div className="col-span-2">
                 <h1 className=" pb-3">মতামত লিখুন</h1>
                 <JoditEditorComponent
-                  placeholder="Start typing here..."
+                  placeholder="আপনার মতামত লিখুন..."
                   initialValue={editorContent}
                   onContentChange={handleContentChange}
                   height="300px"
