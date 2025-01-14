@@ -1,27 +1,35 @@
 import React, { useState, useRef, useMemo } from "react";
-import JoditEditor from "jodit-react";
+// import JoditEditor from "jodit-react";
+import dynamic from "next/dynamic";
+
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 interface JoditEditorProps {
   placeholder?: string;
   initialValue?: string;
   onContentChange?: (content: string) => void;
+  height?: string | number;
+  width?: string | number;
 }
 
 const JoditEditorComponent: React.FC<JoditEditorProps> = ({
   placeholder = "Start typing...",
   initialValue = "",
   onContentChange,
+  height = "400px",
+  width = "100%",
 }) => {
   const editor = useRef(null);
   const [content, setContent] = useState(initialValue);
 
   const config = useMemo(
     () => ({
-      readonly: false, // Allows editing
-      toolbar: true, // Show toolbar
-      placeholder, // Set placeholder text
+      readonly: false,
+      toolbar: true,
+      placeholder,
+      height,
     }),
-    [placeholder]
+    [placeholder, height]
   );
 
   const handleBlur = (newContent: string) => {
@@ -30,42 +38,18 @@ const JoditEditorComponent: React.FC<JoditEditorProps> = ({
   };
 
   return (
-    <div>
+    <div style={{ width, height }}>
+      {" "}
+      {/* Apply width and height to parent container */}
       <JoditEditor
         ref={editor}
         value={content}
         config={config}
-        onBlur={handleBlur} // Update content on blur
-        onChange={() => {}} // No-op for performance
+        onBlur={handleBlur}
+        onChange={() => {}}
       />
     </div>
   );
 };
 
 export default JoditEditorComponent;
-
-// import React, { useState } from 'react';
-// import JoditEditorComponent from './JoditEditorComponent';
-
-// const App: React.FC = () => {
-//   const [editorContent, setEditorContent] = useState('<p>Welcome to Jodit Editor!</p>');
-
-//   const handleContentChange = (content: string) => {
-//     setEditorContent(content);
-//   };
-
-//   return (
-//     <div>
-//       <h1>Jodit Editor Example</h1>
-//       <JoditEditorComponent
-//         placeholder="Start typing here..."
-//         initialValue={editorContent}
-//         onContentChange={handleContentChange}
-//       />
-//       <h2>Output:</h2>
-//       <div dangerouslySetInnerHTML={{ __html: editorContent }} />
-//     </div>
-//   );
-// };
-
-// export default App;

@@ -4,6 +4,8 @@ import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/JamatBishoyData";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
+import JoditEditorComponent from "./richTextEditor";
 
 // Type for form data
 interface FormData {
@@ -13,6 +15,11 @@ interface FormData {
 
 const JamatBishoyForm = () => {
   const router = useRouter();
+  const [editorContent, setEditorContent] = useState("<p>মতামত লিখুন...</p>");
+
+  const handleContentChange = (content: string) => {
+    setEditorContent(content);
+  };
 
   // User Logged in email collection
   const { data: session } = useSession();
@@ -25,7 +32,6 @@ const JamatBishoyForm = () => {
         initialValues={initialFormData}
         validationSchema={validationSchema}
         onSubmit={async (values: FormData) => {
-
           // Check if email is available
           if (!email) {
             alert("User email is not set. Please log in.");
@@ -91,26 +97,17 @@ const JamatBishoyForm = () => {
               />
             </div>
 
-            <div>
-              <label className="mb-2 block text-gray-700">মতামত লিখুন</label>
-              <Field
-                as="textarea"
-                name="motamotdin"
-                placeholder="মতামত লিখুন"
-                rows={1}
-                onInput={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                  const target = e.target;
-                  target.style.height = "auto";
-                  target.style.height = `${target.scrollHeight}px`;
-                }}
-                style={{ resize: "both" }}
-                className="w-full rounded border border-gray-300 px-4 py-2 mb-3 resize focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            <div className="col-span-2">
+              <h1 className=" pb-3">মতামত লিখুন</h1>
+              <JoditEditorComponent
+                placeholder="Start typing here..."
+                initialValue={editorContent}
+                onContentChange={handleContentChange}
+                height="300px"
+                width="100%"
               />
-              <ErrorMessage
-                name="motamotdin"
-                component="div"
-                className="text-red-500"
-              />
+              {/* <h2>Output:</h2>
+                  <div dangerouslySetInnerHTML={{ __html: editorContent }} /> */}
             </div>
           </div>
 
