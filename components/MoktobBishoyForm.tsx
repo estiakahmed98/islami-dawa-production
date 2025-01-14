@@ -5,9 +5,16 @@ import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/MoktobBishoyData";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
+import JoditEditorComponent from "./richTextEditor";
 
 const MoktobBishoyForm = () => {
   const router = useRouter();
+  const [editorContent, setEditorContent] = useState("<p>মতামত লিখুন...</p>");
+
+  const handleContentChange = (content: string) => {
+    setEditorContent(content);
+  };
 
   // User Logged in email collection
   const { data: session } = useSession();
@@ -223,6 +230,19 @@ const MoktobBishoyForm = () => {
                   component="div"
                   className="text-red-500"
                 />
+              </div>
+
+              <div className="col-span-2">
+                <h1 className=" pb-3">মতামত লিখুন</h1>
+                <JoditEditorComponent
+                  placeholder="Start typing here..."
+                  initialValue={editorContent}
+                  onContentChange={handleContentChange}
+                  height="300px"
+                  width="100%"
+                />
+                {/* <h2>Output:</h2>
+                  <div dangerouslySetInnerHTML={{ __html: editorContent }} /> */}
               </div>
             </div>
 

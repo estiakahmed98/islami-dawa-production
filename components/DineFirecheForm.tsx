@@ -4,6 +4,8 @@ import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/DineFirecheData";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
+import JoditEditorComponent from "./richTextEditor";
 
 // Define form values type
 interface FormValues {
@@ -16,6 +18,11 @@ const DineFirecheForm: React.FC = () => {
   // User Logged in email collection
   const { data: session } = useSession();
   const email = session?.user?.email || "";
+  const [editorContent, setEditorContent] = useState("<p>মতামত লিখুন...</p>");
+
+  const handleContentChange = (content: string) => {
+    setEditorContent(content);
+  };
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">
@@ -88,6 +95,19 @@ const DineFirecheForm: React.FC = () => {
                 component="div"
                 className="text-red-500"
               />
+            </div>
+
+            <div className="col-span-2">
+              <h1 className=" pb-3">মতামত লিখুন</h1>
+              <JoditEditorComponent
+                placeholder="Start typing here..."
+                initialValue={editorContent}
+                onContentChange={handleContentChange}
+                height="300px"
+                width="100%"
+              />
+              {/* <h2>Output:</h2>
+                  <div dangerouslySetInnerHTML={{ __html: editorContent }} /> */}
             </div>
           </div>
 

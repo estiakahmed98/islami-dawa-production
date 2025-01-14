@@ -1,10 +1,12 @@
 "use client";
-import React from "react";
+
+import React, { useState } from "react";
 import { Formik, Form, Field, FieldArray, ErrorMessage } from "formik";
 import { Button } from "@/components/ui/button";
-import { initialFormData, validationSchema } from "@/app/data/SoforBishoyData";
+import { validationSchema } from "@/app/data/SoforBishoyData";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import JoditEditorComponent from "./richTextEditor";
 
 interface FormValues {
   madrasaVisits: string[];
@@ -13,9 +15,15 @@ interface FormValues {
 
 const SoforBishoyForm = () => {
   const router = useRouter();
-  // User Logged in email collection
   const { data: session } = useSession();
   const email = session?.user?.email || "";
+
+  // Move useState inside the component
+  const [editorContent, setEditorContent] = useState("<p>মতামত লিখুন...</p>");
+
+  const handleContentChange = (content: string) => {
+    setEditorContent(content);
+  };
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">
@@ -52,7 +60,7 @@ const SoforBishoyForm = () => {
       >
         {({ values }) => (
           <Form>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 justify-center">
               <div className="space-y-5">
                 <div>
                   <label className="mb-2 block text-gray-700">
@@ -85,7 +93,7 @@ const SoforBishoyForm = () => {
                               <Button
                                 type="button"
                                 variant="ghost"
-                                onClick={() => arrayHelpers.remove(index)} // Remove a madrasa
+                                onClick={() => arrayHelpers.remove(index)}
                                 className="ml-2"
                               >
                                 -
@@ -95,7 +103,7 @@ const SoforBishoyForm = () => {
                                 variant="ghost"
                                 onClick={() =>
                                   arrayHelpers.insert(index + 1, "")
-                                } // Add a new madrasa
+                                }
                                 className="ml-2"
                               >
                                 +
@@ -106,7 +114,7 @@ const SoforBishoyForm = () => {
                           <Button
                             type="button"
                             variant="ghost"
-                            onClick={() => arrayHelpers.push("")} // Add first madrasa
+                            onClick={() => arrayHelpers.push("")}
                           >
                             Add a Madrasa
                           </Button>
@@ -142,7 +150,7 @@ const SoforBishoyForm = () => {
                               <Button
                                 type="button"
                                 variant="ghost"
-                                onClick={() => arrayHelpers.remove(index)} // Remove a school/college
+                                onClick={() => arrayHelpers.remove(index)}
                                 className="ml-2"
                               >
                                 -
@@ -152,7 +160,7 @@ const SoforBishoyForm = () => {
                                 variant="ghost"
                                 onClick={() =>
                                   arrayHelpers.insert(index + 1, "")
-                                } // Add a new school/college
+                                }
                                 className="ml-2"
                               >
                                 +
@@ -163,7 +171,7 @@ const SoforBishoyForm = () => {
                           <Button
                             type="button"
                             variant="ghost"
-                            onClick={() => arrayHelpers.push("")} // Add first school/college
+                            onClick={() => arrayHelpers.push("")}
                           >
                             Add a School/College
                           </Button>
@@ -172,29 +180,18 @@ const SoforBishoyForm = () => {
                     )}
                   />
                 </div>
-                <div>
-                  <label className="mb-2 block text-gray-700">
-                    মতামত লিখুন
-                  </label>
-                  <Field
-                    as="textarea"
-                    name="motamotdin"
-                    placeholder="মতামত লিখুন"
-                    rows={1}
-                    onInput={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                      const target = e.target;
-                      target.style.height = "auto";
-                      target.style.height = `${target.scrollHeight}px`;
-                    }}
-                    style={{ resize: "both" }}
-                    className="w-full rounded border border-gray-300 px-4 py-2 mb-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  />
-                  <ErrorMessage
-                    name="motamotdin"
-                    component="div"
-                    className="text-red-500"
-                  />
-                </div>
+              </div>
+              <div className="col-span-2">
+                <h1 className=" pb-3">মতামত লিখুন</h1>
+                <JoditEditorComponent
+                  placeholder="Start typing here..."
+                  initialValue={editorContent}
+                  onContentChange={handleContentChange}
+                  height="300px"
+                  width="100%"
+                />
+                {/* <h2>Output:</h2>
+                  <div dangerouslySetInnerHTML={{ __html: editorContent }} /> */}
               </div>
             </div>
 
