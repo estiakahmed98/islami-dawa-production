@@ -30,10 +30,10 @@ const Header = () => {
         {/* <p>Islami Dawa Institute</p> */}
         {/* Title Section */}
         <div className="flex flex-col justify-center items-center col-span-8 space-y-1">
-          <h1 className="text-sm md:text-lg font-semibold leading-tight text-center">
+          <h1 className="text-[10px] lg:text-xl font-semibold leading-tight text-center">
             ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ
           </h1>
-          <div className="text-sm">
+          <div className="text-[8px] md:text-lg">
             দাওয়াতি বছর {new Date().getFullYear()} ইং / ১৪৪৫ হিজ
           </div>
         </div>
