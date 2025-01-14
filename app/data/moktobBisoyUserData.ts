@@ -1,4 +1,3 @@
-
 export const userMoktobBisoyData = {
   "labelMap": {
     "MoktobChalu": "নতুন মক্তব চালু হয়েছে",
