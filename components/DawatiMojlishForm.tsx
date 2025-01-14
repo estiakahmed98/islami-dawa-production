@@ -14,7 +14,7 @@ import JoditEditorComponent from "./richTextEditor";
 // Component for the Dawati Mojlish Form
 const DawatiMojlishForm = () => {
   const router = useRouter();
-  const [editorContent, setEditorContent] = useState("<p>মতামত লিখুন...</p>");
+  const [editorContent, setEditorContent] = useState("");
 
   const handleContentChange = (content: string) => {
     setEditorContent(content);
@@ -177,7 +177,7 @@ const DawatiMojlishForm = () => {
             <div className="col-span-2">
               <h1 className=" pb-3">মতামত লিখুন</h1>
               <JoditEditorComponent
-                placeholder="Start typing here..."
+                placeholder="আপনার মতামত লিখুন..."
                 initialValue={editorContent}
                 onContentChange={handleContentChange}
                 height="300px"
