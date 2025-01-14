@@ -55,7 +55,7 @@ const JamatBishoyForm = () => {
         }}
       >
         <Form>
-          <div className="grid grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             <div>
               <label className="mb-2 block text-gray-700">
                 জামাত বের হয়েছে

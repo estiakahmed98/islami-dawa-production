@@ -52,7 +52,7 @@ const DawatiMojlishForm = () => {
         }}
       >
         <Form>
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div>
               <label className="mb-2 block text-gray-700">
                 দাওয়াতের গুরুত্ব ও প্রয়োজনীয়তা নিয়ে মজলিস হয়েছে

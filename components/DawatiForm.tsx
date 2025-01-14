@@ -56,7 +56,7 @@ const DawatiForm = () => {
         }}
       >
         <Form>
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div>
               <label className="mb-2 block text-gray-700">
                 অনুসলিমকে দাওয়াত দেওয়া হয়েছে

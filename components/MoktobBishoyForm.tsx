@@ -53,7 +53,7 @@ const MoktobBishoyForm = () => {
       >
         {({ handleSubmit, isSubmitting }) => (
           <Form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
               <div>
                 <label className="mb-2 block text-gray-700">
                   এক মাসে নতুন মক্তব চালু হয়েছে
@@ -87,9 +87,7 @@ const MoktobBishoyForm = () => {
                   className="text-red-500"
                 />
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-10">
               <div>
                 <label className="mb-2 block text-gray-700">
                   নতুন পুরাতন মোট মক্তব চালু আছে
@@ -123,9 +121,7 @@ const MoktobBishoyForm = () => {
                   className="text-red-500"
                 />
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-10">
               <div>
                 <label className="mb-2 block text-gray-700">
                   মক্তবের মোট ছাত্র-ছাত্রীর সংখ্যা
@@ -159,9 +155,6 @@ const MoktobBishoyForm = () => {
                   className="text-red-500"
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-10">
               <div>
                 <label className="mb-2 block text-gray-700">
                   মক্তবের অভিভাবক সম্মেলন হয়েছে
@@ -195,9 +188,7 @@ const MoktobBishoyForm = () => {
                   className="text-red-500"
                 />
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-10">
               <div>
                 <label className="mb-2 block text-gray-700">
                   মক্তব থেকে ছাত্রছাত্রী মাদ্রাসায় ভর্তি হয়েছে

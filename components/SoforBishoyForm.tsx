@@ -50,7 +50,7 @@ const SoforBishoyForm = () => {
       >
         {({ values }) => (
           <Form>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
               <div className="space-y-5">
                 <div>
                   <label className="mb-2 block text-gray-700">
