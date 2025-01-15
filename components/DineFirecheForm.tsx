@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import JoditEditorComponent from "./richTextEditor";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 
 // Define form values type
 interface FormValues {
@@ -61,11 +61,6 @@ const DineFirecheForm: React.FC = () => {
   // Render loading state
   if (loading) return <p>Loading...</p>;
 
-  // Render message if already submitted today
-  // if (isSubmittedToday) {
-  //   toast.error("You Already Submited Today...");
-  // }
-
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">
       {isSubmittedToday && (
@@ -90,6 +85,7 @@ const DineFirecheForm: React.FC = () => {
                   name="omuslimKalemaPoreche"
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                  disabled={isSubmittedToday}
                 />
                 <ErrorMessage
                   name="omuslimKalemaPoreche"
@@ -105,6 +101,7 @@ const DineFirecheForm: React.FC = () => {
                   name="murtadDineFireasa"
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                  disabled={isSubmittedToday}
                 />
                 <ErrorMessage
                   name="murtadDineFireasa"
@@ -125,8 +122,13 @@ const DineFirecheForm: React.FC = () => {
                 />
               </div>
             </div>
-            <div className="flex justify-end mt-2">
-              <Button variant="ghost" size="default" type="submit">
+            <div className="flex justify-end pt-4">
+              <Button
+                variant="ghost"
+                size="default"
+                type="submit"
+                disabled={isSubmittedToday}
+              >
                 Submit
               </Button>
             </div>

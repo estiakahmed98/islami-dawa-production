@@ -9,6 +9,7 @@ export interface DawatiFormData {
   jummahAlochona: string;
   dhormoSova: string;
   mashwaraPoint: string;
+  editorContent: string;
 }
 
 // Initial form data
@@ -20,11 +21,14 @@ export const initialFormData: DawatiFormData = {
   jummahAlochona: "",
   dhormoSova: "",
   mashwaraPoint: "",
+  editorContent: "",
 };
 
 // Validation schema using Yup
 export const validationSchema = Yup.object().shape({
-  dawatterGuruttoMojlish: Yup.string().required("Dawat Mojlish Field is required"),
+  dawatterGuruttoMojlish: Yup.string().required(
+    "Dawat Mojlish Field is required"
+  ),
   mojlisheOnshogrohon: Yup.string().required("Dawat Gurutto Field is required"),
   prosikkhonKormoshalaAyojon: Yup.string().required(
     "Dawat Prosikkhon Field is required"

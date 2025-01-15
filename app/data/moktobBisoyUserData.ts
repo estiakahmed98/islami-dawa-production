@@ -276,6 +276,19 @@ export const userMoktobBisoyData = {
         "TotalAgeSikkha": 400,
         "MadrasahAdmit": 5,
         "NewMuslim": 500
+      },
+      "2025-01-15": {
+        "MoktobChalu": 12,
+        "MoktobAdmit": 76,
+        "NewMoktob": 15,
+        "Sikkha": 30,
+        "TotalStudent": 300,
+        "TotalSikkha": 5,
+        "GurdianMeeting": 58,
+        "TotalAgeSikkha": 500,
+        "MadrasahAdmit": 250,
+        "NewMuslim": 150,
+        "editorContent": ""
       }
     },
     "zisan@gmail.com": {
@@ -345,6 +358,19 @@ export const userMoktobBisoyData = {
         "TotalAgeSikkha": 74,
         "MadrasahAdmit": 76,
         "NewMuslim": 13
+      },
+      "2025-01-15": {
+        "MoktobChalu": 4,
+        "MoktobAdmit": 76,
+        "NewMoktob": 15,
+        "Sikkha": 3,
+        "TotalStudent": 255,
+        "TotalSikkha": 8,
+        "GurdianMeeting": 4,
+        "TotalAgeSikkha": 74,
+        "MadrasahAdmit": 74,
+        "NewMuslim": 13,
+        "editorContent": ""
       }
     }
   }

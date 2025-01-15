@@ -12,7 +12,7 @@ import {
 import { userMoktobBisoyData } from "../data/moktobBisoyUserData";
 import { userDawatiBisoyData } from "../data/dawatiBisoyUserData";
 import { userDawatiMojlishData } from "../data/dawatiMojlishUserData";
-import { userJamatBisoyUserData } from "../data/jamatBisoyUserData";
+import { userJamatBisoyData } from "../data/jamatBisoyData";
 import { userDineFeraData } from "../data/dineferaUserData";
 import { userSoforBisoyData } from "../data/userSoforBisoyData";
 import { userDayeData } from "../data/dayiUserData";
@@ -306,7 +306,7 @@ const AdminPage: React.FC = () => {
           />
 
           <TallyAdmin
-            userData={userJamatBisoyUserData}
+            userData={userJamatBisoyData}
             emails={emailList}
             title="Jamat Bisoy Tally"
           />
