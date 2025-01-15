@@ -111,6 +111,7 @@ const TalimForm: React.FC = () => {
                 </label>
                 <Field
                   id="mohilaTalim"
+                  type="number"
                   name="mohilaTalim"
                   disabled={isSubmittedToday}
                   placeholder="Enter value"
@@ -132,6 +133,7 @@ const TalimForm: React.FC = () => {
                 </label>
                 <Field
                   id="TalimOngshoGrohon"
+                  type="number"
                   name="TalimOngshoGrohon"
                   disabled={isSubmittedToday}
                   placeholder="Enter value"

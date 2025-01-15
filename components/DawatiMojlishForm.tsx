@@ -111,6 +111,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="dawatterGuruttoMojlish"
+                  type="number"
                   disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
@@ -127,6 +128,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="mojlisheOnshogrohon"
+                  type="number"
                   disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
@@ -143,6 +145,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="prosikkhonKormoshalaAyojon"
+                  type="number"
                   disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
@@ -159,6 +162,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="prosikkhonOnshogrohon"
+                  type="number"
                   disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
@@ -175,6 +179,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="jummahAlochona"
+                  type="number"
                   disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
@@ -191,6 +196,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="dhormoSova"
+                  type="number"
                   disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
@@ -207,6 +213,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="mashwaraPoint"
+                  type="number"
                   disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"

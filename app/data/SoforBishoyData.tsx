@@ -5,12 +5,14 @@ export interface FormValues {
   madrasaVisit: string;
   moktobVisit: string;
   schoolCollegeVisit: string;
+  editorContent: string;
 }
 
 export const initialFormData: FormValues = {
   madrasaVisit: "",
   moktobVisit: "",
   schoolCollegeVisit: "",
+  editorContent: "",
 };
 
 // Validation schema using Yup

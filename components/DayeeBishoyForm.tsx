@@ -100,6 +100,7 @@ const DayeeBishoyForm: React.FC = () => {
                 <Field
                   id="sohojogiDayeToiri"
                   name="sohojogiDayeToiri"
+                  type="number"
                   placeholder="Enter value"
                   disabled={isSubmittedToday}
                   className="w-full rounded border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"

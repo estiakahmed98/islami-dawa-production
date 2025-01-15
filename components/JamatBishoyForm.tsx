@@ -83,6 +83,7 @@ const JamatBishoyForm: React.FC = () => {
                 </label>
                 <Field
                   name="jamatBerHoise"
+                  type="number"
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                   disabled={isSubmittedToday}
@@ -99,6 +100,7 @@ const JamatBishoyForm: React.FC = () => {
                 </label>
                 <Field
                   name="jamatSathi"
+                  type="number"
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                   disabled={isSubmittedToday}

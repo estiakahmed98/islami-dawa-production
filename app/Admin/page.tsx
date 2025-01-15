@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import AmoliChart from "@/components/AmoliCharts";
-import TalimDonutChart from "@/components/TalimBisoyChart";
+
 import { useSelectedUser } from "@/providers/treeProvider";
 import {
   Tabs,
@@ -14,7 +13,7 @@ import { userDawatiBisoyData } from "../data/dawatiBisoyUserData";
 import { userDawatiMojlishData } from "../data/dawatiMojlishUserData";
 import { userJamatBisoyData } from "../data/jamatBisoyData";
 import { userDineFeraData } from "../data/dineferaUserData";
-import { userSoforBisoyData } from "../data/userSoforBisoyData";
+import { soforBishoyData } from "../data/soforBishoyUserData";
 import { userDayeData } from "../data/dayiUserData";
 import TallyAdmin from "@/components/TallyAdmin";
 import { useSession } from "next-auth/react";
@@ -282,10 +281,7 @@ const AdminPage: React.FC = () => {
       </div>
       <div className="flex flex-col gap-4">
         <div className="grow grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-8 pb-4 pt-2">
-          <AmoliChartAdmin
-            data={userAmoliData.records}
-            emailList={emailList}
-          />
+          <AmoliChartAdmin data={userAmoliData.records} emailList={emailList} />
 
           <TallyAdmin
             userData={userMoktobBisoyData}
@@ -323,7 +319,7 @@ const AdminPage: React.FC = () => {
           />
 
           <TallyAdmin
-            userData={userSoforBisoyData}
+            userData={soforBishoyData}
             emails={emailList}
             title="Sofor Bisoy Tally"
           />
