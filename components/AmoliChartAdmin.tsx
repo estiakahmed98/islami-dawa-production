@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React from "react";
@@ -22,35 +20,40 @@ interface AmoliChartProps {
       };
     };
   };
-  userEmail: string;
+  emailList: string[];
   innerRadius?: number;
   outerRadius?: number;
   startAngle?: number;
   endAngle?: number;
 }
 
-const AmoliChart: React.FC<AmoliChartProps> = ({
+const AmoliChartAdmin: React.FC<AmoliChartProps> = ({
   data,
-  userEmail,
+  emailList,
   innerRadius = 80,
   outerRadius = 130,
   startAngle = 90,
   endAngle = 450,
 }) => {
-  // Extract percentages for the specified user and calculate average
-  const userData = data[userEmail];
+  // Extract percentages for the specified email list and calculate the aggregated average
+  const percentages: number[] = emailList.reduce((acc, email) => {
+    const userData = data[email];
+    if (userData) {
+      const userPercentages = Object.values(userData).map((entry) =>
+        parseFloat(entry.percentage)
+      );
+      return acc.concat(userPercentages);
+    }
+    return acc;
+  }, [] as number[]);
 
-  if (!userData) {
+  if (percentages.length === 0) {
     return (
       <div className="text-center text-red-500 font-bold">
-        No data available for the specified user.
+        No data available for the specified users.
       </div>
     );
   }
-
-  const percentages: number[] = Object.values(userData).map((entry) =>
-    parseFloat(entry.percentage)
-  );
 
   const averagePercentage =
     percentages.reduce((sum, value) => sum + value, 0) / percentages.length;
@@ -107,4 +110,4 @@ const AmoliChart: React.FC<AmoliChartProps> = ({
   );
 };
 
-export default AmoliChart;
+export default AmoliChartAdmin;

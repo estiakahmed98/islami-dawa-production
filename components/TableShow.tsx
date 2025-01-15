@@ -186,19 +186,19 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
 
   return (
     <div>
-      <div className="flex justify-between px-6 py-2">
-        <h2 className="text-2xl font-bold text-cyan-800 mb-4 flex items-center">
+      <div className="grid lg:flex  justify-between px-6 py-2">
+        <h2 className="text-lg lg:text-2xl font-bold text-cyan-800 mb-4 flex items-center">
           {`Month: ${monthName} ${year}`}
         </h2>
         <div className="flex gap-4 mb-4">
           <button
-            className="p-2 text-white border-2 bg-teal-700 rounded-md"
+            className="text-sm lg:text-lg p-2 text-white border-2 bg-teal-700 rounded-md"
             onClick={convertToCSV}
           >
             Download CSV
           </button>
           <button
-            className="p-2 text-white border-2 bg-teal-700 rounded-md"
+            className="text-sm lg:text-lg p-2 text-white border-2 bg-teal-700 rounded-md"
             onClick={convertToPDF}
           >
             Download PDF

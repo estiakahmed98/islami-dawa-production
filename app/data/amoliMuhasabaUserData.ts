@@ -1,4 +1,4 @@
-export const userAmoliBisoyData = {
+export const userAmoliData = {
   "labelMap": {
     "tahajjud": "তাহাজ্জুদ",
     "ayat": "তিলাওয়াতুল কোরআন তাদাব্বুর",
@@ -31,102 +31,6 @@ export const userAmoliBisoyData = {
         "ayamroja": "হ্যাঁ",
         "hijbulBahar": "হ্যাঁ",
         "percentage": "80.00"
-      },
-      "2025-01-02": {
-        "tahajjud": "12",
-        "ayat": "sura Muminoon",
-        "zikir": "সকাল/সন্ধ্যা",
-        "ishraq": "ইশরাক",
-        "jamat": "5",
-        "sirat": "Ar Rahikul maktum",
-        "Dua": "হ্যাঁ",
-        "ilm": "Daye der amol",
-        "tasbih": "সকাল/সন্ধ্যা",
-        "dayeeAmol": "হ্যাঁ",
-        "amoliSura": "হ্যাঁ",
-        "ayamroja": "হ্যাঁ",
-        "hijbulBahar": "হ্যাঁ",
-        "percentage": "70.00"
-      },
-      "2025-01-03": {
-        "tahajjud": "25",
-        "ayat": "sura Maidah",
-        "zikir": "সকাল/সন্ধ্যা",
-        "ishraq": "ইশরাক",
-        "jamat": "5",
-        "sirat": "Ar Rahikul maktum",
-        "Dua": "হ্যাঁ",
-        "ilm": "Daye der amol",
-        "tasbih": "সকাল",
-        "dayeeAmol": "হ্যাঁ",
-        "amoliSura": "হ্যাঁ",
-        "ayamroja": "হ্যাঁ",
-        "hijbulBahar": "হ্যাঁ",
-        "percentage": "80.00"
-      },
-      "2025-01-04": {
-        "tahajjud": "15",
-        "ayat": "sura Tawba",
-        "zikir": "সকাল",
-        "ishraq": "চাশ্ত",
-        "jamat": "4",
-        "sirat": "Hadis",
-        "Dua": "হ্যাঁ",
-        "ilm": "hadis",
-        "tasbih": "সকাল",
-        "dayeeAmol": "হ্যাঁ",
-        "amoliSura": "হ্যাঁ",
-        "ayamroja": " না ",
-        "hijbulBahar": "হ্যাঁ",
-        "percentage": "80.00"
-      },
-      "2025-01-05": {
-        "tahajjud": "12",
-        "ayat": "sura Al-Imran",
-        "zikir": "সন্ধ্যা",
-        "ishraq": "আওয়াবীন",
-        "jamat": "4",
-        "sirat": "Hadis",
-        "Dua": "হ্যাঁ",
-        "ilm": "Hadis",
-        "tasbih": "সন্ধ্যা",
-        "dayeeAmol": " না ",
-        "amoliSura": " না ",
-        "ayamroja": "হ্যাঁ",
-        "hijbulBahar": " না ",
-        "percentage": "80.00"
-      },
-      "2025-01-14": {
-        "tahajjud": 27,
-        "ayat": "sura Rad",
-        "zikir": "সকাল-সন্ধ্যা",
-        "ishraq": "চাশ্ত",
-        "jamat": 5,
-        "sirat": "Ar Rahikul maktum",
-        "Dua": "হ্যাঁ",
-        "ilm": "Hadis",
-        "tasbih": "হ্যাঁ",
-        "dayeeAmol": "হ্যাঁ",
-        "amoliSura": "হ্যাঁ",
-        "ayamroja": "",
-        "hijbulBahar": "হ্যাঁ",
-        "percentage": "100.00"
-      },
-      "2025-01-15": {
-        "tahajjud": 30,
-        "ayat": "sura Rad",
-        "zikir": "সকাল-সন্ধ্যা",
-        "ishraq": "আওয়াবীন",
-        "jamat": 5,
-        "sirat": "Ar Rahikul maktum",
-        "Dua": "হ্যাঁ",
-        "ilm": "Hadis",
-        "tasbih": "হ্যাঁ",
-        "dayeeAmol": "হ্যাঁ",
-        "amoliSura": "হ্যাঁ",
-        "ayamroja": "হ্যাঁ",
-        "hijbulBahar": "হ্যাঁ",
-        "percentage": "100.00"
       }
     },
     "moni@gmail.com": {
@@ -244,7 +148,23 @@ export const userAmoliBisoyData = {
         "amoliSura": "হ্যাঁ",
         "ayamroja": "হ্যাঁ",
         "hijbulBahar": "হ্যাঁ",
-        "percentage": "96.92"
+        "percentage": "90"
+      },
+      "2025-01-15": {
+        "tahajjud": 20,
+        "ayat": "sura Araf",
+        "zikir": "সন্ধ্যা",
+        "ishraq": "ইশরাক-আওয়াবীন-চাশ্ত",
+        "jamat": 0,
+        "sirat": "Hadid",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "হ্যাঁ",
+        "hijbulBahar": "হ্যাঁ",
+        "percentage": "89.23"
       }
     }
   }

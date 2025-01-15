@@ -55,9 +55,9 @@ const Sidebar = () => {
   return (
     <aside
       className={cn(
-        "hidden bg-[#155E75] h-screen w-72 shrink-0 flex-col border-r transition-[margin] duration-300 md:flex dark:bg-slate-900",
+        "hidden bg-[#155E75] h-screen w-60 lg:w-72 shrink-0 flex-col border-r transition-[margin] duration-300 md:flex dark:bg-slate-900",
         {
-          "-ml-72": state === "collapsed",
+          "-ml-60 lg:-ml-72": state === "collapsed",
         }
       )}
     >

@@ -20,6 +20,8 @@ import TallyAdmin from "@/components/TallyAdmin";
 import { useSession } from "next-auth/react";
 import Tally from "@/components/Tally";
 import { userTalimBisoyData } from "../data/talimBisoyUserData";
+import { userAmoliBisoyData } from "../data/amoliMuhasabaUserData";
+import AmoliChartAdmin from "@/components/AmoliChartAdmin";
 
 const AdminPage: React.FC = () => {
   const { selectedUser } = useSelectedUser();
@@ -270,21 +272,21 @@ const AdminPage: React.FC = () => {
 
   console.log("Email List:", emailList);
   return (
-    <div>
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-xl font-semibold">
+          Welcome,{"  "}
+          <span className="text-2xl text-emerald-600">
+            {session?.user?.name}
+          </span>
+        </h1>
+      </div>
       <div className="flex flex-col gap-4">
         <div className="grow grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-8 pb-4 pt-2">
-          {/* <AmoliChart data={userAmoliBisoyData.records} userEmail={userEmail} /> */}
-
-          {/* <Tally
-            userData={userMoktobBisoyData}
-            email={userEmail}
-            title="Moktob Tally"
-          /> */}
-          {/* <TallyAdmin
-            userData={userMoktobBisoyData}
-            emails={selectedUser}
-            title="User Moktob Bisoy Tally Results"
-          /> */}
+          <AmoliChartAdmin
+            data={userAmoliBisoyData.records}
+            emailList={emailList}
+          />
 
           <TallyAdmin
             userData={userMoktobBisoyData}

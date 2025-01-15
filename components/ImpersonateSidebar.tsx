@@ -96,7 +96,7 @@ const ImpersonateSidebar: React.FC = () => {
               onClick={toggleView}
               className="px-4 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-500 focus:outline-none"
             >
-              {showUserSidebar ? "Admin Mode" : "User Mode"}
+              {showUserSidebar ? "Go Admin Mode" : "Go User Mode"}
             </button>
           </div>
 

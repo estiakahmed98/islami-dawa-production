@@ -20,7 +20,7 @@ const renderLegend: React.FC<RenderLegendProps> = ({ payload }) => {
   }
 
   return (
-    <ul className="xl:flex xl:gap-4 grid xl:justify-center">
+    <ul className="xl:flex xl:gap-4 grid justify-center">
       {payload.map((entry, index) => (
         <li
           key={`item-${index}`}
@@ -30,8 +30,8 @@ const renderLegend: React.FC<RenderLegendProps> = ({ payload }) => {
             className="w-3 h-3 rounded-full"
             style={{ backgroundColor: entry.color }}
           ></div>
-          <span className="text-gray-700 text-xl">{entry.payload.name}</span>
-          <span className="text-gray-800 text-xl font-semibold">
+          <span className="text-gray-700 text-lg lg:text-xl">{entry.payload.name}</span>
+          <span className="text-gray-800 text-lg lg:text-xl font-semibold">
             ({entry.payload.value}%)
           </span>
         </li>

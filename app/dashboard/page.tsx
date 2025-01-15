@@ -21,6 +21,8 @@ import {
 } from "@/components/TabButton";
 import { useSession } from "next-auth/react";
 import AmoliTableShow from "@/components/TableShow";
+import TallyAdmin from "@/components/TallyAdmin";
+import AmoliChartAdmin from "@/components/AmoliChartAdmin";
 
 interface TallyProps {
   userData: Record<string, any>;
@@ -43,52 +45,54 @@ const Dashboard: React.FC<TallyProps> = ({ userData, email, title }) => {
           </span>
         </h1>
       </div>
-      <div className="grid xl:grid-cols-3 p-6 gap-6 overflow-y-auto border border-[#155E75] rounded-xl">
+      <div className="grid xl:grid-cols-3 p-2 lg:p-6 gap-6 overflow-y-auto border border-[#155E75] rounded-xl">
         <AmoliChart data={userAmoliBisoyData.records} userEmail={userEmail} />
-        <Tally
-          userData={userMoktobBisoyData}
-          email={userEmail}
-          title="Moktob Tally"
-        />
+       
+        <TallyAdmin
+            userData={userMoktobBisoyData}
+            emails={userEmail}
+            title="Moktob Bisoy Tally"
+          />
 
-        <Tally
+        <TallyAdmin
           userData={userDawatiBisoyData}
-          email={userEmail}
+          emails={userEmail}
           title="Dawati Bisoy Tally"
         />
-        <Tally
+
+        <TallyAdmin
           userData={userDawatiMojlishData}
-          email={userEmail}
+          emails={userEmail}
           title="Dawati Mojlish Tally"
         />
 
-        <Tally
+        <TallyAdmin
           userData={userJamatBisoyUserData}
-          email={userEmail}
+          emails={userEmail}
           title="Jamat Bisoy Tally"
         />
 
-        <Tally
+        <TallyAdmin
           userData={userDineFeraData}
-          email={userEmail}
+          emails={userEmail}
           title="Dine Fireche Tally"
         />
 
-        <Tally
+        <TallyAdmin
           userData={userTalimBisoyData}
-          email={userEmail}
+          emails={userEmail}
           title="Talim Bisoy Tally"
         />
 
-        <Tally
+        <TallyAdmin
           userData={userSoforBisoyData}
-          email={userEmail}
+          emails={userEmail}
           title="Sofor Bisoy Tally"
         />
 
-        <Tally
+        <TallyAdmin
           userData={userDayeData}
-          email={userEmail}
+          emails={userEmail}
           title="Dayee Bisoy Tally"
         />
       </div>
