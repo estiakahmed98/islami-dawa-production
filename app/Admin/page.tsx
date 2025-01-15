@@ -1,9 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-<<<<<<< HEAD
-=======
-
->>>>>>> 75ca89ba23b78fb58800526dd12bba40d55f679c
 import { useSelectedUser } from "@/providers/treeProvider";
 import {
   Tabs,
@@ -330,9 +326,8 @@ const AdminPage: React.FC = () => {
       </div>
 
       <div className="border border-[#155E75] p-6 mt-10 rounded-xl overflow-y-auto">
-        <Tabs defaultValue="Amolimusahaba" className="w-full p-4">
+        <Tabs defaultValue="Moktob Bisoy" className="w-full p-4">
           <TabsList className="mx-10 my-6">
-            <TabsTrigger value="Amolimusahaba">Amolimusahaba</TabsTrigger>
             <TabsTrigger value="moktob">Moktob Bisoy</TabsTrigger>
             <TabsTrigger value="talim">Talim Bisoy</TabsTrigger>
             <TabsTrigger value="daye">Daye Bisoy</TabsTrigger>
@@ -344,14 +339,12 @@ const AdminPage: React.FC = () => {
           </TabsList>
 
           {/* Tab Content */}
-          <TabsContent value="Amolimusahaba">
-            <div className="bg-gray-50 rounded shadow">
-              {/* <AmoliTableShow userData={userAmoliData} /> */}
-            </div>
-          </TabsContent>
           <TabsContent value="moktob">
             <div className="bg-gray-50 rounded shadow">
-              <AdminTable userData={userMoktobBisoyData} emailList={emailList} />
+              <AdminTable
+                userData={userMoktobBisoyData}
+                emailList={emailList}
+              />
             </div>
           </TabsContent>
           <TabsContent value="talim">
@@ -366,12 +359,18 @@ const AdminPage: React.FC = () => {
           </TabsContent>
           <TabsContent value="dawati">
             <div className="bg-gray-50 rounded shadow">
-              <AdminTable userData={userDawatiBisoyData} emailList={emailList} />
+              <AdminTable
+                userData={userDawatiBisoyData}
+                emailList={emailList}
+              />
             </div>
           </TabsContent>
           <TabsContent value="dawatimojlish">
             <div className="bg-gray-50 rounded shadow">
-              <AdminTable userData={userDawatiMojlishData} emailList={emailList} />
+              <AdminTable
+                userData={userDawatiMojlishData}
+                emailList={emailList}
+              />
             </div>
           </TabsContent>
           <TabsContent value="jamat">
@@ -386,7 +385,7 @@ const AdminPage: React.FC = () => {
           </TabsContent>
           <TabsContent value="sofor">
             <div className="bg-gray-50 rounded shadow">
-              <AdminTable userData={userSoforBisoyData} emailList={emailList} />
+              <AdminTable userData={soforBishoyData} emailList={emailList} />
             </div>
           </TabsContent>
         </Tabs>
