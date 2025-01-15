@@ -126,120 +126,110 @@ const SoforBishoyForm: React.FC = () => {
       >
         {({ values }) => (
           <Form>
+            <div>
+              <label htmlFor="moktobVisit" className="mb-2 block text-gray-700">
+                চলমান মক্তব পরিদর্শন হয়েছে
+              </label>
+              <Field
+                id="moktobVisit"
+                type="number"
+                name="moktobVisit"
+                placeholder="Enter Value"
+                className="w-full rounded border border-gray-300 px-4 py-2 mb-6"
+              />
+              <ErrorMessage
+                name="moktobVisit"
+                component="div"
+                className="text-red-500"
+              />
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              <div className="space-y-5">
-                <div>
-                  <label
-                    htmlFor="moktobVisit"
-                    className="mb-2 block text-gray-700"
-                  >
-                    চলমান মক্তব পরিদর্শন হয়েছে
-                  </label>
-                  <Field
-                    id="moktobVisit"
-                    type="number"
-                    name="moktobVisit"
-                    placeholder="Enter Value"
-                    className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                  />
-                  <ErrorMessage
-                    name="moktobVisit"
-                    component="div"
-                    className="text-red-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-gray-700">
-                    মাদ্রাসা সফর হয়েছে
-                  </label>
-                  <FieldArray
-                    name="madrasaVisits"
-                    render={(arrayHelpers) => (
-                      <div>
-                        {values.madrasaVisits.map((_, index) => (
-                          <div key={index} className="mb-3 flex items-center">
-                            <Field
-                              name={`madrasaVisits.${index}`}
-                              placeholder={`Name of Madrasa ${index + 1}`}
-                              className="w-full rounded border border-gray-300 px-4 py-2"
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onClick={() => arrayHelpers.remove(index)}
-                              className="ml-2"
-                            >
-                              -
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onClick={() => arrayHelpers.insert(index + 1, "")}
-                              className="ml-2"
-                            >
-                              +
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-5">
-                <div>
-                  <label className="mb-2 block text-gray-700">
-                    স্কুল/কলেজ/ভার্সিটি দাওয়াতী সফর হয়েছে
-                  </label>
-                  <FieldArray
-                    name="schoolCollegeVisits"
-                    render={(arrayHelpers) => (
-                      <div>
-                        {values.schoolCollegeVisits.map((_, index) => (
-                          <div key={index} className="mb-3 flex items-center">
-                            <Field
-                              name={`schoolCollegeVisits.${index}`}
-                              placeholder={`Name of School/College ${
-                                index + 1
-                              }`}
-                              className="w-full rounded border border-gray-300 px-4 py-2"
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onClick={() => arrayHelpers.remove(index)}
-                              className="ml-2"
-                            >
-                              -
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onClick={() => arrayHelpers.insert(index + 1, "")}
-                              className="ml-2"
-                            >
-                              +
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div className="col-span-2">
-                <h1 className="pb-3">মতামত লিখুন</h1>
-                <JoditEditorComponent
-                  placeholder="আপনার মতামত লিখুন..."
-                  initialValue={editorContent}
-                  onContentChange={handleContentChange}
-                  height="300px"
-                  width="100%"
+              <div>
+                <label className="mb-2 block text-gray-700">
+                  মাদ্রাসা সফর হয়েছে
+                </label>
+                <FieldArray
+                  name="madrasaVisits"
+                  render={(arrayHelpers) => (
+                    <div>
+                      {values.madrasaVisits.map((_, index) => (
+                        <div key={index} className=" flex items-center">
+                          <Field
+                            name={`madrasaVisits.${index}`}
+                            placeholder={`Name of Madrasa ${index + 1}`}
+                            className="w-full rounded border border-gray-300 px-4 py-2"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => arrayHelpers.remove(index)}
+                            className="ml-2"
+                          >
+                            -
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => arrayHelpers.insert(index + 1, "")}
+                            className="ml-2"
+                          >
+                            +
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 />
               </div>
+
+              <div>
+                <label className="mb-2 block text-gray-700">
+                  স্কুল/কলেজ/ভার্সিটি দাওয়াতী সফর হয়েছে
+                </label>
+                <FieldArray
+                  name="schoolCollegeVisits"
+                  render={(arrayHelpers) => (
+                    <div>
+                      {values.schoolCollegeVisits.map((_, index) => (
+                        <div key={index} className="mb-3 flex items-center">
+                          <Field
+                            name={`schoolCollegeVisits.${index}`}
+                            placeholder={`Name of School/College ${index + 1}`}
+                            className="w-full rounded border border-gray-300 px-4 py-2"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => arrayHelpers.remove(index)}
+                            className="ml-2"
+                          >
+                            -
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => arrayHelpers.insert(index + 1, "")}
+                            className="ml-2"
+                          >
+                            +
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="col-span-2">
+              <h1 className="pb-3">মতামত লিখুন</h1>
+              <JoditEditorComponent
+                placeholder="আপনার মতামত লিখুন..."
+                initialValue={editorContent}
+                onContentChange={handleContentChange}
+                height="300px"
+                width="100%"
+              />
             </div>
 
             <div className="flex justify-end mt-6">
