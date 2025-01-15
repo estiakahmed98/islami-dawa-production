@@ -326,6 +326,7 @@ const AdminPage: React.FC = () => {
       </div>
 
       <div className="border border-[#155E75] p-6 mt-10 rounded-xl overflow-y-auto">
+        <Tabs defaultValue="Moktob Bisoy" className="w-full p-4">
         <Tabs defaultValue="moktob" className="w-full p-4">
           <TabsList className="mx-10 my-6">
             <TabsTrigger value="moktob">Moktob Bisoy</TabsTrigger>
@@ -341,7 +342,10 @@ const AdminPage: React.FC = () => {
           {/* Tab Content */}
           <TabsContent value="moktob">
             <div className="bg-gray-50 rounded shadow">
-              <AdminTable userData={userMoktobBisoyData} emailList={emailList} />
+              <AdminTable
+                userData={userMoktobBisoyData}
+                emailList={emailList}
+              />
             </div>
           </TabsContent>
           <TabsContent value="talim">
@@ -356,12 +360,18 @@ const AdminPage: React.FC = () => {
           </TabsContent>
           <TabsContent value="dawati">
             <div className="bg-gray-50 rounded shadow">
-              <AdminTable userData={userDawatiBisoyData} emailList={emailList} />
+              <AdminTable
+                userData={userDawatiBisoyData}
+                emailList={emailList}
+              />
             </div>
           </TabsContent>
           <TabsContent value="dawatimojlish">
             <div className="bg-gray-50 rounded shadow">
-              <AdminTable userData={userDawatiMojlishData} emailList={emailList} />
+              <AdminTable
+                userData={userDawatiMojlishData}
+                emailList={emailList}
+              />
             </div>
           </TabsContent>
           <TabsContent value="jamat">
@@ -376,6 +386,7 @@ const AdminPage: React.FC = () => {
           </TabsContent>
           <TabsContent value="sofor">
             <div className="bg-gray-50 rounded shadow">
+              <AdminTable userData={soforBishoyData} emailList={emailList} />
               <AdminTable userData={userSoforBishoyData} emailList={emailList} />
             </div>
           </TabsContent>
