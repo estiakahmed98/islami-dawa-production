@@ -4,119 +4,136 @@ import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/JamatBishoyData";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import JoditEditorComponent from "./richTextEditor";
+import { toast } from "sonner";
 
-// Type for form data
-interface FormData {
-  jamatBerHoise: number | string;
+// Define form values type
+interface FormValues {
+  jamatBerHoise: string | number; // Allow both string and number
   jamatSathi: string;
+  editorContent: string;
 }
 
-const JamatBishoyForm = () => {
+const JamatBishoyForm: React.FC = () => {
   const router = useRouter();
-  const [editorContent, setEditorContent] = useState("");
-
-  const handleContentChange = (content: string) => {
-    setEditorContent(content);
-  };
-
-  // User Logged in email collection
   const { data: session } = useSession();
   const email = session?.user?.email || "";
+  const [isSubmittedToday, setIsSubmittedToday] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Check if the user has already submitted today
+  useEffect(() => {
+    const checkSubmissionStatus = async () => {
+      const response = await fetch(`/api/jamat?email=${email}`);
+      if (response.ok) {
+        const data = await response.json();
+        setIsSubmittedToday(data.isSubmittedToday);
+      }
+      setLoading(false);
+    };
+    if (email) checkSubmissionStatus();
+  }, [email]);
+
+  // Handle form submission
+  const handleSubmit = async (values: FormValues) => {
+    const formData = { ...values, email };
+    if (isSubmittedToday) {
+      toast.error("You Already Submitted Today...");
+      return;
+    }
+
+    const response = await fetch("/api/jamat", {
+      method: "POST",
+      body: JSON.stringify(formData),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (response.ok) {
+      setIsSubmittedToday(true);
+      toast.success("Submitted Successfully...");
+      router.push("/dashboard");
+    } else {
+      toast.error("Submission Failed. Please Try Again...");
+    }
+  };
+
+  // Render loading state
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">
+      {isSubmittedToday && (
+        <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8 z-30">
+          You already have submitted today
+        </div>
+      )}
       <h2 className="mb-6 text-2xl">জামাত বিষয়</h2>
       <Formik
-        initialValues={initialFormData}
+        initialValues={{ ...initialFormData, editorContent: "" }}
         validationSchema={validationSchema}
-        onSubmit={async (values: FormData) => {
-          // Check if email is available
-          if (!email) {
-            alert("User email is not set. Please log in.");
-            return;
-          }
-
-          // Include email in the form data
-          const formData = { ...values, email };
-
-          // Send form data to the API
-          const response = await fetch("/api/jamat", {
-            method: "POST",
-            body: JSON.stringify(formData),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-
-          console.log("response", response);
-
-          // Handle API response
-          if (response.ok) {
-            router.push("/dashboard");
-            alert("Form submission successful!");
-          } else {
-            alert("Form submission failed! Try again.");
-          }
-
-          console.log(formData);
-        }}
+        onSubmit={handleSubmit}
       >
-        <Form>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            <div>
-              <label className="mb-2 block text-gray-700">
-                জামাত বের হয়েছে
-              </label>
-              <Field
-                name="jamatBerHoise"
-                placeholder="Enter value"
-                className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-              />
-              <ErrorMessage
-                name="jamatBerHoise"
-                component="div"
-                className="text-red-500"
-              />
+        {({ setFieldValue }) => (
+          <Form>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              <div>
+                <label className="mb-2 block text-gray-700">
+                  জামাত বের হয়েছে
+                </label>
+                <Field
+                  name="jamatBerHoise"
+                  placeholder="Enter Value"
+                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                  disabled={isSubmittedToday}
+                />
+                <ErrorMessage
+                  name="jamatBerHoise"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-gray-700">
+                  জামাতের মোট সাথী ছিল
+                </label>
+                <Field
+                  name="jamatSathi"
+                  placeholder="Enter Value"
+                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                  disabled={isSubmittedToday}
+                />
+                <ErrorMessage
+                  name="jamatSathi"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+              <div className="lg:col-span-2">
+                <h1 className="pb-3">মতামত লিখুন</h1>
+                <JoditEditorComponent
+                  placeholder="আপনার মতামত লিখুন"
+                  initialValue=""
+                  onContentChange={(content) =>
+                    setFieldValue("editorContent", content)
+                  }
+                  height="300px"
+                  width="100%"
+                />
+              </div>
             </div>
-
-            <div>
-              <label className="mb-2 block text-gray-700">
-                জামাতের মোট সাথী ছিল
-              </label>
-              <Field
-                name="jamatSathi"
-                placeholder="Enter Value"
-                className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-              />
-              <ErrorMessage
-                name="jamatSathi"
-                component="div"
-                className="text-red-500"
-              />
+            <div className="flex justify-end pt-4">
+              <Button
+                variant="ghost"
+                size="default"
+                type="submit"
+                disabled={isSubmittedToday}
+              >
+                Submit
+              </Button>
             </div>
-
-            <div className="col-span-2">
-              <h1 className=" pb-3">মতামত লিখুন</h1>
-              <JoditEditorComponent
-                placeholder="আপনার মতামত লিখুন..."
-                initialValue={editorContent}
-                onContentChange={handleContentChange}
-                height="300px"
-                width="100%"
-              />
-              {/* <h2>Output:</h2>
-                  <div dangerouslySetInnerHTML={{ __html: editorContent }} /> */}
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <Button variant="ghost" size="default" type="submit">
-              Submit
-            </Button>
-          </div>
-        </Form>
+          </Form>
+        )}
       </Formik>
     </div>
   );

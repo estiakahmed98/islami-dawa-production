@@ -10,7 +10,7 @@ import { userDawatiMojlishData } from "../data/dawatiMojlishUserData";
 import { userTalimBisoyData } from "../data/talimBisoyUserData";
 import { userDayeData } from "@/app/data/dayiUserData";
 import { userDawatiBisoyData } from "@/app/data/dawatiBisoyUserData";
-import { userJamatBisoyUserData } from "@/app/data/jamatBisoyUserData";
+import { userJamatBisoyData } from "../data/jamatBisoyData";
 import { userDineFeraData } from "@/app/data/dineferaUserData";
 import { userSoforBisoyData } from "@/app/data/userSoforBisoyData";
 import {
@@ -63,7 +63,7 @@ const Dashboard: React.FC<TallyProps> = ({ userData, email, title }) => {
         />
 
         <Tally
-          userData={userJamatBisoyUserData}
+          userData={userJamatBisoyData}
           email={userEmail}
           title="Jamat Bisoy Tally"
         />
@@ -140,7 +140,7 @@ const Dashboard: React.FC<TallyProps> = ({ userData, email, title }) => {
           </TabsContent>
           <TabsContent value="jamat">
             <div className="bg-gray-50 rounded shadow">
-              <AmoliTableShow userData={userJamatBisoyUserData} />
+              <AmoliTableShow userData={userJamatBisoyData} />
             </div>
           </TabsContent>
           <TabsContent value="dinefera">
