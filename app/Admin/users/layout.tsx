@@ -1,6 +1,6 @@
 "use client";
 
-import Header from "@/components/Header";
+import Header from "@/components/dashboard/header";
 import ImpersonateSidebar from "@/components/ImpersonateSidebar";
 import OnItemClick from "@/components/MuiTreeView";
 import { ReactNode } from "react";
@@ -20,9 +20,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   return (
     <div>
-      <Header />
+  
       <div className="flex h-[calc(100vh-104px)]">
-        <ImpersonateSidebar />
+ 
         {/* Uncomment the line below if you want to pass the logged-in user to the `OnItemClick` component */}
         {/* {userName && <OnItemClick loggedInUser={userName} />} */}
         <div className="max-h-screen p-6 grow overflow-y-auto">{children}</div>

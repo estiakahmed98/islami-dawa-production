@@ -19,6 +19,7 @@ import { userDayeData } from "../data/dayiUserData";
 import TallyAdmin from "@/components/TallyAdmin";
 import { useSession } from "next-auth/react";
 import Tally from "@/components/Tally";
+import { userTalimBisoyData } from "../data/talimBisoyUserData";
 
 const AdminPage: React.FC = () => {
   const { selectedUser } = useSelectedUser();
@@ -264,7 +265,7 @@ const AdminPage: React.FC = () => {
   } else if (!selectedUser) {
     emailList = [userEmail];
   } else {
-    emailList = [userEmail];
+    emailList = [selectedUser];
   }
 
   console.log("Email List:", emailList);
@@ -274,16 +275,62 @@ const AdminPage: React.FC = () => {
         <div className="grow grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-8 pb-4 pt-2">
           {/* <AmoliChart data={userAmoliBisoyData.records} userEmail={userEmail} /> */}
 
-          <Tally
+          {/* <Tally
             userData={userMoktobBisoyData}
             email={userEmail}
             title="Moktob Tally"
-          />
+          /> */}
+          {/* <TallyAdmin
+            userData={userMoktobBisoyData}
+            emails={selectedUser}
+            title="User Moktob Bisoy Tally Results"
+          /> */}
 
           <TallyAdmin
             userData={userMoktobBisoyData}
             emails={emailList}
-            title="Moktob Bisoy Tally Results"
+            title="Moktob Bisoy Tally"
+          />
+          <TallyAdmin
+            userData={userDawatiBisoyData}
+            emails={emailList}
+            title="Dawati Bisoy Tally"
+          />
+
+          <TallyAdmin
+            userData={userDawatiMojlishData}
+            emails={emailList}
+            title="Dawati Mojlish Tally"
+          />
+
+          <TallyAdmin
+            userData={userJamatBisoyUserData}
+            emails={emailList}
+            title="Jamat Bisoy Tally"
+          />
+
+          <TallyAdmin
+            userData={userDineFeraData}
+            emails={emailList}
+            title="Dine Fireche Tally"
+          />
+
+          <TallyAdmin
+            userData={userTalimBisoyData}
+            emails={emailList}
+            title="Talim Bisoy Tally"
+          />
+
+          <TallyAdmin
+            userData={userSoforBisoyData}
+            emails={emailList}
+            title="Sofor Bisoy Tally"
+          />
+
+          <TallyAdmin
+            userData={userDayeData}
+            emails={emailList}
+            title="Dayee Bisoy Tally"
           />
         </div>
       </div>

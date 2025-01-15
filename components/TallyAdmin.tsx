@@ -1,23 +1,17 @@
 // "use client";
 // import React, { useMemo } from "react";
 
-// type UserData = {
-//   [email: string]: {
-//     [date: string]: {
-//       [key: string]: number;
-//     };
-//   };
-// };
-
-// type LabelMap = { [key: string]: string | number };
-
 // type TallyAdminProps = {
-//   userData: UserData & { labelMap?: LabelMap };
+//   userData: Record<string, any>;
 //   emails: string | string[];
-//   title: string;
+//   title?: string;
 // };
 
-// const TallyAdmin: React.FC<TallyAdminProps> = ({ userData, emails, title }) => {
+// const TallyAdmin: React.FC<TallyAdminProps> = ({
+//   userData = {},
+//   emails = [],
+//   title = "Tally Admin",
+// }) => {
 //   const getBackgroundColor = (percentage: number): string => {
 //     if (percentage >= 80) return "bg-teal-500";
 //     if (percentage >= 50) return "bg-amber-500";
@@ -25,12 +19,12 @@
 //   };
 
 //   const aggregateUserData = (
-//     userData: UserData,
+//     userData: Record<string, any>,
 //     emails: string | string[]
 //   ) => {
 //     if (!userData || typeof userData !== "object") return [];
-//     const aggregatedData: { [key: string]: number } = {};
-//     const labelMap = userData.labelMap || {};
+//     const aggregatedData: Record<string, number> = {};
+//     const labelMap: Record<string, string> = userData.labelMap || {};
 
 //     // Initialize aggregation structure for each label
 //     Object.keys(labelMap).forEach((key) => {
@@ -51,9 +45,10 @@
 
 //       // Merge data for each label from all dates for valid users
 //       Object.values(userRecords).forEach((dailyData) => {
-//         Object.entries(dailyData).forEach(([key, value]) => {
+//         const data = dailyData as Record<string, string>; // Explicitly cast to the expected type
+//         Object.entries(data).forEach(([key, value]) => {
 //           if (aggregatedData[key] !== undefined) {
-//             aggregatedData[key] += value; // Sum up values for the valid emails
+//             aggregatedData[key] += parseInt(value, 10); // Sum up values for the valid emails
 //           }
 //         });
 //       });
@@ -86,7 +81,7 @@
 //                 <div key={index}>
 //                   <div className="flex justify-between items-center mb-1">
 //                     <span className="text-xs sm:text-sm font-medium">
-//                       {String(item.label)}
+//                       {item.label}
 //                     </span>
 //                     <span className="text-xs sm:text-sm font-semibold">
 //                       {item.totalValue}
@@ -121,26 +116,20 @@
 // export default TallyAdmin;
 
 
-
 "use client";
 import React, { useMemo } from "react";
 
-type UserData = {
-  [email: string]: {
-    [date: string]: {
-      [key: string]: number;
-    };
-  };
-  labelMap?: { [key: string]: string };
+type TallyAdminProps = {
+  userData: Record<string, any>;
+  emails: string | string[];
+  title?: string;
 };
 
-type TallyProps = {
-  userData: UserData;
-  emails: string[];
-  title: string;
-};
-
-const TallyAdmin: React.FC<TallyProps> = ({ userData, emails, title }) => {
+const TallyAdmin: React.FC<TallyAdminProps> = ({
+  userData = {},
+  emails = [],
+  title = "Tally Admin",
+}) => {
   const getBackgroundColor = (percentage: number): string => {
     if (percentage >= 80) return "bg-teal-500";
     if (percentage >= 50) return "bg-amber-500";
@@ -148,20 +137,23 @@ const TallyAdmin: React.FC<TallyProps> = ({ userData, emails, title }) => {
   };
 
   const aggregateUserData = (
-    userData: UserData,
-    emails: string[]
+    userData: Record<string, any>,
+    emails: string | string[]
   ) => {
     if (!userData || typeof userData !== "object") return [];
-    const aggregatedData: { [key: string]: number } = {};
-    const labelMap = userData.labelMap || {};
+    const aggregatedData: Record<string, number> = {};
+    const labelMap: Record<string, string> = userData.labelMap || {};
 
     // Initialize aggregation structure for each label
     Object.keys(labelMap).forEach((key) => {
       aggregatedData[key] = 0;
     });
 
-    emails.forEach((email) => {
-      const userRecords = userData[email];
+    // Ensure emails is always an array
+    const emailList = Array.isArray(emails) ? emails : [emails];
+
+    emailList.forEach((email) => {
+      const userRecords = userData.records?.[email];
 
       // Skip this email if no data exists for it
       if (!userRecords) {
@@ -171,9 +163,10 @@ const TallyAdmin: React.FC<TallyProps> = ({ userData, emails, title }) => {
 
       // Merge data for each label from all dates for valid users
       Object.values(userRecords).forEach((dailyData) => {
-        Object.entries(dailyData).forEach(([key, value]) => {
+        const data = dailyData as Record<string, string>; // Explicitly cast to the expected type
+        Object.entries(data).forEach(([key, value]) => {
           if (aggregatedData[key] !== undefined) {
-            aggregatedData[key] += value; // Sum up values for the valid emails
+            aggregatedData[key] += parseInt(value, 10); // Sum up values for the valid emails
           }
         });
       });
@@ -186,12 +179,7 @@ const TallyAdmin: React.FC<TallyProps> = ({ userData, emails, title }) => {
       totalValue: totalValue,
       max: 1000, // Example max value
     }));
-    
   };
-
-
-
-
 
   const dataForTally = useMemo(
     () => aggregateUserData(userData, emails),

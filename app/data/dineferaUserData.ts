@@ -72,8 +72,8 @@ export const userDineFeraData = {
         "editorContent": "<p>Hello faysal</p>"
       },
       "2025-01-14": {
-        "omuslimKalemaPoreche": "dfd",
-        "murtadDineFireasa": "fd",
+        "omuslimKalemaPoreche": "50",
+        "murtadDineFireasa": "50",
         "editorContent": "<p>dfdff</p>"
       }
     }
