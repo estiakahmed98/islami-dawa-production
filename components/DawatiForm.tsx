@@ -106,6 +106,7 @@ const DawatiForm: React.FC = () => {
                 </label>
                 <Field
                   name="nonMuslimDawat"
+                  type="number"
                   disabled={isSubmittedToday}
                   placeholder="Enter value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
@@ -123,6 +124,7 @@ const DawatiForm: React.FC = () => {
                 </label>
                 <Field
                   name="murtadDawat"
+                  type="number"
                   disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
@@ -140,6 +142,7 @@ const DawatiForm: React.FC = () => {
                 </label>
                 <Field
                   name="alemderSatheyMojlish"
+                  type="number"
                   disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
@@ -157,6 +160,7 @@ const DawatiForm: React.FC = () => {
                 </label>
                 <Field
                   name="publicSatheyMojlish"
+                  type="number"
                   disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
@@ -174,6 +178,7 @@ const DawatiForm: React.FC = () => {
                 </label>
                 <Field
                   name="nonMuslimSaptahikGasht"
+                  type="number"
                   disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"

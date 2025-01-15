@@ -1,206 +1,219 @@
 "use client";
 
-import React, { useState } from "react";
-import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
+import React, { useEffect, useState } from "react";
+import { divisions, districts, upazilas, unions } from "../app/data/bangla";
 import {
   divisions_en,
   districts_en,
   upazilas_en,
   unions_en,
 } from "@/app/data/english";
+import { toast } from "sonner";
 
-// Define the type for each location level
-interface Location {
-  value: string;
+// Types
+type Division = {
+  value: number;
   title: string;
+};
+
+type District = {
+  value: number;
+  title: string;
+};
+
+type Upazila = {
+  value: number;
+  title: string;
+};
+
+type Union = {
+  value: number;
+  title: string;
+};
+
+interface LocationDropdownProps {
+  language?: "bn" | "en";
+  email: string; // User's email
 }
 
-// Utility functions with TypeScript annotations
-function getAllDivision(type: string): Location[] {
+// Utility functions
+function getAllDivision(type: "bn" | "en"): Division[] {
   return type === "en" ? divisions_en : divisions;
 }
 
-function getAllDistrict(type: string): { [key: string]: Location[] } {
+function getAllDistrict(type: "bn" | "en"): Record<number, District[]> {
   return type === "en" ? districts_en : districts;
 }
 
-function getUpazilas(districtValue: string, type: string): Location[] {
+function getUpazilas(districtValue: number, type: "bn" | "en"): Upazila[] {
   if (!districtValue) return [];
   return type === "en"
     ? upazilas_en[districtValue] || []
     : upazilas[districtValue] || [];
 }
 
-function getUnions(upazilaValue: string, type: string): Location[] {
+function getUnions(upazilaValue: number, type: "bn" | "en"): Union[] {
   if (!upazilaValue) return [];
   return type === "en"
     ? unions_en[upazilaValue] || []
     : unions[upazilaValue] || [];
 }
 
-// Props for the component
-interface LocationDropdownProps {
-  language?: "bn" | "en"; // Defaults to Bangla ("bn")
-}
-
-// Dropdown Component
 const LocationDropdown: React.FC<LocationDropdownProps> = ({
   language = "bn",
+  email,
 }) => {
   const [selectedDivision, setSelectedDivision] = useState<string>("");
   const [selectedDistrict, setSelectedDistrict] = useState<string>("");
   const [selectedUpazila, setSelectedUpazila] = useState<string>("");
-  const [districts, setDistricts] = useState<Location[]>([]);
-  const [upazilas, setUpazilas] = useState<Location[]>([]);
-  const [unions, setUnions] = useState<Location[]>([]);
-  const [finalDivision, setFinalDivision] = useState<string>("");
+  const [selectedUnion, setSelectedUnion] = useState<string>("");
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [upazilas, setUpazilas] = useState<Upazila[]>([]);
+  const [unions, setUnions] = useState<Union[]>([]);
 
-  const handleDivisionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const divisionValue = e.target.value;
-    const formattedValue = divisionValue.split("_");
-    setSelectedDivision(formattedValue[0]);
+  useEffect(() => {
+    const fetchLocation = async () => {
+      try {
+        const response = await fetch(`/api/location?email=${email}`);
+        if (response.ok) {
+          const data = await response.json();
+          const { division, district, upazila, union } = data.location;
+          setSelectedDivision(division);
+          setSelectedDistrict(district);
+          setSelectedUpazila(upazila);
+          setSelectedUnion(union);
 
-    const divisionName = getAllDivision(language).find(
-      (division) => division.value === formattedValue[0]
-    );
+          const divisionDistricts =
+            getAllDistrict(language)[parseInt(division, 10)] || [];
+          setDistricts(divisionDistricts);
 
-    setFinalDivision(divisionName?.title || "");
+          const districtUpazilas = getUpazilas(
+            parseInt(district, 10),
+            language
+          );
+          setUpazilas(districtUpazilas);
 
-    const divisionDistricts = getAllDistrict(language)[formattedValue[0]];
-    setDistricts(divisionDistricts || []);
-    setSelectedDistrict("");
-    setUpazilas([]);
-    setUnions([]);
-  };
+          const upazilaUnions = getUnions(parseInt(upazila, 10), language);
+          setUnions(upazilaUnions);
+        }
+      } catch (error) {
+        console.error("Error fetching location:", error);
+      }
+    };
+    fetchLocation();
+  }, [email, language]);
 
-  const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const districtValue = e.target.value;
-    const formattedValue = districtValue.split("_");
-    setSelectedDistrict(formattedValue[0]);
+  const handleSave = async () => {
+    try {
+      const response = await fetch("/api/location", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          division: selectedDivision,
+          district: selectedDistrict,
+          upazila: selectedUpazila,
+          union: selectedUnion,
+        }),
+      });
 
-    const districtUpazilas = getUpazilas(formattedValue[0], language);
-    setUpazilas(districtUpazilas || []);
-    setSelectedUpazila("");
-    setUnions([]);
-  };
-
-  const handleUpazilaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const upazilaValue = e.target.value;
-    const formattedValue = upazilaValue.split("_");
-    setSelectedUpazila(formattedValue[0]);
-
-    const upazilaUnions = getUnions(formattedValue[0], language);
-    setUnions(upazilaUnions || []);
+      if (response.ok) {
+        toast.success("Location saved successfully!");
+      } else {
+        toast.error("Failed to save location.");
+      }
+    } catch (error) {
+      console.error("Error saving location:", error);
+      toast.error("Error saving location.");
+    }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="flex gap-4 items-center flex-wrap max-w-4xl">
       {/* Division Dropdown */}
-      <div>
-        <label
-          htmlFor="division"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Division
-        </label>
-        <select
-          id="division"
-          name="division"
-          onChange={handleDivisionChange}
-          required
-          className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        >
-          <option value="" disabled>
-            Select Division
+      <select
+        value={selectedDivision}
+        className="p-2 border-2 rounded-lg grow"
+        onChange={(e) => {
+          const divisionValue = e.target.value;
+          setSelectedDivision(divisionValue);
+          const divisionDistricts =
+            getAllDistrict(language)[parseInt(divisionValue, 10)] || [];
+          setDistricts(divisionDistricts);
+          setSelectedDistrict("");
+          setUpazilas([]);
+          setUnions([]);
+        }}
+      >
+        <option value="">Select Division</option>
+        {getAllDivision(language).map((division) => (
+          <option key={division.value} value={division.value}>
+            {division.title}
           </option>
-          {getAllDivision(language).map((division, index) => (
-            <option key={index} value={`${division.value}_${division.title}`}>
-              {division.title}
-            </option>
-          ))}
-        </select>
-      </div>
+        ))}
+      </select>
 
       {/* District Dropdown */}
-      <div>
-        <label
-          htmlFor="district"
-          className="block text-sm font-medium text-gray-700"
-        >
-          District
-        </label>
-        <select
-          id="district"
-          name="district"
-          onChange={handleDistrictChange}
-          required
-          disabled={!districts.length}
-          className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        >
-          <option value="" disabled>
-            Select District
+      <select
+        value={selectedDistrict}
+        className="p-2 border-2 rounded-lg grow"
+        onChange={(e) => {
+          const districtValue = e.target.value;
+          setSelectedDistrict(districtValue);
+          const districtUpazilas = getUpazilas(
+            parseInt(districtValue, 10),
+            language
+          );
+          setUpazilas(districtUpazilas);
+          setSelectedUpazila("");
+          setUnions([]);
+        }}
+        disabled={!districts.length}
+      >
+        <option value="">Select District</option>
+        {districts.map((district) => (
+          <option key={district.value} value={district.value}>
+            {district.title}
           </option>
-          {districts.map((district, index) => (
-            <option key={index} value={`${district.value}_${district.title}`}>
-              {district.title}
-            </option>
-          ))}
-        </select>
-      </div>
+        ))}
+      </select>
 
       {/* Upazila Dropdown */}
-      <div>
-        <label
-          htmlFor="upazila"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Upazila
-        </label>
-        <select
-          id="upazila"
-          name="upazila"
-          onChange={handleUpazilaChange}
-          required
-          disabled={!Array.isArray(upazilas) || upazilas.length === 0}
-          className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        >
-          <option value="" disabled>
-            Select Upazila
+      <select
+        value={selectedUpazila}
+        className="p-2 border-2 rounded-lg grow"
+        onChange={(e) => {
+          const upazilaValue = e.target.value;
+          setSelectedUpazila(upazilaValue);
+          const upazilaUnions = getUnions(parseInt(upazilaValue, 10), language);
+          setUnions(upazilaUnions);
+        }}
+        disabled={!upazilas.length}
+      >
+        <option value="">Select Upazila</option>
+        {upazilas.map((upazila) => (
+          <option key={upazila.value} value={upazila.value}>
+            {upazila.title}
           </option>
-          {Array.isArray(upazilas) &&
-            upazilas.map((upazila, index) => (
-              <option key={index} value={`${upazila.value}_${upazila.title}`}>
-                {upazila.title}
-              </option>
-            ))}
-        </select>
-      </div>
+        ))}
+      </select>
 
       {/* Union Dropdown */}
-      <div>
-        <label
-          htmlFor="union"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Union
-        </label>
-        <select
-          id="tunion"
-          name="tunion"
-          required
-          disabled={!unions.length}
-          className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        >
-          <option value="" disabled>
-            Select Union
+      <select
+        value={selectedUnion}
+        className="p-2 border-2 rounded-lg grow"
+        onChange={(e) => setSelectedUnion(e.target.value)}
+        disabled={!unions.length}
+      >
+        <option value="">Select Union</option>
+        {unions.map((union) => (
+          <option key={union.value} value={union.value}>
+            {union.title}
           </option>
-          {unions.map((tunion, index) => (
-            <option key={index} value={`${tunion.value}_${tunion.title}`}>
-              {tunion.title}
-            </option>
-          ))}
-        </select>
-      </div>
+        ))}
+      </select>
     </div>
   );
 };

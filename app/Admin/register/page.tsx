@@ -2,7 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent } from "react";
-import LocationDropdown from "./LocationDropdown";
+import LocationDropdown from "@/components/LocationDropdown";
+
+// interface LocationDropdownProps {
+//   email: string;
+// }
 
 export default function Register() {
   const router = useRouter();
@@ -100,7 +104,7 @@ export default function Register() {
 
           {/* Location Dropdown */}
           <div>
-            <LocationDropdown />
+            <LocationDropdown email="" />
           </div>
 
           {/* Markaz */}

@@ -1,5 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
+<<<<<<< HEAD
+=======
+
+>>>>>>> 75ca89ba23b78fb58800526dd12bba40d55f679c
 import { useSelectedUser } from "@/providers/treeProvider";
 import {
   Tabs,
@@ -12,7 +16,7 @@ import { userDawatiBisoyData } from "../data/dawatiBisoyUserData";
 import { userDawatiMojlishData } from "../data/dawatiMojlishUserData";
 import { userJamatBisoyData } from "../data/jamatBisoyData";
 import { userDineFeraData } from "../data/dineferaUserData";
-import { userSoforBisoyData } from "../data/userSoforBisoyData";
+import { soforBishoyData } from "../data/soforBishoyUserData";
 import { userDayeData } from "../data/dayiUserData";
 import TallyAdmin from "@/components/TallyAdmin";
 import { useSession } from "next-auth/react";
@@ -312,7 +316,7 @@ const AdminPage: React.FC = () => {
           />
 
           <TallyAdmin
-            userData={userSoforBisoyData}
+            userData={soforBishoyData}
             emails={emailList}
             title="Sofor Bisoy Tally"
           />

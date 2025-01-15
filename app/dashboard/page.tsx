@@ -11,7 +11,7 @@ import { userDayeData } from "@/app/data/dayiUserData";
 import { userDawatiBisoyData } from "@/app/data/dawatiBisoyUserData";
 import { userJamatBisoyData } from "../data/jamatBisoyData";
 import { userDineFeraData } from "@/app/data/dineferaUserData";
-import { userSoforBisoyData } from "@/app/data/userSoforBisoyData";
+import { soforBishoyData } from "../data/soforBishoyUserData";
 import {
   Tabs,
   TabsContent,
@@ -84,7 +84,7 @@ const Dashboard: React.FC<TallyProps> = ({ userData, email, title }) => {
         />
 
         <TallyAdmin
-          userData={userSoforBisoyData}
+          userData={soforBishoyData}
           emails={userEmail}
           title="Sofor Bisoy Tally"
         />
@@ -153,7 +153,7 @@ const Dashboard: React.FC<TallyProps> = ({ userData, email, title }) => {
           </TabsContent>
           <TabsContent value="sofor">
             <div className="bg-gray-50 rounded shadow">
-              <AmoliTableShow userData={userSoforBisoyData} />
+              <AmoliTableShow userData={soforBishoyData} />
             </div>
           </TabsContent>
         </Tabs>
