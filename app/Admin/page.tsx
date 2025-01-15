@@ -18,9 +18,8 @@ import { userSoforBisoyData } from "../data/userSoforBisoyData";
 import { userDayeData } from "../data/dayiUserData";
 import TallyAdmin from "@/components/TallyAdmin";
 import { useSession } from "next-auth/react";
-import Tally from "@/components/Tally";
 import { userTalimBisoyData } from "../data/talimBisoyUserData";
-import { userAmoliBisoyData } from "../data/amoliMuhasabaUserData";
+import { userAmoliData } from "../data/amoliMuhasabaUserData";
 import AmoliChartAdmin from "@/components/AmoliChartAdmin";
 
 const AdminPage: React.FC = () => {
@@ -284,7 +283,7 @@ const AdminPage: React.FC = () => {
       <div className="flex flex-col gap-4">
         <div className="grow grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-8 pb-4 pt-2">
           <AmoliChartAdmin
-            data={userAmoliBisoyData.records}
+            data={userAmoliData.records}
             emailList={emailList}
           />
 
