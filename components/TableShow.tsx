@@ -224,7 +224,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           <tbody>
             {transposedData.map((row, rowIndex) => (
               <tr key={rowIndex} className="hover:bg-gray-100">
-                <td className="border font-semibold border-gray-300 px-6 py-2 whitespace-nowrap">
+                <td className="border max-w-sm:text-xs font-normal border-gray-300 px-6 py-2 whitespace-nowrap">
                   {row.label}
                 </td>
                 {monthDays.map((day) => (
