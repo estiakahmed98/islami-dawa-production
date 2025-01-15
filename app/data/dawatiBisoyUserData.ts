@@ -43,6 +43,14 @@ export const userDawatiBisoyData = {
         "publicSatheyMojlish": "55",
         "nonMuslimSaptahikGasht": "33",
         "motamotdin": "good"
+      },
+      "2025-01-15": {
+        "nonMuslimDawat": 500,
+        "murtadDawat": 500,
+        "alemderSatheyMojlish": 50,
+        "publicSatheyMojlish": 500,
+        "nonMuslimSaptahikGasht": 500,
+        "editorContent": "<p>Dawati Bisoy</p>"
       }
     },
     "zisan@gmail.com": {

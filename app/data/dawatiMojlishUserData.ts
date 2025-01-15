@@ -41,6 +41,16 @@ export const userDawatiMojlishData = {
         "dhormoSova": "6",
         "mashwaraPoint": "7",
         "motamotdin": "Hello"
+      },
+      "2025-01-15": {
+        "dawatterGuruttoMojlish": 100,
+        "mojlisheOnshogrohon": 100,
+        "prosikkhonKormoshalaAyojon": 100,
+        "prosikkhonOnshogrohon": 100,
+        "jummahAlochona": 100,
+        "dhormoSova": 100,
+        "mashwaraPoint": 100,
+        "editorContent": ""
       }
     },
     "zisan@gmail.com": {
@@ -54,6 +64,6 @@ export const userDawatiMojlishData = {
         "mashwaraPoint": "7",
         "motamotdin": "good"
       }
-    }
+    },
   }
 };

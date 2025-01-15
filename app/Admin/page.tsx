@@ -1,9 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-<<<<<<< HEAD
-=======
-
->>>>>>> 75ca89ba23b78fb58800526dd12bba40d55f679c
 import { useSelectedUser } from "@/providers/treeProvider";
 import {
   Tabs,
@@ -14,9 +10,9 @@ import {
 import { userMoktobBisoyData } from "../data/moktobBisoyUserData";
 import { userDawatiBisoyData } from "../data/dawatiBisoyUserData";
 import { userDawatiMojlishData } from "../data/dawatiMojlishUserData";
-import { userJamatBisoyData } from "../data/jamatBisoyData";
+import { userJamatBisoyData } from "../data/jamatBisoyUserData";
 import { userDineFeraData } from "../data/dineferaUserData";
-import { soforBishoyData } from "../data/soforBishoyUserData";
+import { userSoforBishoyData } from "../data/soforBishoyUserData";
 import { userDayeData } from "../data/dayiUserData";
 import TallyAdmin from "@/components/TallyAdmin";
 import { useSession } from "next-auth/react";
@@ -316,7 +312,7 @@ const AdminPage: React.FC = () => {
           />
 
           <TallyAdmin
-            userData={soforBishoyData}
+            userData={userSoforBishoyData}
             emails={emailList}
             title="Sofor Bisoy Tally"
           />
@@ -386,7 +382,7 @@ const AdminPage: React.FC = () => {
           </TabsContent>
           <TabsContent value="sofor">
             <div className="bg-gray-50 rounded shadow">
-              <AdminTable userData={userSoforBisoyData} emailList={emailList} />
+              <AdminTable userData={userSoforBishoyData} emailList={emailList} />
             </div>
           </TabsContent>
         </Tabs>

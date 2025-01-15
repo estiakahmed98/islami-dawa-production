@@ -24,6 +24,11 @@ export const userDineFeraData = {
       "2025-01-14": {
         "omuslimKalemaPoreche": "1000",
         "murtadDineFireasa": "2500"
+      },
+      "2025-01-15": {
+        "omuslimKalemaPoreche": 100,
+        "murtadDineFireasa": 100,
+        "editorContent": "<p>Good Job Boys</p>"
       }
     },
     "rashid@gmail.com": {

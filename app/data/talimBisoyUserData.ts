@@ -27,6 +27,11 @@ export const userTalimBisoyData = {
       "2025-01-14": {
         "mohilaTalim": "1000",
         "TalimOngshoGrohon": "2000"
+      },
+      "2025-01-15": {
+        "mohilaTalim": 90,
+        "TalimOngshoGrohon": 100,
+        "editorContent": ""
       }
     },
     "faysal@gmail.com": {

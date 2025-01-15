@@ -18,6 +18,11 @@ export const userJamatBisoyData = {
         "jamatBerHoise": "100",
         "jamatSathi": "500",
         "motamotdin": "Good"
+      },
+      "2025-01-15": {
+        "jamatBerHoise": 100,
+        "jamatSathi": 5000,
+        "editorContent": ""
       }
     },
     "tushar@gmail.com": {
@@ -60,6 +65,13 @@ export const userJamatBisoyData = {
         "jamatBerHoise": "12",
         "jamatSathi": "45",
         "editorContent": "<p><br></p>"
+      }
+    },
+    "rifat@gmail.com": {
+      "2025-01-15": {
+        "jamatBerHoise": 100,
+        "jamatSathi": 5000,
+        "editorContent": "<p>hello</p>"
       }
     }
   }
