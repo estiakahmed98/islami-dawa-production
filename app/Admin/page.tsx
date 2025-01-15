@@ -326,9 +326,8 @@ const AdminPage: React.FC = () => {
       </div>
 
       <div className="border border-[#155E75] p-6 mt-10 rounded-xl overflow-y-auto">
-        <Tabs defaultValue="Amolimusahaba" className="w-full p-4">
+        <Tabs defaultValue="moktob" className="w-full p-4">
           <TabsList className="mx-10 my-6">
-            <TabsTrigger value="Amolimusahaba">Amolimusahaba</TabsTrigger>
             <TabsTrigger value="moktob">Moktob Bisoy</TabsTrigger>
             <TabsTrigger value="talim">Talim Bisoy</TabsTrigger>
             <TabsTrigger value="daye">Daye Bisoy</TabsTrigger>
@@ -340,11 +339,6 @@ const AdminPage: React.FC = () => {
           </TabsList>
 
           {/* Tab Content */}
-          <TabsContent value="Amolimusahaba">
-            <div className="bg-gray-50 rounded shadow">
-              {/* <AmoliTableShow userData={userAmoliData} /> */}
-            </div>
-          </TabsContent>
           <TabsContent value="moktob">
             <div className="bg-gray-50 rounded shadow">
               <AdminTable userData={userMoktobBisoyData} emailList={emailList} />

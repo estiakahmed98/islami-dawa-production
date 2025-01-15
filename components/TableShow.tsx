@@ -41,8 +41,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     setMonthName(today.toLocaleString("default", { month: "long" }));
     setYear(currentYear);
 
-    // const email = localStorage.getItem("userEmail");
-    // const email = "moni@gmail.com";
 
     setUserEmail(email || "");
 
