@@ -96,8 +96,8 @@ const Dashboard: React.FC<TallyProps> = ({ userData, email, title }) => {
         />
       </div>
 
-      <div className="border border-[#155E75] p-6 mt-10 rounded-xl overflow-y-auto">
-        <Tabs defaultValue="Amolimusahaba" className="w-full p-4">
+      <div className="border border-[#155E75] p-2 lg:p-6 mt-10 rounded-xl overflow-y-auto">
+        <Tabs defaultValue="Amolimusahaba" className="w-full lg:p-4">
           <TabsList className="mx-10 my-6">
             <TabsTrigger value="Amolimusahaba">Amolimusahaba</TabsTrigger>
             <TabsTrigger value="moktob">Moktob Bisoy</TabsTrigger>

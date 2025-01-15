@@ -1,5 +1,5 @@
 "use client";
-
+import { TbXboxX } from "react-icons/tb";
 import React, { useState, useEffect } from "react";
 import fileDownload from "js-file-download";
 import jsPDF from "jspdf";
@@ -186,7 +186,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
 
   return (
     <div>
-      <div className="grid lg:flex  justify-between px-6 py-2">
+      <div className="grid lg:flex  justify-between lg:px-6 py-2">
         <h2 className="text-lg lg:text-2xl font-bold text-cyan-800 mb-4 flex items-center">
           {`Month: ${monthName} ${year}`}
         </h2>
@@ -305,41 +305,50 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       {/* Column Edit Modal */}
       {editColumn !== null && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-10 pr-20 rounded-xl shadow-lg w-2/5 max-h-[80vh] overflow-y-auto scrollbar">
-            <h3 className="text-lg font-bold mb-4">
-              Edit Column: Day {editColumn}
-            </h3>
-            {columnFormData.map((item, index) => (
-              <div className="mb-4" key={index}>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {item.label}
-                </label>
-                <input
-                  type="text"
-                  className="border border-gray-300 p-2 w-full"
-                  value={item.value || ""}
-                  onChange={(e) =>
-                    handleColumnInputChange(index, e.target.value)
-                  }
-                />
-              </div>
-            ))}
-            <div className="flex justify-end gap-4">
-              <button
-                className="p-2 bg-gray-300 rounded"
-                onClick={() => setEditColumn(null)}
-              >
-                Cancel
-              </button>
-              <button
-                className="p-2 bg-teal-700 text-white rounded"
-                onClick={handleSaveColumnEdit}
-              >
-                Save
-              </button>
+        <div className="bg-white p-6 rounded-xl shadow-lg w-[90vw] lg:w-2/5 max-h-[80vh] mt-4 overflow-y-auto scrollbar relative">
+          <button
+            className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none"
+            onClick={() => setEditColumn(null)}
+          >
+            {/* &#x2715; */}
+            <TbXboxX className="size-8"/>
+
+          </button>
+          <h3 className="text-lg font-bold mb-4">
+            Edit Column: Day {editColumn}
+          </h3>
+          {columnFormData.map((item, index) => (
+            <div className="mb-4" key={index}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {item.label}
+              </label>
+              <input
+                type="text"
+                className="border border-gray-300 p-2 w-full"
+                value={item.value || ""}
+                onChange={(e) =>
+                  handleColumnInputChange(index, e.target.value)
+                }
+              />
             </div>
+          ))}
+          <div className="flex justify-end gap-4">
+            <button
+              className="p-2 bg-gray-300 rounded"
+              onClick={() => setEditColumn(null)}
+            >
+              Cancel
+            </button>
+            <button
+              className="p-2 bg-teal-700 text-white rounded"
+              onClick={handleSaveColumnEdit}
+            >
+              Save
+            </button>
           </div>
         </div>
+      </div>
+      
       )}
     </div>
   );

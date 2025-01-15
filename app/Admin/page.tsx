@@ -1,7 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import AmoliChart from "@/components/AmoliCharts";
-import TalimDonutChart from "@/components/TalimBisoyChart";
 import { useSelectedUser } from "@/providers/treeProvider";
 import {
   Tabs,
@@ -21,18 +19,12 @@ import { useSession } from "next-auth/react";
 import { userTalimBisoyData } from "../data/talimBisoyUserData";
 import { userAmoliData } from "../data/amoliMuhasabaUserData";
 import AmoliChartAdmin from "@/components/AmoliChartAdmin";
+import AdminTable from "@/components/AdminTable";
 
 const AdminPage: React.FC = () => {
   const { selectedUser } = useSelectedUser();
-  // const [emailList, setEmailList] = useState(selectedUser);
   let emailList: string[] = [selectedUser];
   console.log("Email", emailList);
-
-  // const userEmail = localStorage.getItem("userEmail");
-  // const userEmail =
-  //   typeof window !== "undefined"
-  //     ? localStorage.getItem("userEmail")
-  //     : "moni@gmail.com";
 
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
@@ -282,10 +274,7 @@ const AdminPage: React.FC = () => {
       </div>
       <div className="flex flex-col gap-4">
         <div className="grow grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-8 pb-4 pt-2">
-          <AmoliChartAdmin
-            data={userAmoliData.records}
-            emailList={emailList}
-          />
+          <AmoliChartAdmin data={userAmoliData.records} emailList={emailList} />
 
           <TallyAdmin
             userData={userMoktobBisoyData}
@@ -334,6 +323,69 @@ const AdminPage: React.FC = () => {
             title="Dayee Bisoy Tally"
           />
         </div>
+      </div>
+
+      <div className="border border-[#155E75] p-6 mt-10 rounded-xl overflow-y-auto">
+        <Tabs defaultValue="Amolimusahaba" className="w-full p-4">
+          <TabsList className="mx-10 my-6">
+            <TabsTrigger value="Amolimusahaba">Amolimusahaba</TabsTrigger>
+            <TabsTrigger value="moktob">Moktob Bisoy</TabsTrigger>
+            <TabsTrigger value="talim">Talim Bisoy</TabsTrigger>
+            <TabsTrigger value="daye">Daye Bisoy</TabsTrigger>
+            <TabsTrigger value="dawati">Dawati Bisoy</TabsTrigger>
+            <TabsTrigger value="dawatimojlish">Dawati Mojlish</TabsTrigger>
+            <TabsTrigger value="jamat">Jamat Bisoy</TabsTrigger>
+            <TabsTrigger value="dinefera">Dine Fire Asa</TabsTrigger>
+            <TabsTrigger value="sofor">Sofor Bisoy</TabsTrigger>
+          </TabsList>
+
+          {/* Tab Content */}
+          <TabsContent value="Amolimusahaba">
+            <div className="bg-gray-50 rounded shadow">
+              {/* <AmoliTableShow userData={userAmoliData} /> */}
+            </div>
+          </TabsContent>
+          <TabsContent value="moktob">
+            <div className="bg-gray-50 rounded shadow">
+              <AdminTable userData={userMoktobBisoyData} emailList={emailList} />
+            </div>
+          </TabsContent>
+          <TabsContent value="talim">
+            <div className="bg-gray-50 rounded shadow">
+              <AdminTable userData={userTalimBisoyData} emailList={emailList} />
+            </div>
+          </TabsContent>
+          <TabsContent value="daye">
+            <div className="bg-gray-50 rounded shadow">
+              <AdminTable userData={userDayeData} emailList={emailList} />
+            </div>
+          </TabsContent>
+          <TabsContent value="dawati">
+            <div className="bg-gray-50 rounded shadow">
+              <AdminTable userData={userDawatiBisoyData} emailList={emailList} />
+            </div>
+          </TabsContent>
+          <TabsContent value="dawatimojlish">
+            <div className="bg-gray-50 rounded shadow">
+              <AdminTable userData={userDawatiMojlishData} emailList={emailList} />
+            </div>
+          </TabsContent>
+          <TabsContent value="jamat">
+            <div className="bg-gray-50 rounded shadow">
+              <AdminTable userData={userJamatBisoyData} emailList={emailList} />
+            </div>
+          </TabsContent>
+          <TabsContent value="dinefera">
+            <div className="bg-gray-50 rounded shadow">
+              <AdminTable userData={userDineFeraData} emailList={emailList} />
+            </div>
+          </TabsContent>
+          <TabsContent value="sofor">
+            <div className="bg-gray-50 rounded shadow">
+              <AdminTable userData={userSoforBisoyData} emailList={emailList} />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
