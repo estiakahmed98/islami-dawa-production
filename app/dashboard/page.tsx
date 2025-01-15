@@ -4,7 +4,6 @@ import React from "react";
 import AmoliChart from "@/components/AmoliCharts";
 import dynamic from "next/dynamic";
 import { userAmoliData } from "../data/amoliMuhasabaUserData";
-import Tally from "@/components/Tally";
 import { userMoktobBisoyData } from "@/app/data/moktobBisoyUserData";
 import { userDawatiMojlishData } from "../data/dawatiMojlishUserData";
 import { userTalimBisoyData } from "../data/talimBisoyUserData";
@@ -46,13 +45,13 @@ const Dashboard: React.FC<TallyProps> = ({ userData, email, title }) => {
         </h1>
       </div>
       <div className="grid xl:grid-cols-3 p-2 lg:p-6 gap-6 overflow-y-auto border border-[#155E75] rounded-xl">
-        <AmoliChart data={userAmoliBisoyData.records} userEmail={userEmail} />
-       
+        <AmoliChart data={userAmoliData.records} userEmail={userEmail} />
+
         <TallyAdmin
-            userData={userMoktobBisoyData}
-            emails={userEmail}
-            title="Moktob Bisoy Tally"
-          />
+          userData={userMoktobBisoyData}
+          emails={userEmail}
+          title="Moktob Bisoy Tally"
+        />
 
         <TallyAdmin
           userData={userDawatiBisoyData}
@@ -67,7 +66,7 @@ const Dashboard: React.FC<TallyProps> = ({ userData, email, title }) => {
         />
 
         <TallyAdmin
-          userData={userJamatBisoyUserData}
+          userData={userJamatBisoyData}
           emails={userEmail}
           title="Jamat Bisoy Tally"
         />
