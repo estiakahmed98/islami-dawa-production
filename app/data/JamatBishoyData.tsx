@@ -2,7 +2,7 @@ import * as Yup from "yup";
 
 // Type for form data
 interface FormData {
-  jamatBerHoise: number | string; // can be a number or string depending on how it's filled out
+  jamatBerHoise: number | string;
   jamatSathi: string;
   editorContent: string;
 }

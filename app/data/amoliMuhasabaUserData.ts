@@ -1,4 +1,4 @@
-export const userAmoliBisoyData = {
+export const userAmoliData = {
   "labelMap": {
     "tahajjud": "তাহাজ্জুদ",
     "ayat": "তিলাওয়াতুল কোরআন তাদাব্বুর",
@@ -209,6 +209,22 @@ export const userAmoliBisoyData = {
         "ayamroja": "হ্যাঁ",
         "hijbulBahar": "হ্যাঁ",
         "percentage": "100.00"
+      },
+      "2025-01-15": {
+        "tahajjud": 20,
+        "ayat": "sura Isra",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "আওয়াবীন",
+        "jamat": 5,
+        "sirat": "bukhari",
+        "Dua": "হ্যাঁ",
+        "ilm": "muslim",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "হ্যাঁ",
+        "hijbulBahar": "হ্যাঁ",
+        "percentage": "100.00"
       }
     },
     "zisan@gmail.com": {
@@ -245,6 +261,42 @@ export const userAmoliBisoyData = {
         "ayamroja": "হ্যাঁ",
         "hijbulBahar": "হ্যাঁ",
         "percentage": "96.92"
+      }
+    },
+    "estiak@gmail.com": {
+      "2025-01-15": {
+        "tahajjud": 20,
+        "ayat": "sura Isra",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "bukhari",
+        "Dua": "হ্যাঁ",
+        "ilm": "muslim",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "হ্যাঁ",
+        "hijbulBahar": "হ্যাঁ",
+        "percentage": "100.00"
+      }
+    },
+    "rifat@gmail.com": {
+      "2025-01-15": {
+        "tahajjud": 20,
+        "ayat": "sura Nahl",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক-আওয়াবীন-চাশ্ত",
+        "jamat": 5,
+        "sirat": "bukhari 1",
+        "Dua": "হ্যাঁ",
+        "ilm": "bukhari 3",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "হ্যাঁ",
+        "hijbulBahar": "হ্যাঁ",
+        "percentage": "100.00"
       }
     }
   }

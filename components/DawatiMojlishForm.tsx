@@ -4,7 +4,6 @@ import { ErrorMessage, Field, Form, Formik } from "formik";
 import {
   initialFormData,
   validationSchema,
-  DawatiFormData,
 } from "@/app/data/DawatiMojlishData";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -34,36 +33,56 @@ const DawatiMojlishForm: React.FC = () => {
   // Check if the user has already submitted today
   useEffect(() => {
     const checkSubmissionStatus = async () => {
-      const response = await fetch(`/api/dawatimojlish?email=${email}`);
-      if (response.ok) {
-        const data = await response.json();
-        setIsSubmittedToday(data.isSubmittedToday);
+      if (!email) return;
+
+      try {
+        const response = await fetch(`/api/dawatimojlish?email=${email}`);
+        if (response.ok) {
+          const data = await response.json();
+          setIsSubmittedToday(data.isSubmittedToday);
+        } else {
+          toast.error("Failed to check submission status.");
+        }
+      } catch (error) {
+        console.error("Error checking submission status:", error);
+        toast.error("Error checking submission status.");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
-    if (email) checkSubmissionStatus();
+
+    checkSubmissionStatus();
   }, [email]);
 
   // Handle form submission
   const handleSubmit = async (values: FormValues) => {
     const formData = { ...values, email };
+
     if (isSubmittedToday) {
-      toast.error("You Already Submitted Today...");
+      toast.error("You have already submitted today. Try again tomorrow.");
       return;
     }
 
-    const response = await fetch("/api/dawatimojlish", {
-      method: "POST",
-      body: JSON.stringify(formData),
-      headers: { "Content-Type": "application/json" },
-    });
+    try {
+      const response = await fetch("/api/dawatimojlish", {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" },
+      });
 
-    if (response.ok) {
-      setIsSubmittedToday(true);
-      toast.success("Submitted Successfully...");
-      router.push("/dashboard");
-    } else {
-      toast.error("Submission Failed. Please Try Again...");
+      if (response.ok) {
+        setIsSubmittedToday(true);
+        toast.success("Submitted successfully!");
+        router.push("/dashboard");
+      } else if (response.status === 400) {
+        const data = await response.json();
+        toast.error(data.error || "Submission failed. Try again.");
+      } else {
+        toast.error("Submission failed. Try again.");
+      }
+    } catch (error) {
+      console.error("Error during submission:", error);
+      toast.error("Error during submission.");
     }
   };
 
@@ -74,7 +93,7 @@ const DawatiMojlishForm: React.FC = () => {
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8 z-30">
-          You already have submitted today
+          You already have submitted today.
         </div>
       )}
       <h2 className="mb-6 text-2xl">দাওয়াতি মজলিশ</h2>
@@ -108,6 +127,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="mojlisheOnshogrohon"
+                  disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -123,6 +143,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="prosikkhonKormoshalaAyojon"
+                  disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -138,6 +159,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="prosikkhonOnshogrohon"
+                  disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -153,6 +175,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="jummahAlochona"
+                  disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -168,6 +191,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="dhormoSova"
+                  disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -183,6 +207,7 @@ const DawatiMojlishForm: React.FC = () => {
                 </label>
                 <Field
                   name="mashwaraPoint"
+                  disabled={isSubmittedToday}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -192,6 +217,7 @@ const DawatiMojlishForm: React.FC = () => {
                   className="text-red-500"
                 />
               </div>
+              {/* Repeat similar blocks for other fields */}
               <div className="lg:col-span-2">
                 <h1 className="pb-3">মতামত লিখুন</h1>
                 <JoditEditorComponent
@@ -206,7 +232,12 @@ const DawatiMojlishForm: React.FC = () => {
               </div>
             </div>
             <div className="flex justify-end pt-4">
-              <Button variant="ghost" size="default" type="submit">
+              <Button
+                variant="ghost"
+                size="default"
+                type="submit"
+                disabled={isSubmittedToday}
+              >
                 Submit
               </Button>
             </div>

@@ -12,6 +12,7 @@ export interface FormData {
   TotalAgeSikkha: string;
   MadrasahAdmit: string;
   NewMuslim: string;
+  editorContent: string;
 }
 
 // Initial form data
@@ -26,6 +27,7 @@ export const initialFormData: FormData = {
   TotalAgeSikkha: "",
   MadrasahAdmit: "",
   NewMuslim: "",
+  editorContent: "",
 };
 
 // Validation schema using Yup

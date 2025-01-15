@@ -1,9 +1,14 @@
 import * as Yup from "yup";
 
 // Initial form data with TypeScript type annotation
-export const initialFormData: { mohilaTalim: string; TalimOngshoGrohon: string } = {
+export const initialFormData: {
+  mohilaTalim: string;
+  TalimOngshoGrohon: string;
+  editorContent: string;
+} = {
   mohilaTalim: "",
   TalimOngshoGrohon: "",
+  editorContent: "",
 };
 
 // Validation schema using Yup with TypeScript support

@@ -7,6 +7,7 @@ export interface DawatiFormData {
   alemderSatheyMojlish: string;
   publicSatheyMojlish: string;
   nonMuslimSaptahikGasht: string;
+  editorContent: string;
 }
 
 // Initial form data
@@ -16,6 +17,7 @@ export const initialFormData: DawatiFormData = {
   alemderSatheyMojlish: "",
   publicSatheyMojlish: "",
   nonMuslimSaptahikGasht: "",
+  editorContent: "",
 };
 
 // Validation schema using Yup
