@@ -27,6 +27,20 @@ export const userSoforBishoyData = {
         "madrasaVisit": "10",
         "moktobVisit": "20",
         "schoolCollegeVisit": "30"
+      },
+      "2025-01-15": {
+        "moktobVisit": 10,
+        "madrasaVisits": [
+          "M1",
+          "m2",
+          "m3"
+        ],
+        "schoolCollegeVisits": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "editorContent": "<p>Ajk Sofor kora hoyeche</p>"
       }
     },
     "tushar@gmail.com": {

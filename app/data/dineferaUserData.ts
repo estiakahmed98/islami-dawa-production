@@ -85,6 +85,11 @@ export const userDineFeraData = {
         "omuslimKalemaPoreche": "50",
         "murtadDineFireasa": "50",
         "editorContent": "<p>dfdff</p>"
+      },
+      "2025-01-15": {
+        "omuslimKalemaPoreche": 100,
+        "murtadDineFireasa": 100,
+        "editorContent": "<p>mota mot<br></p>"
       }
     }
   }
