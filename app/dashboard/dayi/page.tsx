@@ -1,4 +1,5 @@
 import DayeeBishoyForm from "@/components/DayeeBishoyForm";
+import { userDayeData } from "@/app/data/dayiUserData";
 import React from "react";
 import {
   Tabs,
@@ -6,57 +7,33 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/TabButton";
+import AmoliTableShow from "@/components/TableShow";
 
 const DayiPage: React.FC = () => {
-  const currentDate = new Date().toISOString().split("T")[0];
-
   return (
     <div>
-      <DayeeBishoyForm />
-    </div>
-    // <div>
-    //   <Tabs defaultValue="dataForm" className="w-full p-4">
-    //     <div className="flex justify-between">
-    //       <TabsList>
-    //         <TabsTrigger value="dataForm">তথ্য দিন</TabsTrigger>
-    //         <TabsTrigger value="report">প্রতিবেদন</TabsTrigger>
-    //       </TabsList>
-    //       <div>
-    //         <form className="border px-4 py-1 rounded-lg">
-    //           <input type="date" defaultValue={currentDate}></input>
-    //         </form>
-    //       </div>
-    //     </div>
-    //     <TabsContent value="dataForm">
-    //       <div className=" bg-gray-50 rounded shadow">
-    //         <DayeeBishoyForm />
-    //       </div>
-    //     </TabsContent>
-    //     <TabsContent value="report">
-    //       <div className=" bg-gray-50 rounded shadow">
-    //         <Tabs defaultValue="monthly" className="w-full p-4">
-    //           <div className="flex justify-center">
-    //             <TabsList>
-    //               <TabsTrigger value="monthly">মাসিক</TabsTrigger>
-    //               <TabsTrigger value="yearly">বাঁৎসরিক</TabsTrigger>
-    //             </TabsList>
-    //           </div>
+      <div>
+        <Tabs defaultValue="dataForm" className="w-full p-4">
+          <div className="flex justify-between">
+            <TabsList>
+              <TabsTrigger value="dataForm">তথ্য দিন</TabsTrigger>
+              <TabsTrigger value="report">প্রতিবেদন</TabsTrigger>
+            </TabsList>
+          </div>
+          <TabsContent value="dataForm">
+            <div className=" bg-gray-50 rounded shadow">
+              <DayeeBishoyForm />
+            </div>
+          </TabsContent>
 
-    //           <TabsContent value="monthly">
-    //             <div>
-    //               {/* <ReportTable /> */}
-    //             </div>
-    //           </TabsContent>
-    //           <TabsContent value="yearly">
-    //             <div>
-    //               {/* <ReportTableYearly /> */}
-    //             </div>
-    //           </TabsContent>
-    //         </Tabs>
-    //       </div>
-    //     </TabsContent>
-    //   </Tabs>
-    // </div>
+          <TabsContent value="report">
+            <div className=" bg-gray-50 rounded shadow">
+              <AmoliTableShow userData={userDayeData} />
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
   );
 };
 
