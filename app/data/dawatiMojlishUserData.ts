@@ -65,5 +65,17 @@ export const userDawatiMojlishData = {
         "motamotdin": "good"
       }
     },
+    "tauhid@gmail.com": {
+      "2025-01-16": {
+        "dawatterGuruttoMojlish": 12,
+        "mojlisheOnshogrohon": 23,
+        "prosikkhonKormoshalaAyojon": 23,
+        "prosikkhonOnshogrohon": 23,
+        "jummahAlochona": 50,
+        "dhormoSova": 5,
+        "mashwaraPoint": 12,
+        "editorContent": "<p>Dawati Bisoy Motamot</p>"
+      }
+    }
   }
 };
