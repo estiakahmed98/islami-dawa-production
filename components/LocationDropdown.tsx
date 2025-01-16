@@ -131,7 +131,7 @@ const LocationDropdown: React.FC<LocationDropdownProps> = ({
   };
 
   return (
-    <div className="flex gap-4 items-center flex-wrap max-w-4xl">
+    <div className="grid lg:flex gap-4 items-center flex-wrap">
       {/* Division Dropdown */}
       <select
         value={selectedDivision}

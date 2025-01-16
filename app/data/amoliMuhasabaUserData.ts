@@ -252,6 +252,24 @@ export const userAmoliData = {
         "hijbulBahar": "হ্যাঁ",
         "percentage": "100.00"
       }
+    },
+    "user3@gmail.com": {
+      "2025-01-16": {
+        "tahajjud": 20,
+        "ayat": "sura Baqara",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "আওয়াবীন",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "percentage": "100.00"
+      }
     }
   }
 };

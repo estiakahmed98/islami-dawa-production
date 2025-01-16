@@ -29,7 +29,7 @@ interface TallyProps {
   title: string;
 }
 
-const Dashboard: React.FC<TallyProps> = ({ userData, email, title }) => {
+const Dashboard: React.FC<TallyProps> = () => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
   // console.log("Session", session);

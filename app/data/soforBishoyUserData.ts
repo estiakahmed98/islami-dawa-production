@@ -88,6 +88,18 @@ export const userSoforBishoyData = {
         ],
         "editorContent": "<p>Sofor Bisoy Motamot</p>"
       }
+    },
+    "user3@gmail.com": {
+      "2025-01-16": {
+        "moktobVisit": 10,
+        "madrasaVisits": [
+          "M1"
+        ],
+        "schoolCollegeVisits": [
+          "S1"
+        ],
+        "editorContent": "<p>hello motamot</p><p><br></p>"
+      }
     }
   }
 };
