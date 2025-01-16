@@ -17,6 +17,11 @@ export const userTalimBisoyData = {
         "mohilaTalim": "12",
         "TalimOngshoGrohon": "12",
         "editorContent": ""
+      },
+      "2025-01-16": {
+        "mohilaTalim": 12,
+        "TalimOngshoGrohon": 12,
+        "editorContent": "<ul><li data-sourcepos=\"5:1-5:137\"><strong>Knowledge:</strong> A Da'i should have a sound understanding of Islamic teachings, including the Quran, Hadith, and Islamic jurisprudence.</li><li data-sourcepos=\"6:1-6:129\"><strong>Wisdom:</strong> A Da'i should use wisdom and good judgment in their approach, adapting their message to the audience and context.</li><li data-sourcepos=\"7:1-7:140\"><strong>Good character:</strong> A Da'i should embody the values and principles of Islam in their own life, serving as a positive example for others.</li><li data-sourcepos=\"8:1-9:0\"><strong>Patience and perseverance:</strong> A Da'i should be patient and persistent in their efforts, recognizing that guidance comes from God alone.</li></ul>\n\n\n"
       }
     },
     "jewel@gmail.com": {

@@ -21,8 +21,6 @@ import {
 import { useSession } from "next-auth/react";
 import AmoliTableShow from "@/components/TableShow";
 import TallyAdmin from "@/components/TallyAdmin";
-import AmoliChartAdmin from "@/components/AmoliChartAdmin";
-import SoforTable from "@/components/SoforTable";
 
 interface TallyProps {
   userData: Record<string, any>;
