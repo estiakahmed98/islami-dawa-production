@@ -20,6 +20,20 @@ export const userSoforBishoyData = {
           "100"
         ],
         "editorContent": "<p>Good Job</p>"
+      },
+      "2025-01-16": {
+        "moktobVisit": 100,
+        "madrasaVisits": [
+          "Madrasha 1",
+          "Madrasha 1",
+          "Madrasha 1"
+        ],
+        "schoolCollegeVisits": [
+          "School 1",
+          "School 1",
+          "School 1"
+        ],
+        "editorContent": "<p><strong style=\"margin: 0px; padding: 0px; color: rgb(0, 0, 0); font-family: &quot;Open Sans&quot;, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: justify; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;\">Lorem Ipsum</strong><span style=\"color: rgb(0, 0, 0); font-family: &quot;Open Sans&quot;, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: justify; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;\"><span>&nbsp;</span>is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</span></p>"
       }
     },
     "faysal@gmail.com": {
@@ -90,7 +104,7 @@ export const userSoforBishoyData = {
       }
     },
     "user3@gmail.com": {
-      "2025-01-16": {
+      "2025-01-01": {
         "moktobVisit": 10,
         "madrasaVisits": [
           "M1"
@@ -99,6 +113,59 @@ export const userSoforBishoyData = {
           "S1"
         ],
         "editorContent": "<p>hello motamot</p><p><br></p>"
+      },
+      "2025-01-02": {
+        "moktobVisit": 20,
+        "madrasaVisits": [
+          "M1",
+          "M2",
+          "M3",
+          "M4",
+          "M5",
+          "M6"
+        ],
+        "schoolCollegeVisits": [
+          "S1",
+          "S2",
+          "S3",
+          "S4",
+          "S5",
+          "s6"
+        ],
+        "editorContent": "<p>16 tarik er data..............</p>"
+      },
+      "2025-01-10": {
+        "moktobVisit": 20,
+        "madrasaVisits": [
+          "Dhaka Mohila Madrasha",
+          "Gazipur Madrasha",
+          "Tangail Madrasha",
+          "Narayangong Madrasha"
+        ],
+        "schoolCollegeVisits": [
+          "Ideal School and college",
+          "Notre Dame College",
+          "Sf Shaheen College"
+        ],
+        "editorContent": "<p>Apnar Motamot din</p>"
+      },
+      "2025-01-16": {
+        "moktobVisit": 100,
+        "madrasaVisits": [
+          "Madrasha 1",
+          "Madrasha 2",
+          "Madrasha 3",
+          "Madrasha 4",
+          "Madrasha 5"
+        ],
+        "schoolCollegeVisits": [
+          "School 1",
+          "School 2",
+          "School 3",
+          "School 4",
+          "School 5"
+        ],
+        "editorContent": "<div style=\"margin: 0px 14.3958px 0px 28.7917px; padding: 0px; width: 436.792px; text-align: left; float: left; color: rgb(0, 0, 0); font-family: &quot;Open Sans&quot;, Arial, sans-serif; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; font-size: 14px;\"><p style=\"margin: 0px 0px 15px; padding: 0px; text-align: justify;\"><strong style=\"margin: 0px; padding: 0px;\">Lorem Ipsum</strong><span>&nbsp;</span>is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been <strong>the </strong>industry's <u>standard </u>dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p></div><div style=\"margin: 0px 28.7917px 0px 14.3958px; padding: 0px; width: 436.792px; text-align: left; float: right; color: rgb(0, 0, 0); font-family: &quot;Open Sans&quot;, Arial, sans-serif; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; font-size: 14px;\"><br class=\"Apple-interchange-newline\"></div>"
       }
     }
   }

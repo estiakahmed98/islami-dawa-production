@@ -5,6 +5,7 @@ import fileDownload from "js-file-download";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useSession } from "next-auth/react";
+import DOMPurify from "dompurify";
 
 interface AmoliTableProps {
   userData: any;
@@ -25,6 +26,8 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   } | null>(null); // For cell editing
   const [newCellValue, setNewCellValue] = useState<string>(""); // New cell value for editing
 
+  const [motamotPopup, setMotamotPopup] = useState<string | null>(null);
+
   const { data: session } = useSession();
   const email = session?.user?.email;
 
@@ -33,15 +36,12 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
 
-    // Calculate total days in the current month
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     setMonthDays(daysArray);
 
     setMonthName(today.toLocaleString("default", { month: "long" }));
     setYear(currentYear);
-
-
     setUserEmail(email || "");
 
     const labels = userData.labelMap;
@@ -54,11 +54,37 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
         const date = `${currentYear}-${(currentMonth + 1)
           .toString()
           .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-        row[day] = email
-          ? userData.records[email]?.[date]?.[label] || "- -"
-          : "- -";
+        const visitData =
+          (email && userData.records[email]?.[date]?.[label]) ||
+          (email && userData.records[email]?.[date]?.[`${label}s`]) ||
+          "- -";
+        row[day] = visitData;
       });
       return row;
+    });
+
+    transposed.push({
+      label: "মতামত",
+      ...Object.fromEntries(
+        daysArray.map((day) => {
+          const date = `${currentYear}-${(currentMonth + 1)
+            .toString()
+            .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+          const motamotHtml =
+            userData.records[email ?? ""]?.[date]?.editorContent || "- -";
+          const motamotText = DOMPurify.sanitize(motamotHtml, {
+            ALLOWED_TAGS: [],
+          });
+          return [
+            day,
+            motamotText !== "- -" ? (
+              <button onClick={() => setMotamotPopup(motamotText)}>👁️</button>
+            ) : (
+              "- -"
+            ),
+          ];
+        })
+      ),
     });
 
     setTransposedData(transposed);
@@ -204,63 +230,55 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
         </div>
       </div>
 
-      <div className="overflow-auto">
-        <table className="border-collapse border border-gray-300 w-full table-auto text-sm md:text-base">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 px-4 py-2">Label</th>
-              {monthDays.map((day) => (
-                <th
-                  key={day}
-                  className="border border-gray-300 px-6 py-2 text-center relative group whitespace-nowrap"
-                >
-                  Day {day}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {transposedData.map((row, rowIndex) => (
-              <tr key={rowIndex} className="hover:bg-gray-100">
-                <td className="border max-w-sm:text-xs font-normal border-gray-300 px-6 py-2 whitespace-nowrap">
-                  {row.label}
-                </td>
+      <div>
+        <div className="overflow-auto">
+          <table className="border-collapse border border-gray-300 w-full table-auto text-sm md:text-base">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-300 px-4 py-2">Label</th>
                 {monthDays.map((day) => (
-                  <td
+                  <th
                     key={day}
-                    className="border border-gray-300 px-6 py-2 text-center relative group"
+                    className="border border-gray-300 px-6 py-2 text-center text-nowrap"
                   >
-                    {row[day]}
-                    <button
-                      onClick={() => handleEditCellClick(rowIndex, day)}
-                      className="absolute top-1/2 right-2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-blue-600"
-                    >
-                      ✏️
-                    </button>
-                  </td>
+                    Day {day}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td className="border border-gray-300 px-6 py-2 text-center font-bold"></td>
-              {monthDays.map((day) => (
-                <td
-                  key={day}
-                  className="border border-gray-300 px-6 py-2 text-center"
-                >
-                  <button
-                    onClick={() => handleColumnEdit(day)}
-                    className="bg-blue-500 text-white py-1 px-3 rounded"
-                  >
-                    Edit
-                  </button>
-                </td>
+            </thead>
+            <tbody>
+              {transposedData.map((row, rowIndex) => (
+                <tr key={rowIndex} className="hover:bg-gray-100">
+                  <td className="border border-gray-300 px-6 py-2 text-nowrap">
+                    {row.label}
+                  </td>
+                  {monthDays.map((day) => (
+                    <td
+                      key={day}
+                      className="border border-gray-300 px-6 py-2 text-center text-nowrap"
+                    >
+                      {row[day]}
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          </tfoot>
-        </table>
+            </tbody>
+          </table>
+        </div>
+        {motamotPopup && (
+          <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white p-10 rounded-xl shadow-lg max-w-[80vw] lg:max-w-[60vw] max-h-[70vh] relative overflow-y-auto">
+              <button
+                className="absolute top-4 right-6 text-xl text-red-500 hover:text-red-700"
+                onClick={() => setMotamotPopup(null)}
+              >
+                ✖
+              </button>
+              <h3 className="text-lg font-bold mb-4">মতামত</h3>
+              <p className="lg:text-xl">{motamotPopup}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Cell Edit Modal */}
@@ -303,50 +321,48 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       {/* Column Edit Modal */}
       {editColumn !== null && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-        <div className="bg-white p-6 rounded-xl shadow-lg w-[90vw] lg:w-2/5 max-h-[80vh] mt-4 overflow-y-auto scrollbar relative">
-          <button
-            className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none"
-            onClick={() => setEditColumn(null)}
-          >
-            {/* &#x2715; */}
-            <TbXboxX className="size-8"/>
-
-          </button>
-          <h3 className="text-lg font-bold mb-4">
-            Edit Column: Day {editColumn}
-          </h3>
-          {columnFormData.map((item, index) => (
-            <div className="mb-4" key={index}>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {item.label}
-              </label>
-              <input
-                type="text"
-                className="border border-gray-300 p-2 w-full"
-                value={item.value || ""}
-                onChange={(e) =>
-                  handleColumnInputChange(index, e.target.value)
-                }
-              />
-            </div>
-          ))}
-          <div className="flex justify-end gap-4">
+          <div className="bg-white p-6 rounded-xl shadow-lg w-[90vw] lg:w-2/5 max-h-[80vh] mt-4 overflow-y-auto scrollbar relative">
             <button
-              className="p-2 bg-gray-300 rounded"
+              className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none"
               onClick={() => setEditColumn(null)}
             >
-              Cancel
+              {/* &#x2715; */}
+              <TbXboxX className="size-8" />
             </button>
-            <button
-              className="p-2 bg-teal-700 text-white rounded"
-              onClick={handleSaveColumnEdit}
-            >
-              Save
-            </button>
+            <h3 className="text-lg font-bold mb-4">
+              Edit Column: Day {editColumn}
+            </h3>
+            {columnFormData.map((item, index) => (
+              <div className="mb-4" key={index}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {item.label}
+                </label>
+                <input
+                  type="text"
+                  className="border border-gray-300 p-2 w-full"
+                  value={item.value || ""}
+                  onChange={(e) =>
+                    handleColumnInputChange(index, e.target.value)
+                  }
+                />
+              </div>
+            ))}
+            <div className="flex justify-end gap-4">
+              <button
+                className="p-2 bg-gray-300 rounded"
+                onClick={() => setEditColumn(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="p-2 bg-teal-700 text-white rounded"
+                onClick={handleSaveColumnEdit}
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      
       )}
     </div>
   );
