@@ -6,53 +6,32 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/TabButton";
+import AmoliTableShow from "@/components/TableShow";
+import { userJamatBisoyData } from "@/app/data/jamatBisoyUserData";
 
 const JamatPage: React.FC = () => {
-  const currentDate = new Date().toISOString().split("T")[0];
-
   return (
     <div>
-      <JamatBishoyForm />
-    </div>
-    // <div>
-    //   <Tabs defaultValue="dataForm" className="w-full p-4">
-    //     <div className="flex justify-between">
-    //       <TabsList>
-    //         <TabsTrigger value="dataForm">তথ্য দিন</TabsTrigger>
-    //         <TabsTrigger value="report">প্রতিবেদন</TabsTrigger>
-    //       </TabsList>
-    //       <div>
-    //         <form className="border px-4 py-1 rounded-lg">
-    //           <input type="date" defaultValue={currentDate}></input>
-    //         </form>
-    //       </div>
-    //     </div>
-    //     <TabsContent value="dataForm">
-    //       <div className=" bg-gray-50 rounded shadow">
-    //         <JamatBishoyForm />
-    //       </div>
-    //     </TabsContent>
-    //     <TabsContent value="report">
-    //       <div className=" bg-gray-50 rounded shadow">
-    //         <Tabs defaultValue="monthly" className="w-full p-4">
-    //           <div className="flex justify-center">
-    //             <TabsList>
-    //               <TabsTrigger value="monthly">মাসিক</TabsTrigger>
-    //               <TabsTrigger value="yearly">বাঁৎসরিক</TabsTrigger>
-    //             </TabsList>
-    //           </div>
+      <Tabs defaultValue="dataForm" className="w-full p-4">
+        <div className="flex justify-between">
+          <TabsList>
+            <TabsTrigger value="dataForm">তথ্য দিন</TabsTrigger>
+            <TabsTrigger value="report">প্রতিবেদন</TabsTrigger>
+          </TabsList>
+        </div>
+        <TabsContent value="dataForm">
+          <div className=" bg-gray-50 rounded shadow">
+            <JamatBishoyForm />
+          </div>
+        </TabsContent>
 
-    //           <TabsContent value="monthly">
-    //             <div>{/* <ReportTable /> */}</div>
-    //           </TabsContent>
-    //           <TabsContent value="yearly">
-    //             <div>{/* <ReportTableYearly /> */}</div>
-    //           </TabsContent>
-    //         </Tabs>
-    //       </div>
-    //     </TabsContent>
-    //   </Tabs>
-    // </div>
+        <TabsContent value="report">
+          <div className=" bg-gray-50 rounded shadow">
+            <AmoliTableShow userData={userJamatBisoyData} />
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

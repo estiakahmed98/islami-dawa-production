@@ -1,7 +1,8 @@
 export const userDineFeraData = {
   "labelMap": {
     "omuslimKalemaPoreche": "অমুসলিম কালেমা পড়ে মুসলমান হয়েছে",
-    "murtadDineFireasa": "মুরতাদ কালেমা পড়ে ইসলামে ফিরে এসেছে"
+    "murtadDineFireasa": "মুরতাদ কালেমা পড়ে ইসলামে ফিরে এসেছে",
+    "editorContent": "মতামত লিখুন"
   },
   "records": {
     "jewel@gmail.com": {
@@ -50,6 +51,11 @@ export const userDineFeraData = {
         "omuslimKalemaPoreche": "12",
         "murtadDineFireasa": "20",
         "editorContent": "<p>Completed...</p>"
+      },
+      "2025-01-16": {
+        "omuslimKalemaPoreche": 12,
+        "murtadDineFireasa": 20,
+        "editorContent": "<ul><li data-sourcepos=\"9:1-9:75\"><strong>Origin:</strong> \"Da'i\" comes from Arabic, while \"Dayee\" comes from Bengali.</li><li data-sourcepos=\"10:1-10:135\"><strong>Meaning:</strong> \"Da'i\" relates to inviting people to Islam, while \"Dayee\" relates to bearing responsibility or being held accountable.</li><li data-sourcepos=\"11:1-12:0\"><strong>Context:</strong> \"Da'i\" is used in an Islamic religious context, while \"Dayee\" is used in general contexts, including legal and social situations.</li></ul>\n\n"
       }
     },
     "zisan@gmail.com": {
