@@ -73,6 +73,13 @@ export const userJamatBisoyData = {
         "jamatSathi": 5000,
         "editorContent": "<p>hello</p>"
       }
+    },
+    "tauhid@gmail.com": {
+      "2025-01-16": {
+        "jamatBerHoise": 12,
+        "jamatSathi": 220,
+        "editorContent": "<p>Jamat Bisoy Motamot</p>"
+      }
     }
   }
 };

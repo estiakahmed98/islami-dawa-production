@@ -3,11 +3,13 @@ import * as Yup from "yup";
 // Define the shape of the initial form data
 export interface DayeeBishoyFormValues {
   sohojogiDayeToiri: number | "";
+  editorContent: string;
 }
 
 // Initial form data
 export const initialFormData: DayeeBishoyFormValues = {
   sohojogiDayeToiri: "",
+  editorContent: "",
 };
 
 // Validation schema using Yup

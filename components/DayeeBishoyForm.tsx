@@ -17,6 +17,10 @@ const DayeeBishoyForm: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [editorContent, setEditorContent] = useState("");
 
+  const handleContentChange = (content: string) => {
+    setEditorContent(content);
+  };
+
   // Check if the user has already submitted today
   useEffect(() => {
     const checkSubmissionStatus = async () => {
@@ -117,9 +121,7 @@ const DayeeBishoyForm: React.FC = () => {
                 <JoditEditorComponent
                   placeholder="আপনার মতামত লিখুন..."
                   initialValue={editorContent}
-                  onContentChange={(content) =>
-                    setFieldValue("editorContent", content)
-                  }
+                  onContentChange={handleContentChange}
                   height="300px"
                   width="100%"
                 />
@@ -144,4 +146,3 @@ const DayeeBishoyForm: React.FC = () => {
 };
 
 export default DayeeBishoyForm;
-

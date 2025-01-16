@@ -145,18 +145,16 @@ const TalimForm: React.FC = () => {
                   className="text-red-500"
                 />
               </div>
-              <div className="col-span-2 pb-4">
-                <h1 className=" pb-3">মতামত লিখুন</h1>
-                <JoditEditorComponent
-                  placeholder="আপনার মতামত লিখুন..."
-                  initialValue=""
-                  onContentChange={(content) =>
-                    setFieldValue("editorContent", content)
-                  }
-                  height="300px"
-                  width="100%"
-                />
-              </div>
+            </div>
+            <div className=" pb-4">
+              <h1 className=" pb-3">মতামত লিখুন</h1>
+              <JoditEditorComponent
+                placeholder="আপনার মতামত লিখুন..."
+                initialValue=""
+                onContentChange={handleContentChange}
+                height="300px"
+                width="100%"
+              />
             </div>
 
             <div className="flex justify-end">
@@ -177,4 +175,3 @@ const TalimForm: React.FC = () => {
 };
 
 export default TalimForm;
-

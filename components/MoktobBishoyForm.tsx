@@ -273,19 +273,17 @@ const MoktobBishoyForm = () => {
                   className="text-red-500"
                 />
               </div>
+            </div>
 
-              <div className="col-span-2">
-                <h1 className=" pb-3">মতামত লিখুন</h1>
-                <JoditEditorComponent
-                  placeholder="আপনার মতামত লিখুন..."
-                  initialValue=""
-                  onContentChange={(content) =>
-                    setFieldValue("editorContent", content)
-                  }
-                  height="300px"
-                  width="100%"
-                />
-              </div>
+            <div>
+              <h1 className=" pb-3">মতামত লিখুন</h1>
+              <JoditEditorComponent
+                placeholder="আপনার মতামত লিখুন..."
+                initialValue=""
+                onContentChange={handleContentChange}
+                height="300px"
+                width="100%"
+              />
             </div>
 
             <div className="flex justify-end mt-4">

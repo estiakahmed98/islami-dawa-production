@@ -91,6 +91,13 @@ export const userDineFeraData = {
         "murtadDineFireasa": 100,
         "editorContent": "<p>mota mot<br></p>"
       }
+    },
+    "tauhid@gmail.com": {
+      "2025-01-16": {
+        "omuslimKalemaPoreche": 12,
+        "murtadDineFireasa": 20,
+        "editorContent": "<p>Dine Fire Eseche...<br></p>"
+      }
     }
   }
 };
