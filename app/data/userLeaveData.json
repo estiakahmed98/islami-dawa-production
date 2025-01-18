@@ -1,0 +1,39 @@
+{
+  "records": {
+    "estiak@gmail.com": {
+      "2025-01-18": [
+        {
+          "leaveType": "Juwel vai er biye",
+          "from": "2025-01-18T18:00:00.000Z",
+          "to": "2025-01-30T18:00:00.000Z",
+          "days": 25,
+          "reason": "Juwel vai er biye",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Sick",
+          "from": "2025-01-14T18:00:00.000Z",
+          "to": "2025-01-15T18:00:00.000Z",
+          "days": 2,
+          "reason": "Sick",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        }
+      ]
+    },
+    "moni@gmail.com": {
+      "2025-01-18": [
+        {
+          "leaveType": "Biye",
+          "from": "2025-01-13T18:00:00.000Z",
+          "to": "2025-01-16T18:00:00.000Z",
+          "days": 5,
+          "reason": "Biye",
+          "approvedBy": "Biye",
+          "status": "Pending"
+        }
+      ]
+    }
+  }
+}

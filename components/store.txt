@@ -1,0 +1,491 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+
+interface LeaveFormProps {
+  onClose: () => void;
+  onRefresh: () => void;
+}
+
+interface LeaveFormValues {
+  leaveType: string;
+  from: Date | null;
+  to: Date | null;
+  days: string;
+  reason: string;
+  approvedBy: string;
+  status: string;
+}
+
+const initialValues: LeaveFormValues = {
+  leaveType: "",
+  from: null,
+  to: null,
+  days: "",
+  reason: "",
+  approvedBy: "",
+  status: "Pending",
+};
+
+const validationSchema = Yup.object().shape({
+  leaveType: Yup.string().required("Leave Type is required"),
+  from: Yup.date().nullable().required("Start Date is required"),
+  to: Yup.date().nullable().required("End Date is required"),
+  days: Yup.number()
+    .typeError("Days must be a number")
+    .required("Days Field is required"),
+  reason: Yup.string().required("Reason is required"),
+  approvedBy: Yup.string().required("Approved By is required"),
+  status: Yup.string().required("Status is required"),
+});
+
+const LeaveForm: React.FC<LeaveFormProps> = ({ onClose, onRefresh }) => {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const email = session?.user?.email || "";
+
+  const [isSubmittedToday, setIsSubmittedToday] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkSubmissionStatus = async () => {
+      if (!email) return;
+
+      try {
+        const response = await fetch(/api/leaves?email=${email});
+        if (response.ok) {
+          const data = await response.json();
+          setIsSubmittedToday(data.isSubmittedToday);
+        } else {
+          toast.error("Failed to check leave submission status.");
+        }
+      } catch (error) {
+        console.error("Error checking submission status:", error);
+        toast.error("Error checking leave submission status.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSubmissionStatus();
+  }, [email]);
+
+  if (loading) return <p>Loading...</p>;
+
+  return (
+    <div className="modal">
+      <div className="modal-content">
+        {isSubmittedToday && (
+          <div className="bg-red-500 text-red-500 p-4 rounded-lg mb-8">
+            You have already applied for leave today.
+          </div>
+        )}
+
+        <h2 className="mb-6 text-2xl">Apply for Leave</h2>
+
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={async (values, { setSubmitting, resetForm }) => {
+            if (isSubmittedToday) {
+              toast.error("You have already applied for leave today.");
+              setSubmitting(false);
+              return;
+            }
+
+            if (!email) {
+              toast.error("User email is not set. Please log in.");
+              setSubmitting(false);
+              return;
+            }
+
+            const formData = { ...values, email };
+
+            try {
+              const response = await fetch("/api/leaves", {
+                method: "POST",
+                body: JSON.stringify(formData),
+                headers: { "Content-Type": "application/json" },
+              });
+
+              if (response.ok) {
+                toast.success("Leave application submitted successfully!");
+                resetForm();
+                onRefresh();
+                onClose();
+                router.push("/dashboard");
+              } else {
+                toast.error("Leave application submission failed! Try again.");
+              }
+            } catch (error) {
+              console.error("Error during leave application:", error);
+              toast.error("An unexpected error occurred. Please try again.");
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+        >
+          {({ setFieldValue, values }) => (
+            <Form>
+              <div>
+                <label>Leave Type</label>
+                <Field
+                  name="leaveType"
+                  as={Input}
+                  placeholder="Enter leave type"
+                />
+                <ErrorMessage
+                  name="leaveType"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+
+              <div className="flex gap-6">
+                <div>
+                  <label>From</label>
+                  <Calendar
+                    mode="single"
+                    selected={values.from || undefined}
+                    onSelect={(date) => setFieldValue("from", date)}
+                  />
+                  <ErrorMessage
+                    name="from"
+                    component="div"
+                    className="text-red-500"
+                  />
+                </div>
+
+                <div>
+                  <label>To</label>
+                  <Calendar
+                    mode="single"
+                    selected={values.to || undefined}
+                    onSelect={(date) => setFieldValue("to", date)}
+                  />
+                  <ErrorMessage
+                    name="to"
+                    component="div"
+                    className="text-red-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label>Days</label>
+                <Field
+                  name="days"
+                  type="number"
+                  as={Input}
+                  placeholder="Enter number of days"
+                />
+                <ErrorMessage
+                  name="days"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+
+              <div>
+                <label>Reason</label>
+                <Field name="reason" as={Input} placeholder="Enter reason" />
+                <ErrorMessage
+                  name="reason"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+
+              <div>
+                <label>Approved By</label>
+                <Field
+                  name="approvedBy"
+                  as={Input}
+                  placeholder="Enter approver's name"
+                />
+                <ErrorMessage
+                  name="approvedBy"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <Button
+                  variant="ghost"
+                  size="default"
+                  type="submit"
+                  disabled={isSubmittedToday}
+                >
+                  Submit
+                </Button>
+                <Button type="button" onClick={onClose} variant="outline">
+                  Cancel
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </div>
+    </div>
+  );
+};
+
+export default LeaveForm;
+
+ei LeaveForm 
+
+Route --->"import fs from "fs";
+import path from "path";
+import { NextRequest, NextResponse } from "next/server";
+import * as Yup from "yup";
+
+const userLeaveDataPath = path.join(process.cwd(), "app/data/userLeaveData.ts");
+
+// Type definitions
+interface Leave {
+  leaveType: string;
+  from: string;
+  to: string;
+  days: number;
+  reason: string;
+  approvedBy: string;
+  status: string;
+}
+
+interface UserLeaveData {
+  records: Record<string, Record<string, Leave>>;
+}
+
+// Ensure the data file exists
+if (!fs.existsSync(userLeaveDataPath)) {
+  const initialData: UserLeaveData = { records: {} };
+  fs.writeFileSync(
+    userLeaveDataPath,
+    export const userLeaveData = ${JSON.stringify(initialData, null, 2)};,
+    "utf-8"
+  );
+}
+
+// Read data file
+const readData = (): UserLeaveData => {
+  try {
+    const fileContent = fs.readFileSync(userLeaveDataPath, "utf-8").trim();
+    if (!fileContent) return { records: {} };
+    const jsonData = fileContent
+      .replace("export const userLeaveData =", "")
+      .trim();
+    return JSON.parse(jsonData) as UserLeaveData;
+  } catch (error: unknown) {
+    console.error("Error reading data file:", error);
+    return { records: {} };
+  }
+};
+
+// Write data to the file
+const writeData = (data: UserLeaveData) => {
+  try {
+    const formattedData = export const userLeaveData = ${JSON.stringify(
+      data,
+      null,
+      2
+    )};\n;
+    fs.writeFileSync(userLeaveDataPath, formattedData, "utf-8");
+  } catch (error: unknown) {
+    console.error("Error writing to data file:", error);
+  }
+};
+
+// Validation schema
+const validationSchema = Yup.object({
+  leaveType: Yup.string().required("Leave Type is required"),
+  from: Yup.string().required("Start Date is required"),
+  to: Yup.string().required("End Date is required"),
+  days: Yup.number()
+    .typeError("Days must be a number")
+    .required("Days Field is required"),
+  reason: Yup.string().required("Reason is required"),
+  approvedBy: Yup.string().required("Approved By is required"),
+  status: Yup.string().required("Status is required"),
+});
+
+// Check if a leave request exists for today
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const email = searchParams.get("email");
+    const today = new Date().toISOString().split("T")[0];
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Email is required." },
+        { status: 400 }
+      );
+    }
+
+    const data = readData();
+    const isSubmittedToday = !!data.records[email]?.[today];
+
+    return NextResponse.json({ isSubmittedToday }, { status: 200 });
+  } catch (error) {
+    console.error("Error checking submission status:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch submission status." },
+      { status: 500 }
+    );
+  }
+}
+
+// Submit a new leave request
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    await validationSchema.validate(body, { abortEarly: false });
+
+    const { email, leaveType, from, to, days, reason, approvedBy, status } =
+      body;
+    const currentDate = new Date().toISOString().split("T")[0];
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Email is required." },
+        { status: 400 }
+      );
+    }
+
+    const data = readData();
+    if (!data.records[email]) data.records[email] = {};
+
+    // Prevent multiple submissions in one day
+    if (data.records[email][currentDate]) {
+      return NextResponse.json(
+        { error: "You have already submitted a leave request today." },
+        { status: 400 }
+      );
+    }
+
+    // Save leave request
+    data.records[email][currentDate] = {
+      leaveType,
+      from,
+      to,
+      days,
+      reason,
+      approvedBy,
+      status,
+    };
+    writeData(data);
+
+    return NextResponse.json(
+      { message: "Leave added successfully" },
+      { status: 201 }
+    );
+  } catch (error: unknown) {
+    if (error instanceof Yup.ValidationError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 });
+    }
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// Delete a leave request
+export async function DELETE(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { email, date } = body;
+
+    if (!email || !date) {
+      return NextResponse.json(
+        { error: "Email and Date are required." },
+        { status: 400 }
+      );
+    }
+
+    const data = readData();
+    if (data.records[email]?.[date]) {
+      delete data.records[email][date];
+      writeData(data);
+      return NextResponse.json(
+        { message: "Leave deleted successfully" },
+        { status: 200 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "No leave found for the specified date." },
+      { status: 400 }
+    );
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+} "
+
+userLeaveData.ts -->
+
+Data file -->> export const userLeaveData = {
+  "records": {
+    "estiak@gmail.com": {
+      "2025-01-18": {
+        "leaveType": "Sick",
+        "from": "2025-01-20T18:00:00.000Z",
+        "to": "2025-01-24T18:00:00.000Z",
+        "days": 4,
+        "reason": "Biye",
+        "approvedBy": "Juwel",
+        "status": "Pending"
+      }
+    }
+  }
+};
+
+
+leaveData.tsx --> import * as Yup from "yup"; 
+
+// Interface for Leave Form Data
+export interface LeaveFormValues {
+  leaveType: string;
+  from: string;
+  to: string;
+  days: string;
+  reason: string;
+  approvedBy: string;
+  status: string;
+}
+
+// Initial form values
+export const initialLeaveData: LeaveFormValues = {
+  leaveType: "",
+  from: "",
+  to: "",
+  days: "",
+  reason: "",
+  approvedBy: "",
+  status: "Pending",
+};
+
+// Validation schema using Yup
+export const leaveValidationSchema = Yup.object({
+  leaveType: Yup.string().required("Leave Type is required"),
+  from: Yup.string().required("Start Date is required"),
+  to: Yup.string().required("End Date is required"),
+  days: Yup.number()
+    .typeError("Days must be a number")
+    .required("Days Field is required"),
+  reason: Yup.string().required("Reason is required"),
+  approvedBy: Yup.string().required("Approved By is required"),
+  status: Yup.string().required("Status is required"),
+});
