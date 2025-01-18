@@ -21,7 +21,7 @@ import {
 import { useSession } from "next-auth/react";
 import AmoliTableShow from "@/components/TableShow";
 import TallyAdmin from "@/components/TallyAdmin";
-import AmoliYearlyTable from "@/components/TableYearly";
+// import AmoliYearlyTable from "@/components/TableYearly";
 
 interface TallyProps {
   userData: Record<string, any>;
