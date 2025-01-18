@@ -9,7 +9,7 @@
           "days": 25,
           "reason": "Juwel vai er biye",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Approved"
         },
         {
           "leaveType": "Sick",
@@ -18,7 +18,7 @@
           "days": 2,
           "reason": "Sick",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Approved"
         }
       ]
     },

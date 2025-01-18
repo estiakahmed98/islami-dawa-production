@@ -1,116 +1,128 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
-// Define the structure of a request item
-interface Request {
-  id: number;
-  name: string;
-  type: string;
-  requestDate: string;
+interface LeaveRecord {
+  email: string;
+  leaveType: string;
+  from: string;
+  to: string;
+  days: number;
+  reason: string;
+  approvedBy: string;
   status: string;
+  date: string;
+  index: number;
 }
 
-const NotificationPage: React.FC = () => {
-  // Sample dynamic request data
-  const [requests, setRequests] = useState<Request[]>([
-    {
-      id: 1,
-      name: "Estiak",
-      type: "Change Info",
-      requestDate: "Nov 12, 2025",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      name: "Juwel",
-      type: "Add New Address",
-      requestDate: "Nov 10, 2025",
-      status: "Approved",
-    },
-    {
-      id: 3,
-      name: "Faysal",
-      type: "Change Info",
-      requestDate: "Nov 8, 2025",
-      status: "Pending",
-    },
-  ]);
+const AdminNotifications: React.FC = () => {
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRecord[]>([]);
 
-  // Handle status update
-  const handleStatusChange = (id: number, newStatus: string) => {
-    setRequests((prevRequests) =>
-      prevRequests.map((request) =>
-        request.id === id ? { ...request, status: newStatus } : request
-      )
-    );
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch("/api/notification");
+      if (response.ok) {
+        const data = await response.json();
+        setLeaveRequests(data.leaveRequests);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const updateStatus = async (
+    email: string,
+    date: string,
+    index: number,
+    status: string
+  ) => {
+    try {
+      const response = await fetch("/api/notification", {
+        method: "POST",
+        body: JSON.stringify({ email, date, index, status }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.ok) {
+        fetchNotifications();
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
   };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">অনুমতি দিন</h1>
+      <h2 className="text-2xl font-semibold mb-4">Admin Notifications</h2>
       <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-100 border-b">
-              <th className="p-4 text-sm font-semibold text-gray-700">Name</th>
-              <th className="p-4 text-sm font-semibold text-gray-700">
-                Request Type
-              </th>
-              <th className="p-4 text-sm font-semibold text-gray-700">
-                Request Date
-              </th>
-              <th className="p-4 text-sm font-semibold text-gray-700">
-                Status
-              </th>
-              <th className="p-4 text-sm font-semibold text-gray-700">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {requests.map((request) => (
-              <tr
-                key={request.id}
-                className="hover:bg-gray-50 transition duration-150"
-              >
-                <td className="p-4 text-sm text-gray-600">{request.name}</td>
-                <td className="p-4 text-sm text-gray-600">{request.type}</td>
-                <td className="p-4 text-sm text-gray-600">
-                  {request.requestDate}
-                </td>
-                <td
-                  className={`p-4 text-sm font-medium ${
-                    request.status === "Approved"
-                      ? "text-green-600"
-                      : "text-yellow-600"
-                  }`}
-                >
-                  {request.status}
-                </td>
-                <td className="p-4">
-                  <button
-                    onClick={() => handleStatusChange(request.id, "Approved")}
-                    className="px-3 py-1 mr-2 text-sm text-white bg-green-600 rounded hover:bg-green-700"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleStatusChange(request.id, "Describe Required")
-                    }
-                    className="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
-                  >
-                    Describe
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Email</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>From</TableHead>
+              <TableHead>To</TableHead>
+              <TableHead>Days</TableHead>
+              <TableHead>Reason</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {leaveRequests.length > 0 ? (
+              leaveRequests.map((leave, index) => (
+                <TableRow key={index}>
+                  <TableCell>{leave.email}</TableCell>
+                  <TableCell>{leave.leaveType}</TableCell>
+                  <TableCell>{leave.from}</TableCell>
+                  <TableCell>{leave.to}</TableCell>
+                  <TableCell>{leave.days}</TableCell>
+                  <TableCell>{leave.reason}</TableCell>
+                  <TableCell>
+                    <select
+                      value={leave.status}
+                      onChange={(e) =>
+                        updateStatus(
+                          leave.email,
+                          leave.date,
+                          leave.index,
+                          e.target.value
+                        )
+                      }
+                      className="border rounded-md p-2"
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Approved">Approved</option>
+                      <option value="Rejected">Rejected</option>
+                    </select>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center text-gray-500">
+                  No leave requests found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
 };
 
-export default NotificationPage;
+export default AdminNotifications;
