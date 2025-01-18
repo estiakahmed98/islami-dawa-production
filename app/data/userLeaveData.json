@@ -31,7 +31,7 @@
           "days": 5,
           "reason": "Biye",
           "approvedBy": "Biye",
-          "status": "Pending"
+          "status": "Rejected"
         },
         {
           "leaveType": "Sick",
@@ -40,7 +40,7 @@
           "days": 2,
           "reason": "Sick",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Approved"
         },
         {
           "leaveType": "Casual Leave",
