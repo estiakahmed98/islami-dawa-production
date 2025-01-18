@@ -1,6 +1,6 @@
 "use client";
 import { TbXboxX } from "react-icons/tb";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import fileDownload from "js-file-download";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -12,7 +12,7 @@ interface AmoliTableProps {
 }
 
 const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
-  const [monthDays, setMonthDays] = useState<number[]>([]);
+  // const [monthDays, setMonthDays] = useState<number[]>([]);
   const [monthName, setMonthName] = useState<string>("");
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [transposedData, setTransposedData] = useState<any[]>([]);
@@ -31,6 +31,62 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   const { data: session } = useSession();
   const email = session?.user?.email;
 
+  const [selectedMonth, setSelectedMonth] = useState<number>(
+    new Date().getMonth()
+  );
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const monthDays = useMemo(() => {
+    return Array.from(
+      { length: new Date(selectedYear, selectedMonth + 1, 0).getDate() },
+      (_, i) => i + 1
+    );
+  }, [selectedMonth, selectedYear]);
+
+  useEffect(() => {
+    if (!userData || !userData.records || !userEmail) return;
+
+    const labels = userData.labelMap;
+    const transposed = Object.keys(labels).map((label) => {
+      const row: { label: string; [key: number]: any } = {
+        label: labels[label],
+      };
+
+      monthDays.forEach((day) => {
+        const date = `${selectedYear}-${(selectedMonth + 1)
+          .toString()
+          .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+        const visitData =
+          userData.records[userEmail]?.[date]?.[label] ||
+          userData.records[userEmail]?.[date]?.[`${label}s`] ||
+          "- -";
+        row[day] = visitData;
+      });
+
+      return row;
+    });
+
+    // **মতামত row is NOT added**
+    setTransposedData(transposed);
+  }, [selectedMonth, selectedYear, userData, userEmail]);
+
   useEffect(() => {
     const today = new Date();
     const currentYear = today.getFullYear();
@@ -38,7 +94,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
 
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-    setMonthDays(daysArray);
 
     setMonthName(today.toLocaleString("default", { month: "long" }));
     setYear(currentYear);
@@ -152,7 +207,9 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
 
   // PDF Export Function
   const convertToPDF = () => {
-    // Validate Input Data
+    const monthName = months[selectedMonth];
+    const year = selectedYear;
+
     if (
       !monthName ||
       !year ||
@@ -164,43 +221,43 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       return;
     }
 
-    // Initialize jsPDF
-    const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: "landscape" });
 
-    // Add Header Text
     doc.text(`${monthName} ${year} - User: ${userEmail}`, 14, 10);
 
-    // Prepare Table Data
-    const labels = transposedData.map((row) => row.label); // Extract labels for the table header row
-    const headers = ["Day", ...labels]; // First column is 'Day', followed by all labels
+    // **Exclude মতামত row**
+    const filteredData = transposedData.filter((row) => row.label !== "মতামত");
+
+    // **Rearrange Data - Days as First Column**
+    const headers = ["Day", ...filteredData.map((row) => row.label)];
     const rows = monthDays.map((day) => [
-      `Day ${day}`, // First column contains the day label
-      ...transposedData.map((row) => row[day] || "-"), // Add user data for each label and day
+      `Day ${day}`,
+      ...filteredData.map((row) => row[day] || "-"),
     ]);
 
-    // Create the Table with autoTable
     autoTable(doc, {
-      head: [headers], // Set table headers
-      body: rows, // Set table rows
-      startY: 20, // Vertical offset for the table
-      theme: "striped", // Table theme
+      head: [headers],
+      body: rows,
+      startY: 20,
+      theme: "striped",
       headStyles: {
-        fillColor: [22, 160, 133], // Header background color
-        halign: "center", // Center-align header text
+        fillColor: [22, 160, 133],
+        halign: "center",
       },
       bodyStyles: {
-        textColor: 50, // Text color for table body
+        textColor: 50,
       },
       styles: {
-        halign: "center", // Center-align all text
-        fontSize: 10, // Smaller font size for large tables
-        cellWidth: "wrap", // Wrap text inside cells
+        halign: "center",
+        fontSize: 8,
       },
-      margin: { top: 20 }, // Top margin for the table
-      pageBreak: "auto", // Automatically handle page breaks
+      columnStyles: {
+        0: { cellWidth: 20 }, // **Ensure No-Wrap for "Day" Column (Fixed Width)**
+      },
+      margin: { top: 20 },
+      pageBreak: "auto",
     });
 
-    // Save the PDF File
     doc.save(`${monthName}_${year}_user_data.pdf`);
   };
 
@@ -208,16 +265,47 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     return <div>Loading...</div>;
   }
 
+  function downloadCSV(event: React.MouseEvent<HTMLButtonElement>): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <div>
-      <div className="grid lg:flex  justify-between lg:px-6 py-2">
-        <h2 className="text-lg lg:text-2xl font-bold text-cyan-800 mb-4 flex items-center">
-          {`Month: ${monthName} ${year}`}
-        </h2>
-        <div className="flex gap-4 mb-4">
+      <div className="grid lg:flex justify-between py-4">
+        <div className="flex gap-4">
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+            className="border px-4 py-3 rounded"
+          >
+            {months.map((month, index) => (
+              <option key={index} value={index}>
+                {month}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+            className="border px-4 py-3 rounded w-24"
+            style={{
+              maxHeight: "150px",
+              overflowY: "auto",
+            }}
+          >
+            {Array.from({ length: 101 }, (_, i) => 2000 + i).map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex gap-4">
           <button
             className="text-sm lg:text-lg p-2 text-white border-2 bg-teal-700 rounded-md"
-            onClick={convertToCSV}
+            onClick={downloadCSV}
           >
             Download CSV
           </button>

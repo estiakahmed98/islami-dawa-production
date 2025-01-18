@@ -153,7 +153,7 @@ const SoforBishoyForm: React.FC = () => {
                   render={(arrayHelpers) => (
                     <div>
                       {values.madrasaVisits.map((_, index) => (
-                        <div key={index} className=" flex items-center">
+                        <div key={index} className="flex items-center mb-3">
                           <Field
                             name={`madrasaVisits.${index}`}
                             placeholder={`Name of Madrasa ${index + 1}`}

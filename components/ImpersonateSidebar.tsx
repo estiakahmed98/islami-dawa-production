@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import SidebarAdmin from "./SidebarAdmin";
 import Sidebar from "./dashboard/sidebar";
-import TreeExample from "./SidebarAdmin";
 // import OnItemClick from "./MuiTreeView";
 import {
   LuArrowLeftFromLine,

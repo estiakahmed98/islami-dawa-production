@@ -2,7 +2,6 @@ export const userDineFeraData = {
   "labelMap": {
     "omuslimKalemaPoreche": "অমুসলিম কালেমা পড়ে মুসলমান হয়েছে",
     "murtadDineFireasa": "মুরতাদ কালেমা পড়ে ইসলামে ফিরে এসেছে",
-    "editorContent": "মতামত লিখুন"
   },
   "records": {
     "jewel@gmail.com": {
@@ -30,6 +29,11 @@ export const userDineFeraData = {
         "omuslimKalemaPoreche": 100,
         "murtadDineFireasa": 100,
         "editorContent": "<p>Good Job Boys</p>"
+      },
+      "2025-01-18": {
+        "omuslimKalemaPoreche": 100,
+        "murtadDineFireasa": 200,
+        "editorContent": "<p>Hello.....................................................</p>"
       }
     },
     "rashid@gmail.com": {

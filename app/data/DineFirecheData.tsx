@@ -4,11 +4,13 @@ import * as Yup from "yup";
 export interface FormValues {
   omuslimKalemaPoreche: string;
   murtadDineFireasa: string;
+  editorContent: string;
 }
 
 export const initialFormData: FormValues = {
   omuslimKalemaPoreche: "",
   murtadDineFireasa: "",
+  editorContent: "",
 };
 
 // Validation schema using Yup
