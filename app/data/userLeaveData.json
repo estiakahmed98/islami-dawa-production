@@ -52,6 +52,32 @@
           "status": "Pending"
         }
       ]
+    },
+    "jewel@gmail.com": {
+      "2025-01-18": [
+        {
+          "leaveType": "Sick Leave",
+          "from": "2025-01-17T18:00:00.000Z",
+          "to": "2025-01-17T18:00:00.000Z",
+          "days": 1,
+          "reason": "sick",
+          "approvedBy": "central admin",
+          "status": "Approved"
+        }
+      ]
+    },
+    "faysal@gmail.com": {
+      "2025-01-18": [
+        {
+          "leaveType": "Casual Leave",
+          "from": "2025-01-18T18:00:00.000Z",
+          "to": "2025-01-19T18:00:00.000Z",
+          "days": 2,
+          "reason": "Casual Leave",
+          "approvedBy": "central admin",
+          "status": "Approved"
+        }
+      ]
     }
   }
 }

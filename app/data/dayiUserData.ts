@@ -51,6 +51,12 @@ export const userDayeData = {
         "sohojogiDayeToiri": 2,
         "editorContent": "<p>motamot</p>"
       }
+    },
+    "faysal@gmail.com": {
+      "2025-01-18": {
+        "sohojogiDayeToiri": 12,
+        "editorContent": "<p>motamot</p>"
+      }
     }
   }
 };
