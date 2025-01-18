@@ -19,7 +19,7 @@ interface LeaveFormValues {
   leaveType: string;
   from: Date | null;
   to: Date | null;
-  days: string;
+  days: number;
   reason: string;
   approvedBy: string;
   status: string;
@@ -29,7 +29,7 @@ const initialValues: LeaveFormValues = {
   leaveType: "",
   from: null,
   to: null,
-  days: "",
+  days: 0,
   reason: "",
   approvedBy: "",
   status: "Pending",
@@ -110,7 +110,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ onClose, onRefresh }) => {
             const formData = { ...values, email };
 
             try {
-              const response = await fetch("/api/leave", {
+              const response = await fetch("/api/leaves", {
                 method: "POST",
                 body: JSON.stringify(formData),
                 headers: { "Content-Type": "application/json" },
@@ -121,7 +121,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ onClose, onRefresh }) => {
                 resetForm();
                 onRefresh();
                 onClose();
-                router.push("/leave");
+                router.push("/dashboard/leave");
               } else {
                 toast.error("Leave application submission failed! Try again.");
               }
