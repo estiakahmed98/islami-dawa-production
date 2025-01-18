@@ -110,7 +110,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ onClose, onRefresh }) => {
             const formData = { ...values, email };
 
             try {
-              const response = await fetch("/api/leaves", {
+              const response = await fetch("/api/leave", {
                 method: "POST",
                 body: JSON.stringify(formData),
                 headers: { "Content-Type": "application/json" },
@@ -121,7 +121,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ onClose, onRefresh }) => {
                 resetForm();
                 onRefresh();
                 onClose();
-                router.push("/dashboard");
+                router.push("/leave");
               } else {
                 toast.error("Leave application submission failed! Try again.");
               }
@@ -136,12 +136,18 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ onClose, onRefresh }) => {
           {({ setFieldValue, values }) => (
             <Form>
               <div>
-                <label>Leave Type</label>
+                <label className="block mb-2 font-medium">Leave Type</label>
                 <Field
+                  as="select"
                   name="leaveType"
-                  as={Input}
-                  placeholder="Enter leave type"
-                />
+                  className="border rounded-md p-2 w-full"
+                >
+                  <option value="" disabled>
+                    Select Leave Type
+                  </option>
+                  <option value="Casual Leave">Casual Leave</option>
+                  <option value="Sick Leave">Sick Leave</option>
+                </Field>
                 <ErrorMessage
                   name="leaveType"
                   component="div"

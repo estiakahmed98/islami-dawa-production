@@ -125,7 +125,7 @@ const LeaveTable: React.FC = () => {
                     <Button
                       variant="destructive"
                       onClick={() => handleDelete(leave.from, index)}
-                      className="bg-red-500 text-white font-extrabold"
+                      className="bg-red-400 text-white font-extrabold"
                     >
                       Delete
                     </Button>

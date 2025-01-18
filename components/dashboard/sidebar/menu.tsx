@@ -1,12 +1,11 @@
-import { LayoutGrid } from "lucide-react";
 import MenuItem from "./menu-item";
-
 
 // Importing React icons
 import { LuLayoutDashboard } from "react-icons/lu";
 import { FaRegFileAlt, FaRegHandshake, FaUsers } from "react-icons/fa";
 import { LiaChalkboardTeacherSolid } from "react-icons/lia";
 import { FaQuran } from "react-icons/fa";
+import { FcLeave } from "react-icons/fc";
 import {
   MdOutlinePeopleAlt,
   MdOutlineMosque,
@@ -15,7 +14,6 @@ import {
 import { BsMoonStars } from "react-icons/bs";
 import Image from "next/image";
 import { useSidebar } from "@/providers/sidebar-provider";
-
 
 const SidebarMenu = () => {
   const { isMobile } = useSidebar();
@@ -69,6 +67,11 @@ const SidebarMenu = () => {
       title: "সফর বিষয়",
       icon: <MdOutlineTravelExplore className="size-5" />,
       url: "/dashboard/sofor",
+    },
+    {
+      title: "ছুটি বিষয়",
+      icon: <FcLeave className="size-5" />,
+      url: "/dashboard/leave",
     },
   ];
 
