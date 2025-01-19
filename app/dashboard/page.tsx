@@ -44,6 +44,7 @@ const Dashboard: React.FC<TallyProps> = () => {
           </span>
         </h1>
       </div>
+
       <div className="grid xl:grid-cols-3 p-2 lg:p-6 gap-6 overflow-y-auto border border-[#155E75] rounded-xl">
         <AmoliChart data={userAmoliData.records} userEmail={userEmail} />
 
