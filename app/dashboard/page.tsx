@@ -21,6 +21,8 @@ import {
 import { useSession } from "next-auth/react";
 import AmoliTableShow from "@/components/TableShow";
 import TallyAdmin from "@/components/TallyAdmin";
+import AyatRangeForm from "@/components/AmoliNewForm";
+import { ayatOptions } from "../data/AmoliMuhasabaFormData";
 
 interface TallyProps {
   userData: Record<string, any>;

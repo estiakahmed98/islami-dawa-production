@@ -54,7 +54,7 @@
       ]
     },
     "jewel@gmail.com": {
-      "2025-01-18": [
+      "2025-01-08": [
         {
           "leaveType": "Sick Leave",
           "from": "2025-01-17T18:00:00.000Z",
@@ -63,6 +63,17 @@
           "reason": "sick",
           "approvedBy": "central admin",
           "status": "Approved"
+        }
+      ],
+      "2025-01-19": [
+        {
+          "leaveType": "Sick Leave",
+          "from": "2025-01-23T18:00:00.000Z",
+          "to": "2025-01-24T18:00:00.000Z",
+          "days": 4,
+          "reason": "sick",
+          "approvedBy": "central admin",
+          "status": "Pending"
         }
       ]
     },

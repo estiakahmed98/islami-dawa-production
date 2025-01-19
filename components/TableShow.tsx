@@ -1,4 +1,3 @@
-
 "use client";
 import { TbXboxX } from "react-icons/tb";
 import React, { useState, useEffect, useMemo } from "react";
@@ -15,6 +14,7 @@ interface AmoliTableProps {
 const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
+  const userName = session?.user?.name;
 
   const [selectedMonth, setSelectedMonth] = useState<number>(
     new Date().getMonth()
@@ -163,14 +163,15 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
 
     const doc = new jsPDF({ orientation: "landscape" });
 
-    doc.text(`${monthName} ${year} - User: ${userEmail}`, 14, 10);
+    doc.text(`${monthName} ${year} - User: ${userName}`, 14, 10);
 
     const filteredData = transposedData.filter((row) => row.label !== "মতামত");
+    const filteredData2 = filteredData.filter((row) => row.label !== "Edit");
 
-    const headers = ["Day", ...filteredData.map((row) => row.label)];
+    const headers = ["Day", ...filteredData2.map((row) => row.label)];
     const rows = monthDays.map((day) => [
       `Day ${day}`,
-      ...filteredData.map((row) => row[day] || "-"),
+      ...filteredData2.map((row) => row[day] || "-"),
     ]);
 
     autoTable(doc, {
@@ -217,7 +218,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-            className="border px-4 py-3 rounded"
+            className="border px-4 py-2 rounded"
           >
             {months.map((month, index) => (
               <option key={index} value={index}>
@@ -228,7 +229,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="border px-4 py-3 rounded w-24"
+            className="border px-4 py-2 rounded w-24"
             style={{
               maxHeight: "150px",
               overflowY: "auto",
@@ -295,7 +296,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
 
       {motamotPopup && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-10 rounded-xl shadow-lg max-w-[85vw] lg:max-w-[60vw] max-h-[70vh] relative overflow-y-auto">
+          <div className="bg-white p-10 rounded-xl shadow-lg max-w-[85vw] lg:max-w-[0vw] max-h-[70vh] relative overflow-y-auto">
             <button
               className="absolute top-4 right-6 text-xl text-red-500 hover:text-red-700"
               onClick={() => setMotamotPopup(null)}
@@ -309,7 +310,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       )}
       {editPopup && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex justify-center items-center z-50">
-          <div className="bg-white p-10 rounded-xl shadow-lg max-w-[85vw] max-h-[80vh] relative overflow-y-auto">
+          <div className="bg-white p-10 rounded-xl shadow-lg max-w-[85vw] lg:w-[50vw] max-h-[80vh] relative overflow-y-auto">
             <button
               className="absolute top-4 right-6 text-xl text-red-500 hover:text-red-700"
               onClick={() => setEditPopup(null)}

@@ -25,6 +25,14 @@ const Header = () => {
   moment.locale("bn");
   const hijriDate = moment().format("iD");
 
+  const today = new Date();
+
+const day = String(today.getDate()).padStart(2, '0'); // Adds leading zero if necessary
+const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+const year = today.getFullYear();
+
+const formattedDate = `${day}-${month}-${year}`;
+
   return (
     <header className="flex h-20 bg-[#155E75] text-white shrink-0 items-center justify-between border-b px-6 dark:bg-slate-900">
       <Button onClick={toggleSidebar} size="icon" variant="secondary">
@@ -39,7 +47,7 @@ const Header = () => {
             ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ
           </h1>
           <div className="text-[8px] md:text-lg">
-            দাওয়াতি বছর {new Date().getFullYear()} ইং /
+            দাওয়াতি বছর ({formattedDate}) ইং /
             {moment().format(" iD iMMMM iYYYY")} হিজ
           </div>
         </div>
