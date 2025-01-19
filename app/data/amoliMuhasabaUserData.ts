@@ -209,6 +209,22 @@ export const userAmoliData = {
         "ayamroja": "",
         "hijbulBahar": "হ্যাঁ",
         "percentage": "95.00"
+      },
+      "2025-01-19": {
+        "tahajjud": 31,
+        "ayat": "sura Hijr",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "percentage": "100.00"
       }
     },
     "zisan@gmail.com": {
@@ -225,6 +241,22 @@ export const userAmoliData = {
         "dayeeAmol": "হ্যাঁ",
         "amoliSura": "হ্যাঁ",
         "ayamroja": "হ্যাঁ",
+        "hijbulBahar": "হ্যাঁ",
+        "percentage": "100.00"
+      },
+      "2025-01-19": {
+        "tahajjud": 24,
+        "ayat": "sura Baqara",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Ar Rahikul maktum",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
         "hijbulBahar": "হ্যাঁ",
         "percentage": "100.00"
       }
@@ -269,6 +301,22 @@ export const userAmoliData = {
         "ishraq": "আওয়াবীন",
         "jamat": 5,
         "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "percentage": "100.00"
+      },
+      "2025-01-19": {
+        "tahajjud": 20,
+        "ayat": "sura Isra",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "আওয়াবীন-চাশ্ত",
+        "jamat": 5,
+        "sirat": "Ar Rahikul maktum",
         "Dua": "হ্যাঁ",
         "ilm": "Hadis",
         "tasbih": "হ্যাঁ",
