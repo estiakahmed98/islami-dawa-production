@@ -14,7 +14,7 @@ if (!fs.existsSync(todoDataPath)) {
 }
 
 // Read Task Data
-const readTodoData = () => {
+const readTodoData = (): { records: Task[] } => {
   try {
     const fileContent = fs.readFileSync(todoDataPath, "utf-8").trim();
     return fileContent ? JSON.parse(fileContent) : { records: [] };
