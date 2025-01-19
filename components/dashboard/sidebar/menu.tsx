@@ -14,6 +14,7 @@ import {
 import { BsMoonStars } from "react-icons/bs";
 import Image from "next/image";
 import { useSidebar } from "@/providers/sidebar-provider";
+import { GrSchedules } from "react-icons/gr";
 
 const SidebarMenu = () => {
   const { isMobile } = useSidebar();
@@ -72,6 +73,11 @@ const SidebarMenu = () => {
       title: "ছুটি বিষয়",
       icon: <FcLeave className="size-5" />,
       url: "/dashboard/leave",
+    },
+    {
+      title: "কর্সূমচী",
+      icon: <GrSchedules className="size-5" />,
+      url: "/dashboard/todo",
     },
   ];
 
