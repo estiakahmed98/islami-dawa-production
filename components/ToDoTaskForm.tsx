@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import JoditEditorComponent from "./richTextEditor";
+import { DayPilot } from "@daypilot/daypilot-lite-react";
 
 interface TaskFormProps {
   userEmail: string;
-  selectedDate: Date | null;
+  selectedDate: string | null;
   setIsOpen: (isOpen: boolean) => void;
   fetchTasks: () => void;
 }
@@ -32,9 +33,24 @@ const TaskForm: React.FC<TaskFormProps> = ({
       return;
     }
 
+    if (!selectedDate) {
+      toast.error("Please select a date.");
+      return;
+    }
+
+    // Convert selectedDate to DayPilot.Date format
+    const selectedDateTime = DayPilot.Date.parse(selectedDate, "yyyy-MM-dd");
+    const today = DayPilot.Date.today();
+
+    // Prevent past date submissions
+    if (selectedDateTime < today) {
+      toast.error("You cannot add tasks for past dates.");
+      return;
+    }
+
     const newTask = {
       email: userEmail,
-      date: selectedDate?.toISOString().split("T")[0] || "",
+      date: selectedDate,
       ...taskData,
     };
 
@@ -60,17 +76,26 @@ const TaskForm: React.FC<TaskFormProps> = ({
   return (
     <div className="modal bg-white space-y-4 p-6 m-4 max-h-[80vh] overflow-y-auto rounded-lg shadow-lg">
       <h3 className="text-xl font-semibold mb-4">Add Task</h3>
+
+      {/* Show Selected Date */}
+      <p className="text-gray-600">
+        Selected Date:{" "}
+        {selectedDate ? new Date(selectedDate).toDateString() : "Not Selected"}
+      </p>
+
       <Input
         type="text"
         placeholder="Title"
         value={taskData.title}
         onChange={(e) => setTaskData({ ...taskData, title: e.target.value })}
       />
+
       <Input
         type="time"
         value={taskData.time}
         onChange={(e) => setTaskData({ ...taskData, time: e.target.value })}
       />
+
       <select
         className="w-full border p-2 rounded mt-2"
         value={taskData.visibility}
@@ -81,6 +106,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
         <option value="private">Private</option>
         <option value="public">Public</option>
       </select>
+
       <JoditEditorComponent
         placeholder="Task Details..."
         initialValue={taskData.description}
@@ -88,8 +114,12 @@ const TaskForm: React.FC<TaskFormProps> = ({
           setTaskData({ ...taskData, description: content })
         }
       />
+
+      {/* Submit & Cancel Buttons */}
       <div className="flex justify-end mt-4">
-        <Button onClick={handleSubmit}>Submit</Button>
+        <Button onClick={handleSubmit} disabled={!selectedDate}>
+          Submit
+        </Button>
         <Button
           variant="outline"
           onClick={() => setIsOpen(false)}
