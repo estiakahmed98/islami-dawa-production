@@ -56,31 +56,55 @@ const LeaveForm: React.FC<LeaveFormProps> = ({
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={async (values, { setSubmitting }) => {
-            if (isReadOnly) {
+          onSubmit={async (values, { setSubmitting, resetForm }) => {
+            if (isSubmittedToday) {
+              toast.error("You have already applied for leave today.");
               setSubmitting(false);
               return;
             }
-
+          
+            if (!email) {
+              toast.error("User email is not set. Please log in.");
+              setSubmitting(false);
+              return;
+            }
+          
+            const formData = { ...values, email };
+          
             try {
-              const formattedValues = {
-                ...values,
-                from: values.from
-                  ? values.from.toISOString().split("T")[0]
-                  : "",
-                to: values.to ? values.to.toISOString().split("T")[0] : "",
-              };
-
+              // Submit leave data
               const response = await fetch("/api/leaves", {
                 method: isEditing ? "PUT" : "POST",
                 body: JSON.stringify(formattedValues),
                 headers: { "Content-Type": "application/json" },
               });
-
+          
               if (response.ok) {
-                toast.success(
-                  `Leave ${isEditing ? "updated" : "applied"} successfully!`
-                );
+                // Format dates for the email payload
+                const formattedFromDate = values.from
+                  ? new Date(values.from).toLocaleDateString()
+                  : "N/A";
+                const formattedToDate = values.to
+                  ? new Date(values.to).toLocaleDateString()
+                  : "N/A";
+          
+                // Send email
+                await fetch("/api/emails", {
+                  method: "POST",
+                  body: JSON.stringify({
+                    email: "faysalmohammed.shah@gmail.com", // Replace with dynamic recipient email if needed
+                    name: session?.user?.name || "User",
+                    leaveType: values.leaveType,
+                    reason: values.reason,
+                    leaveDates: `${formattedFromDate} - ${formattedToDate}`,
+                  }),
+                  
+                  headers: { "Content-Type": "application/json" },
+                });
+                console.log(`${formattedFromDate} - ${formattedToDate}`)
+          
+                toast.success("Leave application submitted successfully!");
+                resetForm();
                 onRefresh();
                 onClose();
               } else {
@@ -95,6 +119,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({
               setSubmitting(false);
             }
           }}
+          
         >
           {({ setFieldValue, values }) => (
             <Form className="space-y-4">

@@ -93,6 +93,89 @@
           "approvedBy": "central admin",
           "status": "Pending"
         }
+      ],
+      "2025-01-20": [
+        {
+          "leaveType": "Sick Leave",
+          "from": "2025-01-22T18:00:00.000Z",
+          "to": "2025-01-22T18:00:00.000Z",
+          "days": 1,
+          "reason": "sick",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Casual Leave",
+          "from": "2025-01-24T18:00:00.000Z",
+          "to": "2025-01-24T18:00:00.000Z",
+          "days": 1,
+          "reason": "Zisan er biye",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Casual Leave",
+          "from": "2025-01-23T18:00:00.000Z",
+          "to": "2025-01-23T18:00:00.000Z",
+          "days": 1,
+          "reason": "Juwel vai er biye",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Sick Leave",
+          "from": "2025-01-23T18:00:00.000Z",
+          "to": "2025-01-23T18:00:00.000Z",
+          "days": 1,
+          "reason": "Fever",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Sick Leave",
+          "from": "2025-01-18T18:00:00.000Z",
+          "to": "2025-01-18T18:00:00.000Z",
+          "days": 1,
+          "reason": "sick",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Casual Leave",
+          "from": "2025-01-26T18:00:00.000Z",
+          "to": "2025-01-28T18:00:00.000Z",
+          "days": 2,
+          "reason": "casual leave dorkar ghurte jabo",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Casual Leave",
+          "from": "2025-01-25T18:00:00.000Z",
+          "to": "2025-01-27T18:00:00.000Z",
+          "days": 2,
+          "reason": "casual leave dorkar ghurte jabo",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Casual Leave",
+          "from": "2025-01-21T18:00:00.000Z",
+          "to": "2025-01-21T18:00:00.000Z",
+          "days": 1,
+          "reason": "casual",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Casual Leave",
+          "from": "2025-01-25T18:00:00.000Z",
+          "to": "2025-01-29T18:00:00.000Z",
+          "days": 4,
+          "reason": "Zisan er biye",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        }
       ]
     },
     "faysal@gmail.com": {
@@ -106,6 +189,53 @@
           "reason": "Casual Leave",
           "approvedBy": "central admin",
           "status": "Approved"
+        }
+      ],
+      "2025-01-20": [
+        {
+          "leaveType": "Sick Leave",
+          "from": "2025-01-19T18:00:00.000Z",
+          "to": "2025-01-19T18:00:00.000Z",
+          "days": 1,
+          "reason": "sick",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Casual Leave",
+          "from": "2025-01-20T18:00:00.000Z",
+          "to": "2025-01-20T18:00:00.000Z",
+          "days": 1,
+          "reason": "casual",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Casual Leave",
+          "from": "2025-01-21T18:00:00.000Z",
+          "to": "2025-01-21T18:00:00.000Z",
+          "days": 1,
+          "reason": "casual",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Casual Leave",
+          "from": "2025-01-22T18:00:00.000Z",
+          "to": "2025-01-22T18:00:00.000Z",
+          "days": 1,
+          "reason": "casual",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "leaveType": "Casual Leave",
+          "from": "2025-01-23T18:00:00.000Z",
+          "to": "2025-01-23T18:00:00.000Z",
+          "days": 1,
+          "reason": "casual",
+          "approvedBy": "Estiak",
+          "status": "Pending"
         }
       ]
     }
