@@ -51,6 +51,17 @@
           "approvedBy": "Sir",
           "status": "Pending"
         }
+      ],
+      "2025-01-20": [
+        {
+          "leaveType": "Casual Leave",
+          "from": "2025-01-23T18:00:00.000Z",
+          "to": "2025-01-24T18:00:00.000Z",
+          "days": 2,
+          "reason": "sick",
+          "approvedBy": "central admin",
+          "status": "Pending"
+        }
       ]
     },
     "jewel@gmail.com": {

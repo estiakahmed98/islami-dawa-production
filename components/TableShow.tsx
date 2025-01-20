@@ -7,6 +7,9 @@ import autoTable from "jspdf-autotable";
 import { useSession } from "next-auth/react";
 import DOMPurify from "dompurify";
 
+import html2pdf from "html2pdf.js";
+import "@fontsource/noto-sans-bengali"; // Import Bangla font
+
 interface AmoliTableProps {
   userData: any;
 }
@@ -161,43 +164,83 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       return;
     }
 
-    const doc = new jsPDF({ orientation: "landscape" });
-
-    doc.text(`${monthName} ${year} - User: ${userName}`, 14, 10);
-
+    // Filter out unwanted rows
     const filteredData = transposedData.filter((row) => row.label !== "মতামত");
     const filteredData2 = filteredData.filter((row) => row.label !== "Edit");
 
-    const headers = ["Day", ...filteredData2.map((row) => row.label)];
-    const rows = monthDays.map((day) => [
-      `Day ${day}`,
-      ...filteredData2.map((row) => row[day] || "-"),
-    ]);
+    // Create table structure
+    let tableHTML = `
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
+            body {
+              font-family: 'Noto Sans Bengali', sans-serif;
+              text-align: center;
+              padding: 0px;
+        
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+            td {
+              border-bottom: 1px solid #000;
+              padding: 8px;
+              text-align: center;
+              font-size: 12px;
+            }
+            th {
+              background-color: #16A085;
+              color: white;
+              padding: 10px;
+              font-size: 14px;
+            }
+          </style>
+        </head>
+        <body>
+          <h2>${monthName} ${year} - ব্যবহারকারী: ${userName}</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>দিন</th>
+                ${filteredData2.map((row) => `<th>${row.label}</th>`).join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${monthDays
+                .map(
+                  (day) => `
+                <tr>
+                  <td>দিন ${day}</td>
+                  ${filteredData2
+                    .map((row) => `<td>${row[day] || "-"}</td>`)
+                    .join("")}
+                </tr>`
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
 
-    autoTable(doc, {
-      head: [headers],
-      body: rows,
-      startY: 20,
-      theme: "striped",
-      headStyles: {
-        fillColor: [22, 160, 133],
-        halign: "center",
-      },
-      bodyStyles: {
-        textColor: 50,
-      },
-      styles: {
-        halign: "center",
-        fontSize: 8,
-      },
-      columnStyles: {
-        0: { cellWidth: 20 },
-      },
-      margin: { top: 20 },
-      pageBreak: "auto",
-    });
+    // Convert the content to PDF
+    const element = document.createElement("div");
+    element.innerHTML = tableHTML;
 
-    doc.save(`${monthName}_${year}_user_data.pdf`);
+    html2pdf()
+      .set({
+        margin: 10,
+        filename: `${monthName}_${year}_user_data.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+      })
+      .from(element)
+      .save();
   };
 
   const handleSaveEdit = (day: number, updatedData: any) => {
