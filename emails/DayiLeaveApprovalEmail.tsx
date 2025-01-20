@@ -1,21 +1,18 @@
 import { Html } from "@react-email/components";
-import * as React from "react";
 
-interface EmailProps {
+interface ApprovalEmailProps {
   name: string;
   leaveType: string;
-  reason: string;
   leaveDates: string;
   footerText?: string;
 }
 
-export default function StyledLeaveEmail({
+export default function LeaveApprovalEmail({
   name,
   leaveType,
-  reason,
   leaveDates,
   footerText,
-}: EmailProps) {
+}: ApprovalEmailProps) {
   return (
     <Html>
       <div
@@ -47,8 +44,8 @@ export default function StyledLeaveEmail({
             }}
           >
             <h1>Islami Dawa Institute</h1>
-            <h1 style={{  color: "#ffffff",fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-              আপনার ছুটির আবেদন জমা হয়েছে
+            <h1 style={{ color: "#ffffff", fontSize: "24px", fontWeight: "bold", margin: 0 }}>
+              আপনার ছুটির আবেদন অনুমোদিত হয়েছে
             </h1>
           </div>
 
@@ -62,11 +59,10 @@ export default function StyledLeaveEmail({
                 marginBottom: "20px",
               }}
             >
-              <strong>{name}</strong>, আপনার ছুটির আবেদনটি সফলভাবে জমা দেওয়া
-              হয়েছে। বিস্তারিত তথ্য নিচে দেওয়া হলঃ
+              <strong>{name}</strong>, আপনার ছুটির আবেদনটি সফলভাবে অনুমোদিত হয়েছে। বিস্তারিত তথ্য নিচে দেওয়া হলঃ
             </p>
 
-            {/* Details */}
+            {/* Leave Details */}
             <div
               style={{
                 backgroundColor: "#f9f9f9",
@@ -114,30 +110,6 @@ export default function StyledLeaveEmail({
                 {leaveDates}
               </p>
             </div>
-
-            <div
-              style={{
-                backgroundColor: "#f9f9f9",
-                border: "1px solid #e0e0e0",
-                borderRadius: "8px",
-                padding: "15px",
-                marginBottom: "15px",
-              }}
-            >
-              <p
-                style={{
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  color: "#333333",
-                  marginBottom: "10px",
-                }}
-              >
-                Reason:
-              </p>
-              <p style={{ fontSize: "16px", color: "#555555", marginBottom: 0 }}>
-                {reason}
-              </p>
-            </div>
           </div>
 
           {/* Footer */}
@@ -151,7 +123,9 @@ export default function StyledLeaveEmail({
               lineHeight: "1.5",
             }}
           >
-            <p style={{ margin: 0 }}>{footerText}</p>
+            <p style={{ margin: 0 }}>
+              {footerText || "Thank you for your time and dedication."}
+            </p>
             <div style={{ marginTop: "10px" }}>
               <a
                 href="#"

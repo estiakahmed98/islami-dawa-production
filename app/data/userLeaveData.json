@@ -67,6 +67,16 @@
           "reason": "Biye",
           "approvedBy": "Talat Sir",
           "status": "Rejected"
+        },
+        {
+          "id": "505122d2-a179-4687-b41d-82be58bdd39e",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-20T18:00:00.000Z",
+          "to": "2025-01-20T18:00:00.000Z",
+          "days": 1,
+          "reason": "casual leave dorkar ghurte jabo",
+          "approvedBy": "moni",
+          "status": "Rejected"
         }
       ]
     },
@@ -91,7 +101,7 @@
           "days": 4,
           "reason": "sick",
           "approvedBy": "central admin",
-          "status": "Pending"
+          "status": "Approved"
         }
       ],
       "2025-01-20": [
@@ -102,7 +112,7 @@
           "days": 1,
           "reason": "sick",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Approved"
         },
         {
           "leaveType": "Casual Leave",
@@ -111,7 +121,7 @@
           "days": 1,
           "reason": "Zisan er biye",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Approved"
         },
         {
           "leaveType": "Casual Leave",
@@ -120,7 +130,7 @@
           "days": 1,
           "reason": "Juwel vai er biye",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Approved"
         },
         {
           "leaveType": "Sick Leave",
@@ -129,7 +139,7 @@
           "days": 1,
           "reason": "Fever",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Approved"
         },
         {
           "leaveType": "Sick Leave",
@@ -138,7 +148,7 @@
           "days": 1,
           "reason": "sick",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Approved"
         },
         {
           "leaveType": "Casual Leave",
@@ -156,7 +166,7 @@
           "days": 2,
           "reason": "casual leave dorkar ghurte jabo",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Approved"
         },
         {
           "leaveType": "Casual Leave",
@@ -165,7 +175,7 @@
           "days": 1,
           "reason": "casual",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Rejected"
         },
         {
           "leaveType": "Casual Leave",
@@ -174,7 +184,27 @@
           "days": 4,
           "reason": "Zisan er biye",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Approved"
+        },
+        {
+          "id": "7c25a783-1bf1-456a-9ac0-6024410db3aa",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-21T18:00:00.000Z",
+          "to": "2025-02-03T18:00:00.000Z",
+          "days": 12,
+          "reason": "Amr Biye Tsi",
+          "approvedBy": "Jewel",
+          "status": "Approved"
+        },
+        {
+          "id": "33d2c268-c075-48ec-8e16-83f9655c70b3",
+          "leaveType": "Sick Leave",
+          "from": "2025-01-29T18:00:00.000Z",
+          "to": "2025-02-01T18:00:00.000Z",
+          "days": 3,
+          "reason": "sick",
+          "approvedBy": "Jewel",
+          "status": "Rejected"
         }
       ]
     },
@@ -199,7 +229,7 @@
           "days": 1,
           "reason": "sick",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Approved"
         },
         {
           "leaveType": "Casual Leave",
@@ -208,7 +238,7 @@
           "days": 1,
           "reason": "casual",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Approved"
         },
         {
           "leaveType": "Casual Leave",
@@ -217,7 +247,7 @@
           "days": 1,
           "reason": "casual",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Rejected"
         },
         {
           "leaveType": "Casual Leave",
@@ -226,7 +256,7 @@
           "days": 1,
           "reason": "casual",
           "approvedBy": "Estiak",
-          "status": "Pending"
+          "status": "Rejected"
         },
         {
           "leaveType": "Casual Leave",
@@ -236,6 +266,106 @@
           "reason": "casual",
           "approvedBy": "Estiak",
           "status": "Pending"
+        },
+        {
+          "id": "155ed5b1-e39b-495c-be1f-12dcc94c2773",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-20T18:00:00.000Z",
+          "to": "2025-01-20T18:00:00.000Z",
+          "days": 1,
+          "reason": "casual leave dorkar ghurte jabo",
+          "approvedBy": "Estiak",
+          "status": "Pending"
+        },
+        {
+          "id": "1b14ee50-fb76-4b40-9fd8-324466efd227",
+          "leaveType": "Sick Leave",
+          "from": "2025-01-18T18:00:00.000Z",
+          "to": "2025-01-18T18:00:00.000Z",
+          "days": 1,
+          "reason": "Fever",
+          "approvedBy": "Estiak",
+          "status": "Rejected"
+        },
+        {
+          "id": "1411fa12-f220-42a3-bcd5-dc4355bdab93",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-21T18:00:00.000Z",
+          "to": "2025-01-24T18:00:00.000Z",
+          "days": 4,
+          "reason": "estiak vai er 2nd biye",
+          "approvedBy": "talat sir",
+          "status": "Rejected"
+        },
+        {
+          "id": "3aa3fb2b-a3a0-4b76-8968-5b0e15de8c6e",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-21T18:00:00.000Z",
+          "to": "2025-01-21T18:00:00.000Z",
+          "days": 1,
+          "reason": "zisan er gaye holud",
+          "approvedBy": "Estiak",
+          "status": "Approved"
+        },
+        {
+          "id": "e6e721b8-7396-4e98-92ac-5d873073db0f",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-21T18:00:00.000Z",
+          "to": "2025-01-25T18:00:00.000Z",
+          "days": 5,
+          "reason": "jewel vai er gaye holud",
+          "approvedBy": "Estiak",
+          "status": "Approved"
+        },
+        {
+          "id": "43656fbd-ae3d-43e4-894a-83def3d5bd49",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-29T18:00:00.000Z",
+          "to": "2025-01-29T18:00:00.000Z",
+          "days": 1,
+          "reason": "casual leave dorkar ghurte jabo",
+          "approvedBy": "Estiak",
+          "status": "Approved"
+        },
+        {
+          "id": "f9bfdcf9-b423-4ceb-b1cb-3112d292419a",
+          "leaveType": "Sick Leave",
+          "from": "2025-01-18T18:00:00.000Z",
+          "to": "2025-01-18T18:00:00.000Z",
+          "days": 1,
+          "reason": "Fever",
+          "approvedBy": "Estiak",
+          "status": "Approved"
+        },
+        {
+          "id": "738cd7d2-0b2f-4794-8954-34f55a10dc6c",
+          "leaveType": "Sick Leave",
+          "from": "2025-01-17T18:00:00.000Z",
+          "to": "2025-01-17T18:00:00.000Z",
+          "days": 1,
+          "reason": "Fever",
+          "approvedBy": "Estiak",
+          "status": "Approved"
+        },
+        {
+          "id": "a0ba8077-b6ee-4e37-b9ea-9446e290af16",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-21T18:00:00.000Z",
+          "to": "2025-01-21T18:00:00.000Z",
+          "days": 1,
+          "reason": "casual",
+          "approvedBy": "Estiak",
+          "status": "Approved"
+        },
+        {
+          "id": "28a847e2-83eb-4489-b2dc-f295b06e7d03",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-20T18:00:00.000Z",
+          "to": "2025-01-31T18:00:00.000Z",
+          "days": 12,
+          "reason": "Gramer Bari te Ghurte Jabo",
+          "approvedBy": "Faysal ",
+          "status": "Approved"
         }
       ]
     }

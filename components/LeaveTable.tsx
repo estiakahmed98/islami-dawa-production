@@ -81,15 +81,17 @@ const LeaveTable: React.FC = () => {
       {/* Leave Form Modal */}
       {showForm && (
         <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="z-30 overflow-y-auto">
+          <div className="z-30 max-w-[95vh] max-h-[70vh] overflow-y-auto">
             <LeaveForm
+            
               onClose={() => {
                 setShowForm(false);
                 setSelectedLeave(null);
               }}
               onRefresh={fetchLeaves}
               existingData={selectedLeave} // ✅ Pass existing leave data for editing
-              userEmail={userEmail} // ✅ Pass the logged-in user's email
+              userEmail={userEmail} 
+              // ✅ Pass the logged-in user's email
             />
           </div>
         </div>
