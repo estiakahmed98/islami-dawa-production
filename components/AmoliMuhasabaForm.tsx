@@ -702,7 +702,7 @@ const AmoliMuhasabaForm = () => {
                 >
                   <option value="">Select Option</option>
                   {ayatOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
+                    <option key={option.value} value={option.label}>
                       {option.label}
                     </option>
                   ))}
@@ -991,7 +991,10 @@ const AmoliMuhasabaForm = () => {
             </div>
             <div className="mt-6 flex items-center justify-between">
               <div className="text-gray-600 text-lg">
-                Total Points: <span className="text-emerald-600 font-semibold">{totalPoints} / {maxPoints} ({percentage}%) </span>
+                Total Points:{" "}
+                <span className="text-emerald-600 font-semibold">
+                  {totalPoints} / {maxPoints} ({percentage}%){" "}
+                </span>
               </div>
               <button
                 type="submit"
