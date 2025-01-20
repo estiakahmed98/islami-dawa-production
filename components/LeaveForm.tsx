@@ -100,23 +100,47 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ onClose, onRefresh }) => {
               setSubmitting(false);
               return;
             }
-
+          
             if (!email) {
               toast.error("User email is not set. Please log in.");
               setSubmitting(false);
               return;
             }
-
+          
             const formData = { ...values, email };
-
+          
             try {
+              // Submit leave data
               const response = await fetch("/api/leaves", {
                 method: "POST",
                 body: JSON.stringify(formData),
                 headers: { "Content-Type": "application/json" },
               });
-
+          
               if (response.ok) {
+                // Format dates for the email payload
+                const formattedFromDate = values.from
+                  ? new Date(values.from).toLocaleDateString()
+                  : "N/A";
+                const formattedToDate = values.to
+                  ? new Date(values.to).toLocaleDateString()
+                  : "N/A";
+          
+                // Send email
+                await fetch("/api/emails", {
+                  method: "POST",
+                  body: JSON.stringify({
+                    email: "faysalmohammed.shah@gmail.com", // Replace with dynamic recipient email if needed
+                    name: session?.user?.name || "User",
+                    leaveType: values.leaveType,
+                    reason: values.reason,
+                    leaveDates: `${formattedFromDate} - ${formattedToDate}`,
+                  }),
+                  
+                  headers: { "Content-Type": "application/json" },
+                });
+                console.log(`${formattedFromDate} - ${formattedToDate}`)
+          
                 toast.success("Leave application submitted successfully!");
                 resetForm();
                 onRefresh();
@@ -132,6 +156,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ onClose, onRefresh }) => {
               setSubmitting(false);
             }
           }}
+          
         >
           {({ setFieldValue, values }) => (
             <Form>
