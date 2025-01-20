@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { NextRequest, NextResponse } from "next/server";
+import { v4 as uuidv4 } from "uuid";
 import * as Yup from "yup";
 
 const userLeaveDataPath = path.join(
@@ -8,8 +9,8 @@ const userLeaveDataPath = path.join(
   "app/data/userLeaveData.json"
 );
 
-// Type definitions
 interface Leave {
+  id: string;
   leaveType: string;
   from: string;
   to: string;
@@ -23,30 +24,27 @@ interface UserLeaveData {
   records: Record<string, Record<string, Leave[]>>;
 }
 
-// Ensure the data file exists
+// ✅ **Ensure the Data File Exists**
 if (!fs.existsSync(userLeaveDataPath)) {
-  const initialData: UserLeaveData = { records: {} };
   fs.writeFileSync(
     userLeaveDataPath,
-    JSON.stringify(initialData, null, 2),
+    JSON.stringify({ records: {} }, null, 2),
     "utf-8"
   );
 }
 
-// Read data file
+// ✅ **Read Data**
 const readData = (): UserLeaveData => {
   try {
     const fileContent = fs.readFileSync(userLeaveDataPath, "utf-8").trim();
-    return fileContent
-      ? (JSON.parse(fileContent) as UserLeaveData)
-      : { records: {} };
+    return fileContent ? JSON.parse(fileContent) : { records: {} };
   } catch (error) {
     console.error("Error reading data file:", error);
     return { records: {} };
   }
 };
 
-// Write data to the file
+// ✅ **Write Data**
 const writeData = (data: UserLeaveData) => {
   try {
     fs.writeFileSync(userLeaveDataPath, JSON.stringify(data, null, 2), "utf-8");
@@ -55,20 +53,18 @@ const writeData = (data: UserLeaveData) => {
   }
 };
 
-// Validation schema
+// ✅ **Validation Schema**
 const validationSchema = Yup.object({
   leaveType: Yup.string().required("Leave Type is required"),
   from: Yup.string().required("Start Date is required"),
   to: Yup.string().required("End Date is required"),
-  days: Yup.number()
-    .typeError("Days must be a number")
-    .required("Days Field is required"),
+  days: Yup.number().required("Days Field is required"),
   reason: Yup.string().required("Reason is required"),
   approvedBy: Yup.string().required("Approved By is required"),
   status: Yup.string().required("Status is required"),
 });
 
-// ✅ GET: Fetch all leave requests for a user
+// ✅ **GET: Fetch Leave Requests**
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -93,7 +89,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ✅ POST: Submit a new leave request (Append Data)
+// ✅ **POST: Add a New Leave Request**
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -114,8 +110,9 @@ export async function POST(req: NextRequest) {
     if (!data.records[email][currentDate])
       data.records[email][currentDate] = [];
 
-    // Append new leave request
-    data.records[email][currentDate].push({
+    // ✅ Add unique ID for each leave request
+    const newLeave: Leave = {
+      id: uuidv4(),
       leaveType,
       from,
       to,
@@ -123,11 +120,13 @@ export async function POST(req: NextRequest) {
       reason,
       approvedBy,
       status,
-    });
+    };
+
+    data.records[email][currentDate].push(newLeave);
 
     writeData(data);
     return NextResponse.json(
-      { message: "Leave added successfully" },
+      { message: "Leave added successfully", newLeave },
       { status: 201 }
     );
   } catch (error) {
@@ -138,37 +137,48 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ✅ DELETE: Remove a specific leave request
-export async function DELETE(req: NextRequest) {
+// ✅ **PUT: Update an Existing Leave Request by `id`**
+export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, date, index } = body;
+    await validationSchema.validate(body, { abortEarly: false });
 
-    if (!email || !date || index === undefined)
+    const { id, email, leaveType, from, to, days, reason, approvedBy, status } =
+      body;
+
+    if (!email || !id) {
       return NextResponse.json(
-        { error: "Email, Date, and Index are required." },
+        { error: "Email and ID are required." },
         { status: 400 }
-      );
-
-    const data = readData();
-    if (data.records[email]?.[date]) {
-      data.records[email][date].splice(index, 1);
-      if (data.records[email][date].length === 0)
-        delete data.records[email][date]; // Remove empty date
-      writeData(data);
-      return NextResponse.json(
-        { message: "Leave deleted successfully" },
-        { status: 200 }
       );
     }
 
+    const data = readData();
+    let updated = false;
+
+    // ✅ Find and update leave request using `id`
+    for (const date in data.records[email]) {
+      data.records[email][date] = data.records[email][date].map((leave) => {
+        if (leave.id === id) {
+          updated = true;
+          return { id, leaveType, from, to, days, reason, approvedBy, status };
+        }
+        return leave;
+      });
+    }
+
+    if (!updated) {
+      return NextResponse.json({ error: "Leave not found." }, { status: 404 });
+    }
+
+    writeData(data);
     return NextResponse.json(
-      { error: "No leave found for the specified date." },
-      { status: 400 }
+      { message: "Leave updated successfully" },
+      { status: 200 }
     );
   } catch (error) {
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Failed to update leave." },
       { status: 500 }
     );
   }
