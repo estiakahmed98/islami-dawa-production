@@ -6,7 +6,7 @@ import {
   validationSchema,
 } from "@/app/data/DawatiMojlishData";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";

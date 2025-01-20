@@ -15,7 +15,7 @@ import { userDineFeraData } from "../data/dineferaUserData";
 import { userSoforBishoyData } from "../data/soforBishoyUserData";
 import { userDayeData } from "../data/dayiUserData";
 import TallyAdmin from "@/components/TallyAdmin";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { userTalimBisoyData } from "../data/talimBisoyUserData";
 import { userAmoliData } from "../data/amoliMuhasabaUserData";
 import AmoliChartAdmin from "@/components/AmoliChartAdmin";

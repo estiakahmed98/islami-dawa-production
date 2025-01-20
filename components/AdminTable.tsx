@@ -1,11 +1,10 @@
-
 "use client";
 import { TbXboxX } from "react-icons/tb";
 import React, { useState, useEffect } from "react";
 import fileDownload from "js-file-download";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 
 interface AmoliTableProps {
   userData: any;
@@ -54,7 +53,8 @@ const AdminTable: React.FC<AmoliTableProps> = ({ userData, emailList }) => {
 
         // Aggregate data for all emails
         row[day] = emailList.reduce((sum, email) => {
-          const value = parseFloat(userData.records[email]?.[date]?.[label]) || 0;
+          const value =
+            parseFloat(userData.records[email]?.[date]?.[label]) || 0;
           return sum + value;
         }, 0);
       });

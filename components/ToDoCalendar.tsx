@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import TaskForm from "./ToDoTaskForm";
 import { DayPilotMonth, DayPilot } from "@daypilot/daypilot-lite-react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";

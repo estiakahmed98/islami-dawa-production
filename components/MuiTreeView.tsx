@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, JSX } from "react";
@@ -10,7 +9,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import { useSelectedUser } from "@/providers/treeProvider";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { ScrollArea } from "./ui/scroll-area";
 
 interface TreeNode {
@@ -32,7 +31,6 @@ const OnItemClick: React.FC<{
   const router = useRouter();
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
- 
 
   let idCounter = 1;
   const generateUniqueId = (): number => idCounter++;
@@ -1019,74 +1017,74 @@ const OnItemClick: React.FC<{
       },
     };
 
-   // Return the hierarchical structure based on the logged-in user
-   if (user === "moni@gmail.com") {
-    return [
-      {
-        id: 100,
-        label: "Central Admin",
-        children: [unions["moni@gmail.com"]],
-      },
-    ];
-  } else if (user === "ratul@gmail.com") {
-    return [
-      {
-        id: 101,
-        label: "Division Admin",
-        children: [unions["ratul@gmail.com"]],
-      },
-    ];
-  } else if (user === "estiak@gmail.com") {
-    return [
-      {
-        id: 102,
-        label: "Division Admin",
-        children: [unions["estiak@gmail.com"]],
-      },
-    ];
-  } else if (user === "toyon@gmail.com") {
-    return [
-      {
-        id: 103,
-        label: "District Admin",
-        children: [unions["toyon@gmail.com"]],
-      },
-    ];
-  } else if (user === "hridoy@gmail.com") {
-    return [
-      {
-        id: 104,
-        label: "District Admin",
-        children: [unions["hridoy@gmail.com"]],
-      },
-    ];
-  } else if (user === "rifat@gmail.com") {
-    return [
-      {
-        id: 105,
-        label: "Upozilla Admin",
-        children: [unions["rifat@gmail.com"]],
-      },
-    ];
-  } else if (user === "zisan@gmail.com") {
-    return [
-      {
-        id: 106,
-        label: "Union Admin",
-        children: [unions["zisan@gmail.com"]],
-      },
-    ];
-  } else if (user === "tauhid@gmail.com") {
-    return [
-      {
-        id: 107,
-        label: "Union Admin",
-        children: [unions["tauhid@gmail.com"]],
-      },
-    ];
-  } else {
-    return []; // Return an empty array for unrecognized users
-  }
+    // Return the hierarchical structure based on the logged-in user
+    if (user === "moni@gmail.com") {
+      return [
+        {
+          id: 100,
+          label: "Central Admin",
+          children: [unions["moni@gmail.com"]],
+        },
+      ];
+    } else if (user === "ratul@gmail.com") {
+      return [
+        {
+          id: 101,
+          label: "Division Admin",
+          children: [unions["ratul@gmail.com"]],
+        },
+      ];
+    } else if (user === "estiak@gmail.com") {
+      return [
+        {
+          id: 102,
+          label: "Division Admin",
+          children: [unions["estiak@gmail.com"]],
+        },
+      ];
+    } else if (user === "toyon@gmail.com") {
+      return [
+        {
+          id: 103,
+          label: "District Admin",
+          children: [unions["toyon@gmail.com"]],
+        },
+      ];
+    } else if (user === "hridoy@gmail.com") {
+      return [
+        {
+          id: 104,
+          label: "District Admin",
+          children: [unions["hridoy@gmail.com"]],
+        },
+      ];
+    } else if (user === "rifat@gmail.com") {
+      return [
+        {
+          id: 105,
+          label: "Upozilla Admin",
+          children: [unions["rifat@gmail.com"]],
+        },
+      ];
+    } else if (user === "zisan@gmail.com") {
+      return [
+        {
+          id: 106,
+          label: "Union Admin",
+          children: [unions["zisan@gmail.com"]],
+        },
+      ];
+    } else if (user === "tauhid@gmail.com") {
+      return [
+        {
+          id: 107,
+          label: "Union Admin",
+          children: [unions["tauhid@gmail.com"]],
+        },
+      ];
+    } else {
+      return []; // Return an empty array for unrecognized users
+    }
   };
 
   const treeData = userEmail ? getFilteredTreeData(userEmail) : [];
@@ -1133,7 +1131,7 @@ const OnItemClick: React.FC<{
   };
 
   return (
-    <ScrollArea  className="overflow-y-auto text-white font-semibold py-4 shrink-0">
+    <ScrollArea className="overflow-y-auto text-white font-semibold py-4 shrink-0">
       <Stack spacing={2}>
         <div className="flex justify-end px-4">
           <IconButton size="small" onClick={handleToggle}>
@@ -1162,7 +1160,7 @@ const OnItemClick: React.FC<{
           )}
         </Box>
       </Stack>
-    </ScrollArea >
+    </ScrollArea>
   );
 };
 

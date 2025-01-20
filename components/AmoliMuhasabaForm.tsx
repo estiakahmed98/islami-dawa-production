@@ -16,7 +16,7 @@
 // } from "@/app/data/AmoliMuhasabaFormData";
 // import "moment-hijri";
 // import { useRouter } from "next/navigation";
-// import { useSession } from "next-auth/react";
+// import { useSession } from "@/lib/auth-client";
 // import moment from "moment-hijri";
 // import { toast } from "sonner";
 
@@ -419,7 +419,7 @@ import {
 } from "@/app/data/AmoliMuhasabaFormData";
 import "moment-hijri";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import moment from "moment-hijri";
 import { toast } from "sonner";
 
