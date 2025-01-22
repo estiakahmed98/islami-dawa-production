@@ -18,7 +18,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/TabButton";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import AmoliTableShow from "@/components/TableShow";
 import TallyAdmin from "@/components/TallyAdmin";
 

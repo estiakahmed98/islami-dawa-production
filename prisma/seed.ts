@@ -1,6 +1,6 @@
-import { db } from "../lib/db";
-import bcrypt from "bcryptjs";
-import { userData, User } from "../app/data/userData";
+// import { db } from "../lib/db";
+// import bcrypt from "bcryptjs";
+// import { userData, User } from "../app/data/userData";
 
 const users: Array<User> = Object.values(userData); // Convert object to array
 

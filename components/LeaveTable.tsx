@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import LeaveForm from "./LeaveForm";
 import {

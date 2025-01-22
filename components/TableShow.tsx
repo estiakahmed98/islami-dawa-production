@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import fileDownload from "js-file-download";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import DOMPurify from "dompurify";
 
 import html2pdf from "html2pdf.js";

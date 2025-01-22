@@ -14,11 +14,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSidebar } from "@/providers/sidebar-provider";
-import { signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "@/lib/auth-client";
 import "moment-hijri";
+import { useRouter } from "next/navigation";
 import moment from "moment-hijri";
 
 const Header = () => {
+  const router = useRouter();
   const session = useSession();
   const { toggleSidebar } = useSidebar();
 
@@ -27,11 +29,11 @@ const Header = () => {
 
   const today = new Date();
 
-const day = String(today.getDate()).padStart(2, '0'); // Adds leading zero if necessary
-const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-const year = today.getFullYear();
+  const day = String(today.getDate()).padStart(2, "0"); // Adds leading zero if necessary
+  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+  const year = today.getFullYear();
 
-const formattedDate = `${day}-${month}-${year}`;
+  const formattedDate = `${day}-${month}-${year}`;
 
   return (
     <header className="flex h-20 bg-[#155E75] text-white shrink-0 items-center justify-between border-b px-6 dark:bg-slate-900">
@@ -82,7 +84,17 @@ const formattedDate = `${day}-${month}-${year}`;
                 <UserRound className="opacity-60" aria-hidden="true" />
                 <span>Profile</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => signOut()}>
+              <DropdownMenuItem
+                onClick={() => {
+                  signOut({
+                    fetchOptions: {
+                      onSuccess: () => {
+                        router.replace("/");
+                      },
+                    },
+                  });
+                }}
+              >
                 <LogOut className="opacity-60" aria-hidden="true" />
                 <span>Logout</span>
               </DropdownMenuItem>
