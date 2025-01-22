@@ -16,9 +16,11 @@ import {
 import { useSidebar } from "@/providers/sidebar-provider";
 import { signOut, useSession } from "@/lib/auth-client";
 import "moment-hijri";
+import { useRouter } from "next/navigation";
 import moment from "moment-hijri";
 
 const Header = () => {
+  const router = useRouter();
   const session = useSession();
   const { toggleSidebar } = useSidebar();
 
@@ -82,7 +84,17 @@ const Header = () => {
                 <UserRound className="opacity-60" aria-hidden="true" />
                 <span>Profile</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => signOut()}>
+              <DropdownMenuItem
+                onClick={() => {
+                  signOut({
+                    fetchOptions: {
+                      onSuccess: () => {
+                        router.replace("/");
+                      },
+                    },
+                  });
+                }}
+              >
                 <LogOut className="opacity-60" aria-hidden="true" />
                 <span>Logout</span>
               </DropdownMenuItem>

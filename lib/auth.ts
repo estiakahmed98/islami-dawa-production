@@ -9,14 +9,38 @@ export const auth = betterAuth({
   user: {
     modelName: "users",
     additionalFields: {
-      division: { type: "string", required: false },
-      district: { type: "string", required: false },
-      area: { type: "string", required: false },
-      upazila: { type: "string", required: false },
-      union: { type: "string", required: false },
-      markaz: { type: "string", required: false },
-      phone: { type: "string", required: false },
-      role: { type: "string", required: false },
+      role: {
+        type: "string",
+        required: true,
+      },
+      division: {
+        type: "string",
+        required: true,
+      },
+      district: {
+        type: "string",
+        required: true,
+      },
+      area: {
+        type: "string",
+        required: true,
+      },
+      upazila: {
+        type: "string",
+        required: true,
+      },
+      union: {
+        type: "string",
+        required: true,
+      },
+      markaz: {
+        type: "string",
+        required: false,
+      },
+      phone: {
+        type: "string",
+        required: true,
+      },
     },
   },
   session: {

@@ -17,17 +17,16 @@ model users {
   id            String     @id @default(cuid())
   email         String     @unique
   name          String?
-  emailVerified Boolean
-  password      String
-  image         String?
+  role          String
   division      String
   district      String
   area          String
-  role          String
   upazila       String
   union         String
   markaz        String?
   phone         String
+  emailVerified Boolean
+  image         String?
   createdAt     DateTime
   updatedAt     DateTime
   sessions      sessions[]

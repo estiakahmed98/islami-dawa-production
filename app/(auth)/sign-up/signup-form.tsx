@@ -40,6 +40,13 @@ const SignupForm = () => {
       name: "",
       email: "",
       password: "",
+      role: "",
+      division: "",
+      district: "",
+      area: "",
+      upazila: "",
+      union: "",
+      phone: "",
     },
   });
 
@@ -47,16 +54,15 @@ const SignupForm = () => {
     await signUp.email(
       {
         name: values.name,
-        email: values.email,
         password: values.password,
-        role: "admin",
+        email: values.email,
+        role: "centraladmin",
         division: "Dhaka",
         district: "Dhaka",
-        area: "Dhaka",
-        upazila: "Mirpur",
-        union: "Mirpur",
-        markaz: "Mirpur Markaz",
-        phone: "01720151612",
+        area: "Dhanmondi",
+        upazila: "Dhaka",
+        union: "Dhaka",
+        phone: "01736486851",
       },
       {
         onRequest: () => {
