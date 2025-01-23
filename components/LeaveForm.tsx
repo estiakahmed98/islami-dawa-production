@@ -120,10 +120,10 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ onClose, onRefresh }) => {
               if (response.ok) {
                 // Format dates for the email payload
                 const formattedFromDate = values.from
-                  ? new Date(values.from).toLocaleDateString()
+                  ? new Date(values.from)
                   : "N/A";
                 const formattedToDate = values.to
-                  ? new Date(values.to).toLocaleDateString()
+                  ? new Date(values.to)
                   : "N/A";
 
                 // Send email

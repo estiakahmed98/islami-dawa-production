@@ -59,35 +59,33 @@
       ],
       "2025-01-20": [
         {
-          "id": "655a69ee-be5b-48cf-b7fa-3828af8dad5c",
-          "leaveType": "Casual Leave",
-          "from": "2025-01-28",
-          "to": "2025-01-29",
-          "days": 1,
-          "reason": "Biye",
-          "approvedBy": "Talat Sir",
-          "status": "Rejected"
-        },
-        {
-          "id": "505122d2-a179-4687-b41d-82be58bdd39e",
-          "leaveType": "Casual Leave",
-          "from": "2025-01-20T18:00:00.000Z",
-          "to": "2025-01-20T18:00:00.000Z",
-          "days": 1,
-          "reason": "casual leave dorkar ghurte jabo",
-          "approvedBy": "moni",
-          "status": "Rejected"
-        }
-      ],
-      "2025-01-20": [
-        {
           "leaveType": "Casual Leave",
           "from": "2025-01-23T18:00:00.000Z",
           "to": "2025-01-24T18:00:00.000Z",
           "days": 2,
           "reason": "sick",
           "approvedBy": "central admin",
-          "status": "Pending"
+          "status": "Rejected"
+        },
+        {
+          "id": "2f797727-f9fb-4fec-8ef6-5154631d73ef",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-21T18:00:00.000Z",
+          "to": "2025-01-21T18:00:00.000Z",
+          "days": 1,
+          "reason": "Zisan er biye",
+          "approvedBy": "moni",
+          "status": "Approved"
+        },
+        {
+          "id": "23fe01e4-07a9-4bc7-ac57-6e12d5e3b178",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-21T18:00:00.000Z",
+          "to": "2025-01-21T18:00:00.000Z",
+          "days": 1,
+          "reason": "casual",
+          "approvedBy": "moni",
+          "status": "Approved"
         }
       ]
     },
@@ -377,6 +375,60 @@
           "reason": "Gramer Bari te Ghurte Jabo",
           "approvedBy": "Faysal ",
           "status": "Approved"
+        }
+      ],
+      "2025-01-21": [
+        {
+          "id": "90a440f5-de06-4f2a-820d-25242c3602d4",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-23T18:00:00.000Z",
+          "to": "2025-01-23T18:00:00.000Z",
+          "days": 1,
+          "reason": "Zisan er biye",
+          "approvedBy": "Faysal ",
+          "status": "Pending"
+        },
+        {
+          "id": "1e65be3b-7af7-4bf9-893d-8050ff462e02",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-24T18:00:00.000Z",
+          "to": "2025-01-24T18:00:00.000Z",
+          "days": 1,
+          "reason": "casual",
+          "approvedBy": "Faysal ",
+          "status": "Rejected"
+        },
+        {
+          "id": "88a8cd88-e64a-486b-822e-d603a03328a1",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-30T18:00:00.000Z",
+          "to": "2025-01-30T18:00:00.000Z",
+          "days": 1,
+          "reason": "Zisan er biye",
+          "approvedBy": "Faysal ",
+          "status": "Approved"
+        },
+        {
+          "id": "c2a7059f-25f1-48d2-b8b5-9d42e3579bce",
+          "leaveType": "Sick Leave",
+          "from": "2025-01-19T18:00:00.000Z",
+          "to": "2025-01-19T18:00:00.000Z",
+          "days": 1,
+          "reason": "Fever",
+          "approvedBy": "Faysal ",
+          "status": "Approved"
+        }
+      ],
+      "2025-01-22": [
+        {
+          "id": "ae5134ec-78d0-45a3-838d-a99d8c431c71",
+          "leaveType": "Casual Leave",
+          "from": "2025-01-23T18:00:00.000Z",
+          "to": "2025-01-23T18:00:00.000Z",
+          "days": 1,
+          "reason": "casual leave dorkar ghurte jabo",
+          "approvedBy": "Faysal ",
+          "status": "Pending"
         }
       ]
     }
