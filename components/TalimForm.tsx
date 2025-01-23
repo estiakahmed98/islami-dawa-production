@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Formik, Form } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/TalimData";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";

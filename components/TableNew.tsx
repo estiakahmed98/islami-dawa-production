@@ -1,11 +1,10 @@
-
 "use client";
 import { TbXboxX } from "react-icons/tb";
 import React, { useState, useEffect, useMemo } from "react";
 import fileDownload from "js-file-download";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import DOMPurify from "dompurify";
 
 interface AmoliTableProps {

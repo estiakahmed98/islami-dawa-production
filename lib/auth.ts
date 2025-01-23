@@ -1,47 +1,74 @@
-import NextAuth from "next-auth";
-import Credentials from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import { signInSchema } from "@/validators/authValidators";
-import { getUserByEmail } from "./authActions";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { db } from "./db";
+import { betterAuth } from "better-auth";
+import { admin } from "better-auth/plugins";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { db } from "@/lib/db";
 
-export const { auth, handlers, signIn, signOut } = NextAuth({
-  debug: true,
-  adapter: PrismaAdapter(db),
-  pages: {
-    signIn: "/",
+export const auth = betterAuth({
+  database: prismaAdapter(db, {
+    provider: "postgresql",
+  }),
+  user: {
+    modelName: "users",
+    additionalFields: {
+      role: {
+        type: "string",
+        required: false,
+      },
+      division: {
+        type: "string",
+        required: true,
+      },
+      district: {
+        type: "string",
+        required: true,
+      },
+      area: {
+        type: "string",
+        required: true,
+      },
+      upazila: {
+        type: "string",
+        required: true,
+      },
+      union: {
+        type: "string",
+        required: true,
+      },
+      markaz: {
+        type: "string",
+        required: false,
+      },
+      phone: {
+        type: "string",
+        required: true,
+      },
+    },
   },
   session: {
-    strategy: "jwt",
+    modelName: "sessions",
   },
-  providers: [
-    Credentials({
-      credentials: {
-        email: {},
-        password: {},
-      },
-      authorize: async (credentials) => {
-        const { email, password } = await signInSchema.validate(credentials, {
-          abortEarly: false,
-        });
+  account: {
+    modelName: "accounts",
+  },
+  verification: {
+    modelName: "verifications",
+  },
+  emailAndPassword: {
+    enabled: true,
+  },
 
-        const user = await getUserByEmail(email);
-        const matchPassword = await bcrypt.compare(
-          password,
-          user?.password as unknown as string
-        );
-
-        // If no user found, throw invalid credentials
-        if (!user || !matchPassword) {
-          throw new Error("Invalid credentials.");
-        }
-
-        console.log(user);
-
-        // return user
-        return user;
-      },
+  plugins: [
+    admin({
+      defaultRole: false,
+      adminRole: [
+        "centraladmin",
+        "superadmin",
+        "divisionadmin",
+        "districtadmin",
+        "areaadmin",
+        "upozilaadmin",
+        "unionadmin",
+      ],
     }),
   ],
 });
