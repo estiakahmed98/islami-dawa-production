@@ -9,8 +9,9 @@ import autoTable from "jspdf-autotable";
 import { useSession } from "@/lib/auth-client";
 import DOMPurify from "dompurify";
 import "@fontsource/noto-sans-bengali"; // Import Bangla font
+import * as html2pdf from 'html2pdf.js';
 
-const html2pdf = dynamic(() => import("html2pdf.js"), { ssr: false });
+// const html2pdf = dynamic(() => import("html2pdf.js"), { ssr: false });
 
 interface AmoliTableProps {
   userData: any;
