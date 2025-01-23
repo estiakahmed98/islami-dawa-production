@@ -30,8 +30,6 @@ type Union = {
 };
 
 const Register = () => {
-  const router = useRouter();
-
   const [language, setLanguage] = useState("bn");
   const [formData, setFormData] = useState({
     name: "",
