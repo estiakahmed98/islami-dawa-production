@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 
 interface LeaveFormProps {
@@ -157,7 +157,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ onClose, onRefresh }) => {
           }}
         >
           {({ setFieldValue, values }) => (
-            <Form >
+            <Form>
               <div>
                 <label className="block mb-2 font-medium">Leave Type</label>
                 <Field
