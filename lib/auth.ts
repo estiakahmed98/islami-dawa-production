@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { admin } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { db } from "@/lib/db";
 
@@ -11,7 +12,7 @@ export const auth = betterAuth({
     additionalFields: {
       role: {
         type: "string",
-        required: true,
+        required: false,
       },
       division: {
         type: "string",
@@ -55,4 +56,19 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+
+  plugins: [
+    admin({
+      defaultRole: false,
+      adminRole: [
+        "centraladmin",
+        "superadmin",
+        "divisionadmin",
+        "districtadmin",
+        "areaadmin",
+        "upozilaadmin",
+        "unionadmin",
+      ],
+    }),
+  ],
 });

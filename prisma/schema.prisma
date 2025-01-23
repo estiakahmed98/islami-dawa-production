@@ -11,7 +11,7 @@ model users {
   id            String     @id @default(cuid())
   email         String     @unique
   name          String?
-  role          String
+  role          String?
   division      String
   district      String
   area          String
@@ -23,20 +23,24 @@ model users {
   image         String?
   createdAt     DateTime
   updatedAt     DateTime
+  banned        Boolean?
+  banReason     String?
+  banExpires    Int?
   sessions      sessions[]
   accounts      accounts[]
 }
 
 model sessions {
-  id        String   @id @default(cuid())
-  expiresAt DateTime
-  token     String
-  createdAt DateTime
-  updatedAt DateTime
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String   @id @default(cuid())
+  expiresAt      DateTime
+  token          String
+  createdAt      DateTime
+  updatedAt      DateTime
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  impersonatedBy String?
+  user           users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
 }

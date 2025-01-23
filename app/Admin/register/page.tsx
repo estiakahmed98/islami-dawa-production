@@ -4,12 +4,9 @@ import React, { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
-import {
-  divisions_en,
-  districts_en,
-  upazilas_en,
-  unions_en,
-} from "@/app/data/english";
+import { admin } from "@/lib/auth-client";
+import * as yup from "yup";
+import { signUpSchemaUser } from "@/validators/authValidators";
 
 // Types
 type Division = {
@@ -43,6 +40,7 @@ const Register = () => {
     district: "",
     upazila: "",
     union: "",
+    area: "",
     markaz: "",
     phone: "",
     email: "",
@@ -56,34 +54,26 @@ const Register = () => {
   useEffect(() => {
     if (formData.division) {
       const divisionDistricts =
-        (language === "en"
-          ? districts_en[parseInt(formData.division, 10)]
-          : districts[parseInt(formData.division, 10)]) || [];
+        districts[parseInt(formData.division, 10)] || [];
       setDistrictsList(divisionDistricts);
     } else {
       setDistrictsList([]);
     }
 
     if (formData.district) {
-      const districtUpazilas =
-        (language === "en"
-          ? upazilas_en[parseInt(formData.district, 10)]
-          : upazilas[parseInt(formData.district, 10)]) || [];
+      const districtUpazilas = upazilas[parseInt(formData.district, 10)] || [];
       setUpazilasList(districtUpazilas);
     } else {
       setUpazilasList([]);
     }
 
     if (formData.upazila) {
-      const upazilaUnions =
-        (language === "en"
-          ? unions_en[parseInt(formData.upazila, 10)]
-          : unions[parseInt(formData.upazila, 10)]) || [];
+      const upazilaUnions = unions[parseInt(formData.upazila, 10)] || [];
       setUnionsList(upazilaUnions);
     } else {
       setUnionsList([]);
     }
-  }, [formData.division, formData.district, formData.upazila, language]);
+  }, [formData.division, formData.district, formData.upazila]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -99,27 +89,42 @@ const Register = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      await signUpSchemaUser.validate(formData, { abortEarly: false });
 
-      if (response.ok) {
-        toast.success("User created successfully!");
-        router.push("/admin/register");
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.error || "User creation failed! Try again.");
-      }
+      const newUser = await admin.createUser(
+        {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+          data: {
+            division: formData.division,
+            district: formData.district,
+            upazila: formData.upazila,
+            union: formData.union,
+            area: formData.area,
+            markaz: formData.markaz,
+            phone: formData.phone,
+          },
+        },
+        {
+          onSuccess: () => {
+            toast.success("User created successfully!");
+          },
+          onError: (ctx) => {
+            toast.error(ctx.error.message);
+          },
+        }
+      );
     } catch (error) {
-      console.error("Error creating user:", error);
-      toast.error("Something went wrong! Please try again.");
+      if (error instanceof yup.ValidationError) {
+        error.inner.forEach((err) => toast.error(err.message));
+      } else {
+        console.error("Error creating user:", error);
+        toast.error("Something went wrong! Please try again.");
+      }
     }
   };
-
   return (
     <div className="flex items-center justify-center bg-gray-50 m-10">
       <div className="w-full p-8 space-y-6 shadow-lg rounded-lg">
@@ -188,13 +193,12 @@ const Register = () => {
               className="p-2 border-2 rounded-lg grow w-full"
             >
               <option value="">Select Division</option>
-              {(language === "en" ? divisions_en : divisions).map(
-                (division) => (
+              {language === "bn" &&
+                divisions.map((division) => (
                   <option key={division.value} value={division.value}>
                     {division.title}
                   </option>
-                )
-              )}
+                ))}
             </select>
           </div>
 
@@ -271,6 +275,25 @@ const Register = () => {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Area */}
+          <div>
+            <label
+              htmlFor="area"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Area
+            </label>
+            <input
+              type="text"
+              id="area"
+              name="area"
+              value={formData.area}
+              onChange={handleChange}
+              placeholder="Enter your Area Name"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
           </div>
 
           {/* Markaz */}

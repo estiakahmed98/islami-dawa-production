@@ -71,10 +71,13 @@ const Header = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="max-w-64">
             <DropdownMenuLabel className="flex min-w-0 flex-col">
-              <span className="truncate text-sm font-medium text-foreground">
+              <span className="truncate text-md font-bold text-foreground">
                 {session.data?.user?.name}
               </span>
-              <span className="truncate text-sm font-medium text-muted-foreground">
+              <span className="truncate text-sm font-medium text-foreground">
+                {session.data?.user?.role}
+              </span>
+              <span className="truncate text-xs font-light text-muted-foreground">
                 {session.data?.user?.email}
               </span>
             </DropdownMenuLabel>

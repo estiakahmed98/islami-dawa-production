@@ -1,12 +1,22 @@
-
-
 import Header from "@/components/dashboard/header";
 import Sidebar from "@/components/dashboard/sidebar";
 import ImpersonateSidebar from "@/components/ImpersonateSidebar";
 import { SidebarProvider } from "@/providers/sidebar-provider";
 import TreeProvider from "@/providers/treeProvider";
+import { roleList } from "@/lib/_role-list";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
-const AdmindLayout = ({ children }: { children: React.ReactNode }) => {
+const AdmindLayout = async ({ children }: { children: React.ReactNode }) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!roleList.includes(session?.user?.role as string)) {
+    redirect("/dashboard");
+  }
+
   return (
     <SidebarProvider>
       <TreeProvider>

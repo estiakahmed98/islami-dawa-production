@@ -67,6 +67,7 @@ const SignupForm = () => {
       {
         onRequest: () => {
           setFormError("");
+          toast.loading;
         },
         onSuccess: () => {
           toast.success("Login Successful");
@@ -74,6 +75,7 @@ const SignupForm = () => {
         },
         onError: (ctx) => {
           setFormError(ctx.error.message);
+          toast.error(ctx.error.message);
         },
       }
     );
