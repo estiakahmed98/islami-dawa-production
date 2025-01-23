@@ -94,6 +94,7 @@ const SidebarMenu = () => {
           />
         </div>
       )}
+      {isMobile && <button>Admin Mode</button>}
       {/* <hr /> */}
       {menuList.map((menu, index) => {
         return <MenuItem key={index} {...menu} />;

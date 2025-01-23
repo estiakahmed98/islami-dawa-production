@@ -1,17 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { TbXboxX } from "react-icons/tb";
 import React, { useState, useEffect, useMemo } from "react";
 import fileDownload from "js-file-download";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { useSession } from "@/lib/auth-client";
 import DOMPurify from "dompurify";
 import "@fontsource/noto-sans-bengali"; // Import Bangla font
-import * as html2pdf from 'html2pdf.js';
-
-// const html2pdf = dynamic(() => import("html2pdf.js"), { ssr: false });
+const html2pdf = dynamic(() => import("html2pdf.js"), { ssr: false });
 
 interface AmoliTableProps {
   userData: any;
