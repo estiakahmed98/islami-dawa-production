@@ -2,7 +2,7 @@ import Header from "@/components/dashboard/header";
 import Sidebar from "@/components/dashboard/sidebar";
 import { SidebarProvider } from "@/providers/sidebar-provider";
 
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
       <div className="flex fixed size-full">
