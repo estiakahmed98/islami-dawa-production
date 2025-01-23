@@ -171,78 +171,195 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     const filteredData2 = filteredData.filter((row) => row.label !== "Edit");
 
     // Create table structure
-    let tableHTML = `
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
-            body {
-              font-family: 'Noto Sans Bengali', sans-serif;
-              text-align: center;
-              padding: 0px;
+  //   let tableHTML = `
+  //     <html>
+  //       <head>
+  //         <meta charset="UTF-8">
+  //         <style>
+  //           @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
+  //           body {
+  //             font-family: 'Noto Sans Bengali', sans-serif;
+  //             text-align: center;
+  //             padding: 0px;
         
+  //           }
+  //           table {
+  //             width: 100%;
+  //             border-collapse: collapse;
+  //             margin-top: 20px;
+  //           }
+  //           td {
+  //             border-bottom: 1px solid #000;
+  //             padding: 8px;
+  //             text-align: center;
+  //             font-size: 12px;
+  //           }
+  //           th {
+  //             background-color: #16A085;
+  //             color: white;
+  //             padding: 10px;
+  //             font-size: 14px;
+  //           }
+  //         </style>
+  //       </head>
+  //       <body>
+  //         <h2>${monthName} ${year} - ব্যবহারকারী: ${userName}</h2>
+  //         <table>
+  //           <thead>
+  //             <tr>
+  //               <th>দিন</th>
+  //               ${filteredData2.map((row) => `<th>${row.label}</th>`).join("")}
+  //             </tr>
+  //           </thead>
+  //           <tbody>
+  //             ${monthDays
+  //               .map(
+  //                 (day) => `
+  //               <tr>
+  //                 <td>${day}</td>
+  //                 ${filteredData2
+  //                   .map((row) => `<td>${row[day] || "-"}</td>`)
+  //                   .join("")}
+  //               </tr>`
+  //               )
+  //               .join("")}
+  //           </tbody>
+  //         </table>
+  //       </body>
+  //     </html>
+  //   `;
+
+  //   // Convert the content to PDF
+  //   const element = document.createElement("div");
+  //   element.innerHTML = tableHTML;
+
+  //   html2pdf()
+  //     .set({
+  //       margin: 10,
+  //       filename: `${monthName}_${year}_user_data.pdf`,
+  //       image: { type: "jpeg", quality: 0.98 },
+  //       html2canvas: { scale: 2 },
+  //       jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+  //     })
+  //     .from(element)
+  //     .save();
+  // };
+
+  const tableHTML = `
+  <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
+        body {
+          font-family: 'Noto Sans Bengali', sans-serif;
+          text-align: center;
+          padding: 0px;
+          margin: 0px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+        }
+        td {
+          border-bottom: 1px solid #000;
+          padding: 8px;
+          text-align: center;
+          font-size: 12px;
+        }
+        th {
+          background-color: #16A085;
+          color: white;
+          padding: 10px;
+          font-size: 14px;
+        }
+        .header {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          text-align: center;
+          background-color: #16A085;
+          color: white;
+          padding: 10px 0;
+          font-size: 16px;
+        }
+        .content {
+          margin-top: 70px;
+        }
+        .page-break {
+          page-break-before: always;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h2>${monthName} ${year} - ব্যবহারকারী: ${userName}</h2>
+      </div>
+      <div class="content">
+        ${monthDays
+          .reduce<string[]>((acc, day, index) => {
+            if (index % 12 === 0) {
+              // Start a new table after every 12 rows
+              if (index !== 0) acc.push('</tbody></table><div class="page-break"></div>');
+              acc.push(`
+                <table>
+                  <thead>
+                    <tr>
+                      <th>দিন</th>
+                      ${filteredData2.map((row) => `<th>${row.label}</th>`).join("")}
+                    </tr>
+                  </thead>
+                  <tbody>
+              `);
             }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 20px;
-            }
-            td {
-              border-bottom: 1px solid #000;
-              padding: 8px;
-              text-align: center;
-              font-size: 12px;
-            }
-            th {
-              background-color: #16A085;
-              color: white;
-              padding: 10px;
-              font-size: 14px;
-            }
-          </style>
-        </head>
-        <body>
-          <h2>${monthName} ${year} - ব্যবহারকারী: ${userName}</h2>
-          <table>
-            <thead>
+            // Add a normal row
+            acc.push(`
               <tr>
-                <th>দিন</th>
-                ${filteredData2.map((row) => `<th>${row.label}</th>`).join("")}
+                <td>${day}</td>
+                ${filteredData2.map((row) => `<td>${row[day] || "-"}</td>`).join("")}
               </tr>
-            </thead>
-            <tbody>
-              ${monthDays
-                .map(
-                  (day) => `
-                <tr>
-                  <td>দিন ${day}</td>
-                  ${filteredData2
-                    .map((row) => `<td>${row[day] || "-"}</td>`)
-                    .join("")}
-                </tr>`
-                )
-                .join("")}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `;
+            `);
+            return acc;
+          }, [])
+          .join("")}
+        </tbody></table>
+      </div>
+    </body>
+  </html>
+`;
 
-    // Convert the content to PDF
-    const element = document.createElement("div");
-    element.innerHTML = tableHTML;
+// Convert the content to PDF
+const element = document.createElement("div");
+element.innerHTML = tableHTML;
 
-    html2pdf()
-      .set({
-        margin: 10,
-        filename: `${monthName}_${year}_user_data.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
-      })
-      .from(element)
-      .save();
+html2pdf()
+  .set({
+    margin: [20, 10, 20, 10],
+    filename: `${monthName}_${year}_user_data.pdf`,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+  })
+  .from(element)
+  .toPdf()
+  .get("pdf")
+  .then((pdf) => {
+    const totalPages = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(10);
+      pdf.text(`Page ${i} of ${totalPages}`, pdf.internal.pageSize.getWidth() / 2, 10, {
+        align: "center",
+      });
+    }
+  })
+  .save();
+
+
+
+
   };
 
   const handleSaveEdit = (day: number, updatedData: any) => {

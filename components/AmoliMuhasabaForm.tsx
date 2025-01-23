@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 // "use client";
 
 // import { useState, useEffect } from "react";
@@ -401,13 +403,14 @@
 
 // export default AmoliMuhasabaForm;
 
+>>>>>>> c491014d2eff76db07520a17b62bd59170c6771b
 "use client";
 
 import { useState, useEffect, ChangeEvent } from "react";
 import { Formik, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import {
-  ayatOptions,
+  surahOptions,
   duaOptions,
   zikirOptions,
   ishraqOptions,
@@ -425,7 +428,7 @@ import { toast } from "sonner";
 
 interface AmoliMuhasabaFormValues {
   tahajjud: number;
-  ayat: string;
+  surah: string;
   zikir: string;
   ishraq: string;
   jamat: number;
@@ -437,11 +440,12 @@ interface AmoliMuhasabaFormValues {
   amoliSura: string;
   ayamroja: string;
   hijbulBahar: string;
+  ayat:string;
 }
 
 const initialFormData: AmoliMuhasabaFormValues = {
   tahajjud: 0,
-  ayat: "",
+  surah: "",
   zikir: "",
   ishraq: "",
   jamat: 0,
@@ -453,6 +457,7 @@ const initialFormData: AmoliMuhasabaFormValues = {
   amoliSura: "",
   ayamroja: "",
   hijbulBahar: "",
+  ayat: "", // New field
 };
 
 const validationSchema = Yup.object({
@@ -463,7 +468,7 @@ const validationSchema = Yup.object({
     .min(0, "Value should not be less than 0")
     .max(5, "Value should not exceed 5")
     .required("This field is required"),
-  ayat: Yup.string().required("This field is required"),
+  surah: Yup.string().required("Select Surah required"),
   zikir: Yup.string().required("This field is required"),
   ishraq: Yup.string().required("This field is required"),
   sirat: Yup.string().required("This field is required"),
@@ -474,6 +479,7 @@ const validationSchema = Yup.object({
   amoliSura: Yup.string().required("This field is required"),
   ayamroja: Yup.string().notRequired(),
   hijbulBahar: Yup.string().required("This field is required"),
+  ayat: Yup.string().required("This field is required"),
 });
 
 const AmoliMuhasabaForm = () => {
@@ -483,7 +489,7 @@ const AmoliMuhasabaForm = () => {
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [points, setPoints] = useState({
     tahajjud: 0,
-    ayat: 0,
+    surah: 0,
     zikir: 0,
     ishraq: 0,
     jamat: 0,
@@ -509,7 +515,7 @@ const AmoliMuhasabaForm = () => {
       if (value === "সকাল" || value === "সন্ধ্যা") return 3;
       return 0;
     } else if (
-      field === "ayat" ||
+      field === "surah" ||
       field === "ishraq" ||
       field === "ilm" ||
       field === "sirat"
@@ -690,7 +696,7 @@ const AmoliMuhasabaForm = () => {
                   তিলাওয়াতুল কোরআন তাদাব্বুর
                 </label>
                 <Field
-                  name="ayat"
+                  name="surah"
                   as="select"
                   disabled={isSubmittedToday}
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
@@ -698,15 +704,37 @@ const AmoliMuhasabaForm = () => {
                     e:
                       | ChangeEvent<HTMLInputElement | HTMLSelectElement>
                       | ChangeEvent<HTMLSelectElement>
-                  ) => handleInputChange(e, "ayat", setFieldValue)}
+                  ) => handleInputChange(e, "surah", setFieldValue)}
                 >
                   <option value="">Select Option</option>
-                  {ayatOptions.map((option) => (
+                  {surahOptions.map((option) => (
                     <option key={option.value} value={option.label}>
                       {option.label}
                     </option>
                   ))}
                 </Field>
+                <ErrorMessage
+                  name="surah"
+                  component="div"
+                  className="text-red-500"
+                />
+                <div className="text-gray-600">Points: {points.surah}</div>
+              </div>
+
+              <div className="mb-2">
+                <label className="mb-2 block text-gray-700">আয়াত প্রদান</label>
+                <Field
+                  name="ayat"
+                  type="text"
+                  placeholder="Enter Ayat"
+                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                  onChange={(
+                    e:
+                      | ChangeEvent<HTMLInputElement | HTMLSelectElement>
+                      | ChangeEvent<HTMLSelectElement>
+                  ) => handleInputChange(e, "ayat", setFieldValue)}
+                  disabled={isSubmittedToday}
+                />
                 <ErrorMessage
                   name="ayat"
                   component="div"
@@ -714,6 +742,7 @@ const AmoliMuhasabaForm = () => {
                 />
                 <div className="text-gray-600">Points: {points.ayat}</div>
               </div>
+
               <div className="mb-2">
                 <label className="mb-2 block text-gray-700">
                   সকাল-সন্ধ্যা দোয়া ও জিকির

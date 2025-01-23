@@ -3,7 +3,7 @@ import * as Yup from "yup";
 // Types for form data
 interface FormData {
   tahajjud: string;
-  ayat: string;
+  surahOptions: string;
   zikir: string;
   ishraq: string;
   jamat: string;
@@ -20,7 +20,7 @@ interface FormData {
 // Initial form data
 export const initialFormData: FormData = {
   tahajjud: "",
-  ayat: "",
+  surahOptions: "",
   zikir: "",
   ishraq: "",
   jamat: "",
@@ -170,7 +170,7 @@ export const validationSchema = Yup.object().shape({
 //   { value: "sura Nas", label: "সুরা আন-নাস" },
 // ];
 
-export const ayatOptions = [
+export const surahOptions = [
   { value: "sura Fatiha", label: "সুরা ফাতিহা", length: 7 },
   { value: "sura Baqara", label: "সুরা বাকারা", length: 286 },
   { value: "sura Al-Imran", label: "সুরা আল ইমরান", length: 200 },
