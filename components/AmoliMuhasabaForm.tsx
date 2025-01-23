@@ -402,6 +402,7 @@
 
 // export default AmoliMuhasabaForm;
 
+
 "use client";
 
 import { useState, useEffect, ChangeEvent } from "react";
@@ -499,6 +500,7 @@ const AmoliMuhasabaForm = () => {
     amoliSura: 0,
     ayamroja: 0,
     hijbulBahar: 0,
+    ayat: 0
   });
 
   moment.locale("en");
