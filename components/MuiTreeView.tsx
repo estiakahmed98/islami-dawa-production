@@ -11,6 +11,7 @@ import { useSelectedUser } from "@/providers/treeProvider";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { ScrollArea } from "./ui/scroll-area";
+import { PiTreeViewBold } from "react-icons/pi";
 
 interface TreeNode {
   id: number;
@@ -1133,11 +1134,12 @@ const OnItemClick: React.FC<{
   return (
     <ScrollArea className="overflow-y-auto text-white font-semibold py-4 shrink-0">
       <Stack spacing={2}>
-        <div className="flex justify-start px-4">
+        <div className="flex justify-start px-2">
           <IconButton size="small" onClick={handleToggle}>
-            <p className="text-white text-sm font-medium">
-              {isExpanded ? "Collapse All" : "Expand All"}
-            </p>
+            <div className="flex gap-4 text-white text-sm font-medium">
+              <PiTreeViewBold className="size-6"/>
+              {isExpanded ? <span className="mb-0">Collapse All</span> : <span>Expand All</span>}
+            </div>
             {isExpanded ? (
               <ArrowDropUpIcon className="text-white" />
             ) : (
