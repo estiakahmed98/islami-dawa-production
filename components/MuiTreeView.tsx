@@ -1133,7 +1133,7 @@ const OnItemClick: React.FC<{
   return (
     <ScrollArea className="overflow-y-auto text-white font-semibold py-4 shrink-0">
       <Stack spacing={2}>
-        <div className="flex justify-end px-4">
+        <div className="flex justify-start px-4">
           <IconButton size="small" onClick={handleToggle}>
             <p className="text-white text-sm font-medium">
               {isExpanded ? "Collapse All" : "Expand All"}
