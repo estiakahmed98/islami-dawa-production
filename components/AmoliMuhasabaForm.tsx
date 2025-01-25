@@ -1,4 +1,3 @@
-
 // "use client";
 
 // import { useState, useEffect } from "react";
@@ -402,7 +401,6 @@
 
 // export default AmoliMuhasabaForm;
 
-
 "use client";
 
 import { useState, useEffect, ChangeEvent } from "react";
@@ -439,7 +437,7 @@ interface AmoliMuhasabaFormValues {
   amoliSura: string;
   ayamroja: string;
   hijbulBahar: string;
-  ayat:string;
+  ayat: string;
 }
 
 const initialFormData: AmoliMuhasabaFormValues = {
@@ -500,7 +498,7 @@ const AmoliMuhasabaForm = () => {
     amoliSura: 0,
     ayamroja: 0,
     hijbulBahar: 0,
-    ayat: 0
+    ayat: 0,
   });
 
   moment.locale("en");
@@ -566,7 +564,7 @@ const AmoliMuhasabaForm = () => {
   };
 
   const totalPoints = Object.values(points).reduce((a, b) => a + b, 0);
-  const maxPoints = showAyamRojaSection ? 65 : 60; // Dynamically set max points
+  const maxPoints = showAyamRojaSection ? 70 : 65; // Dynamically set max points
   const percentage = ((totalPoints / maxPoints) * 100).toFixed(2);
 
   useEffect(() => {

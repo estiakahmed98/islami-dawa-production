@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
 import { admin } from "@/lib/auth-client";

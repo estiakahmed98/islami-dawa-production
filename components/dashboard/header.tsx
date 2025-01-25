@@ -18,6 +18,7 @@ import { signOut, useSession } from "@/lib/auth-client";
 import "moment-hijri";
 import { useRouter } from "next/navigation";
 import moment from "moment-hijri";
+import Link from "next/link";
 
 const Header = () => {
   const router = useRouter();
@@ -83,9 +84,11 @@ const Header = () => {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserRound className="opacity-60" aria-hidden="true" />
-                <span>Profile</span>
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <UserRound className="opacity-60" aria-hidden="true" />
+                  <span>Profile</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
