@@ -241,6 +241,23 @@ export const userAmoliData = {
         "ayamroja": "",
         "hijbulBahar": "হ্যাঁ",
         "percentage": "100.00"
+      },
+      "2025-01-25": {
+        "tahajjud": 20,
+        "surah": "সুরা রাদ",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক-আওয়াবীন-চাশ্ত",
+        "jamat": 5,
+        "sirat": "bukhari",
+        "Dua": "হ্যাঁ",
+        "ilm": "muslim",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "50",
+        "percentage": "100.00"
       }
     },
     "zisan@gmail.com": {
