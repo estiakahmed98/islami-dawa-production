@@ -8,10 +8,6 @@ import * as yup from "yup";
 import { signUpSchemaUser } from "@/validators/authValidators";
 
 // Types
-type Division = {
-  value: number;
-  title: string;
-};
 
 type District = {
   value: number;
@@ -29,7 +25,6 @@ type Union = {
 };
 
 const Register = () => {
-  const [language, setLanguage] = useState("bn");
   const [formData, setFormData] = useState({
     name: "",
     role: "",
@@ -190,12 +185,11 @@ const Register = () => {
               className="p-2 border-2 rounded-lg grow w-full"
             >
               <option value="">Select Division</option>
-              {language === "bn" &&
-                divisions.map((division) => (
-                  <option key={division.value} value={division.value}>
-                    {division.title}
-                  </option>
-                ))}
+              {divisions.map((division) => (
+                <option key={division.value} value={division.value}>
+                  {division.title}
+                </option>
+              ))}
             </select>
           </div>
 

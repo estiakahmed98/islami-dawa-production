@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useSelectedUser } from "@/providers/treeProvider";
 import {
   Tabs,
@@ -28,8 +28,6 @@ const AdminPage: React.FC = () => {
 
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
-
-  let dashboardData;
 
   if (selectedUser === "rifat@gmail.com") {
     emailList = [

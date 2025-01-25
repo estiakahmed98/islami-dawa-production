@@ -1,5 +1,4 @@
 import Header from "@/components/dashboard/header";
-import Sidebar from "@/components/dashboard/sidebar";
 import ImpersonateSidebar from "@/components/ImpersonateSidebar";
 import { SidebarProvider } from "@/providers/sidebar-provider";
 import TreeProvider from "@/providers/treeProvider";
