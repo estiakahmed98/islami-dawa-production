@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation"; // Import useRouter and usePathname for navigation
 import MenuItem from "./menu-item";
@@ -7,22 +6,26 @@ import MenuItem from "./menu-item";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { FaRegFileAlt, FaRegHandshake, FaUsers, FaQuran } from "react-icons/fa";
 import { LiaChalkboardTeacherSolid } from "react-icons/lia";
-import { FcLeave } from "react-icons/fc";
+import { FcAcceptDatabase, FcLeave } from "react-icons/fc";
 import {
   MdOutlinePeopleAlt,
   MdOutlineMosque,
   MdOutlineTravelExplore,
+  MdPeople,
 } from "react-icons/md";
 import { BsMoonStars } from "react-icons/bs";
 import Image from "next/image";
 import { useSidebar } from "@/providers/sidebar-provider";
 import { GrSchedules } from "react-icons/gr";
 import { useSession } from "@/lib/auth-client";
+import { IoPersonAddSharp } from "react-icons/io5";
+import OnItemClick from "@/components/MuiTreeView";
 
 const SidebarMenu = () => {
   const router = useRouter(); // Router instance for navigation
   const { data: session } = useSession();
   const userRole = session?.user?.role;
+  const userEmail = session?.user.email;
 
   const { isMobile } = useSidebar();
 
@@ -51,10 +54,10 @@ const SidebarMenu = () => {
   useEffect(() => {
     if (currentRoute === "/admin") {
       setIsAdminMode(true);
-      setButtonText("Goto User Mode") // Set Admin Mode when on "/admin"
+      setButtonText("Goto User Mode"); // Set Admin Mode when on "/admin"
     } else if (currentRoute === "/dashboard") {
       setIsAdminMode(false);
-      setButtonText("Goto Admin Mode") // Set User Mode when on "/dashboard"
+      setButtonText("Goto Admin Mode"); // Set User Mode when on "/dashboard"
     }
   }, [currentRoute]);
 
@@ -62,6 +65,21 @@ const SidebarMenu = () => {
     const newMode = !isAdminMode;
     setIsAdminMode(newMode);
     router.push(newMode ? "/admin" : "/dashboard");
+  };
+
+  const handleMobileAdminToggle = () => {
+    const newMode = !isAdminMode;
+    setIsAdminMode(newMode);
+  };
+
+  const [userName, setUserName] = useState<string>("");
+
+  useEffect(() => {
+    setUserName(userEmail || "");
+  }, []);
+
+  const navigateToUserPage = (): void => {
+    router.push("/admin/user");
   };
 
   const menuList = [
@@ -127,6 +145,29 @@ const SidebarMenu = () => {
     },
   ];
 
+  const adminMenuList = [
+    {
+      url: "/admin",
+      icon: <LuLayoutDashboard className="size-6" />,
+      title: "ড্যাশবোর্ড",
+    },
+    {
+      url: "/admin/register",
+      icon: <IoPersonAddSharp className="size-6" />,
+      title: "দায়ী এড করা",
+    },
+    {
+      url: "/admin/users",
+      icon: <MdPeople className="size-6" />,
+      title: "দায়ী দেখুন",
+    },
+    {
+      url: "/admin/notification",
+      icon: <FcAcceptDatabase className="size-6" />,
+      title: "অনুমতি দিন",
+    },
+  ];
+
   return (
     <nav className="grow space-y-2 overflow-y-auto p-6">
       {!isMobile && (
@@ -142,7 +183,7 @@ const SidebarMenu = () => {
       )}
 
       {/* Toggle Button for Admin Roles */}
-      {isAdmin && (
+      {isAdmin && !isMobile && (
         <div className="flex justify-start mb-8">
           <button
             className={`px-4 py-2 rounded-xl text-white transition-all duration-300 ${
@@ -158,9 +199,52 @@ const SidebarMenu = () => {
       )}
 
       {/* Menu List */}
-      {menuList.map((menu, index) => (
-        <MenuItem key={index} {...menu} />
-      ))}
+      {!isAdmin &&
+        menuList.map((menu, index) => <MenuItem key={index} {...menu} />)}
+
+      {isAdmin &&
+        !isMobile &&
+        menuList.map((menu, index) => <MenuItem key={index} {...menu} />)}
+
+
+      {isAdmin && isMobile && (
+        <div className="flex justify-start mb-8">
+          <button
+            className={`px-4 py-2 rounded-xl text-white transition-all duration-300 ${
+              isAdminMode
+                ? "bg-lime-700 hover:bg-lime-600"
+                : "bg-blue-700 hover:bg-blue-600"
+            }`}
+            onClick={() => {
+              const newMode = !isAdminMode;
+              setIsAdminMode(newMode);
+              setButtonText(newMode ? "Goto User Mode" : "Goto Admin Mode"); // Toggle button text
+            }}
+          >
+            {buttText}
+          </button>
+        </div>
+      )}
+
+      {isAdmin &&
+        isMobile &&
+        (isAdminMode ? (
+          <>
+            {adminMenuList.map((menu, index) => (
+              <MenuItem key={index} {...menu} />
+            ))}
+            {userName && (
+              <div className="mt-4 px-1 overflow-y-auto">
+                <OnItemClick
+                  loggedInUser={userName}
+                  onItemClick={navigateToUserPage}
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          menuList.map((menu, index) => <MenuItem key={index} {...menu} />)
+        ))}
     </nav>
   );
 };
