@@ -1,6 +1,6 @@
 export const roleList = [
-  "centraladmin",
   "superadmin",
+  "centraladmin",
   "divisionadmin",
   "districtadmin",
   "areaadmin",
