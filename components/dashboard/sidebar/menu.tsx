@@ -55,7 +55,7 @@ const SidebarMenu = () => {
     if (currentRoute === "/admin") {
       setIsAdminMode(true);
       setButtonText("Goto User Mode"); // Set Admin Mode when on "/admin"
-    } else if (currentRoute === "/dashboard") {
+    } else if (currentRoute === "/dashboard" || "/dashboard/*") {
       setIsAdminMode(false);
       setButtonText("Goto Admin Mode"); // Set User Mode when on "/dashboard"
     }
@@ -64,6 +64,12 @@ const SidebarMenu = () => {
   const handleModeToggle = () => {
     const newMode = !isAdminMode;
     setIsAdminMode(newMode);
+    if(isAdminMode){
+      setButtonText("Goto User Mode")
+    }
+    else{
+      setButtonText("Goto Admin Mode")
+    }
     router.push(newMode ? "/admin" : "/dashboard");
   };
 

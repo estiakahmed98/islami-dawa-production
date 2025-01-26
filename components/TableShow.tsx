@@ -337,7 +337,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
 
       {motamotPopup && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-10 rounded-xl shadow-lg max-w-[85vw] lg:max-w-[0vw] max-h-[70vh] relative overflow-y-auto">
+          <div className="bg-white p-10 rounded-xl shadow-lg max-w-[85vw] lg:max-w-[60vw] max-h-[70vh] relative overflow-y-auto">
             <button
               className="absolute top-4 right-6 text-xl text-red-500 hover:text-red-700"
               onClick={() => setMotamotPopup(null)}
