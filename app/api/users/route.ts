@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    const users = await prisma.user.findMany({
+    const users = await prisma.users.findMany({
       where: query,
       select: {
         id: true,
