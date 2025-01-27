@@ -77,6 +77,8 @@ const Register = () => {
     }));
   };
 
+
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -117,6 +119,7 @@ const Register = () => {
       }
     }
   };
+
   return (
     <div className="flex items-center justify-center bg-gray-50 lg:m-10">
       <div className="w-full p-8 space-y-6 shadow-lg rounded-lg">

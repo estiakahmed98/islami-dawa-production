@@ -1,3 +1,252 @@
+// "use client";
+
+// import React, { useState, useEffect, JSX } from "react";
+// import Box from "@mui/material/Box";
+// import Stack from "@mui/material/Stack";
+// import { SimpleTreeView, TreeItem as MuiTreeItem } from "@mui/x-tree-view";
+// import IconButton from "@mui/material/IconButton";
+// import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+// import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+// import { useSelectedUser } from "@/providers/treeProvider";
+// import { useRouter } from "next/navigation";
+// import { useSession } from "@/lib/auth-client";
+// import { ScrollArea } from "./ui/scroll-area";
+// import { PiTreeViewBold } from "react-icons/pi";
+
+// // Role hierarchy list
+// export const roleList = [
+//   "centraladmin",
+//   "divisionadmin",
+//   "districtadmin",
+//   "upozilaadmin",
+//   "unionadmin",
+//   "daye",
+// ];
+
+// // Define User & Tree Structure
+// interface User {
+//   id: number;
+//   name: string;
+//   email: string;
+//   role: string;
+//   division?: string;
+//   district?: string;
+//   upazila?: string;
+//   union?: string;
+//   phone?: string;
+// }
+
+// interface TreeNode {
+//   id: number;
+//   label: string;
+//   user?: string;
+//   children?: TreeNode[];
+// }
+
+// const OnItemClick: React.FC = () => {
+//   const { setSelectedUser } = useSelectedUser();
+//   const [treeData, setTreeData] = useState<TreeNode[]>([]);
+//   const [expanded, setExpanded] = useState<string[]>([]);
+//   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+//   const [users, setUsers] = useState<User[]>([]);
+
+//   const router = useRouter();
+//   const { data: session } = useSession();
+//   const userEmail = session?.user?.email || "";
+//   const userRole = session?.user?.role || "";
+//   const userUnion = session?.user?.union || "";
+
+//   console.log("Logged-in User:", { userRole, userEmail });
+
+//   // Fetch Users from API (Triggers on first load & when users change)
+//   useEffect(() => {
+//     fetchUsers();
+//   }, [treeData]);
+
+//   const fetchUsers = async () => {
+//     try {
+//       const response = await fetch("/api/users");
+//       if (!response.ok) throw new Error("Failed to fetch users");
+
+//       const usersData: User[] = await response.json();
+//       setUsers(usersData);
+//       setTreeData(buildTree(usersData, session?.user));
+//     } catch (error) {
+//       console.error("Error fetching users:", error);
+//     }
+//   };
+
+//   // ✅ Function to Refresh Tree After User Addition
+//   const refreshTree = () => {
+//     fetchUsers();
+//   };
+
+//   // Build Hierarchical Tree from User Data
+//   const buildTree = (users: User[], loggedInUser: User | null): TreeNode[] => {
+//     const userMap = new Map<string, TreeNode>();
+
+//     // Create nodes for each user
+//     users.forEach((user) => {
+//       userMap.set(user.email, {
+//         id: user.id,
+//         label: `${user.name} (${user.role})`,
+//         user: user.email,
+//         children: [],
+//       });
+//     });
+
+//     // Assign users based on role hierarchy
+//     users.forEach((user) => {
+//       const parentEmail = getParentEmail(user, users);
+//       if (parentEmail && userMap.has(parentEmail)) {
+//         userMap.get(parentEmail)!.children?.push(userMap.get(user.email)!);
+//       }
+//     });
+
+//     // ✅ Handle root nodes based on logged-in user
+//     if (loggedInUser) {
+//       if (loggedInUser.role === "centraladmin") {
+//         return users
+//           .filter((u) => u.role === "centraladmin")
+//           .map((u) => userMap.get(u.email)!);
+//       } else {
+//         return [userMap.get(loggedInUser.email)!];
+//       }
+//     }
+
+//     return [];
+//   };
+
+//   // Get Parent Email Based on Role Hierarchy
+//   const getParentEmail = (user: User, users: User[]): string | null => {
+//     let parentUser: User | undefined;
+
+//     switch (user.role) {
+//       case "divisionadmin":
+//         parentUser = users.find((u) => u.role === "centraladmin");
+//         break;
+//       case "districtadmin":
+//         parentUser = users.find(
+//           (u) => u.role === "divisionadmin" && u.division === user.division
+//         );
+//         break;
+//       case "upozilaadmin":
+//         parentUser = users.find(
+//           (u) => u.role === "districtadmin" && u.district === user.district
+//         );
+//         break;
+//       case "unionadmin":
+//         parentUser = users.find(
+//           (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
+//         );
+//         break;
+//       case "daye":
+//         parentUser = users.find(
+//           (u) => u.role === "unionadmin" && u.union === user.union
+//         );
+//         break;
+//       default:
+//         return null;
+//     }
+//     return parentUser ? parentUser.email : null;
+//   };
+
+//   // Render Tree Items
+//   const renderTree = (nodes: TreeNode[]): JSX.Element[] | null => {
+//     if (!nodes?.length) return null;
+//     return nodes.map((node) => (
+//       <MuiTreeItem
+//         key={node.id}
+//         itemId={node.id.toString()}
+//         label={node.label}
+//         onClick={() => handleItemClick(node.user)}
+//       >
+//         {node.children && renderTree(node.children)}
+//       </MuiTreeItem>
+//     ));
+//   };
+
+//   // Expand/Collapse Toggle
+//   const handleToggle = () => {
+//     setExpanded(isExpanded ? [] : getAllIds(treeData));
+//     setIsExpanded(!isExpanded);
+//   };
+
+//   // Collect All IDs for Expansion
+//   const getAllIds = (nodes: TreeNode[]): string[] =>
+//     nodes.flatMap((node) => [
+//       node.id.toString(),
+//       ...(node.children ? getAllIds(node.children) : []),
+//     ]);
+
+//   // Handle User Click
+//   const handleItemClick = (user?: string) => {
+//     if (user) {
+//       setSelectedUser(user);
+//       router.push("/admin");
+//     }
+//   };
+
+//   return (
+//     <ScrollArea className="overflow-y-auto text-white font-semibold py-4 shrink-0">
+//       <Stack spacing={2}>
+//         {/* Expand/Collapse Button */}
+//         <div className="flex justify-start px-2">
+//           <IconButton size="small" onClick={handleToggle}>
+//             <div className="flex gap-4 text-white text-sm font-medium">
+//               <PiTreeViewBold className="size-6" />
+//               <span>{isExpanded ? "Collapse All" : "Expand All"}</span>
+//             </div>
+//             {isExpanded ? (
+//               <ArrowDropUpIcon className="text-white" />
+//             ) : (
+//               <ArrowDropDownIcon className="text-white" />
+//             )}
+//           </IconButton>
+//         </div>
+
+//         {/* Tree View */}
+//         <Box sx={{ minHeight: 352, minWidth: 300 }}>
+//           {userEmail ? (
+//             <SimpleTreeView
+//               expandedItems={expanded}
+//               onExpandedItemsChange={(e, ids) => setExpanded(ids)}
+//             >
+//               {renderTree(treeData)}
+//             </SimpleTreeView>
+//           ) : (
+//             <p>Please log in to view your tree data.</p>
+//           )}
+//         </Box>
+//       </Stack>
+//     </ScrollArea>
+//   );
+// };
+
+// export default OnItemClick;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 "use client";
 
 import React, { useState, useEffect, JSX } from "react";
@@ -48,29 +297,40 @@ const OnItemClick: React.FC = () => {
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
   const [expanded, setExpanded] = useState<string[]>([]);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [users, setUsers] = useState<User[]>([]);
 
   const router = useRouter();
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
+  const userRole = session?.user?.role || "";
 
-  // Fetch Users from API
+  console.log("Logged-in User:", { userRole, userEmail });
+
+  // Fetch Users from API (Triggers on first load & when users change)
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("/api/users");
-        const users: User[] = await response.json();
-        setTreeData(buildTree(users));
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-
     fetchUsers();
-  }, []);
+  }, [treeData]);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("/api/users");
+      if (!response.ok) throw new Error("Failed to fetch users");
+
+      const usersData: User[] = await response.json();
+      setUsers(usersData);
+      setTreeData(buildTree(usersData, session?.user));
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  // // ✅ Function to Refresh Tree After User Addition
+  // const refreshTree = () => {
+  //   fetchUsers();
+  // };
 
   // Build Hierarchical Tree from User Data
-  const buildTree = (users: User[]): TreeNode[] => {
-    const rootNodes: TreeNode[] = [];
+  const buildTree = (users: User[], loggedInUser: User | null): TreeNode[] => {
     const userMap = new Map<string, TreeNode>();
 
     // Create nodes for each user
@@ -88,12 +348,21 @@ const OnItemClick: React.FC = () => {
       const parentEmail = getParentEmail(user, users);
       if (parentEmail && userMap.has(parentEmail)) {
         userMap.get(parentEmail)!.children?.push(userMap.get(user.email)!);
-      } else if (user.role === "centraladmin") {
-        rootNodes.push(userMap.get(user.email)!);
       }
     });
 
-    return rootNodes;
+    // ✅ Handle root nodes based on logged-in user
+    if (loggedInUser) {
+      if (loggedInUser.role === "centraladmin") {
+        return users
+          .filter((u) => u.role === "centraladmin")
+          .map((u) => userMap.get(u.email)!);
+      } else {
+        return [userMap.get(loggedInUser.email)!];
+      }
+    }
+
+    return [];
   };
 
   // Get Parent Email Based on Role Hierarchy
@@ -130,21 +399,7 @@ const OnItemClick: React.FC = () => {
     return parentUser ? parentUser.email : null;
   };
 
-  // Render Tree Items
-  const renderTree = (nodes: TreeNode[]): JSX.Element[] | null => {
-    if (!nodes?.length) return null;
-    return nodes.map((node) => (
-      <MuiTreeItem
-        key={node.id}
-        itemId={node.id.toString()}
-        label={node.label}
-        onClick={() => handleItemClick(node.user)}
-      >
-        {node.children && renderTree(node.children)}
-      </MuiTreeItem>
-    ));
-  };
-
+ 
   // Expand/Collapse Toggle
   const handleToggle = () => {
     setExpanded(isExpanded ? [] : getAllIds(treeData));
@@ -164,6 +419,21 @@ const OnItemClick: React.FC = () => {
       setSelectedUser(user);
       router.push("/admin");
     }
+  };
+
+  // Render Tree Items
+  const renderTree = (nodes: TreeNode[]): JSX.Element[] | null => {
+    if (!nodes?.length) return null;
+    return nodes.map((node) => (
+      <MuiTreeItem
+        key={node.id}
+        itemId={node.id.toString()}
+        label={node.label}
+        onClick={() => handleItemClick(node.user)}
+      >
+        {node.children && renderTree(node.children)}
+      </MuiTreeItem>
+    ));
   };
 
   return (
@@ -203,3 +473,308 @@ const OnItemClick: React.FC = () => {
 };
 
 export default OnItemClick;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// "use client";
+
+// import React, { useState, useEffect, JSX } from "react";
+// import Box from "@mui/material/Box";
+// import Stack from "@mui/material/Stack";
+// import { SimpleTreeView, TreeItem as MuiTreeItem } from "@mui/x-tree-view";
+// import IconButton from "@mui/material/IconButton";
+// import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+// import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+// import { useSelectedUser } from "@/providers/treeProvider";
+// import { useRouter } from "next/navigation";
+// import { useSession } from "@/lib/auth-client";
+// import { ScrollArea } from "./ui/scroll-area";
+// import { PiTreeViewBold } from "react-icons/pi";
+
+// // Role hierarchy list
+// export const roleList = [
+//   "centraladmin",
+//   "divisionadmin",
+//   "districtadmin",
+//   "upozilaadmin",
+//   "unionadmin",
+//   "daye",
+// ];
+
+// // Define User & Tree Structure
+// interface User {
+//   id: number;
+//   name: string;
+//   email: string;
+//   role: string;
+//   division?: string;
+//   district?: string;
+//   upazila?: string;
+//   union?: string;
+//   phone?: string;
+// }
+
+// interface TreeNode {
+//   id: number;
+//   label: string;
+//   user?: string;
+//   children?: TreeNode[];
+// }
+
+// const OnItemClick: React.FC = () => {
+//   const { setSelectedUser } = useSelectedUser();
+//   const [treeData, setTreeData] = useState<TreeNode[]>([]);
+//   const [expanded, setExpanded] = useState<string[]>([]);
+//   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+//   const [users, setUsers] = useState<User[]>([]);
+
+//   const router = useRouter();
+//   const { data: session } = useSession();
+//   const userEmail = session?.user?.email || "";
+//   const userRole = session?.user?.role || "";
+
+//   console.log("Logged-in User:", { userRole, userEmail });
+
+//   // Fetch Users from API (Triggers on first load & when users change)
+//   useEffect(() => {
+//     fetchUsers();
+//   }, [treeData]);
+
+//   const fetchUsers = async () => {
+//     try {
+//       const response = await fetch("/api/users");
+//       if (!response.ok) throw new Error("Failed to fetch users");
+
+//       const usersData: User[] = await response.json();
+//       setUsers(usersData);
+//       setTreeData(buildTree(usersData, session?.user));
+//     } catch (error) {
+//       console.error("Error fetching users:", error);
+//     }
+//   };
+
+//   // ✅ Function to Refresh Tree After User Addition
+//   const refreshTree = () => {
+//     fetchUsers();
+//   };
+
+//   // Build Hierarchical Tree from User Data
+//   const buildTree = (users: User[], loggedInUser: User | null): TreeNode[] => {
+//     const userMap = new Map<string, TreeNode>();
+
+//     // Create nodes for each user
+//     users.forEach((user) => {
+//       userMap.set(user.email, {
+//         id: user.id,
+//         label: `${user.name} (${user.role})`,
+//         user: user.email,
+//         children: [],
+//       });
+//     });
+
+//     // Assign users based on role hierarchy
+//     users.forEach((user) => {
+//       const parentEmail = getParentEmail(user, users);
+//       if (parentEmail && userMap.has(parentEmail)) {
+//         userMap.get(parentEmail)!.children?.push(userMap.get(user.email)!);
+//       }
+//     });
+
+//     // ✅ Handle root nodes based on logged-in user
+//     if (loggedInUser) {
+//       if (loggedInUser.role === "centraladmin") {
+//         return users
+//           .filter((u) => u.role === "centraladmin")
+//           .map((u) => userMap.get(u.email)!);
+//       } else {
+//         return [userMap.get(loggedInUser.email)!];
+//       }
+//     }
+
+//     return [];
+//   };
+
+//   // Get Parent Email Based on Role Hierarchy
+//   const getParentEmail = (user: User, users: User[]): string | null => {
+//     let parentUser: User | undefined;
+
+//     switch (user.role) {
+//       case "divisionadmin":
+//         parentUser = users.find((u) => u.role === "centraladmin");
+//         break;
+//       case "districtadmin":
+//         parentUser = users.find(
+//           (u) => u.role === "divisionadmin" && u.division === user.division
+//         );
+//         break;
+//       case "upozilaadmin":
+//         parentUser = users.find(
+//           (u) => u.role === "districtadmin" && u.district === user.district
+//         );
+//         break;
+//       case "unionadmin":
+//         parentUser = users.find(
+//           (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
+//         );
+//         break;
+//       case "daye":
+//         parentUser = users.find(
+//           (u) => u.role === "unionadmin" && u.union === user.union
+//         );
+//         break;
+//       default:
+//         return null;
+//     }
+//     return parentUser ? parentUser.email : null;
+//   };
+
+//   // ✅ Function to Validate Admin Addition
+//   const canAddAdmin = (newUser: User): User | null => {
+//     const sameRoleUsers = users.filter((u) => u.role === newUser.role);
+
+//     switch (newUser.role) {
+//       case "districtadmin":
+//         return sameRoleUsers.find((u) => u.district === newUser.district) || null;
+//       case "upozilaadmin":
+//         return sameRoleUsers.find((u) => u.upazila === newUser.upazila) || null;
+//       case "unionadmin":
+//         return sameRoleUsers.find((u) => u.union === newUser.union) || null;
+//       default:
+//         return null;
+//     }
+//   };
+
+//   // Add Admin with Validation
+//   const handleAddAdmin = async (newUser: User) => {
+//     const existingAdmin = canAddAdmin(newUser);
+
+//     if (existingAdmin) {
+//       if (window.confirm(`Already have an admin (${existingAdmin.name}). Replace?`)) {
+//         try {
+//           // Delete the existing admin first
+//           await fetch(`/api/users/${existingAdmin.id}`, { method: "DELETE" });
+
+//           // Then add the new admin
+//           await fetch("/api/users", {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify(newUser),
+//           });
+
+//           alert("Admin replaced successfully!");
+//           refreshTree();
+//         } catch (error) {
+//           console.error("Error replacing admin:", error);
+//           alert("Error replacing admin. Please try again.");
+//         }
+//       }
+//     } else {
+//       try {
+//         // Add the new admin
+//         await fetch("/api/users", {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify(newUser),
+//         });
+
+//         alert("Admin added successfully!");
+//         refreshTree();
+//       } catch (error) {
+//         console.error("Error adding admin:", error);
+//         alert("Error adding admin. Please try again.");
+//       }
+//     }
+//   };
+
+//   // Expand/Collapse Toggle
+//   const handleToggle = () => {
+//     setExpanded(isExpanded ? [] : getAllIds(treeData));
+//     setIsExpanded(!isExpanded);
+//   };
+
+//   // Collect All IDs for Expansion
+//   const getAllIds = (nodes: TreeNode[]): string[] =>
+//     nodes.flatMap((node) => [
+//       node.id.toString(),
+//       ...(node.children ? getAllIds(node.children) : []),
+//     ]);
+
+//   // Handle User Click
+//   const handleItemClick = (user?: string) => {
+//     if (user) {
+//       setSelectedUser(user);
+//       router.push("/admin");
+//     }
+//   };
+
+//   // Render Tree Items
+//   const renderTree = (nodes: TreeNode[]): JSX.Element[] | null => {
+//     if (!nodes?.length) return null;
+//     return nodes.map((node) => (
+//       <MuiTreeItem
+//         key={node.id}
+//         itemId={node.id.toString()}
+//         label={node.label}
+//         onClick={() => handleItemClick(node.user)}
+//       >
+//         {node.children && renderTree(node.children)}
+//       </MuiTreeItem>
+//     ));
+//   };
+
+//   return (
+//     <ScrollArea className="overflow-y-auto text-white font-semibold py-4 shrink-0">
+//       <Stack spacing={2}>
+//         {/* Expand/Collapse Button */}
+//         <div className="flex justify-start px-2">
+//           <IconButton size="small" onClick={handleToggle}>
+//             <div className="flex gap-4 text-white text-sm font-medium">
+//               <PiTreeViewBold className="size-6" />
+//               <span>{isExpanded ? "Collapse All" : "Expand All"}</span>
+//             </div>
+//             {isExpanded ? (
+//               <ArrowDropUpIcon className="text-white" />
+//             ) : (
+//               <ArrowDropDownIcon className="text-white" />
+//             )}
+//           </IconButton>
+//         </div>
+
+//         {/* Tree View */}
+//         <Box sx={{ minHeight: 352, minWidth: 300 }}>
+//           {userEmail ? (
+//             <SimpleTreeView
+//               expandedItems={expanded}
+//               onExpandedItemsChange={(e, ids) => setExpanded(ids)}
+//             >
+//               {renderTree(treeData)}
+//             </SimpleTreeView>
+//           ) : (
+//             <p>Please log in to view your tree data.</p>
+//           )}
+//         </Box>
+//       </Stack>
+//     </ScrollArea>
+//   );
+// };
+
+// export default OnItemClick;
