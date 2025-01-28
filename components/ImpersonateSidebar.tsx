@@ -305,6 +305,7 @@ import { FcAcceptDatabase } from "react-icons/fc";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import OnItemClick from "./MuiTreeView";
+import MuiTreeView from "./MuiTreeView";
 
 const ImpersonateSidebar: React.FC = () => {
   // const [showUserSidebar, setShowUserSidebar] = useState<boolean>(false);
@@ -434,10 +435,7 @@ const ImpersonateSidebar: React.FC = () => {
 
           {!isCollapsed && userName && (
             <div className="mt-4 px-4">
-              <OnItemClick
-                loggedInUser={userName}
-                onItemClick={navigateToUserPage}
-              />
+              <MuiTreeView />
             </div>
           )}
         </div>

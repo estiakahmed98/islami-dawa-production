@@ -77,8 +77,6 @@ const Register = () => {
     }));
   };
 
-
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
