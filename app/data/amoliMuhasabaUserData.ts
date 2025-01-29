@@ -467,6 +467,25 @@ export const userAmoliData = {
         "ayat": "12-50",
         "percentage": "100.00"
       }
+    },
+    "selim@gmail.com": {
+      "2025-01-29": {
+        "tahajjud": 23,
+        "surah": "সুরা ইব্রাহিম",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "আওয়াবীন",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "12-50",
+        "percentage": "100.00"
+      }
     }
   }
 };

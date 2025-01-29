@@ -67,6 +67,14 @@ export const userDawatiBisoyData = {
         "publicSatheyMojlish": 500,
         "nonMuslimSaptahikGasht": 500,
         "editorContent": "<p><span style=\"color: rgb(55, 65, 81); font-family: Arial, Helvetica, sans-serif; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;\">অনুসলিমকে দাওয়াত দেওয়া হয়েছে</span><br class=\"Apple-interchange-newline\"><br></p>"
+      },
+      "2025-01-29": {
+        "nonMuslimDawat": 50,
+        "murtadDawat": 50,
+        "alemderSatheyMojlish": 50,
+        "publicSatheyMojlish": 50,
+        "nonMuslimSaptahikGasht": 50,
+        "editorContent": "<p>Hello Everyone&nbsp;</p>"
       }
     },
     "zisan@gmail.com": {
