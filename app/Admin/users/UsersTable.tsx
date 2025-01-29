@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +14,7 @@ import {
 import { useSession } from "@/lib/auth-client";
 
 interface User {
-  id: string; // Fixed: BetterAuth uses string IDs
+  id: string;
   name: string;
   email: string;
   role: string;
@@ -54,11 +53,11 @@ export default function UsersTable() {
     phone: "",
   });
 
-  const { data, isPending, error } = useSession(); // FIXED: Corrected session usage
-  const sessionUser = data?.user; // Get the authenticated user
+  const { data, isPending } = useSession();
+  const sessionUser = data?.user;
 
   useEffect(() => {
-    if (isPending) return; // Wait until session loads
+    if (isPending) return;
     if (!sessionUser) {
       console.log("User not authenticated");
       return;
@@ -74,13 +73,26 @@ export default function UsersTable() {
           }
         });
 
-        const response = await fetch(`/api/showuser?${params.toString()}`);
-        const data = await response.json();
+        const response = await fetch(`/api/usershow?${params.toString()}`);
 
-        if (response.ok) {
-          setUsers(data.users || []);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Error response:", errorText);
+          throw new Error(`API error: ${response.statusText}`);
+        }
+
+        const text = await response.text();
+        if (!text) {
+          throw new Error("Empty response from API");
+        }
+
+        const data = JSON.parse(text);
+
+        if (data?.users) {
+          setUsers(data.users);
         } else {
-          console.error("Failed to fetch users:", data.message);
+          console.error("Invalid data structure:", data);
+          setUsers([]);
         }
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -90,7 +102,7 @@ export default function UsersTable() {
     };
 
     fetchUsers();
-  }, [filters, isPending, sessionUser]); // FIXED: Using correct session values
+  }, [filters, isPending, sessionUser]);
 
   const handleFilterChange = (name: keyof Filters, value: string) => {
     setFilters((prev) => ({ ...prev, [name]: value }));
@@ -98,21 +110,19 @@ export default function UsersTable() {
 
   const toggleBan = async (userId: string, isBanned: boolean) => {
     try {
-      const response = await fetch("/api/banuser", {
+      const response = await fetch("/api/usershow", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, banned: !isBanned }),
       });
 
-      // Ensure the response contains JSON
       if (!response.ok) {
-        const errorText = await response.text(); // Read raw response in case of error
+        const errorText = await response.text();
         console.error("Error response:", errorText);
         throw new Error(`API error: ${response.statusText}`);
       }
 
       const data = await response.json();
-
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id === userId ? { ...user, banned: !isBanned } : user
@@ -163,60 +173,49 @@ export default function UsersTable() {
           ))}
       </div>
 
-      {loading ? (
-        <p className="text-center text-xl p-10">Loading users...</p>
-      ) : users.length > 0 ? (
-        <div className="overflow-x-auto shadow-md rounded-lg border border-gray-200 px-4">
-          <Table className="overflow-x-auto">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Division</TableHead>
-                <TableHead>District</TableHead>
-                <TableHead>Upazila</TableHead>
-                <TableHead>Union</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Markaz</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <Link
-                      href={`/admin/users/${user.id}`}
-                      className="text-blue-600 hover:underline"
-                    >
-                      {user.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.role}</TableCell>
-                  <TableCell>{user.division}</TableCell>
-                  <TableCell>{user.district}</TableCell>
-                  <TableCell>{user.upazila}</TableCell>
-                  <TableCell>{user.union}</TableCell>
-                  <TableCell>{user.phone}</TableCell>
-                  <TableCell>{user.markaz}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant={user.banned ? "destructive" : "outline"}
-                      onClick={() => toggleBan(user.id, user.banned)}
-                    >
-                      {user.banned ? "Unban" : "Ban"}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      ) : (
-        <p className="text-center text-xl p-10">No users found.</p>
-      )}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Division</TableHead>
+            <TableHead>District</TableHead>
+            <TableHead>Upazila</TableHead>
+            <TableHead>Union</TableHead>
+            <TableHead>Area</TableHead>
+            <TableHead>Phone</TableHead>
+            <TableHead>Markaz</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {users.map((user) => (
+            <TableRow key={user.id}>
+              <TableCell>{user.name}</TableCell>
+              <TableCell>{user.email}</TableCell>
+              <TableCell>{user.role}</TableCell>
+              <TableCell>{user.division}</TableCell>
+              <TableCell>{user.district}</TableCell>
+              <TableCell>{user.upazila}</TableCell>
+              <TableCell>{user.union}</TableCell>
+              <TableCell>{user.area}</TableCell>
+              <TableCell>{user.phone}</TableCell>
+              <TableCell>{user.markaz}</TableCell>
+              <TableCell>{user.banned ? "Banned" : "Active"}</TableCell>
+              <TableCell>
+                <Button
+                  onClick={() => toggleBan(user.id, user.banned)}
+                  className={user.banned ? "bg-red-500" : "bg-green-500"}
+                >
+                  {user.banned ? "Unban" : "Ban"}
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
