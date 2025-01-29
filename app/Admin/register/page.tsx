@@ -381,18 +381,12 @@
 
 // export default Register;
 
-
-
-
-
-
-
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
-import { admin } from "@/lib/auth-client";
+import { admin, useSession } from "@/lib/auth-client";
 import * as yup from "yup";
 
 // Types
@@ -415,7 +409,6 @@ const Register = () => {
 
   const [loading, setLoading] = useState(false);
 
-
   const signUpSchemaUser = yup.object().shape({
     name: yup.string().required(),
     email: yup
@@ -435,6 +428,46 @@ const Register = () => {
     markaz: yup.string().optional(),
     phone: yup.string().required("Phone is required"),
   });
+
+  // Role Hierarchy for Filtering
+  const roleHierarchy = {
+    centraladmin: [
+      "divisionadmin",
+      "districtadmin",
+      "upozilaadmin",
+      "unionadmin",
+      "daye",
+    ],
+    divisionadmin: ["districtadmin", "upozilaadmin", "unionadmin", "daye"],
+    districtadmin: ["upozilaadmin", "unionadmin", "daye"],
+    upozilaadmin: ["unionadmin", "daye"],
+    unionadmin: ["daye"],
+  };
+
+  const { data: session} = useSession(); // Fetch session data
+  const loggedInUserRole = session?.user?.role || null; // Get logged-in user role
+
+  const roleOptions = useMemo(() => {
+    if (!loggedInUserRole) return [];
+    return (
+      roleHierarchy[loggedInUserRole]?.map((role) => ({
+        value: role,
+        title: getRoleTitle(role), // Fix: Call the corrected function
+      })) || []
+    );
+  }, [loggedInUserRole]);
+
+  function getRoleTitle(role) {
+    const roleTitles = {
+      centraladmin: "কেন্দ্রীয় এডমিন",
+      divisionadmin: "বিভাগীয় এডমিন",
+      districtadmin: "জেলা এডমিন",
+      upozilaadmin: "উপজেলা এডমিন",
+      unionadmin: "ইউনিয়ন এডমিন",
+      daye: "দা'ঈ",
+    };
+    return roleTitles[role] || role; // This ensures proper lookup
+  }
 
   // Memoized lists based on selections
   const districtsList: LocationOption[] =
@@ -524,8 +557,11 @@ const Register = () => {
   const { role } = formData;
   const hideDistrict = role === "divisionadmin";
   const hideUpazila = role === "divisionadmin" || role === "districtadmin";
-  const hideUnion = role === "divisionadmin" || role === "districtadmin" || role === "upozilaadmin";
-  const hideMarkaz = hideUnion; // Markaz follows the same rule as Union
+  const hideUnion =
+    role === "divisionadmin" ||
+    role === "districtadmin" ||
+    role === "upozilaadmin";
+  const hideMarkaz = hideUnion || role === "unionadmin";
 
   return (
     <div className="flex items-center justify-center bg-gray-50 lg:m-10">
@@ -533,7 +569,12 @@ const Register = () => {
         <h2 className="text-2xl font-bold text-center">Add New User</h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
           {/* Full Name */}
-          <InputField label="Full Name" name="name" value={formData.name} onChange={handleChange} />
+          <InputField
+            label="Full Name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+          />
 
           {/* Role Dropdown */}
           <SelectField
@@ -541,32 +582,90 @@ const Register = () => {
             name="role"
             value={formData.role}
             onChange={handleChange}
-            options={[
-              { value: "centraladmin", title: "কেন্দ্রীয় এডমিন" },
-              { value: "divisionadmin", title: "বিভাগীয় এডমিন" },
-              { value: "districtadmin", title: "জেলা এডমিন" },
-              { value: "upozilaadmin", title: "উপজেলা এডমিন" },
-              { value: "unionadmin", title: "ইউনিয়ন এডমিন" },
-              { value: "daye", title: "দা'ঈ" },
-            ]}
+            options={roleOptions}
           />
 
           {/* Location Dropdowns */}
-          <SelectField label="Division" name="division" value={formData.division} onChange={handleChange} options={divisions} />
-          {!hideDistrict && <SelectField label="District" name="district" value={formData.district} onChange={handleChange} options={districtsList} disabled={!districtsList.length} />}
-          {!hideUpazila && <SelectField label="Upazila" name="upazila" value={formData.upazila} onChange={handleChange} options={upazilasList} disabled={!upazilasList.length} />}
-          {!hideUnion && <SelectField label="Union" name="union" value={formData.union} onChange={handleChange} options={unionsList} disabled={!unionsList.length} />}
+          <SelectField
+            label="Division"
+            name="division"
+            value={formData.division}
+            onChange={handleChange}
+            options={divisions}
+          />
+          {!hideDistrict && (
+            <SelectField
+              label="District"
+              name="district"
+              value={formData.district}
+              onChange={handleChange}
+              options={districtsList}
+              disabled={!districtsList.length}
+            />
+          )}
+          {!hideUpazila && (
+            <SelectField
+              label="Upazila"
+              name="upazila"
+              value={formData.upazila}
+              onChange={handleChange}
+              options={upazilasList}
+              disabled={!upazilasList.length}
+            />
+          )}
+          {!hideUnion && (
+            <SelectField
+              label="Union"
+              name="union"
+              value={formData.union}
+              onChange={handleChange}
+              options={unionsList}
+              disabled={!unionsList.length}
+            />
+          )}
 
           {/* Other Inputs */}
-          <InputField label="Area" name="area" value={formData.area} onChange={handleChange} />
-          {!hideMarkaz && <InputField label="Markaz (Optional)" name="markaz" value={formData.markaz} onChange={handleChange} />}
-          <InputField label="Mobile Number" name="phone" value={formData.phone} onChange={handleChange} />
-          <InputField label="Email" name="email" value={formData.email} onChange={handleChange} />
-          <InputField type="password" label="Create New Password" name="password" value={formData.password} onChange={handleChange} />
+          <InputField
+            label="Area"
+            name="area"
+            value={formData.area}
+            onChange={handleChange}
+          />
+          {!hideMarkaz && (
+            <InputField
+              label="Markaz (Optional)"
+              name="markaz"
+              value={formData.markaz}
+              onChange={handleChange}
+            />
+          )}
+          <InputField
+            label="Mobile Number"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+          />
+          <InputField
+            label="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          <InputField
+            type="password"
+            label="Create New Password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
 
           {/* Submit Button */}
           <div className="flex justify-end">
-            <button type="submit" disabled={loading} className="w-32 py-2 px-4 bg-[#155E75] text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-32 py-2 px-4 bg-[#155E75] text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
               {loading ? "Processing..." : "Add User"}
             </button>
           </div>
@@ -577,7 +676,15 @@ const Register = () => {
 };
 
 // Reusable InputField Component
-const InputField = ({ label, ...props }) => (
+interface InputFieldProps {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+}
+
+const InputField: React.FC<InputFieldProps> = ({ label, ...props }) => (
   <div>
     <label className="block text-sm font-medium text-gray-700">{label}</label>
     <input className="w-full p-2 border rounded-md" {...props} />
@@ -585,16 +692,200 @@ const InputField = ({ label, ...props }) => (
 );
 
 // Reusable SelectField Component
-const SelectField = ({ label, options, ...props }) => (
+interface SelectFieldProps {
+  label: string;
+  options: { value: number | string; title: string }[];
+  [key: string]: any;
+}
+
+const SelectField: React.FC<SelectFieldProps> = ({ label, options, ...props }) => (
   <div>
     <label className="block text-sm font-medium text-gray-700">{label}</label>
     <select className="w-full p-2 border rounded-md" {...props}>
       <option value="">Select {label}</option>
       {options.map(({ value, title }) => (
-        <option key={value} value={value}>{title}</option>
+        <option key={value} value={value}>
+          {title}
+        </option>
       ))}
     </select>
   </div>
 );
 
 export default Register;
+
+// "use client";
+
+// import React, { useState, useEffect, useCallback, useMemo } from "react";
+// import { toast } from "sonner";
+// import { useSession } from "@/lib/auth-client";
+// import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
+// import { admin } from "@/lib/auth-client";
+// import * as yup from "yup";
+
+// // Role Hierarchy for Filtering
+// const roleHierarchy = {
+//   centraladmin: ["divisionadmin", "districtadmin", "upozilaadmin", "unionadmin", "daye"],
+//   divisionadmin: ["districtadmin", "upozilaadmin", "unionadmin", "daye"],
+//   districtadmin: ["upozilaadmin", "unionadmin", "daye"],
+//   upozilaadmin: ["unionadmin", "daye"],
+//   unionadmin: ["daye"],
+// };
+
+// const Register = () => {
+//   const { data: session, status } = useSession(); // Fetch session data
+//   const loggedInUserRole = session?.user?.role || null; // Get logged-in user role
+
+//   const [formData, setFormData] = useState({
+//     name: "",
+//     role: "",
+//     division: "",
+//     district: "",
+//     upazila: "",
+//     union: "",
+//     area: "",
+//     markaz: "",
+//     phone: "",
+//     email: "",
+//     password: "",
+//   });
+
+//   const [errors, setErrors] = useState<Record<string, string>>({});
+//   const [loading, setLoading] = useState(false);
+
+//   // Memoized Role Options Based on Logged-in User Role
+//   const roleOptions = useMemo(() => {
+//     if (!loggedInUserRole) return [];
+//     return loggedInUserRole === "centraladmin"
+//       ? Object.keys(roleHierarchy).map((role) => ({ value: role, title: getRoleTitle(role) }))
+//       : roleHierarchy[loggedInUserRole]?.map((role) => ({ value: role, title: getRoleTitle(role) })) || [];
+//   }, [loggedInUserRole]);
+
+//   function getRoleTitle(role: string) {
+//     const roleTitles: Record<string, string> = {
+//       centraladmin: "কেন্দ্রীয় এডমিন",
+//       divisionadmin: "বিভাগীয় এডমিন",
+//       districtadmin: "জেলা এডমিন",
+//       upozilaadmin: "উপজেলা এডমিন",
+//       unionadmin: "ইউনিয়ন এডমিন",
+//       daye: "দা'ঈ",
+//     };
+//     return roleTitles[role] || role;
+//   }
+
+//   // Handle Form Changes
+//   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+//     const { name, value } = e.target;
+//     setFormData((prev) => ({ ...prev, [name]: value }));
+//     setErrors((prev) => ({ ...prev, [name]: "" })); // Clear error when user types
+//   }, []);
+
+//   // Submit Form
+//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault();
+//     setLoading(true);
+
+//     try {
+//       await admin.createUser(
+//         {
+//           name: formData.name,
+//           email: formData.email,
+//           password: formData.password,
+//           role: formData.role,
+//           data: {
+//             division: formData.division,
+//             district: formData.district,
+//             upazila: formData.upazila,
+//             union: formData.union,
+//             area: formData.area,
+//             markaz: formData.markaz,
+//             phone: formData.phone,
+//           },
+//         },
+//         {
+//           onSuccess: () => {
+//             toast.success("User created successfully!");
+//             setFormData({
+//               name: "",
+//               role: "",
+//               division: "",
+//               district: "",
+//               upazila: "",
+//               union: "",
+//               area: "",
+//               markaz: "",
+//               phone: "",
+//               email: "",
+//               password: "",
+//             });
+//           },
+//           onError: (ctx) => {
+//             toast.error(ctx.error.message);
+//           },
+//         }
+//       );
+//     } catch (error) {
+//       toast.error("Something went wrong! Please try again.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // Show loading state while fetching session
+//   if (status === "loading") {
+//     return (
+//       <div className="flex items-center justify-center h-screen">
+//         <p>Loading user data...</p>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="flex items-center justify-center bg-gray-50 lg:m-10">
+//       <div className="w-full p-8 space-y-6 shadow-lg rounded-lg bg-white">
+//         <h2 className="text-2xl font-bold text-center">Add New User</h2>
+//         <form className="space-y-4" onSubmit={handleSubmit}>
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700">Full Name</label>
+//             <input className="w-full p-2 border rounded-md" name="name" value={formData.name} onChange={handleChange} />
+//           </div>
+
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700">Role</label>
+//             <select className="w-full p-2 border rounded-md" name="role" value={formData.role} onChange={handleChange}>
+//               <option value="">Select Role</option>
+//               {roleOptions.map(({ value, title }) => (
+//                 <option key={value} value={value}>
+//                   {title}
+//                 </option>
+//               ))}
+//             </select>
+//           </div>
+
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700">Email</label>
+//             <input className="w-full p-2 border rounded-md" name="email" value={formData.email} onChange={handleChange} />
+//           </div>
+
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700">Password</label>
+//             <input type="password" className="w-full p-2 border rounded-md" name="password" value={formData.password} onChange={handleChange} />
+//           </div>
+
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700">Mobile Number</label>
+//             <input className="w-full p-2 border rounded-md" name="phone" value={formData.phone} onChange={handleChange} />
+//           </div>
+
+//           <div className="flex justify-end">
+//             <button type="submit" disabled={loading} className="w-32 py-2 px-4 bg-[#155E75] text-white rounded-md hover:bg-blue-600">
+//               {loading ? "Processing..." : "Add User"}
+//             </button>
+//           </div>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Register;
