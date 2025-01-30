@@ -8,13 +8,18 @@ import JoditEditorComponent from "./richTextEditor";
 import { useSession } from "@/lib/auth-client";
 
 interface Task {
+  id: string;
   email: string;
   date: string;
   title: string;
   time: string;
   visibility: string;
   description: string;
-  id: string;
+  division?: string;
+  district?: string;
+  area?: string;
+  upozila?: string;
+  union?: string;
 }
 
 interface TaskFormProps {
@@ -25,6 +30,11 @@ interface TaskFormProps {
   fetchTasks: () => void;
   taskData?: Task | null;
   setIsEditing?: (isEditing: boolean) => void;
+  userDivision?: string;
+  userDistrict?: string;
+  userArea?: string;
+  userUpozila?: string;
+  userUnion?: string;
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({
@@ -35,6 +45,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
   fetchTasks,
   taskData = null,
   setIsEditing,
+  userDivision,
+  userDistrict,
+  userArea,
+  userUpozila,
+  userUnion,
 }) => {
   const [taskState, setTaskState] = useState<Task>({
     id: taskData?.id || "",
@@ -44,6 +59,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
     time: taskData?.time || "",
     visibility: taskData?.visibility || "private",
     description: taskData?.description || "",
+    division: userDivision,
+    district: userDistrict,
+    area: userArea,
+    upozila: userUpozila,
+    union: userUnion,
   });
 
   useEffect(() => {
@@ -56,6 +76,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
         time: taskData.time,
         visibility: taskData.visibility,
         description: taskData.description,
+        division: taskData.division,
+        district: taskData.district,
+        area: taskData.area,
+        upozila: taskData.upozila,
+        union: taskData.union,
       });
     } else {
       setTaskState({
@@ -66,9 +91,23 @@ const TaskForm: React.FC<TaskFormProps> = ({
         time: "",
         visibility: "private",
         description: "",
+        division: userDivision,
+        district: userDistrict,
+        area: userArea,
+        upozila: userUpozila,
+        union: userUnion,
       });
     }
-  }, [taskData, selectedDate, userEmail]);
+  }, [
+    taskData,
+    selectedDate,
+    userEmail,
+    userDivision,
+    userDistrict,
+    userArea,
+    userUpozila,
+    userUnion,
+  ]);
 
   const handleSubmit = async () => {
     if (!taskState.title || !taskState.time || !taskState.description) {
@@ -77,7 +116,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
     }
 
     try {
-      const response = await fetch("/api/todo", {
+      const response = await fetch("/api/tasks", {
         method: taskData ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -108,6 +147,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
         {taskData ? "Edit Task" : "Add Task"}
       </h3>
 
+      {/* Title Input */}
       <Input
         type="text"
         placeholder="Title"
@@ -115,25 +155,27 @@ const TaskForm: React.FC<TaskFormProps> = ({
         onChange={(e) => setTaskState({ ...taskState, title: e.target.value })}
       />
 
+      {/* Time Input */}
       <Input
         type="time"
         value={taskState.time}
         onChange={(e) => setTaskState({ ...taskState, time: e.target.value })}
       />
 
-      {/* Role-based visibility selection */}
+      {/* Visibility Select */}
       <select
         className="w-full border p-2 rounded mt-2"
         value={taskState.visibility}
         onChange={(e) =>
           setTaskState({ ...taskState, visibility: e.target.value })
         }
-        disabled={userRole !== "centraladmin"}
+        disabled={userRole === "daye"} // Only dayee can add private tasks
       >
         <option value="private">Private</option>
-        {userRole === "centraladmin" && <option value="public">Public</option>}
+        {userRole !== "daye" && <option value="public">Public</option>}
       </select>
 
+      {/* Rich Text Editor for Description */}
       <JoditEditorComponent
         placeholder="Task Details..."
         initialValue={taskState.description}
@@ -142,6 +184,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
         }
       />
 
+      {/* Submit and Cancel Buttons */}
       <div className="flex justify-end mt-4">
         <Button onClick={handleSubmit}>
           {taskData ? "Update Task" : "Submit"}

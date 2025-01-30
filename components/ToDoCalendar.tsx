@@ -8,19 +8,19 @@ import { DayPilotMonth, DayPilot } from "@daypilot/daypilot-lite-react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 interface Task {
+  id: string;
   email: string;
   date: string;
   title: string;
   time: string;
   visibility: string;
   description: string;
-  id: string;
 }
 
 const TodoListCalendar = () => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
-  const userRole = session?.user?.role || ""; // Get user role
+  const userRole = session?.user?.role || "";
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -33,25 +33,23 @@ const TodoListCalendar = () => {
     fetchTasks();
   }, [startDate]);
 
+  // Fetch tasks from the API
   const fetchTasks = async () => {
     try {
-      const response = await fetch(`/api/todo?email=${userEmail}`);
+      const response = await fetch("/api/tasks");
       if (response.ok) {
         const data = await response.json();
-        const allTasks: Task[] = data.records || [];
-
-        // ✅ Show only private tasks of the logged-in user & all public tasks
-        const userTasks = allTasks.filter(
-          (task) => task.email === userEmail || task.visibility === "public"
-        );
-
-        setTasks(userTasks);
+        setTasks(data.records);
+      } else {
+        toast.error("Failed to fetch tasks.");
       }
     } catch (error) {
       console.error("Error fetching tasks:", error);
+      toast.error("An error occurred. Try again.");
     }
   };
 
+  // Handle date selection
   const handleDateClick = (date: Date | undefined) => {
     if (!date) return;
     const selectedDateTimestamp = date.getTime();
@@ -68,16 +66,13 @@ const TodoListCalendar = () => {
     setIsEditing(false);
   };
 
+  // Handle task deletion
   const handleDeleteTask = async () => {
     if (!selectedTask) return;
 
     try {
-      const response = await fetch("/api/todo", {
+      const response = await fetch(`/api/tasks?id=${selectedTask.id}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: selectedTask.id,
-        }),
       });
 
       if (response.ok) {
@@ -85,7 +80,7 @@ const TodoListCalendar = () => {
         fetchTasks();
         setSelectedTask(null); // Close task details modal
       } else {
-        toast.error("Failed to delete task");
+        toast.error("Failed to delete task.");
       }
     } catch (error) {
       console.error("Error deleting task:", error);
@@ -172,7 +167,7 @@ const TodoListCalendar = () => {
               >
                 Close
               </button>
-              {/* ✅ Edit Button */}
+              {/* Edit Button */}
               {selectedTask.email === userEmail && (
                 <button
                   className="bg-yellow-500 text-white px-4 py-2 rounded"
@@ -185,7 +180,7 @@ const TodoListCalendar = () => {
                   Edit
                 </button>
               )}
-              {/* ✅ Delete Button */}
+              {/* Delete Button */}
               {selectedTask.email === userEmail && (
                 <button
                   className="bg-red-700 text-white px-4 py-2 rounded"
@@ -205,7 +200,7 @@ const TodoListCalendar = () => {
           <div>
             <TaskForm
               userEmail={userEmail}
-              userRole={userRole} // Pass user role
+              userRole={userRole}
               selectedDate={selectedDate}
               setIsOpen={setIsOpen}
               fetchTasks={fetchTasks}
