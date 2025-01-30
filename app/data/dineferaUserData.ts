@@ -1,7 +1,7 @@
 export const userDineFeraData = {
   "labelMap": {
     "omuslimKalemaPoreche": "অমুসলিম কালেমা পড়ে মুসলমান হয়েছে",
-    "murtadDineFireasa": "মুরতাদ কালেমা পড়ে ইসলামে ফিরে এসেছে",
+    "murtadDineFireasa": "মুরতাদ কালেমা পড়ে ইসলামে ফিরে এসেছে"
   },
   "records": {
     "jewel@gmail.com": {
@@ -107,6 +107,13 @@ export const userDineFeraData = {
         "omuslimKalemaPoreche": 12,
         "murtadDineFireasa": 20,
         "editorContent": "<p>Dine Fire Eseche...<br></p>"
+      }
+    },
+    "sumon@gmail.com": {
+      "2025-01-30": {
+        "omuslimKalemaPoreche": 100,
+        "murtadDineFireasa": 100,
+        "editorContent": "<p>Alhamdulliah</p>"
       }
     }
   }

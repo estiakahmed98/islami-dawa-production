@@ -1,7 +1,8 @@
 export const userAmoliData = {
   "labelMap": {
     "tahajjud": "তাহাজ্জুদ",
-    "ayat": "তিলাওয়াতুল কোরআন তাদাব্বুর",
+    "surah": "তিলাওয়াতুল কোরআন তাদাব্বুর",
+    "ayat": "আয়াত সংখ্যা",
     "zikir": "সকাল-সন্ধ্যা দোয়া ও জিকির",
     "ishraq": "ইশরাক-আওয়াবীন-চাশ্ত",
     "jamat": "জামাতে সালাত",
@@ -110,6 +111,23 @@ export const userAmoliData = {
         "amoliSura": "হ্যাঁ",
         "ayamroja": "",
         "hijbulBahar": "হ্যাঁ",
+        "percentage": "100.00"
+      },
+      "2025-01-30": {
+        "tahajjud": 24,
+        "surah": "সুরা ইউনুস",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-20",
         "percentage": "100.00"
       }
     },
@@ -484,6 +502,25 @@ export const userAmoliData = {
         "ayamroja": "",
         "hijbulBahar": "হ্যাঁ",
         "ayat": "12-50",
+        "percentage": "100.00"
+      }
+    },
+    "sumon@gmail.com": {
+      "2025-01-30": {
+        "tahajjud": 21,
+        "surah": "সুরা হিজর",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-20",
         "percentage": "100.00"
       }
     }

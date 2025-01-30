@@ -116,6 +116,16 @@ export const userDawatiBisoyData = {
         "nonMuslimSaptahikGasht": 500,
         "editorContent": "<p>Dawati Bisoy Comments.</p>"
       }
+    },
+    "sumon@gmail.com": {
+      "2025-01-30": {
+        "nonMuslimDawat": 50,
+        "murtadDawat": 50,
+        "alemderSatheyMojlish": 50,
+        "publicSatheyMojlish": 50,
+        "nonMuslimSaptahikGasht": 50,
+        "editorContent": "<p>Dawati Bisoy Motamot,,...</p>"
+      }
     }
   }
 };

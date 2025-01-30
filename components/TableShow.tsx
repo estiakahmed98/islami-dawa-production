@@ -1,12 +1,11 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import React, { useState, useEffect, useMemo } from "react";
 import fileDownload from "js-file-download";
 import { useSession } from "@/lib/auth-client";
 import DOMPurify from "dompurify";
 import "@fontsource/noto-sans-bengali"; // Import Bangla font
-const html2pdf = dynamic(() => import("html2pdf.js"), { ssr: false });
+// const html2pdf = dynamic(() => import("html2pdf.js"), { ssr: false });
 
 interface AmoliTableProps {
   userData: any;
@@ -30,7 +29,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   const [editPopup, setEditPopup] = useState<{ day: number; data: any } | null>(
     null
   );
-
   const months = [
     "January",
     "February",
@@ -147,10 +145,15 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     fileDownload(csvContent, "amoli-table.csv");
   };
 
-  const convertToPDF = () => {
+  const getHtml2Pdf = async () => {
+    const html2pdfModule = await import("html2pdf.js");
+    return html2pdfModule.default || html2pdfModule; // Ensure correct function access
+  };
+  
+  const convertToPDF = async () => {
     const monthName = months[selectedMonth];
     const year = selectedYear;
-
+  
     if (
       !monthName ||
       !year ||
@@ -161,85 +164,115 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       console.error("Invalid data for PDF generation");
       return;
     }
-
+  
     // Filter out unwanted rows
     const filteredData = transposedData.filter((row) => row.label !== "মতামত");
     const filteredData2 = filteredData.filter((row) => row.label !== "Edit");
-
+  
     // Create table structure
     let tableHTML = `
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
-            body {
-              font-family: 'Noto Sans Bengali', sans-serif;
-              text-align: center;
-              padding: 0px;
-        
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 20px;
-            }
-            td {
-              border-bottom: 1px solid #000;
-              padding: 8px;
-              text-align: center;
-              font-size: 12px;
-            }
-            th {
-              background-color: #16A085;
-              color: white;
-              padding: 10px;
-              font-size: 14px;
-            }
-          </style>
-        </head>
-        <body>
-          <h2>${monthName} ${year} - ব্যবহারকারী: ${userName}</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>দিন</th>
-                ${filteredData2.map((row) => `<th>${row.label}</th>`).join("")}
-              </tr>
-            </thead>
-            <tbody>
-              ${monthDays
-                .map(
-                  (day) => `
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
+              body {
+                font-family: 'Noto Sans Bengali', sans-serif;
+                text-align: center;
+                padding: 0px;
+              }
+              table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+              }
+              thead {
+                display: table-header-group; /* Ensures header repeats on every page */
+              }
+              tbody {
+                display: table-row-group;
+              }
+              tr {
+                page-break-inside: avoid; /* Prevents rows from splitting */
+              }
+              td {
+                border-bottom: 1px solid #000;
+                padding: 8px;
+                text-align: center;
+                font-size: 12px;
+              }
+              th {
+                background-color: #16A085;
+                color: white;
+                padding: 10px;
+                font-size: 14px;
+              }
+            </style>
+          </head>
+          <body>
+            <h2>${monthName} ${year} - ব্যবহারকারী: ${userName}</h2>
+            <table>
+              <thead>
                 <tr>
-                  <td>দিন ${day}</td>
-                  ${filteredData2
-                    .map((row) => `<td>${row[day] || "-"}</td>`)
-                    .join("")}
-                </tr>`
-                )
-                .join("")}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `;
-
-    // Convert the content to PDF
+                  <th>দিন</th>
+                  ${filteredData2.map((row) => `<th>${row.label}</th>`).join("")}
+                </tr>
+              </thead>
+              <tbody>
+                ${monthDays
+                  .map(
+                    (day) => `
+                  <tr>
+                    <td>${day}</td>
+                    ${filteredData2
+                      .map((row) => `<td>${row[day] || "-"}</td>`)
+                      .join("")}
+                  </tr>`
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </body>
+        </html>
+      `;
+  
     const element = document.createElement("div");
     element.innerHTML = tableHTML;
-
-    html2pdf()
-      .set({
-        margin: 10,
-        filename: `${monthName}_${year}_user_data.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
-      })
-      .from(element)
-      .save();
+  
+    try {
+      const html2pdf = await getHtml2Pdf(); // Load library dynamically
+      console.log("html2pdf Loaded:", html2pdf); // Debugging
+  
+      if (typeof html2pdf !== "function") {
+        console.error("html2pdf is not a function, received:", html2pdf);
+        return;
+      }
+  
+      html2pdf()
+        .set({
+          margin: 10,
+          filename: `${monthName}_${year}_user_data.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+        })
+        .from(element)
+        .toPdf()
+        .get("pdf")
+        .then((pdf) => {
+          const totalPages = pdf.internal.getNumberOfPages();
+          for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(10);
+            pdf.text(`Page ${i} of ${totalPages}`, pdf.internal.pageSize.getWidth() - 20, pdf.internal.pageSize.getHeight() - 10);
+          }
+        })
+        .save();
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
   };
+  
 
   const handleSaveEdit = (day: number, updatedData: any) => {
     const newData = [...transposedData];

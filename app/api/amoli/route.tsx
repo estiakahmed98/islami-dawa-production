@@ -11,6 +11,7 @@ const userDataPath = path.join(
 // Type definitions
 interface UserAmoliData {
   tahajjud?: string;
+  surah?: string;
   ayat?: string;
   zikir?: string;
   ishraq?: string;
