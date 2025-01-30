@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { getSession } from "@/lib/auth-client";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 const todoDataPath = path.join(process.cwd(), "app/data/todoData.json");
 
@@ -48,7 +50,11 @@ const writeTodoData = (data: { records: Task[] }) => {
 
 export async function GET() {
   try {
-    const { data: session } = await getSession();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    console.log(session);
 
     if (!session?.user) {
       return NextResponse.json(
@@ -114,7 +120,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { data: session } = await getSession();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    console.log(session);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -166,7 +176,10 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const { data: session } = await getSession();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -218,7 +231,9 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const { data: session } = await getSession();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
