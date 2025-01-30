@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ interface Task {
   division?: string;
   district?: string;
   area?: string;
-  upozila?: string;
+  upazila?: string;
   union?: string;
 }
 
@@ -30,11 +30,6 @@ interface TaskFormProps {
   fetchTasks: () => void;
   taskData?: Task | null;
   setIsEditing?: (isEditing: boolean) => void;
-  userDivision?: string;
-  userDistrict?: string;
-  userArea?: string;
-  userUpozila?: string;
-  userUnion?: string;
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({
@@ -45,14 +40,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
   fetchTasks,
   taskData = null,
   setIsEditing,
-  userDivision,
-  userDistrict,
-  userArea,
-  userUpozila,
-  userUnion,
 }) => {
+  const { data: session } = useSession(); // Get session data
   const titleInputRef = useRef<HTMLInputElement>(null);
 
+  // State to manage the task form fields
   const [taskState, setTaskState] = useState<Task>({
     id: taskData?.id || "",
     email: userEmail,
@@ -61,21 +53,21 @@ const TaskForm: React.FC<TaskFormProps> = ({
     time: taskData?.time || "",
     visibility: taskData?.visibility || "private",
     description: taskData?.description || "",
-    division: userDivision,
-    district: userDistrict,
-    area: userArea,
-    upozila: userUpozila,
-    union: userUnion,
+    division: taskData?.division || session?.user?.division || "",
+    district: taskData?.district || session?.user?.district || "",
+    area: taskData?.area || session?.user?.area || "",
+    upazila: taskData?.upazila || session?.user?.upazila || "",
+    union: taskData?.union || session?.user?.union || "",
   });
 
-  // Auto-focus on the first input field when the component is mounted
+  // Auto-focus on the title field
   useEffect(() => {
     if (titleInputRef.current) {
       titleInputRef.current.focus();
     }
   }, []);
 
-  // Update state when taskData changes
+  // Update state when `taskData` changes
   useEffect(() => {
     if (taskData) {
       setTaskState({
@@ -86,54 +78,39 @@ const TaskForm: React.FC<TaskFormProps> = ({
         time: taskData.time,
         visibility: taskData.visibility,
         description: taskData.description,
-        division: taskData.division,
-        district: taskData.district,
-        area: taskData.area,
-        upozila: taskData.upozila,
-        union: taskData.union,
-      });
-    } else {
-      setTaskState({
-        id: "",
-        email: userEmail,
-        date: selectedDate || "",
-        title: "",
-        time: "",
-        visibility: "private",
-        description: "",
-        division: userDivision,
-        district: userDistrict,
-        area: userArea,
-        upozila: userUpozila,
-        union: userUnion,
+        division: taskData.division || session?.user?.division || "",
+        district: taskData.district || session?.user?.district || "",
+        area: taskData.area || session?.user?.area || "",
+        upazila: taskData.upazila || session?.user?.upazila || "",
+        union: taskData.union || session?.user?.union || "",
       });
     }
-  }, [
-    taskData,
-    selectedDate,
-    userEmail,
-    userDivision,
-    userDistrict,
-    userArea,
-    userUpozila,
-    userUnion,
-  ]);
+  }, [taskData, session]);
 
+  // Form submission
   const handleSubmit = async () => {
     if (!taskState.title || !taskState.time || !taskState.description) {
       toast.error("All fields are required.");
       return;
     }
 
+    // ✅ Ensure selectedDate is not null
+    const selectedTaskDate = taskState.date || selectedDate;
+    if (!selectedTaskDate) {
+      toast.error("Please select a date.");
+      return;
+    }
+
+    // ✅ Combine selectedDate and time properly
+    const fullDateTime = `${selectedTaskDate}T${taskState.time}:00`;
+
     try {
       const response = await fetch("/api/tasks", {
         method: taskData ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: taskState.title,
-          time: taskState.time,
-          visibility: taskState.visibility,
-          description: taskState.description,
+          ...taskState,
+          date: fullDateTime, // ✅ Ensure correct datetime format
         }),
       });
 
@@ -188,7 +165,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
         onChange={(e) =>
           setTaskState({ ...taskState, visibility: e.target.value })
         }
-        disabled={userRole === "daye"}
+        disabled={userRole === "daye"} // Only dayee can add private tasks
       >
         <option value="private">Private</option>
         {userRole !== "daye" && <option value="public">Public</option>}
@@ -202,6 +179,13 @@ const TaskForm: React.FC<TaskFormProps> = ({
           setTaskState({ ...taskState, description: content })
         }
       />
+
+      {/* Auto-filled Fields from Session (Hidden from user) */}
+      <input type="hidden" value={taskState.division} />
+      <input type="hidden" value={taskState.district} />
+      <input type="hidden" value={taskState.area} />
+      <input type="hidden" value={taskState.upazila} />
+      <input type="hidden" value={taskState.union} />
 
       {/* Submit and Cancel Buttons */}
       <div className="flex justify-end mt-4">

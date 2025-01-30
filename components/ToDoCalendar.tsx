@@ -10,15 +10,24 @@ import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 interface Task {
   id: string;
   email: string;
-  date: string;
+  date: string; // ✅ Should be in 'YYYY-MM-DDTHH:mm:ss' format
   title: string;
   time: string;
   visibility: string;
   description: string;
+  division?: string;
+  district?: string;
+  area?: string;
+  upazila?: string;
+  union?: string;
+  text: string;
+  start: string;
+  end: string;
 }
 
 const TodoListCalendar = () => {
   const { data: session } = useSession();
+
   const userEmail = session?.user?.email || "";
   const userRole = session?.user?.role || "";
 
@@ -42,7 +51,16 @@ const TodoListCalendar = () => {
       }
 
       const data = await response.json();
-      setTasks(data.records);
+
+      // ✅ Ensure correct event formatting
+      const formattedTasks = data.records.map((task: Task) => ({
+        id: task.id,
+        text: task.title,
+        start: new Date(task.date).toISOString().split("T")[0], // ✅ Ensure YYYY-MM-DD format
+        end: new Date(task.date).toISOString().split("T")[0],
+      }));
+
+      setTasks(formattedTasks);
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error fetching tasks:", error.message);
@@ -60,16 +78,12 @@ const TodoListCalendar = () => {
 
   const handleDateClick = (date: Date | undefined) => {
     if (!date) return;
-    const selectedDateTimestamp = date.getTime();
-    const todayTimestamp = new Date().setHours(0, 0, 0, 0);
 
-    if (selectedDateTimestamp < todayTimestamp) {
-      toast.error("You cannot select a past date.");
-      return;
-    }
+    // ✅ Ensure selected date is in YYYY-MM-DD format
+    const formattedDate = date.toISOString().split("T")[0];
 
     setSelectedTask(null);
-    setSelectedDate(date.toISOString().split("T")[0]);
+    setSelectedDate(formattedDate); // ✅ Pass correct date format
     setIsOpen(true);
     setIsEditing(false);
   };
@@ -78,18 +92,28 @@ const TodoListCalendar = () => {
     if (!selectedTask) return;
 
     try {
-      const response = await fetch(`/api/tasks?id=${selectedTask.id}`, {
+      const response = await fetch("/api/tasks", {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selectedTask.id }), // ✅ Ensure task ID is sent
       });
 
-      if (!response.ok) throw new Error("Failed to delete task.");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete task.");
+      }
 
       toast.success("Task deleted successfully");
-      fetchTasks();
-      setSelectedTask(null);
+      fetchTasks(); // ✅ Refresh task list after deletion
+      setSelectedTask(null); // ✅ Close modal after deletion
     } catch (error) {
-      console.error("Error deleting task:", error);
-      toast.error("An error occurred. Try again.");
+      if (error instanceof Error) {
+        console.error("Error deleting task:", error.message);
+        toast.error(`Error: ${error.message}`);
+      } else {
+        console.error("Unexpected error:", error);
+        toast.error("An unexpected error occurred.");
+      }
     }
   };
 
@@ -137,9 +161,9 @@ const TodoListCalendar = () => {
         }
         events={tasks.map((task) => ({
           id: task.id,
-          text: task.title,
-          start: task.date,
-          end: task.date,
+          text: task.text,
+          start: task.start, // ✅ Ensure `start` is a valid date
+          end: task.end,
         }))}
         onEventClick={(args) => {
           const task = tasks.find((t) => t.id === args.e.id());

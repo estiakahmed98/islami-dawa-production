@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { getSession } from "@/lib/auth-client";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
@@ -50,11 +49,7 @@ const writeTodoData = (data: { records: Task[] }) => {
 
 export async function GET() {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    console.log(session);
+    const session = await auth.api.getSession({ headers: await headers() });
 
     if (!session?.user) {
       return NextResponse.json(
@@ -63,52 +58,15 @@ export async function GET() {
       );
     }
 
-    const { role, division, district, upazila, union } = session.user;
     const todoData = readTodoData();
 
-    let visibleTasks: Task[] = [];
+    // ✅ Ensure 'date' is always in 'YYYY-MM-DD' format before sending
+    const tasks = todoData.records.map((task) => ({
+      ...task,
+      date: new Date(task.date).toISOString().split("T")[0], // ✅ Fix incorrect format
+    }));
 
-    if (role === "centraladmin") {
-      visibleTasks = todoData.records;
-    } else if (role === "divisionadmin") {
-      visibleTasks = todoData.records.filter(
-        (task) =>
-          task.division === division &&
-          [
-            "divisionadmin",
-            "districtadmin",
-            "upozilaadmin",
-            "unionadmin",
-            "daye",
-          ].includes(task.visibility)
-      );
-    } else if (role === "districtadmin") {
-      visibleTasks = todoData.records.filter(
-        (task) =>
-          task.district === district &&
-          ["districtadmin", "upozilaadmin", "unionadmin", "daye"].includes(
-            task.visibility
-          )
-      );
-    } else if (role === "upozilaadmin") {
-      visibleTasks = todoData.records.filter(
-        (task) =>
-          task.upazila === upazila &&
-          ["upozilaadmin", "unionadmin", "daye"].includes(task.visibility)
-      );
-    } else if (role === "unionadmin") {
-      visibleTasks = todoData.records.filter(
-        (task) =>
-          task.union === union &&
-          ["unionadmin", "daye"].includes(task.visibility)
-      );
-    } else {
-      visibleTasks = todoData.records.filter(
-        (task) => task.visibility === "public"
-      );
-    }
-
-    return NextResponse.json({ records: visibleTasks }, { status: 200 });
+    return NextResponse.json({ records: tasks }, { status: 200 });
   } catch (error) {
     console.error("Error fetching tasks:", error);
     return NextResponse.json(
@@ -124,37 +82,34 @@ export async function POST(req: Request) {
       headers: await headers(),
     });
 
-    console.log(session);
-
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ✅ Extract user location data from session
-    const { email, division, district, area, upazila, union } = session.user;
+    const { title, time, visibility, description, date } = await req.json();
 
-    // ✅ Extract other task data from request body
-    const { title, time, visibility, description } = await req.json();
-
-    // ✅ Validate required fields
-    if (!title || !time || !visibility || !description) {
+    if (!title || !time || !visibility || !description || !date) {
       return NextResponse.json(
         { error: "Missing required fields." },
         { status: 400 }
       );
     }
 
+    const { email, division, district, area, upazila, union } = session.user;
     const todoData = readTodoData();
+
+    // ✅ Ensure correct datetime format
+    const formattedDateTime = new Date(`${date}`).toISOString();
 
     const newTask: Task = {
       id: crypto.randomUUID(),
-      email, // ✅ Automatically assign from session
-      date: new Date().toISOString().split("T")[0], // ✅ Auto-assign today's date
+      email,
+      date: formattedDateTime, // ✅ Store ISO formatted datetime
       title,
       time,
       visibility,
       description,
-      division, // ✅ Auto-assign from session
+      division,
       district,
       area,
       upazila,
@@ -234,11 +189,13 @@ export async function DELETE(req: Request) {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await req.json();
+
     if (!id) {
       return NextResponse.json(
         { error: "Task ID is required." },
@@ -260,6 +217,7 @@ export async function DELETE(req: Request) {
       );
     }
 
+    // ✅ Remove the task from the list
     todoData.records.splice(taskIndex, 1);
     writeTodoData(todoData);
 
