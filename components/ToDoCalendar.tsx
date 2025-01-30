@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
 import TaskForm from "./ToDoTaskForm";
@@ -26,30 +26,38 @@ const TodoListCalendar = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [startDate, setStartDate] = useState(DayPilot.Date.today().addDays(2));
+  const [startDate, setStartDate] = useState(DayPilot.Date.today());
   const [isEditing, setIsEditing] = useState(false);
+
+  const fetchTasks = useCallback(async () => {
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Unknown error occurred.");
+      }
+
+      const data = await response.json();
+      setTasks(data.records);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error fetching tasks:", error.message);
+        toast.error(`Error: ${error.message}`);
+      } else {
+        console.error("Unexpected error:", error);
+        toast.error("An unexpected error occurred.");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     fetchTasks();
-  }, [startDate]);
+  }, [fetchTasks]);
 
-  // Fetch tasks from the API
-  const fetchTasks = async () => {
-    try {
-      const response = await fetch("/api/tasks");
-      if (response.ok) {
-        const data = await response.json();
-        setTasks(data.records);
-      } else {
-        toast.error("Failed to fetch tasks.");
-      }
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-      toast.error("An error occurred. Try again.");
-    }
-  };
-
-  // Handle date selection
   const handleDateClick = (date: Date | undefined) => {
     if (!date) return;
     const selectedDateTimestamp = date.getTime();
@@ -66,7 +74,6 @@ const TodoListCalendar = () => {
     setIsEditing(false);
   };
 
-  // Handle task deletion
   const handleDeleteTask = async () => {
     if (!selectedTask) return;
 
@@ -75,18 +82,27 @@ const TodoListCalendar = () => {
         method: "DELETE",
       });
 
-      if (response.ok) {
-        toast.success("Task deleted successfully");
-        fetchTasks();
-        setSelectedTask(null); // Close task details modal
-      } else {
-        toast.error("Failed to delete task.");
-      }
+      if (!response.ok) throw new Error("Failed to delete task.");
+
+      toast.success("Task deleted successfully");
+      fetchTasks();
+      setSelectedTask(null);
     } catch (error) {
       console.error("Error deleting task:", error);
       toast.error("An error occurred. Try again.");
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+        setSelectedTask(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="p-6">
@@ -96,6 +112,7 @@ const TodoListCalendar = () => {
       <div className="flex mb-2 gap-2 items-center">
         <button
           className="bg-[#227f9b] text-white px-4 py-2 rounded"
+          aria-label="Previous Month"
           onClick={() => setStartDate(startDate.addMonths(-1))}
         >
           <FaArrowLeft />
@@ -105,6 +122,7 @@ const TodoListCalendar = () => {
         </p>
         <button
           className="bg-[#227f9b] text-white px-4 py-2 rounded"
+          aria-label="Next Month"
           onClick={() => setStartDate(startDate.addMonths(1))}
         >
           <FaArrowRight />
@@ -160,34 +178,34 @@ const TodoListCalendar = () => {
             <div
               dangerouslySetInnerHTML={{ __html: selectedTask.description }}
             ></div>
+
             <div className="flex justify-between mt-4">
               <button
                 className="bg-red-500 text-white px-4 py-2 rounded"
+                aria-label="Close Task Modal"
                 onClick={() => setSelectedTask(null)}
               >
                 Close
               </button>
-              {/* Edit Button */}
               {selectedTask.email === userEmail && (
-                <button
-                  className="bg-yellow-500 text-white px-4 py-2 rounded"
-                  onClick={() => {
-                    setIsEditing(true);
-                    setSelectedDate(selectedTask.date);
-                    setIsOpen(true);
-                  }}
-                >
-                  Edit
-                </button>
-              )}
-              {/* Delete Button */}
-              {selectedTask.email === userEmail && (
-                <button
-                  className="bg-red-700 text-white px-4 py-2 rounded"
-                  onClick={handleDeleteTask}
-                >
-                  Delete
-                </button>
+                <>
+                  <button
+                    className="bg-yellow-500 text-white px-4 py-2 rounded"
+                    onClick={() => {
+                      setIsEditing(true);
+                      setSelectedDate(selectedTask.date);
+                      setIsOpen(true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="bg-red-700 text-white px-4 py-2 rounded"
+                    onClick={handleDeleteTask}
+                  >
+                    Delete
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -197,17 +215,15 @@ const TodoListCalendar = () => {
       {/* Task Form Modal */}
       {isOpen && (
         <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-30">
-          <div>
-            <TaskForm
-              userEmail={userEmail}
-              userRole={userRole}
-              selectedDate={selectedDate}
-              setIsOpen={setIsOpen}
-              fetchTasks={fetchTasks}
-              taskData={isEditing ? selectedTask : null}
-              setIsEditing={setIsEditing}
-            />
-          </div>
+          <TaskForm
+            userEmail={userEmail}
+            userRole={userRole}
+            selectedDate={selectedDate}
+            setIsOpen={setIsOpen}
+            fetchTasks={fetchTasks}
+            taskData={isEditing ? selectedTask : null}
+            setIsEditing={setIsEditing}
+          />
         </div>
       )}
     </div>

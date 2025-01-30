@@ -9,6 +9,7 @@ export const {
   signOut,
   useSession,
   admin,
+  getSession,
   updateUser,
   changeEmail,
   changePassword,

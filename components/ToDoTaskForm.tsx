@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -51,6 +51,8 @@ const TaskForm: React.FC<TaskFormProps> = ({
   userUpozila,
   userUnion,
 }) => {
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
   const [taskState, setTaskState] = useState<Task>({
     id: taskData?.id || "",
     email: userEmail,
@@ -66,6 +68,14 @@ const TaskForm: React.FC<TaskFormProps> = ({
     union: userUnion,
   });
 
+  // Auto-focus on the first input field when the component is mounted
+  useEffect(() => {
+    if (titleInputRef.current) {
+      titleInputRef.current.focus();
+    }
+  }, []);
+
+  // Update state when taskData changes
   useEffect(() => {
     if (taskData) {
       setTaskState({
@@ -120,24 +130,32 @@ const TaskForm: React.FC<TaskFormProps> = ({
         method: taskData ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...taskState,
-          id: taskData ? taskData.id : undefined,
+          title: taskState.title,
+          time: taskState.time,
+          visibility: taskState.visibility,
+          description: taskState.description,
         }),
       });
 
-      if (response.ok) {
-        toast.success(
-          taskData ? "Task updated successfully!" : "Task added successfully!"
-        );
-        fetchTasks();
-        setIsOpen(false);
-        if (setIsEditing) setIsEditing(false);
-      } else {
-        toast.error("Failed to save task.");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save task.");
       }
+
+      toast.success(
+        taskData ? "Task updated successfully!" : "Task added successfully!"
+      );
+      fetchTasks();
+      setIsOpen(false);
+      if (setIsEditing) setIsEditing(false);
     } catch (error) {
-      console.error("Error saving task:", error);
-      toast.error("An error occurred. Try again.");
+      if (error instanceof Error) {
+        console.error("Error saving task:", error.message);
+        toast.error(`Error: ${error.message}`);
+      } else {
+        console.error("Unexpected error:", error);
+        toast.error("An unexpected error occurred.");
+      }
     }
   };
 
@@ -149,6 +167,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
 
       {/* Title Input */}
       <Input
+        ref={titleInputRef}
         type="text"
         placeholder="Title"
         value={taskState.title}
@@ -169,7 +188,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
         onChange={(e) =>
           setTaskState({ ...taskState, visibility: e.target.value })
         }
-        disabled={userRole === "daye"} // Only dayee can add private tasks
+        disabled={userRole === "daye"}
       >
         <option value="private">Private</option>
         {userRole !== "daye" && <option value="public">Public</option>}
@@ -186,11 +205,12 @@ const TaskForm: React.FC<TaskFormProps> = ({
 
       {/* Submit and Cancel Buttons */}
       <div className="flex justify-end mt-4">
-        <Button onClick={handleSubmit}>
+        <Button aria-label="Submit Task" onClick={handleSubmit}>
           {taskData ? "Update Task" : "Submit"}
         </Button>
         <Button
           variant="outline"
+          aria-label="Cancel Task Form"
           onClick={() => {
             setIsOpen(false);
             if (setIsEditing) setIsEditing(false);
