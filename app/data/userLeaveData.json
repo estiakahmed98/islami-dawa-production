@@ -10,7 +10,7 @@
           "days": 25,
           "reason": "Juwel vai er biye",
           "approvedBy": "Estiak",
-          "status": "Approved"
+          "status": "Rejected"
         },
         {
           "id": "2b3c4d5e6f",
@@ -54,7 +54,7 @@
           "days": 1,
           "reason": "Juwel Vai er Biye",
           "approvedBy": "Sir",
-          "status": "Approved"
+          "status": "Rejected"
         }
       ],
       "2025-01-20": [

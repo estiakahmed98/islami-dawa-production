@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -8,13 +8,19 @@ import JoditEditorComponent from "./richTextEditor";
 import { useSession } from "@/lib/auth-client";
 
 interface Task {
+  id: string;
   email: string;
+  creatorRole: string; // <-- store the role of the creator
   date: string;
   title: string;
   time: string;
-  visibility: string;
+  visibility: string; // "private" or "public"
   description: string;
-  id: string;
+  division?: string;
+  district?: string;
+  area?: string;
+  upazila?: string;
+  union?: string;
 }
 
 interface TaskFormProps {
@@ -36,69 +42,94 @@ const TaskForm: React.FC<TaskFormProps> = ({
   taskData = null,
   setIsEditing,
 }) => {
+  const { data: session } = useSession();
+  const titleRef = useRef<HTMLInputElement>(null);
+
   const [taskState, setTaskState] = useState<Task>({
     id: taskData?.id || "",
-    email: userEmail,
-    date: selectedDate || "",
+    email: taskData?.email || userEmail, // who posted
+    creatorRole: taskData?.creatorRole || userRole, // store role of the creator
+    date: taskData?.date || selectedDate || "",
     title: taskData?.title || "",
     time: taskData?.time || "",
     visibility: taskData?.visibility || "private",
     description: taskData?.description || "",
+    division: taskData?.division || session?.user?.division || "",
+    district: taskData?.district || session?.user?.district || "",
+    area: taskData?.area || session?.user?.area || "",
+    upazila: taskData?.upazila || session?.user?.upazila || "",
+    union: taskData?.union || session?.user?.union || "",
   });
 
+  // Autofocus title
+  useEffect(() => {
+    if (titleRef.current) titleRef.current.focus();
+  }, []);
+
+  // If incoming taskData changes, re-sync:
   useEffect(() => {
     if (taskData) {
-      setTaskState({
+      setTaskState((prev) => ({
+        ...prev,
         id: taskData.id,
         email: taskData.email,
+        creatorRole: taskData.creatorRole,
         date: taskData.date,
         title: taskData.title,
         time: taskData.time,
         visibility: taskData.visibility,
         description: taskData.description,
-      });
-    } else {
-      setTaskState({
-        id: "",
-        email: userEmail,
-        date: selectedDate || "",
-        title: "",
-        time: "",
-        visibility: "private",
-        description: "",
-      });
+        division: taskData.division || session?.user?.division || "",
+        district: taskData.district || session?.user?.district || "",
+        area: taskData.area || session?.user?.area || "",
+        upazila: taskData.upazila || session?.user?.upazila || "",
+        union: taskData.union || session?.user?.union || "",
+      }));
     }
-  }, [taskData, selectedDate, userEmail]);
+  }, [taskData, session]);
 
   const handleSubmit = async () => {
     if (!taskState.title || !taskState.time || !taskState.description) {
-      toast.error("All fields are required.");
+      toast.error("Title, time, and description are required.");
       return;
     }
 
+    // Validate date
+    const chosenDate = taskState.date || selectedDate;
+    if (!chosenDate) {
+      toast.error("Please select a date.");
+      return;
+    }
+    const parsed = new Date(chosenDate);
+    const isoDate = isNaN(parsed.getTime())
+      ? new Date().toISOString()
+      : parsed.toISOString();
+
     try {
-      const response = await fetch("/api/todo", {
+      const response = await fetch("/api/tasks", {
         method: taskData ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...taskState,
-          id: taskData ? taskData.id : undefined,
+          date: isoDate,
         }),
       });
 
-      if (response.ok) {
-        toast.success(
-          taskData ? "Task updated successfully!" : "Task added successfully!"
-        );
-        fetchTasks();
-        setIsOpen(false);
-        if (setIsEditing) setIsEditing(false);
-      } else {
-        toast.error("Failed to save task.");
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || "Failed to save task.");
       }
+
+      toast.success(taskData ? "Task updated!" : "Task created!");
+      fetchTasks();
+      setIsOpen(false);
+      if (setIsEditing) setIsEditing(false);
     } catch (error) {
-      console.error("Error saving task:", error);
-      toast.error("An error occurred. Try again.");
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
     }
   };
 
@@ -108,32 +139,37 @@ const TaskForm: React.FC<TaskFormProps> = ({
         {taskData ? "Edit Task" : "Add Task"}
       </h3>
 
+      {/* Title */}
       <Input
+        ref={titleRef}
         type="text"
-        placeholder="Title"
+        placeholder="Task Title"
         value={taskState.title}
         onChange={(e) => setTaskState({ ...taskState, title: e.target.value })}
       />
 
+      {/* Time */}
       <Input
         type="time"
         value={taskState.time}
         onChange={(e) => setTaskState({ ...taskState, time: e.target.value })}
       />
 
-      {/* Role-based visibility selection */}
+      {/* Visibility */}
       <select
         className="w-full border p-2 rounded mt-2"
         value={taskState.visibility}
         onChange={(e) =>
           setTaskState({ ...taskState, visibility: e.target.value })
         }
-        disabled={userRole !== "centraladmin"}
+        // daye cannot create public
+        disabled={userRole === "daye"}
       >
         <option value="private">Private</option>
-        {userRole === "centraladmin" && <option value="public">Public</option>}
+        {userRole !== "daye" && <option value="public">Public</option>}
       </select>
 
+      {/* Description (rich text) */}
       <JoditEditorComponent
         placeholder="Task Details..."
         initialValue={taskState.description}
@@ -142,10 +178,15 @@ const TaskForm: React.FC<TaskFormProps> = ({
         }
       />
 
+      {/* Hidden region fields if needed */}
+      <input type="hidden" value={taskState.division} />
+      <input type="hidden" value={taskState.district} />
+      <input type="hidden" value={taskState.upazila} />
+      <input type="hidden" value={taskState.union} />
+
+      {/* Buttons */}
       <div className="flex justify-end mt-4">
-        <Button onClick={handleSubmit}>
-          {taskData ? "Update Task" : "Submit"}
-        </Button>
+        <Button onClick={handleSubmit}>{taskData ? "Update" : "Create"}</Button>
         <Button
           variant="outline"
           onClick={() => {
