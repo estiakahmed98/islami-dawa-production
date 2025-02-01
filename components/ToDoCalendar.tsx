@@ -9,25 +9,26 @@ import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 interface Task {
   id: string;
-  email: string;
-  date: string; // ✅ Should be in 'YYYY-MM-DDTHH:mm:ss' format
+  email: string; // who created
+  creatorRole: string; // role of the creator
+  date: string; // e.g., "2025-01-29T12:00:00.000Z"
   title: string;
   time: string;
-  visibility: string;
+  visibility: string; // "private" or "public"
   description: string;
   division?: string;
   district?: string;
   area?: string;
   upazila?: string;
   union?: string;
-  text: string;
-  start: string;
-  end: string;
+  // For DayPilot usage:
+  text?: string;
+  start?: string;
+  end?: string;
 }
 
 const TodoListCalendar = () => {
   const { data: session } = useSession();
-
   const userEmail = session?.user?.email || "";
   const userRole = session?.user?.role || "";
 
@@ -38,6 +39,7 @@ const TodoListCalendar = () => {
   const [startDate, setStartDate] = useState(DayPilot.Date.today());
   const [isEditing, setIsEditing] = useState(false);
 
+  // Fetch tasks
   const fetchTasks = useCallback(async () => {
     try {
       const response = await fetch("/api/tasks", {
@@ -47,27 +49,33 @@ const TodoListCalendar = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Unknown error occurred.");
+        throw new Error(errorData.error || "Unknown error while fetching.");
       }
 
       const data = await response.json();
+      const allTasks: Task[] = data.records;
 
-      // ✅ Ensure correct event formatting
-      const formattedTasks = data.records.map((task: Task) => ({
-        id: task.id,
-        text: task.title,
-        start: new Date(task.date).toISOString().split("T")[0], // ✅ Ensure YYYY-MM-DD format
-        end: new Date(task.date).toISOString().split("T")[0],
-      }));
+      // Convert each to DayPilot event format
+      const mapped = allTasks.map((task) => {
+        const d = new Date(task.date);
+        const safeDate = isNaN(d.getTime())
+          ? new Date().toISOString().split("T")[0]
+          : d.toISOString().split("T")[0];
 
-      setTasks(formattedTasks);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error fetching tasks:", error.message);
-        toast.error(`Error: ${error.message}`);
+        return {
+          ...task,
+          text: task.title,
+          start: safeDate,
+          end: safeDate,
+        };
+      });
+
+      setTasks(mapped);
+    } catch (err) {
+      if (err instanceof Error) {
+        toast.error(err.message);
       } else {
-        console.error("Unexpected error:", error);
-        toast.error("An unexpected error occurred.");
+        toast.error("Unexpected error fetching tasks.");
       }
     }
   }, []);
@@ -76,67 +84,64 @@ const TodoListCalendar = () => {
     fetchTasks();
   }, [fetchTasks]);
 
+  // Handle selecting an empty date cell
   const handleDateClick = (date: Date | undefined) => {
     if (!date) return;
-
-    // ✅ Ensure selected date is in YYYY-MM-DD format
-    const formattedDate = date.toISOString().split("T")[0];
-
+    const dayString = date.toISOString().split("T")[0];
+    setSelectedDate(dayString);
     setSelectedTask(null);
-    setSelectedDate(formattedDate); // ✅ Pass correct date format
     setIsOpen(true);
     setIsEditing(false);
   };
 
+  // Delete a task
   const handleDeleteTask = async () => {
     if (!selectedTask) return;
-
     try {
       const response = await fetch("/api/tasks", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selectedTask.id }), // ✅ Ensure task ID is sent
+        body: JSON.stringify({ id: selectedTask.id }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete task.");
+        const errData = await response.json();
+        throw new Error(errData.error || "Failed to delete.");
       }
 
-      toast.success("Task deleted successfully");
-      fetchTasks(); // ✅ Refresh task list after deletion
-      setSelectedTask(null); // ✅ Close modal after deletion
+      toast.success("Task deleted!");
+      fetchTasks();
+      setSelectedTask(null);
     } catch (error) {
       if (error instanceof Error) {
-        console.error("Error deleting task:", error.message);
-        toast.error(`Error: ${error.message}`);
+        toast.error(error.message);
       } else {
-        console.error("Unexpected error:", error);
-        toast.error("An unexpected error occurred.");
+        toast.error("Unexpected error deleting task.");
       }
     }
   };
 
+  // Close modals with Escape
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
         setIsOpen(false);
         setSelectedTask(null);
+        setIsEditing(false);
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, []);
 
   return (
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-4">To-Do List Calendar</h2>
 
-      {/* Navigation & Current Month Display */}
+      {/* Nav + current month */}
       <div className="flex mb-2 gap-2 items-center">
         <button
           className="bg-[#227f9b] text-white px-4 py-2 rounded"
-          aria-label="Previous Month"
           onClick={() => setStartDate(startDate.addMonths(-1))}
         >
           <FaArrowLeft />
@@ -146,32 +151,30 @@ const TodoListCalendar = () => {
         </p>
         <button
           className="bg-[#227f9b] text-white px-4 py-2 rounded"
-          aria-label="Next Month"
           onClick={() => setStartDate(startDate.addMonths(1))}
         >
           <FaArrowRight />
         </button>
       </div>
 
-      {/* Calendar Component */}
       <DayPilotMonth
         startDate={startDate}
         onTimeRangeSelected={(args) =>
           handleDateClick(new Date(args.start.toString()))
         }
-        events={tasks.map((task) => ({
-          id: task.id,
-          text: task.text,
-          start: task.start, // ✅ Ensure `start` is a valid date
-          end: task.end,
+        events={tasks.map((t) => ({
+          id: t.id,
+          text: t.text ?? t.title,
+          start: t.start!,
+          end: t.end!,
         }))}
         onEventClick={(args) => {
-          const task = tasks.find((t) => t.id === args.e.id());
-          if (task) setSelectedTask(task);
+          const found = tasks.find((t) => t.id === args.e.id());
+          if (found) setSelectedTask(found);
         }}
       />
 
-      {/* Task Details Modal */}
+      {/* If event is clicked, show details */}
       {selectedTask && (
         <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white m-4 p-6 rounded-lg shadow-lg max-w-[60vh] max-h-[70vh] overflow-y-auto z-10">
@@ -180,17 +183,28 @@ const TodoListCalendar = () => {
               <strong>Title:</strong> {selectedTask.title}
             </p>
             <p>
-              <strong>Added By:</strong> {selectedTask.email}
+              <strong>Creator Email:</strong> {selectedTask.email}
+            </p>
+            <p>
+              <strong>Creator Role:</strong> {selectedTask.creatorRole}
+            </p>
+            <p>
+              <strong>Creator Division:</strong> {selectedTask.division}
+            </p>
+            <p>
+              <strong>Creator District:</strong> {selectedTask.district}
+            </p>
+            <p>
+              <strong>Creator Upazila:</strong> {selectedTask.upazila}
+            </p>
+            <p>
+              <strong>Creator Union:</strong> {selectedTask.union}
             </p>
             <p>
               <strong>Time:</strong>{" "}
               {new Date(`1970-01-01T${selectedTask.time}`).toLocaleTimeString(
                 "en-US",
-                {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                }
+                { hour: "2-digit", minute: "2-digit", hour12: true }
               )}
             </p>
             <p>
@@ -206,13 +220,19 @@ const TodoListCalendar = () => {
             <div className="flex justify-between mt-4">
               <button
                 className="bg-red-500 text-white px-4 py-2 rounded"
-                aria-label="Close Task Modal"
                 onClick={() => setSelectedTask(null)}
               >
                 Close
               </button>
+
+              {/* 
+                Show Edit/Delete if:
+                  - user is the owner (email match)
+                  (If you want centraladmin to also be able, 
+                   add condition like userRole==="centraladmin" ) 
+              */}
               {selectedTask.email === userEmail && (
-                <>
+                <div className="space-x-2">
                   <button
                     className="bg-yellow-500 text-white px-4 py-2 rounded"
                     onClick={() => {
@@ -229,14 +249,14 @@ const TodoListCalendar = () => {
                   >
                     Delete
                   </button>
-                </>
+                </div>
               )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Task Form Modal */}
+      {/* Add or Edit modal */}
       {isOpen && (
         <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-30">
           <TaskForm

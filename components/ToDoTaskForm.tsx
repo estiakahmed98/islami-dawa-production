@@ -10,10 +10,11 @@ import { useSession } from "@/lib/auth-client";
 interface Task {
   id: string;
   email: string;
+  creatorRole: string; // <-- store the role of the creator
   date: string;
   title: string;
   time: string;
-  visibility: string;
+  visibility: string; // "private" or "public"
   description: string;
   division?: string;
   district?: string;
@@ -41,14 +42,14 @@ const TaskForm: React.FC<TaskFormProps> = ({
   taskData = null,
   setIsEditing,
 }) => {
-  const { data: session } = useSession(); // Get session data
-  const titleInputRef = useRef<HTMLInputElement>(null);
+  const { data: session } = useSession();
+  const titleRef = useRef<HTMLInputElement>(null);
 
-  // State to manage the task form fields
   const [taskState, setTaskState] = useState<Task>({
     id: taskData?.id || "",
-    email: userEmail,
-    date: selectedDate || "",
+    email: taskData?.email || userEmail, // who posted
+    creatorRole: taskData?.creatorRole || userRole, // store role of the creator
+    date: taskData?.date || selectedDate || "",
     title: taskData?.title || "",
     time: taskData?.time || "",
     visibility: taskData?.visibility || "private",
@@ -60,19 +61,19 @@ const TaskForm: React.FC<TaskFormProps> = ({
     union: taskData?.union || session?.user?.union || "",
   });
 
-  // Auto-focus on the title field
+  // Autofocus title
   useEffect(() => {
-    if (titleInputRef.current) {
-      titleInputRef.current.focus();
-    }
+    if (titleRef.current) titleRef.current.focus();
   }, []);
 
-  // Update state when `taskData` changes
+  // If incoming taskData changes, re-sync:
   useEffect(() => {
     if (taskData) {
-      setTaskState({
+      setTaskState((prev) => ({
+        ...prev,
         id: taskData.id,
         email: taskData.email,
+        creatorRole: taskData.creatorRole,
         date: taskData.date,
         title: taskData.title,
         time: taskData.time,
@@ -83,26 +84,26 @@ const TaskForm: React.FC<TaskFormProps> = ({
         area: taskData.area || session?.user?.area || "",
         upazila: taskData.upazila || session?.user?.upazila || "",
         union: taskData.union || session?.user?.union || "",
-      });
+      }));
     }
   }, [taskData, session]);
 
-  // Form submission
   const handleSubmit = async () => {
     if (!taskState.title || !taskState.time || !taskState.description) {
-      toast.error("All fields are required.");
+      toast.error("Title, time, and description are required.");
       return;
     }
 
-    // ✅ Ensure selectedDate is not null
-    const selectedTaskDate = taskState.date || selectedDate;
-    if (!selectedTaskDate) {
+    // Validate date
+    const chosenDate = taskState.date || selectedDate;
+    if (!chosenDate) {
       toast.error("Please select a date.");
       return;
     }
-
-    // ✅ Combine selectedDate and time properly
-    const fullDateTime = `${selectedTaskDate}T${taskState.time}:00`;
+    const parsed = new Date(chosenDate);
+    const isoDate = isNaN(parsed.getTime())
+      ? new Date().toISOString()
+      : parsed.toISOString();
 
     try {
       const response = await fetch("/api/tasks", {
@@ -110,27 +111,23 @@ const TaskForm: React.FC<TaskFormProps> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...taskState,
-          date: fullDateTime, // ✅ Ensure correct datetime format
+          date: isoDate,
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save task.");
+        const errData = await response.json();
+        throw new Error(errData.error || "Failed to save task.");
       }
 
-      toast.success(
-        taskData ? "Task updated successfully!" : "Task added successfully!"
-      );
+      toast.success(taskData ? "Task updated!" : "Task created!");
       fetchTasks();
       setIsOpen(false);
       if (setIsEditing) setIsEditing(false);
     } catch (error) {
       if (error instanceof Error) {
-        console.error("Error saving task:", error.message);
-        toast.error(`Error: ${error.message}`);
+        toast.error(error.message);
       } else {
-        console.error("Unexpected error:", error);
         toast.error("An unexpected error occurred.");
       }
     }
@@ -142,36 +139,37 @@ const TaskForm: React.FC<TaskFormProps> = ({
         {taskData ? "Edit Task" : "Add Task"}
       </h3>
 
-      {/* Title Input */}
+      {/* Title */}
       <Input
-        ref={titleInputRef}
+        ref={titleRef}
         type="text"
-        placeholder="Title"
+        placeholder="Task Title"
         value={taskState.title}
         onChange={(e) => setTaskState({ ...taskState, title: e.target.value })}
       />
 
-      {/* Time Input */}
+      {/* Time */}
       <Input
         type="time"
         value={taskState.time}
         onChange={(e) => setTaskState({ ...taskState, time: e.target.value })}
       />
 
-      {/* Visibility Select */}
+      {/* Visibility */}
       <select
         className="w-full border p-2 rounded mt-2"
         value={taskState.visibility}
         onChange={(e) =>
           setTaskState({ ...taskState, visibility: e.target.value })
         }
-        disabled={userRole === "daye"} // Only dayee can add private tasks
+        // daye cannot create public
+        disabled={userRole === "daye"}
       >
         <option value="private">Private</option>
         {userRole !== "daye" && <option value="public">Public</option>}
       </select>
 
-      {/* Rich Text Editor for Description */}
+      {/* Description (rich text) */}
       <JoditEditorComponent
         placeholder="Task Details..."
         initialValue={taskState.description}
@@ -180,21 +178,17 @@ const TaskForm: React.FC<TaskFormProps> = ({
         }
       />
 
-      {/* Auto-filled Fields from Session (Hidden from user) */}
+      {/* Hidden region fields if needed */}
       <input type="hidden" value={taskState.division} />
       <input type="hidden" value={taskState.district} />
-      <input type="hidden" value={taskState.area} />
       <input type="hidden" value={taskState.upazila} />
       <input type="hidden" value={taskState.union} />
 
-      {/* Submit and Cancel Buttons */}
+      {/* Buttons */}
       <div className="flex justify-end mt-4">
-        <Button aria-label="Submit Task" onClick={handleSubmit}>
-          {taskData ? "Update Task" : "Submit"}
-        </Button>
+        <Button onClick={handleSubmit}>{taskData ? "Update" : "Create"}</Button>
         <Button
           variant="outline"
-          aria-label="Cancel Task Form"
           onClick={() => {
             setIsOpen(false);
             if (setIsEditing) setIsEditing(false);
