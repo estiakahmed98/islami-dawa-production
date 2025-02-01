@@ -33,7 +33,6 @@ interface Task {
   union?: string;
 }
 
-// Read data
 function readTodoData(): { records: Task[] } {
   try {
     const fileContent = fs.readFileSync(todoDataPath, "utf-8").trim();
@@ -44,13 +43,19 @@ function readTodoData(): { records: Task[] } {
   }
 }
 
-// Write data
 function writeTodoData(data: { records: Task[] }) {
   try {
     fs.writeFileSync(todoDataPath, JSON.stringify(data, null, 2), "utf-8");
   } catch (error) {
     console.error("Error writing file:", error);
   }
+}
+
+// A helper to get a date at midnight (00:00:00)
+function getMidnight(date: Date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
 }
 
 // =================== GET ===================
@@ -64,7 +69,7 @@ export async function GET() {
     }
 
     const viewerEmail = session.user.email;
-    const viewerRole = session?.user?.role as string;
+    const viewerRole = session.user.role as string; // Force to string
     const viewerDivision = session.user.division;
     const viewerDistrict = session.user.district;
     const viewerUpazila = session.user.upazila;
@@ -122,10 +127,8 @@ export async function GET() {
           ["unionadmin", "daye"].includes(viewerRole)
         );
       } else if (ownerRole === "daye") {
-        // If daye somehow posted public, decide what to do:
-        // By your spec, daye "cannot post public", but if it exists, let's
-        // show it only to the same union dayes, or (?), or everyone?
-        // For safety, we can show to no one or just do a fallback:
+        // By your spec, daye shouldn't post public. If it exists, we hide it or show it?
+        // We'll hide it for safety.
         return false;
       }
       // Fallback (shouldn't happen):
@@ -183,9 +186,30 @@ export async function POST(req: Request) {
 
     // Validate date
     const parsed = new Date(date);
-    const safeDate = isNaN(parsed.getTime())
-      ? new Date().toISOString()
-      : parsed.toISOString();
+    if (isNaN(parsed.getTime())) {
+      return NextResponse.json(
+        { error: "Invalid date format." },
+        { status: 400 }
+      );
+    }
+    // For new post => date must be >= tomorrow
+    const now = getMidnight(new Date()); // e.g. "Feb 1, 2025 00:00:00"
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1); // => "Feb 2, 2025 00:00:00"
+
+    const desiredDateMidnight = getMidnight(parsed);
+    if (desiredDateMidnight < tomorrow) {
+      return NextResponse.json(
+        {
+          error:
+            "Cannot post for past or today's date. Must be at least tomorrow.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // All good
+    const safeDate = parsed.toISOString(); // keep the original time if needed, or just midnight
 
     const todoData = readTodoData();
     const newTask: Task = {
@@ -271,7 +295,7 @@ export async function PUT(req: Request) {
     }
 
     const existing = todoData.records[index];
-    // Only the owner can update (if you want centraladmin to also edit, check here)
+    // Only the owner can update (or add a check for centraladmin if needed)
     if (existing.email !== session.user.email) {
       return NextResponse.json(
         { error: "Unauthorized to update this task." },
@@ -281,9 +305,24 @@ export async function PUT(req: Request) {
 
     // Validate date
     const parsed = new Date(date);
-    const safeDate = isNaN(parsed.getTime())
-      ? new Date().toISOString()
-      : parsed.toISOString();
+    if (isNaN(parsed.getTime())) {
+      return NextResponse.json(
+        { error: "Invalid date format." },
+        { status: 400 }
+      );
+    }
+
+    // For update => date must be >= today
+    const today = getMidnight(new Date());
+    const desiredDateMidnight = getMidnight(parsed);
+    if (desiredDateMidnight < today) {
+      return NextResponse.json(
+        { error: "Cannot edit a past date's task." },
+        { status: 400 }
+      );
+    }
+
+    const safeDate = parsed.toISOString();
 
     todoData.records[index] = {
       ...existing,

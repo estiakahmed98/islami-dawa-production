@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UserCircle, Mail, Phone, MapPin, Landmark } from "lucide-react";
-import { useSession, updateUser } from "@/lib/auth-client";
 import { toast } from "sonner";
 
+// A reusable field
 const ProfileField = ({
   icon: Icon,
   label,
@@ -42,48 +42,82 @@ const ProfileField = ({
 };
 
 const Profile: React.FC = () => {
-  const session = useSession();
-  const user = session.data?.user;
+  // Data we load from the DB
   const [formData, setFormData] = useState<{
-    phone?: string;
+    id?: string;
+    name?: string;
     email?: string;
-    area?: string;
+    phone?: string;
+    role?: string;
+    division?: string;
     district?: string;
     upazila?: string;
+    union?: string;
+    area?: string;
     markaz?: string;
-  }>(user || {});
+    // add more if needed
+  }>({});
+
   const [isEditing, setIsEditing] = useState(false);
 
+  // 1) Load from /api/profile
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch("/api/profile");
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(error || "Failed to load profile");
+      }
+      const data = await response.json();
+      setFormData(data);
+    } catch (err: any) {
+      console.error("fetchProfile error:", err);
+      toast.error(err.message || "Could not load profile");
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  // 2) Handle field changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // 3) Save profile updates
   const handleSave = async () => {
     try {
-      await updateUser(formData);
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(error || "Failed to update profile");
+      }
+
       toast.success("Profile updated successfully!");
       setIsEditing(false);
-    } catch (error) {
-      console.error("Failed to update profile", error);
-      toast.error("Failed to update profile");
+      await fetchProfile(); // optionally refresh data
+    } catch (err: any) {
+      console.error("Failed to update profile", err);
+      toast.error(err.message || "Could not update profile");
     }
   };
 
   return (
-    <div className="max-w-lg mt-40 mx-auto p-6 bg-white shadow-2xl rounded-2xl border border-gray-100 transition-all duration-300 hover:shadow-3xl">
+    <div className="max-w-2xl mt-16 mx-auto p-6 bg-white shadow-2xl rounded-2xl border border-gray-100 transition-all duration-300 hover:shadow-3xl">
       <div className="text-center relative">
-        {user?.image ? (
-          <div className="relative mx-auto w-24 h-24 mb-4"></div>
-        ) : (
-          <UserCircle className="w-24 h-24 mx-auto text-gray-300 mb-4" />
-        )}
+        <UserCircle className="w-24 h-24 mx-auto text-gray-300 mb-4" />
 
         <h2 className="text-lg font-bold text-gray-900 mb-1">
-          {user?.name || "User Profile"}
+          {formData.name || "User Profile"}
         </h2>
         <p className="text-sm text-primary-600 font-medium">
-          {user?.role || "Role Not Specified"}
+          {formData.role || "Role Not Specified"}
         </p>
       </div>
 
@@ -106,7 +140,15 @@ const Profile: React.FC = () => {
         />
         <ProfileField
           icon={MapPin}
-          label="Address"
+          label="Division"
+          name="division"
+          value={formData.division}
+          onChange={handleChange}
+          editable={isEditing}
+        />
+        <ProfileField
+          icon={MapPin}
+          label="Area"
           name="area"
           value={formData.area}
           onChange={handleChange}
@@ -114,7 +156,7 @@ const Profile: React.FC = () => {
         />
         <ProfileField
           icon={MapPin}
-          label="City/State"
+          label="District"
           name="district"
           value={formData.district}
           onChange={handleChange}
@@ -122,9 +164,17 @@ const Profile: React.FC = () => {
         />
         <ProfileField
           icon={MapPin}
-          label="Postcode"
+          label="Upazila"
           name="upazila"
           value={formData.upazila}
+          onChange={handleChange}
+          editable={isEditing}
+        />
+        <ProfileField
+          icon={MapPin}
+          label="Union"
+          name="union"
+          value={formData.union}
           onChange={handleChange}
           editable={isEditing}
         />
@@ -168,70 +218,3 @@ const Profile: React.FC = () => {
 };
 
 export default Profile;
-
-// "use client";
-
-// import React from "react";
-// import { UserCircle, Mail, Phone, MapPin, Landmark } from "lucide-react";
-// import { useSession } from "@/lib/auth-client";
-
-// const ProfileField = ({
-//   icon: Icon,
-//   label,
-//   value,
-// }: {
-//   icon?: React.ElementType;
-//   label: string;
-//   value?: string | null;
-// }) => {
-//   if (!value) return null;
-
-//   return (
-//     <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1.5">
-//       {Icon && <Icon className="w-4 h-4 text-primary-500 flex-shrink-0" />}
-//       <span className="font-medium">{label}:</span>
-//       <span className="truncate text-gray-800">{value}</span>
-//     </div>
-//   );
-// };
-
-// const Profile: React.FC = () => {
-//   const session = useSession();
-//   const user = session.data?.user;
-
-//   return (
-//     <div className="max-w-lg mt-40 mx-auto p-6 bg-white shadow-2xl rounded-2xl border border-gray-100 transition-all duration-300 hover:shadow-3xl">
-//       <div className="text-center relative">
-//         {user?.image ? (
-//           <div className="relative mx-auto w-24 h-24 mb-4">
-//             <img
-//               src={user.image}
-//               alt="Profile"
-//               className="w-full h-full rounded-full object-cover border-4 border-primary-500 shadow-md transition-transform duration-300 hover:scale-105"
-//             />
-//           </div>
-//         ) : (
-//           <UserCircle className="w-24 h-24 mx-auto text-gray-300 mb-4" />
-//         )}
-
-//         <h2 className="text-lg font-bold text-gray-900 mb-1">
-//           {user?.name || "User Profile"}
-//         </h2>
-//         <p className="text-sm text-primary-600 font-medium">
-//           {user?.role || "Role Not Specified"}
-//         </p>
-//       </div>
-
-//       <div className="mt-4 border-t pt-4 text-left space-y-3">
-//         <ProfileField icon={Phone} label="Phone" value={user?.phone} />
-//         <ProfileField icon={Mail} label="Email" value={user?.email} />
-//         <ProfileField icon={MapPin} label="Address" value={user?.area} />
-//         <ProfileField icon={MapPin} label="City/State" value={user?.district} />
-//         <ProfileField icon={MapPin} label="Postcode" value={user?.upazila} />
-//         <ProfileField icon={Landmark} label="Markaz" value={user?.markaz} />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Profile;

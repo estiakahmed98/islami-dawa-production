@@ -87,6 +87,21 @@ const TodoListCalendar = () => {
   // Handle selecting an empty date cell
   const handleDateClick = (date: Date | undefined) => {
     if (!date) return;
+
+    // Zero-out hours, minutes, seconds for an easy comparison
+    const selectedMidnight = new Date(date);
+    selectedMidnight.setHours(0, 0, 0, 0);
+
+    const todayMidnight = new Date();
+    todayMidnight.setHours(0, 0, 0, 0);
+
+    // If selected date is before today, disallow
+    if (selectedMidnight < todayMidnight) {
+      toast.error("You cannot select a past date.");
+      return;
+    }
+
+    // Otherwise, go ahead with opening the form
     const dayString = date.toISOString().split("T")[0];
     setSelectedDate(dayString);
     setSelectedTask(null);
@@ -231,26 +246,27 @@ const TodoListCalendar = () => {
                   (If you want centraladmin to also be able, 
                    add condition like userRole==="centraladmin" ) 
               */}
-              {selectedTask.email === userEmail && (
-                <div className="space-x-2">
-                  <button
-                    className="bg-yellow-500 text-white px-4 py-2 rounded"
-                    onClick={() => {
-                      setIsEditing(true);
-                      setSelectedDate(selectedTask.date);
-                      setIsOpen(true);
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="bg-red-700 text-white px-4 py-2 rounded"
-                    onClick={handleDeleteTask}
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
+              {selectedTask.email === userEmail &&
+                userRole === "centraladmin" && (
+                  <div className="space-x-2">
+                    <button
+                      className="bg-yellow-500 text-white px-4 py-2 rounded"
+                      onClick={() => {
+                        setIsEditing(true);
+                        setSelectedDate(selectedTask.date);
+                        setIsOpen(true);
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="bg-red-700 text-white px-4 py-2 rounded"
+                      onClick={handleDeleteTask}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
             </div>
           </div>
         </div>

@@ -24,6 +24,7 @@ const Header = () => {
   const router = useRouter();
   const session = useSession();
   const { toggleSidebar } = useSidebar();
+  const userRole = session.data?.user?.role;
 
   moment.locale("bn");
   const hijriDate = moment().format("iD");
@@ -85,7 +86,13 @@ const Header = () => {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/profile">
+                <Link
+                  href={
+                    userRole === "daye"
+                      ? "/dashboard/profile"
+                      : "/admin/profile"
+                  }
+                >
                   <UserRound className="opacity-60" aria-hidden="true" />
                   <span>Profile</span>
                 </Link>
