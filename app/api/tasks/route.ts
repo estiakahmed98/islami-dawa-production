@@ -64,7 +64,7 @@ export async function GET() {
     }
 
     const viewerEmail = session.user.email;
-    const viewerRole = session.user.role;
+    const viewerRole = session?.user?.role as string;
     const viewerDivision = session.user.division;
     const viewerDistrict = session.user.district;
     const viewerUpazila = session.user.upazila;
@@ -191,7 +191,7 @@ export async function POST(req: Request) {
     const newTask: Task = {
       id: crypto.randomUUID(),
       email: user.email,
-      creatorRole: user.role, // store who created it
+      creatorRole: user.role as string, // store who created it
       date: safeDate,
       title,
       time,
