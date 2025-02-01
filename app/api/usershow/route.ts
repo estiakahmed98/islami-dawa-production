@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
-import { admin } from "@/lib/auth-client";
 
 const prisma = new PrismaClient();
 
@@ -99,6 +98,51 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         message: "Error updating user status",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const { userId } = await req.json();
+
+    if (typeof userId !== "string") {
+      return NextResponse.json(
+        { message: "Invalid request body: userId is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if user exists before deletion
+    const user = await db.users.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    // Delete user
+    await db.users.delete({ where: { id: userId } });
+
+    return NextResponse.json(
+      { message: "User deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return NextResponse.json(
+      {
+        message: "Error deleting user",
         error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }

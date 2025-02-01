@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useSession } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -35,8 +36,6 @@ interface Filters {
   district: string;
   upazila: string;
   union: string;
-  area: string;
-  phone: string;
 }
 
 export default function UsersTable() {
@@ -49,8 +48,6 @@ export default function UsersTable() {
     district: "",
     upazila: "",
     union: "",
-    area: "",
-    phone: "",
   });
 
   const { data, isPending } = useSession();
@@ -108,6 +105,7 @@ export default function UsersTable() {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Toggle Ban Status
   const toggleBan = async (userId: string, isBanned: boolean) => {
     try {
       const response = await fetch("/api/usershow", {
@@ -122,14 +120,45 @@ export default function UsersTable() {
         throw new Error(`API error: ${response.statusText}`);
       }
 
-      const data = await response.json();
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id === userId ? { ...user, banned: !isBanned } : user
         )
       );
+
+      toast.success(`User ${isBanned ? "unbanned" : "banned"} successfully!`);
     } catch (error) {
       console.error("Error updating user status:", error);
+      toast.error("Failed to update user status.");
+    }
+  };
+
+  // Delete User
+  const handleDelete = async (userId: string) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this user? This action cannot be undone."
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch("/api/usershow", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
+        throw new Error(`API error: ${response.statusText}`);
+      }
+
+      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+
+      toast.success("User deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Failed to delete user.");
     }
   };
 
@@ -141,6 +170,7 @@ export default function UsersTable() {
     <div className="w-full mx-auto p-2">
       <h1 className="text-2xl font-bold text-center mb-6">Users Table</h1>
 
+      {/* Filters */}
       <div className="mb-4 grid grid-cols-3 md:grid-cols-6 gap-4">
         <select
           value={filters.role}
@@ -154,8 +184,6 @@ export default function UsersTable() {
           <option value="areaadmin">Area Admin</option>
           <option value="upozilaadmin">Upazila Admin</option>
           <option value="daye">Da'ee</option>
-          <option value="user">User</option>
-          <option value="markaz">Markaz</option>
         </select>
 
         {Object.keys(filters)
@@ -173,49 +201,100 @@ export default function UsersTable() {
           ))}
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Division</TableHead>
-            <TableHead>District</TableHead>
-            <TableHead>Upazila</TableHead>
-            <TableHead>Union</TableHead>
-            <TableHead>Area</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Markaz</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Action</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell>{user.name}</TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.role}</TableCell>
-              <TableCell>{user.division}</TableCell>
-              <TableCell>{user.district}</TableCell>
-              <TableCell>{user.upazila}</TableCell>
-              <TableCell>{user.union}</TableCell>
-              <TableCell>{user.area}</TableCell>
-              <TableCell>{user.phone}</TableCell>
-              <TableCell>{user.markaz}</TableCell>
-              <TableCell>{user.banned ? "Banned" : "Active"}</TableCell>
-              <TableCell>
-                <Button
-                  onClick={() => toggleBan(user.id, user.banned)}
-                  className={user.banned ? "bg-red-500" : "bg-green-500"}
-                >
-                  {user.banned ? "Unban" : "Ban"}
-                </Button>
-              </TableCell>
+      <div className="w-full border p-2 border-gray-300 rounded-lg shadow-md overflow-y-auto h-[65vh]">
+        <Table className="w-full">
+          <TableHeader className="sticky top-0 z-10 bg-white shadow-md border-2">
+            <TableRow>
+              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+                Name
+              </TableHead>
+              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+                Email
+              </TableHead>
+              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+                Role
+              </TableHead>
+              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+                Division
+              </TableHead>
+              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+                District
+              </TableHead>
+              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+                Upazila
+              </TableHead>
+              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+                Union
+              </TableHead>
+              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+                Phone
+              </TableHead>
+              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+                Markaz
+              </TableHead>
+              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+                Status
+              </TableHead>
+              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+                Actions
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+
+          {/* Table Body */}
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell className="border-r border-gray-300">
+                  {user.name}
+                </TableCell>
+                <TableCell className="border-r border-gray-300">
+                  {user.email}
+                </TableCell>
+                <TableCell className="border-r border-gray-300">
+                  {user.role}
+                </TableCell>
+                <TableCell className="border-r border-gray-300">
+                  {user.division}
+                </TableCell>
+                <TableCell className="border-r border-gray-300">
+                  {user.district}
+                </TableCell>
+                <TableCell className="border-r border-gray-300">
+                  {user.upazila}
+                </TableCell>
+                <TableCell className="border-r border-gray-300">
+                  {user.union}
+                </TableCell>
+                <TableCell className="border-r border-gray-300">
+                  {user.phone}
+                </TableCell>
+                <TableCell className="border-r border-gray-300">
+                  {user.markaz}
+                </TableCell>
+                <TableCell className="border-r border-gray-300">
+                  {user.banned ? "Banned" : "Active"}
+                </TableCell>
+                <TableCell className="flex space-x-2">
+                  <Button
+                    onClick={() => toggleBan(user.id, user.banned)}
+                    className={user.banned ? "bg-red-500" : "bg-green-500"}
+                  >
+                    {user.banned ? "Unban" : "Ban"}
+                  </Button>
+
+                  <Button
+                    onClick={() => handleDelete(user.id)}
+                    className="bg-red-800"
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
