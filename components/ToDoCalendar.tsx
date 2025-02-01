@@ -29,7 +29,9 @@ interface Task {
 
 const TodoListCalendar = () => {
   const { data: session } = useSession();
+
   const userEmail = session?.user?.email || "";
+
   const userRole = session?.user?.role || "";
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -88,21 +90,22 @@ const TodoListCalendar = () => {
   const handleDateClick = (date: Date | undefined) => {
     if (!date) return;
 
-    // Zero-out hours, minutes, seconds for an easy comparison
+    // Zero-out hours, minutes, and seconds
     const selectedMidnight = new Date(date);
     selectedMidnight.setHours(0, 0, 0, 0);
 
     const todayMidnight = new Date();
     todayMidnight.setHours(0, 0, 0, 0);
 
-    // If selected date is before today, disallow
+    // Prevent selecting past dates
     if (selectedMidnight < todayMidnight) {
       toast.error("You cannot select a past date.");
       return;
     }
 
-    // Otherwise, go ahead with opening the form
-    const dayString = date.toISOString().split("T")[0];
+    // ✅ Fix: Use toLocaleDateString for proper YYYY-MM-DD format in local time
+    const dayString = selectedMidnight.toLocaleDateString("en-CA");
+    console.log("DayString :", dayString);
     setSelectedDate(dayString);
     setSelectedTask(null);
     setIsOpen(true);
@@ -174,9 +177,9 @@ const TodoListCalendar = () => {
 
       <DayPilotMonth
         startDate={startDate}
-        onTimeRangeSelected={(args) =>
-          handleDateClick(new Date(args.start.toString()))
-        }
+        onTimeRangeSelected={(args) => {
+          handleDateClick(new Date(args.start.toString()));
+        }}
         events={tasks.map((t) => ({
           id: t.id,
           text: t.text ?? t.title,
@@ -201,19 +204,7 @@ const TodoListCalendar = () => {
               <strong>Creator Email:</strong> {selectedTask.email}
             </p>
             <p>
-              <strong>Creator Role:</strong> {selectedTask.creatorRole}
-            </p>
-            <p>
-              <strong>Creator Division:</strong> {selectedTask.division}
-            </p>
-            <p>
-              <strong>Creator District:</strong> {selectedTask.district}
-            </p>
-            <p>
-              <strong>Creator Upazila:</strong> {selectedTask.upazila}
-            </p>
-            <p>
-              <strong>Creator Union:</strong> {selectedTask.union}
+              <strong>Role:</strong> {selectedTask.creatorRole}
             </p>
             <p>
               <strong>Time:</strong>{" "}
@@ -246,27 +237,26 @@ const TodoListCalendar = () => {
                   (If you want centraladmin to also be able, 
                    add condition like userRole==="centraladmin" ) 
               */}
-              {selectedTask.email === userEmail &&
-                userRole === "centraladmin" && (
-                  <div className="space-x-2">
-                    <button
-                      className="bg-yellow-500 text-white px-4 py-2 rounded"
-                      onClick={() => {
-                        setIsEditing(true);
-                        setSelectedDate(selectedTask.date);
-                        setIsOpen(true);
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="bg-red-700 text-white px-4 py-2 rounded"
-                      onClick={handleDeleteTask}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
+              {selectedTask.email === userEmail && (
+                <div className="space-x-2">
+                  <button
+                    className="bg-yellow-500 text-white px-4 py-2 rounded"
+                    onClick={() => {
+                      setIsEditing(true);
+                      setSelectedDate(selectedTask.date);
+                      setIsOpen(true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="bg-red-700 text-white px-4 py-2 rounded"
+                    onClick={handleDeleteTask}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

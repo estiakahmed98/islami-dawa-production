@@ -20,7 +20,6 @@ const Register = () => {
     district: "",
     upazila: "",
     union: "",
-    area: "",
     markaz: "",
     phone: "",
     email: "",
@@ -179,7 +178,6 @@ const Register = () => {
             district: formData.district,
             upazila: formData.upazila,
             union: formData.union,
-            area: formData.area,
             markaz: formData.markaz,
             phone: formData.phone,
           },
@@ -198,7 +196,6 @@ const Register = () => {
               district: "",
               upazila: "",
               union: "",
-              area: "",
               markaz: "",
               phone: "",
               email: "",
@@ -283,12 +280,6 @@ const Register = () => {
               onChange={handleChange}
             />
           )}
-          <InputField
-            label="Area"
-            name="area"
-            value={formData.area}
-            onChange={handleChange}
-          />
           <InputField
             label="Mobile Number"
             name="phone"

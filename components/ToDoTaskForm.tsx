@@ -96,6 +96,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
 
     // Validate date
     const chosenDate = taskState.date || selectedDate;
+
     if (!chosenDate) {
       toast.error("Please select a date.");
       return;
