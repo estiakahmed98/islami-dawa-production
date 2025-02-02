@@ -1,9 +1,10 @@
+
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useSelectedUser } from "@/providers/treeProvider";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton";
 import { useSession } from "@/lib/auth-client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton";
 import TallyAdmin from "@/components/TallyAdmin";
 import AmoliChartAdmin from "@/components/AmoliChartAdmin";
 import AdminTable from "@/components/AdminTable";
@@ -18,13 +19,98 @@ import { userDayeData } from "@/app/data/dayiUserData";
 import { userTalimBisoyData } from "@/app/data/talimBisoyUserData";
 import { userAmoliData } from "@/app/data/amoliMuhasabaUserData";
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  division?: string;
+  district?: string;
+  upazila?: string;
+  union?: string;
+}
+
 const AdminDashboard: React.FC = () => {
   const { selectedUser } = useSelectedUser();
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
+  const [emailList, setEmailList] = useState<string[]>([userEmail]);
+  const [users, setUsers] = useState<User[]>([]);
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("/api/users", { cache: "no-store" });
+        if (!response.ok) throw new Error("Failed to fetch users");
 
-  const emailList = selectedUser ? [selectedUser] : [userEmail];
+        const usersData: User[] = await response.json();
+        setUsers(usersData);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    if (!users.length) return;
+
+    if (selectedUser) {
+      const selectedUserObj = users.find((u) => u.email === selectedUser);
+
+      if (selectedUserObj) {
+        let collectedEmails: string[] = [selectedUserObj.email];
+
+        // Function to collect all child emails recursively
+        const findChildEmails = (parentEmail: string) => {
+          users.forEach((user) => {
+            if (getParentEmail(user, users) === parentEmail) {
+              collectedEmails.push(user.email);
+              findChildEmails(user.email);
+            }
+          });
+        };
+
+        findChildEmails(selectedUserObj.email);
+
+        // Collect "daye" emails based on the role
+        if (selectedUserObj.role === "unionadmin") {
+          const dayeEmails = users
+            .filter((user) => user.role === "daye" && user.union === selectedUserObj.union)
+            .map((user) => user.email);
+          collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+        }
+
+        else if (selectedUserObj.role === "upozilaadmin") {
+          const dayeEmails = users
+            .filter((user) => user.role === "daye" && user.upazila === selectedUserObj.upazila)
+            .map((user) => user.email);
+          collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+        }
+
+        else if (selectedUserObj.role === "districtadmin") {
+          const dayeEmails = users
+            .filter((user) => user.role === "daye" && user.district === selectedUserObj.district)
+            .map((user) => user.email);
+          collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+        }
+
+        else if (selectedUserObj.role === "divisionadmin") {
+          const dayeEmails = users
+            .filter((user) => user.role === "daye" && user.division === selectedUserObj.division)
+            .map((user) => user.email);
+          collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+        }
+
+        setEmailList(collectedEmails);
+      } else {
+        setEmailList([selectedUser]);
+      }
+    } else {
+      setEmailList([userEmail]); // Default to logged-in user
+    }
+  }, [selectedUser, users, userEmail]);
 
   console.log("Email List:", emailList);
 
@@ -57,13 +143,8 @@ const AdminDashboard: React.FC = () => {
             <TabsTrigger value="talim">Talim Bisoy</TabsTrigger>
             <TabsTrigger value="daye">Daye Bisoy</TabsTrigger>
             <TabsTrigger value="dawati">Dawati Bisoy</TabsTrigger>
-            <TabsTrigger value="dawatimojlish">Dawati Mojlish</TabsTrigger>
-            <TabsTrigger value="jamat">Jamat Bisoy</TabsTrigger>
-            <TabsTrigger value="dinefera">Dine Fire Asa</TabsTrigger>
-            <TabsTrigger value="sofor">Sofor Bisoy</TabsTrigger>
           </TabsList>
 
-          {/* Tab Content */}
           <TabsContent value="moktob">
             <AdminTable userData={userMoktobBisoyData} emailList={emailList} />
           </TabsContent>
@@ -76,22 +157,30 @@ const AdminDashboard: React.FC = () => {
           <TabsContent value="dawati">
             <AdminTable userData={userDawatiBisoyData} emailList={emailList} />
           </TabsContent>
-          <TabsContent value="dawatimojlish">
-            <AdminTable userData={userDawatiMojlishData} emailList={emailList} />
-          </TabsContent>
-          <TabsContent value="jamat">
-            <AdminTable userData={userJamatBisoyData} emailList={emailList} />
-          </TabsContent>
-          <TabsContent value="dinefera">
-            <AdminTable userData={userDineFeraData} emailList={emailList} />
-          </TabsContent>
-          <TabsContent value="sofor">
-            <AdminTable userData={userSoforBishoyData} emailList={emailList} />
-          </TabsContent>
         </Tabs>
       </div>
     </div>
   );
 };
 
+// Function to get the parent email
+const getParentEmail = (user: User, users: User[]): string | null => {
+  switch (user.role) {
+    case "divisionadmin":
+      return users.find((u) => u.role === "centraladmin")?.email || null;
+    case "districtadmin":
+      return users.find((u) => u.role === "divisionadmin" && u.division === user.division)?.email || null;
+    case "upozilaadmin":
+      return users.find((u) => u.role === "districtadmin" && u.district === user.district)?.email || null;
+    case "unionadmin":
+      return users.find((u) => u.role === "upozilaadmin" && u.upazila === user.upazila)?.email || null;
+    case "daye":
+      return users.find((u) => u.role === "unionadmin" && u.union === user.union)?.email || null;
+    default:
+      return null;
+  }
+};
+
 export default AdminDashboard;
+
+
