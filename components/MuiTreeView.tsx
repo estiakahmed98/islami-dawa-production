@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, JSX, useCallback } from "react";
@@ -14,7 +13,14 @@ import { useSession } from "@/lib/auth-client";
 import { ScrollArea } from "./ui/scroll-area";
 import { PiTreeViewBold } from "react-icons/pi";
 
-export const roleList = ["centraladmin", "divisionadmin", "districtadmin", "upozilaadmin", "unionadmin", "daye"];
+export const roleList = [
+  "centraladmin",
+  "divisionadmin",
+  "districtadmin",
+  "upozilaadmin",
+  "unionadmin",
+  "daye",
+];
 
 interface User {
   id: string;
@@ -106,16 +112,45 @@ const MuiTreeView: React.FC = () => {
         parentUser = users.find((u) => u.role === "centraladmin");
         break;
       case "districtadmin":
-        parentUser = users.find((u) => u.role === "divisionadmin" && u.division === user.division);
+        parentUser = users.find(
+          (u) => u.role === "divisionadmin" && u.division === user.division
+        );
         break;
       case "upozilaadmin":
-        parentUser = users.find((u) => u.role === "districtadmin" && u.district === user.district);
+        parentUser = users.find(
+          (u) => u.role === "districtadmin" && u.district === user.district
+        );
         break;
       case "unionadmin":
-        parentUser = users.find((u) => u.role === "upozilaadmin" && u.upazila === user.upazila);
+        parentUser = users.find(
+          (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
+        );
         break;
       case "daye":
-        parentUser = users.find((u) => u.role === "unionadmin" && u.union === user.union);
+        // Step 1: Try to find a unionadmin in the same union
+        parentUser = users.find(
+          (u) => u.role === "unionadmin" && u.union === user.union
+        );
+
+        // Step 2: If no unionadmin is found, find a upozila in the same upozila
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
+          );
+        }
+
+        // Step 3: If no unionadmin is found, find a districtadmin in the same district
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "districtadmin" && u.district === user.district
+          );
+        }
+        // Step 4: If no districtadmin is found, find a divisiontadmin in the same division
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "divisionadmin" && u.division === user.division
+          );
+        }
         break;
       default:
         return null;
@@ -148,7 +183,8 @@ const MuiTreeView: React.FC = () => {
         .filter(
           (node) =>
             node.label.toLowerCase().includes(lowerCaseQuery) ||
-            (node.children && node.children.some((child) => filterNodes([child]).length))
+            (node.children &&
+              node.children.some((child) => filterNodes([child]).length))
         )
         .map((node) => ({
           ...node,
@@ -166,7 +202,9 @@ const MuiTreeView: React.FC = () => {
       <>
         {parts.map((part, index) =>
           part.toLowerCase() === query.toLowerCase() ? (
-            <span key={index} className="bg-amber-600 font-bold">{part}</span>
+            <span key={index} className="bg-amber-600 font-bold">
+              {part}
+            </span>
           ) : (
             part
           )
@@ -213,12 +251,21 @@ const MuiTreeView: React.FC = () => {
 
         <IconButton size="small" onClick={handleToggle} className="text-white">
           <PiTreeViewBold className="size-6 text-white" />
-          <span className="text-white">{isExpanded ? "Collapse All" : "Expand All"}</span>
-          {isExpanded ? <ArrowDropUpIcon className="text-white"/> : <ArrowDropDownIcon className="text-white"/>}
+          <span className="text-white">
+            {isExpanded ? "Collapse All" : "Expand All"}
+          </span>
+          {isExpanded ? (
+            <ArrowDropUpIcon className="text-white" />
+          ) : (
+            <ArrowDropDownIcon className="text-white" />
+          )}
         </IconButton>
 
         <Box sx={{ minHeight: 352, minWidth: 300 }}>
-          <SimpleTreeView expandedItems={expanded} onExpandedItemsChange={(e, ids) => setExpanded(ids)}>
+          <SimpleTreeView
+            expandedItems={expanded}
+            onExpandedItemsChange={(e, ids) => setExpanded(ids)}
+          >
             {renderTree(filteredTree)}
           </SimpleTreeView>
         </Box>
