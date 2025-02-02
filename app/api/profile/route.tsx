@@ -6,16 +6,18 @@ import { db } from "@/lib/db"; // Your Prisma client (or DB client)
 export async function GET() {
   try {
     // 1) Get the session, passing in request headers
+    const headersList = await headers(); // Await the headers
     const session = await auth.api.getSession({
-      headers: headers(),
+      headers: headersList, // Pass the awaited headers
     });
+
     if (!session?.user?.email) {
       // Not logged in
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // 2) Fetch the user from DB by email
-    const user = await prisma.users.findUnique({
+    const user = await db.users.findUnique({
       where: { email: session.user.email },
       // Choose exactly which fields you want to return
       select: {
@@ -52,9 +54,11 @@ export async function GET() {
 export async function PUT(req: Request) {
   try {
     // 1) Validate session
+    const headersList = await headers(); // Await the headers
     const session = await auth.api.getSession({
-      headers: headers(),
+      headers: headersList, // Pass the awaited headers
     });
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -63,7 +67,7 @@ export async function PUT(req: Request) {
     const data = await req.json();
 
     // 3) Update user record in DB
-    const updatedUser = await prisma.users.update({
+    const updatedUser = await db.users.update({
       where: { email: session.user.email },
       data: {
         // Only update the fields you need
