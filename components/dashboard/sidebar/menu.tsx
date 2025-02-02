@@ -64,11 +64,10 @@ const SidebarMenu = () => {
   const handleModeToggle = () => {
     const newMode = !isAdminMode;
     setIsAdminMode(newMode);
-    if(isAdminMode){
-      setButtonText("Goto User Mode")
-    }
-    else{
-      setButtonText("Goto Admin Mode")
+    if (isAdminMode) {
+      setButtonText("Goto User Mode");
+    } else {
+      setButtonText("Goto Admin Mode");
     }
     router.push(newMode ? "/admin" : "/dashboard");
   };
@@ -90,7 +89,7 @@ const SidebarMenu = () => {
 
   const menuList = [
     {
-      title: "ড্যাশবোর্ড",
+      title: `ড্যাশবোর্ড (${session?.user?.role || "No Role"})`,
       icon: <LuLayoutDashboard className="size-5" />,
       url: "/dashboard",
     },
@@ -155,7 +154,7 @@ const SidebarMenu = () => {
     {
       url: "/admin",
       icon: <LuLayoutDashboard className="size-6" />,
-      title: "ড্যাশবোর্ড",
+      title: `ড্যাশবোর্ড (${session?.user?.role || "No Role"})`,
     },
     {
       url: "/admin/register",
@@ -211,7 +210,6 @@ const SidebarMenu = () => {
       {isAdmin &&
         !isMobile &&
         menuList.map((menu, index) => <MenuItem key={index} {...menu} />)}
-
 
       {isAdmin && isMobile && (
         <div className="flex justify-start mb-8">
