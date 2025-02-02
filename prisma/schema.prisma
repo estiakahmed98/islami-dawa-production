@@ -14,7 +14,7 @@ model users {
   role          String?
   division      String
   district      String
-  area          String
+  area          String?
   upazila       String
   union         String
   markaz        String?
