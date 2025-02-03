@@ -4,6 +4,7 @@ import React, { useState, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
 import { admin, useSession } from "@/lib/auth-client";
+import markazList from "@/app/data/markazList";
 import * as yup from "yup";
 
 type LocationOption = { value: number | string; title: string };
@@ -272,14 +273,18 @@ const Register = () => {
               disabled={!unionsList.length}
             />
           )}
-          {!hideMarkaz && (
-            <InputField
-              label="Markaz (Optional)"
-              name="markaz"
-              value={formData.markaz}
-              onChange={handleChange}
-            />
-          )}
+
+          <SelectField
+            label="Markaz"
+            name="markaz"
+            value={formData.markaz}
+            onChange={handleChange}
+            options={markazList.map(({ name }) => ({
+              value: name,
+              title: name,
+            }))}
+          />
+
           <InputField
             label="Mobile Number"
             name="phone"
