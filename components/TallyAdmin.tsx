@@ -58,9 +58,9 @@ const TallyAdmin: React.FC<TallyAdminProps> = ({
     // Format aggregated data for display
     return Object.entries(aggregatedData).map(([key, totalValue]) => ({
       label: labelMap[key] || key, // Use label map if available
-      value: Math.min(totalValue, 1000), // Cap the value
+      value: Math.min(totalValue, 5000), // Cap the value
       totalValue: totalValue,
-      max: 1000, // Example max value
+      max: 5000, // Example max value
     }));
   };
 
