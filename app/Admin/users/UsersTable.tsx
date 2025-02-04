@@ -39,6 +39,7 @@ interface Filters {
 }
 
 export default function UsersTable() {
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -64,34 +65,10 @@ export default function UsersTable() {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const params = new URLSearchParams();
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value.trim()) {
-            params.append(key, value);
-          }
-        });
-
-        const response = await fetch(`/api/usershow?${params.toString()}`);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Error response:", errorText);
-          throw new Error(`API error: ${response.statusText}`);
-        }
-
-        const text = await response.text();
-        if (!text) {
-          throw new Error("Empty response from API");
-        }
-
-        const data = JSON.parse(text);
-
-        if (data?.users) {
-          setUsers(data.users);
-        } else {
-          console.error("Invalid data structure:", data);
-          setUsers([]);
-        }
+        const response = await fetch(`/api/usershow`);
+        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+        const data = await response.json();
+        setUsers(data.users || []);
       } catch (error) {
         console.error("Error fetching users:", error);
       } finally {
@@ -100,7 +77,17 @@ export default function UsersTable() {
     };
 
     fetchUsers();
-  }, [filters, isPending, sessionUser]);
+  }, [isPending, sessionUser]);
+
+  useEffect(() => {
+    const filtered = users.filter((user) =>
+      Object.entries(filters).every(
+        ([key, value]) => !value || (typeof user[key as keyof User] === 'string' && (user[key as keyof User] as string)?.toLowerCase().includes(value.toLowerCase()))
+      )
+    );
+
+    setFilteredUsers(filtered);
+  }, [filters, users]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,6 +201,62 @@ export default function UsersTable() {
     return <p className="text-center text-xl p-10">Authenticating...</p>;
   }
 
+
+  const getParentEmail = (user: User, users: User[]): string | null => {
+    let parentUser: User | undefined;
+    switch (user.role) {
+      case "divisionadmin":
+        parentUser = users.find((u) => u.role === "centraladmin");
+        break;
+      case "districtadmin":
+        parentUser = users.find(
+          (u) => u.role === "divisionadmin" && u.division === user.division
+        );
+        break;
+      case "upozilaadmin":
+        parentUser = users.find(
+          (u) => u.role === "districtadmin" && u.district === user.district
+        );
+        break;
+      case "unionadmin":
+        parentUser = users.find(
+          (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
+        );
+        break;
+      case "daye":
+        // Step 1: Try to find a unionadmin in the same union
+        parentUser = users.find(
+          (u) => u.role === "unionadmin" && u.union === user.union
+        );
+
+        // Step 2: If no unionadmin is found, find a upozila in the same upozila
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
+          );
+        }
+
+        // Step 3: If no unionadmin is found, find a districtadmin in the same district
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "districtadmin" && u.district === user.district
+          );
+        }
+        // Step 4: If no districtadmin is found, find a divisiontadmin in the same division
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "divisionadmin" && u.division === user.division
+          );
+        }
+        break;
+
+      default:
+        return null;
+    }
+    return parentUser ? `${parentUser.name} (${parentUser.role})` : null;
+  };
+
+
   return (
     <div className="w-full mx-auto p-2">
       <h1 className="text-2xl font-bold text-center mb-6">Users Table</h1>
@@ -223,7 +266,7 @@ export default function UsersTable() {
         <select
           value={filters.role}
           onChange={(e) => handleFilterChange("role", e.target.value)}
-          className="border border-gray-300 rounded-md px-4 py-2"
+          className="border border-slate-500 rounded-md px-4 py-2"
         >
           <option value="">All Roles</option>
           <option value="centraladmin">Central Admin</option>
@@ -240,6 +283,7 @@ export default function UsersTable() {
               key={key}
               type="text"
               placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+              className="border-slate-500"
               value={filters[key as keyof Filters]}
               onChange={(e) =>
                 handleFilterChange(key as keyof Filters, e.target.value)
@@ -248,9 +292,9 @@ export default function UsersTable() {
           ))}
       </div>
 
-      <div className="w-full border p-2 border-gray-300 rounded-lg shadow-md overflow-y-auto h-[65vh]">
+      <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-y-auto h-[65vh]">
         <Table className="w-full">
-          <TableHeader className="sticky top-0 z-10 bg-white shadow-md border-2">
+          <TableHeader className="sticky top-0 z-10 bg-teal-100 shadow-md border-b-2">
             <TableRow>
               <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
                 Name
@@ -280,6 +324,9 @@ export default function UsersTable() {
                 Markaz
               </TableHead>
               <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+                Admin Assigned
+              </TableHead>
+              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
                 Status
               </TableHead>
               <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
@@ -290,8 +337,8 @@ export default function UsersTable() {
 
           {/* Table Body */}
           <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
+          {filteredUsers.map((user) => (
+              <TableRow key={user.id} className="text-center">
                 <TableCell
                   className="border-r hover:text-green-700  cursor-pointer hover:underline"
                   onClick={() => setSelectedUser(user)}
@@ -321,6 +368,9 @@ export default function UsersTable() {
                 </TableCell>
                 <TableCell className="border-r border-gray-300">
                   {user.markaz}
+                </TableCell>
+                <TableCell className="border-r border-gray-300 text-center">
+                  {getParentEmail(user, users) || "N/A"}
                 </TableCell>
                 <TableCell className="border-r border-gray-300">
                   {user.banned ? "Banned" : "Active"}
@@ -456,3 +506,4 @@ export default function UsersTable() {
     </div>
   );
 }
+
