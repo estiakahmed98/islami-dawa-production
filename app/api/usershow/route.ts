@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
-
-const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest) {
   try {
@@ -34,7 +31,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const users = await prisma.users.findMany({
+    const users = await db.users.findMany({
       where: query,
       select: {
         id: true,
@@ -49,10 +46,17 @@ export async function GET(req: NextRequest) {
         phone: true,
         markaz: true,
         banned: true,
+        note: true, // Ensure note is included
       },
     });
 
-    return NextResponse.json({ users: users || [] }, { status: 200 });
+    // Ensure note is always null unless explicitly changed
+    const usersWithNullNote = users.map((user) => ({
+      ...user,
+      note: user.note ?? null,
+    }));
+
+    return NextResponse.json({ users: usersWithNullNote }, { status: 200 });
   } catch (error) {
     console.error("Error fetching users:", error);
     return NextResponse.json(
@@ -65,41 +69,46 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
+    const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { userId, banned } = await req.json();
+    const currentUser = await db.users.findUnique({
+      where: { id: session.user.id },
+    });
+    if (currentUser?.role !== "centraladmin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
 
-    if (typeof userId !== "string" || typeof banned !== "boolean") {
+    const { userId, updates, note } = await req.json();
+
+    if (!userId || typeof updates !== "object" || updates === null) {
       return NextResponse.json(
-        { message: "Invalid request body" },
+        { message: "Invalid request data" },
         { status: 400 }
       );
     }
 
+    const updateData: Record<string, any> = { ...updates };
+
+    // Only update note if explicitly provided
+    if (note !== undefined) {
+      updateData.note = note;
+    }
+
     const updatedUser = await db.users.update({
       where: { id: userId },
-      data: { banned },
+      data: updateData,
     });
 
-    return NextResponse.json(
-      { message: "User status updated successfully", user: updatedUser },
-      { status: 200 }
-    );
+    return NextResponse.json({ user: updatedUser }, { status: 200 });
   } catch (error) {
-    console.error("Error updating user status:", error);
+    console.error("Update error:", error);
     return NextResponse.json(
-      {
-        message: "Error updating user status",
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
+      { message: "Internal server error" },
       { status: 500 }
     );
   }

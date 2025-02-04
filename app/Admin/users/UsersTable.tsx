@@ -40,6 +40,7 @@ interface Filters {
 
 export default function UsersTable() {
   const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState<Filters>({
     role: "",
@@ -101,8 +102,55 @@ export default function UsersTable() {
     fetchUsers();
   }, [filters, isPending, sessionUser]);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUser || !sessionUser || sessionUser.role !== "centraladmin")
+      return;
+
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const updates = {
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      role: formData.get("role") as string,
+      division: formData.get("division") as string,
+      district: formData.get("district") as string,
+      upazila: formData.get("upazila") as string,
+      union: formData.get("union") as string,
+      phone: formData.get("phone") as string,
+      area: formData.get("area") as string,
+      markaz: formData.get("markaz") as string,
+    };
+    const note = formData.get("note") as string;
+
+    try {
+      const response = await fetch("/api/usershow", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: selectedUser.id, updates, note }),
+      });
+
+      if (!response.ok) throw new Error("Update failed");
+
+      // Refresh user list
+      const params = new URLSearchParams(
+        Object.fromEntries(
+          Object.entries(filters).map(([key, value]) => [key, value.toString()])
+        )
+      );
+      const res = await fetch(`/api/usershow?${params.toString()}`);
+      const data = await res.json();
+      setUsers(data.users);
+
+      setSelectedUser(null);
+      toast.success("User updated successfully");
+    } catch (error) {
+      console.error("Update error:", error);
+      toast.error("Failed to update user");
+    }
+  };
+
   const handleFilterChange = (name: keyof Filters, value: string) => {
-    setFilters((prev) => ({ ...prev, [name]: value }));
+    setFilters((prev) => ({ ...prev, [name]: value.toString() }));
   };
 
   // Toggle Ban Status
@@ -181,7 +229,6 @@ export default function UsersTable() {
           <option value="centraladmin">Central Admin</option>
           <option value="divisionadmin">Division Admin</option>
           <option value="districtadmin">District Admin</option>
-          <option value="areaadmin">Area Admin</option>
           <option value="upozilaadmin">Upazila Admin</option>
           <option value="daye">Da'ee</option>
         </select>
@@ -245,7 +292,10 @@ export default function UsersTable() {
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id}>
-                <TableCell className="border-r border-gray-300">
+                <TableCell
+                  className="border-r hover:text-green-700  cursor-pointer hover:underline"
+                  onClick={() => setSelectedUser(user)}
+                >
                   {user.name}
                 </TableCell>
                 <TableCell className="border-r border-gray-300">
@@ -295,6 +345,114 @@ export default function UsersTable() {
           </TableBody>
         </Table>
       </div>
+
+      {selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
+            <h2 className="text-xl font-bold mb-4">
+              Edit User: {selectedUser.name}
+            </h2>
+            <form onSubmit={handleSubmit}>
+              {/* Form Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Name */}
+                <div>
+                  <label>Name</label>
+                  <Input
+                    name="name"
+                    defaultValue={selectedUser.name}
+                    readOnly={sessionUser?.role !== "centraladmin"}
+                    required
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label>Email</label>
+                  <Input
+                    name="email"
+                    type="email"
+                    defaultValue={selectedUser.email}
+                    readOnly={sessionUser?.role !== "centraladmin"}
+                    required
+                  />
+                </div>
+
+                {/* Role Dropdown */}
+                <div>
+                  <label>Role</label>
+                  <select
+                    name="role"
+                    defaultValue={selectedUser.role}
+                    disabled={sessionUser?.role !== "centraladmin"}
+                    className="w-full p-2 border rounded-md"
+                    required
+                  >
+                    <option value="centraladmin">Central Admin</option>
+                    <option value="divisionadmin">Division Admin</option>
+                    <option value="districtadmin">District Admin</option>
+                    <option value="areaadmin">Area Admin</option>
+                    <option value="upozilaadmin">Upazila Admin</option>
+                    <option value="daye">Da'ee</option>
+                  </select>
+                </div>
+
+                {/* Location Fields */}
+                {["division", "district", "upazila", "union"].map((field) => (
+                  <div key={field}>
+                    <label>
+                      {field.charAt(0).toUpperCase() + field.slice(1)}
+                    </label>
+                    <Input
+                      name={field}
+                      defaultValue={selectedUser[field as keyof User] as string}
+                      readOnly={sessionUser?.role !== "centraladmin"}
+                      required
+                    />
+                  </div>
+                ))}
+
+                {/* Phone */}
+                <div>
+                  <label>Phone</label>
+                  <Input
+                    name="phone"
+                    defaultValue={selectedUser.phone}
+                    readOnly={sessionUser?.role !== "centraladmin"}
+                    required
+                  />
+                </div>
+
+                {/* Note Field (Central Admin Only) */}
+                {sessionUser?.role === "centraladmin" && (
+                  <div className="col-span-2">
+                    <label>Note (Reason for Changes)</label>
+                    <textarea
+                      name="note"
+                      required
+                      className="w-full p-2 border rounded-md"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Form Actions */}
+              <div className="mt-4 flex justify-end gap-2">
+                <Button
+                  type="button"
+                  onClick={() => setSelectedUser(null)}
+                  variant="outline"
+                >
+                  Cancel
+                </Button>
+                {sessionUser?.role === "centraladmin" && (
+                  <Button type="submit">Save Changes</Button>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

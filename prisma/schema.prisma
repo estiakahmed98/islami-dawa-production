@@ -26,6 +26,7 @@ model users {
   banned        Boolean?
   banReason     String?
   banExpires    Int?
+  note          String?
   sessions      sessions[]
   accounts      accounts[]
 }
