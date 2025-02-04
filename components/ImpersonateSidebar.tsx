@@ -14,6 +14,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import MuiTreeView from "./MuiTreeView";
 import { useSession } from "@/lib/auth-client";
+// import dynamic from "next/dynamic";
+// const MuiTreeView = dynamic(() => import("@/components/MuiTreeView"), {
+//   ssr: false,
+// });
 
 const ImpersonateSidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
