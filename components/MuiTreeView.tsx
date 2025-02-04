@@ -63,7 +63,7 @@ const MuiTreeView: React.FC = () => {
 
         const usersData: User[] = await response.json();
         setUsers(usersData);
-        const tree = buildTree(usersData, session?.user || null);
+        const tree = buildTree(usersData, session?.user ? { ...session.user, role: session.user.role || '' } : null);
         setTreeData(tree);
         setFilteredTree(tree);
       } catch (error) {
@@ -152,12 +152,17 @@ const MuiTreeView: React.FC = () => {
           );
         }
         break;
+
       default:
         return null;
     }
     return parentUser ? parentUser.email : null;
   };
 
+
+
+  
+  
   const handleItemClick = useCallback(
     (event: React.SyntheticEvent, nodeId: string) => {
       event.stopPropagation();
