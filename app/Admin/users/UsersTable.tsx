@@ -14,6 +14,7 @@ import {
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
+import markazList from "@/app/data/markazList";
 
 interface User {
   id: string;
@@ -39,12 +40,47 @@ interface Filters {
   union: string;
 }
 
+interface SelectFieldProps {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  options: Array<{ value: string; title: string }>;
+}
+
+const SelectField: React.FC<SelectFieldProps> = ({
+  label,
+  name,
+  value,
+  onChange,
+  options,
+}) => {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full p-2 border rounded-md"
+      >
+        <option value="">Select {label}</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.title}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
 export default function UsersTable() {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const [divisionId, setDivisionId] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
   const [districtId, setDistrictId] = useState<string>("");
   const [upazilaId, setUpazilaId] = useState<string>("");
   const [unionId, setUnionId] = useState<string>("");
@@ -514,10 +550,9 @@ export default function UsersTable() {
                     className="w-full p-2 border rounded-md"
                     required
                   >
-                    <option value="centraladmin">Central Admin</option>
                     <option value="divisionadmin">Division Admin</option>
                     <option value="districtadmin">District Admin</option>
-                    <option value="areaadmin">Area Admin</option>
+                    <option value="markaz">Markaz Admin (Not Avilable)</option>
                     <option value="upozilaadmin">Upazila Admin</option>
                     <option value="daye">Da'ee</option>
                   </select>
@@ -594,6 +629,23 @@ export default function UsersTable() {
                     defaultValue={selectedUser.phone}
                     readOnly={sessionUser?.role !== "centraladmin"}
                     required
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <SelectField
+                    label="Markaz"
+                    name="markaz"
+                    value={selectedUser.markaz}
+                    onChange={(e) => {
+                      setSelectedUser((prev) =>
+                        prev ? { ...prev, markaz: e.target.value } : null
+                      );
+                    }}
+                    options={markazList.map(({ name }) => ({
+                      value: name,
+                      title: name,
+                    }))}
                   />
                 </div>
 
