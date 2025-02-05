@@ -161,6 +161,9 @@ const MuiTreeView: React.FC = () => {
             (u) => u.role === "divisionadmin" && u.division === user.division
           );
         }
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
         break;
 
       default:
@@ -287,36 +290,7 @@ const MuiTreeView: React.FC = () => {
 
 export default MuiTreeView;
 
-
-
-
-
-
 // export default dynamic(() => Promise.resolve(MuiTreeView), { ssr: false });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // "use client";
 

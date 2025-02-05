@@ -177,6 +177,14 @@ const AdminDashboard: React.FC = () => {
         .map((user) => user.email);
       collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
     }
+    else if (loggedInUser.role === "centraladmin") {
+      const dayeEmails = users
+        .filter(
+          (user) => user.role === "daye"
+        )
+        .map((user) => user.email);
+      collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+    }
   
     if (selectedUser) {
       const selectedUserObj = users.find((u) => u.email === selectedUser);
@@ -222,6 +230,14 @@ const AdminDashboard: React.FC = () => {
           const dayeEmails = users
             .filter(
               (user) => user.role === "daye" && user.division === selectedUserObj.division
+            )
+            .map((user) => user.email);
+          selectedEmails = [...new Set([...selectedEmails, ...dayeEmails])];
+        }
+        else if (selectedUserObj.role === "centraladmin") {
+          const dayeEmails = users
+            .filter(
+              (user) => user.role === "daye"
             )
             .map((user) => user.email);
           selectedEmails = [...new Set([...selectedEmails, ...dayeEmails])];
