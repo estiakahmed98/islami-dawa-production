@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
 
 interface User {
   id: string;
@@ -43,6 +44,10 @@ export default function UsersTable() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [divisionId, setDivisionId] = useState<string>("");
+  const [districtId, setDistrictId] = useState<string>("");
+  const [upazilaId, setUpazilaId] = useState<string>("");
+  const [unionId, setUnionId] = useState<string>("");
   const [filters, setFilters] = useState<Filters>({
     role: "",
     name: "",
@@ -82,7 +87,12 @@ export default function UsersTable() {
   useEffect(() => {
     const filtered = users.filter((user) =>
       Object.entries(filters).every(
-        ([key, value]) => !value || (typeof user[key as keyof User] === 'string' && (user[key as keyof User] as string)?.toLowerCase().includes(value.toLowerCase()))
+        ([key, value]) =>
+          !value ||
+          (typeof user[key as keyof User] === "string" &&
+            (user[key as keyof User] as string)
+              ?.toLowerCase()
+              .includes(value.toLowerCase()))
       )
     );
 
@@ -95,14 +105,33 @@ export default function UsersTable() {
       return;
 
     const formData = new FormData(e.currentTarget as HTMLFormElement);
+
+    // Convert IDs to names
+    const divisionId = formData.get("divisionId") as string;
+    const districtId = formData.get("districtId") as string;
+    const upazilaId = formData.get("upazilaId") as string;
+    const unionId = formData.get("unionId") as string;
+
+    const division =
+      divisions.find((d) => d.value.toString() === divisionId)?.title || "";
+    const district =
+      districts[divisionId]?.find((d) => d.value.toString() === districtId)
+        ?.title || "";
+    const upazila =
+      upazilas[districtId]?.find((u) => u.value.toString() === upazilaId)
+        ?.title || "";
+    const union =
+      unions[upazilaId]?.find((u) => u.value.toString() === unionId)?.title ||
+      "";
+
     const updates = {
       name: formData.get("name") as string,
       email: formData.get("email") as string,
       role: formData.get("role") as string,
-      division: formData.get("division") as string,
-      district: formData.get("district") as string,
-      upazila: formData.get("upazila") as string,
-      union: formData.get("union") as string,
+      division,
+      district,
+      upazila,
+      union,
       phone: formData.get("phone") as string,
       area: formData.get("area") as string,
       markaz: formData.get("markaz") as string,
@@ -133,6 +162,55 @@ export default function UsersTable() {
     } catch (error) {
       console.error("Update error:", error);
       toast.error("Failed to update user");
+    }
+  };
+
+  // Initialize location IDs when user is selected
+  useEffect(() => {
+    if (selectedUser) {
+      // Find division ID
+      const division = divisions.find((d) => d.title === selectedUser.division);
+      setDivisionId(division?.value.toString() || "");
+
+      // Find district ID
+      const districtList = division ? districts[division.value] : [];
+      const district = districtList.find(
+        (d) => d.title === selectedUser.district
+      );
+      setDistrictId(district?.value.toString() || "");
+
+      // Find upazila ID
+      const upazilaList = district ? upazilas[district.value] : [];
+      const upazila = upazilaList.find((u) => u.title === selectedUser.upazila);
+      setUpazilaId(upazila?.value.toString() || "");
+
+      // Find union ID
+      const unionList = upazila ? unions[upazila.value] : [];
+      const union = unionList.find((u) => u.title === selectedUser.union);
+      setUnionId(union?.value.toString() || "");
+    }
+  }, [selectedUser]);
+
+  const handleLocationChange = (name: string, value: string) => {
+    switch (name) {
+      case "divisionId":
+        setDivisionId(value);
+        setDistrictId("");
+        setUpazilaId("");
+        setUnionId("");
+        break;
+      case "districtId":
+        setDistrictId(value);
+        setUpazilaId("");
+        setUnionId("");
+        break;
+      case "upazilaId":
+        setUpazilaId(value);
+        setUnionId("");
+        break;
+      case "unionId":
+        setUnionId(value);
+        break;
     }
   };
 
@@ -201,7 +279,6 @@ export default function UsersTable() {
     return <p className="text-center text-xl p-10">Authenticating...</p>;
   }
 
-
   const getParentEmail = (user: User, users: User[]): string | null => {
     let parentUser: User | undefined;
     switch (user.role) {
@@ -255,7 +332,6 @@ export default function UsersTable() {
     }
     return parentUser ? `${parentUser.name} (${parentUser.role})` : null;
   };
-
 
   return (
     <div className="w-full mx-auto p-2">
@@ -337,7 +413,7 @@ export default function UsersTable() {
 
           {/* Table Body */}
           <TableBody>
-          {filteredUsers.map((user) => (
+            {filteredUsers.map((user) => (
               <TableRow key={user.id} className="text-center">
                 <TableCell
                   className="border-r hover:text-green-700  cursor-pointer hover:underline"
@@ -453,12 +529,60 @@ export default function UsersTable() {
                     <label>
                       {field.charAt(0).toUpperCase() + field.slice(1)}
                     </label>
-                    <Input
-                      name={field}
-                      defaultValue={selectedUser[field as keyof User] as string}
-                      readOnly={sessionUser?.role !== "centraladmin"}
+                    <select
+                      name={`${field}Id`}
+                      value={
+                        field === "division"
+                          ? divisionId
+                          : field === "district"
+                            ? districtId
+                            : field === "upazila"
+                              ? upazilaId
+                              : unionId
+                      }
+                      onChange={(e) =>
+                        handleLocationChange(`${field}Id`, e.target.value)
+                      }
+                      disabled={
+                        sessionUser?.role !== "centraladmin" ||
+                        (field === "district" && !divisionId) ||
+                        (field === "upazila" && !districtId) ||
+                        (field === "union" && !upazilaId)
+                      }
+                      className="w-full p-2 border rounded-md"
                       required
-                    />
+                    >
+                      <option value="">
+                        Select {field.charAt(0).toUpperCase() + field.slice(1)}
+                      </option>
+                      {field === "division" &&
+                        divisions.map((d) => (
+                          <option key={d.value} value={d.value}>
+                            {d.title}
+                          </option>
+                        ))}
+                      {field === "district" &&
+                        divisionId &&
+                        districts[divisionId]?.map((d) => (
+                          <option key={d.value} value={d.value}>
+                            {d.title}
+                          </option>
+                        ))}
+                      {field === "upazila" &&
+                        districtId &&
+                        upazilas[districtId]?.map((u) => (
+                          <option key={u.value} value={u.value}>
+                            {u.title}
+                          </option>
+                        ))}
+                      {field === "union" &&
+                        upazilaId &&
+                        unions[upazilaId]?.map((u) => (
+                          <option key={u.value} value={u.value}>
+                            {u.title}
+                          </option>
+                        ))}
+                    </select>
                   </div>
                 ))}
 
@@ -506,4 +630,3 @@ export default function UsersTable() {
     </div>
   );
 }
-
