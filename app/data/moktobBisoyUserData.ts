@@ -800,6 +800,96 @@ export const userMoktobBisoyData = {
         "NewMuslim": 1000,
         "editorContent": "<p>Nice</p>"
       }
+    },
+    "dayedhaka@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 10,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 8,
+        "editorContent": "<p>Hello</p>"
+      }
+    },
+    "daye2dhaka@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 20,
+        "MoktobAdmit": 20,
+        "NewMoktob": 20,
+        "Sikkha": 20,
+        "TotalStudent": 20,
+        "TotalSikkha": 18,
+        "GurdianMeeting": 20,
+        "TotalAgeSikkha": 20,
+        "MadrasahAdmit": 20,
+        "NewMuslim": 20,
+        "editorContent": "<p>Hello Daye2</p>"
+      }
+    },
+    "daye3dhaka@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 30,
+        "MoktobAdmit": 30,
+        "NewMoktob": 30,
+        "Sikkha": 30,
+        "TotalStudent": 28,
+        "TotalSikkha": 30,
+        "GurdianMeeting": 30,
+        "TotalAgeSikkha": 30,
+        "MadrasahAdmit": 30,
+        "NewMuslim": 29,
+        "editorContent": ""
+      }
+    },
+    "daye4dhaka@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 40,
+        "MoktobAdmit": 40,
+        "NewMoktob": 40,
+        "Sikkha": 40,
+        "TotalStudent": 40,
+        "TotalSikkha": 40,
+        "GurdianMeeting": 40,
+        "TotalAgeSikkha": 39,
+        "MadrasahAdmit": 40,
+        "NewMuslim": 40,
+        "editorContent": ""
+      }
+    },
+    "daye5dhaka@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 50,
+        "MoktobAdmit": 50,
+        "NewMoktob": 50,
+        "Sikkha": 50,
+        "TotalStudent": 50,
+        "TotalSikkha": 50,
+        "GurdianMeeting": 50,
+        "TotalAgeSikkha": 50,
+        "MadrasahAdmit": 50,
+        "NewMuslim": 48,
+        "editorContent": ""
+      }
+    },
+    "aftab@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 50,
+        "MoktobAdmit": 50,
+        "NewMoktob": 50,
+        "Sikkha": 50,
+        "TotalStudent": 50,
+        "TotalSikkha": 49,
+        "GurdianMeeting": 50,
+        "TotalAgeSikkha": 50,
+        "MadrasahAdmit": 50,
+        "NewMuslim": 50,
+        "editorContent": "<p>Hello</p>"
+      }
     }
   }
 };

@@ -487,20 +487,22 @@ export default function UsersTable() {
                 <TableCell className="border-r border-gray-300">
                   {user.banned ? "Banned" : "Active"}
                 </TableCell>
-                <TableCell className="flex space-x-2">
-                  <Button
-                    onClick={() => toggleBan(user.id, user.banned)}
-                    className={user.banned ? "bg-red-500" : "bg-green-500"}
-                  >
-                    {user.banned ? "Unban" : "Ban"}
-                  </Button>
+                <TableCell>
+                  <div className="flex space-x-2 justify-center items-center">
+                    <Button
+                      onClick={() => toggleBan(user.id, user.banned)}
+                      className={user.banned ? "bg-red-500" : "bg-green-500"}
+                    >
+                      {user.banned ? "Unban" : "Ban"}
+                    </Button>
 
-                  <Button
-                    onClick={() => handleDelete(user.id)}
-                    className="bg-red-800"
-                  >
-                    Delete
-                  </Button>
+                    <Button
+                      onClick={() => handleDelete(user.id)}
+                      className="bg-red-800"
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

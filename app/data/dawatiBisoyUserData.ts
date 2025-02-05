@@ -216,6 +216,66 @@ export const userDawatiBisoyData = {
         "nonMuslimSaptahikGasht": 998,
         "editorContent": "<p>Niceeee</p>"
       }
+    },
+    "dayedhaka@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 10,
+        "murtadDawat": 10,
+        "alemderSatheyMojlish": 10,
+        "publicSatheyMojlish": 10,
+        "nonMuslimSaptahikGasht": 8,
+        "editorContent": "<p><br></p>"
+      }
+    },
+    "daye2dhaka@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 20,
+        "murtadDawat": 20,
+        "alemderSatheyMojlish": 20,
+        "publicSatheyMojlish": 20,
+        "nonMuslimSaptahikGasht": 19,
+        "editorContent": ""
+      }
+    },
+    "daye3dhaka@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 30,
+        "murtadDawat": 30,
+        "alemderSatheyMojlish": 30,
+        "publicSatheyMojlish": 30,
+        "nonMuslimSaptahikGasht": 28,
+        "editorContent": ""
+      }
+    },
+    "daye4dhaka@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 40,
+        "murtadDawat": 40,
+        "alemderSatheyMojlish": 40,
+        "publicSatheyMojlish": 40,
+        "nonMuslimSaptahikGasht": 38,
+        "editorContent": ""
+      }
+    },
+    "daye5dhaka@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 50,
+        "murtadDawat": 50,
+        "alemderSatheyMojlish": 50,
+        "publicSatheyMojlish": 50,
+        "nonMuslimSaptahikGasht": 50,
+        "editorContent": ""
+      }
+    },
+    "aftab@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 50,
+        "murtadDawat": 50,
+        "alemderSatheyMojlish": 50,
+        "publicSatheyMojlish": 50,
+        "nonMuslimSaptahikGasht": 48,
+        "editorContent": ""
+      }
     }
   }
 };
