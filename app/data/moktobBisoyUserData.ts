@@ -665,6 +665,141 @@ export const userMoktobBisoyData = {
         "NewMuslim": 9,
         "editorContent": ""
       }
+    },
+    "ctgdaye1@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 100,
+        "MoktobAdmit": 100,
+        "NewMoktob": 100,
+        "Sikkha": 100,
+        "TotalStudent": 100,
+        "TotalSikkha": 100,
+        "GurdianMeeting": 100,
+        "TotalAgeSikkha": 100,
+        "MadrasahAdmit": 100,
+        "NewMuslim": 99,
+        "editorContent": "<p>Very Good.</p>"
+      }
+    },
+    "ctgdaye2@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 50,
+        "MoktobAdmit": 50,
+        "NewMoktob": 50,
+        "Sikkha": 50,
+        "TotalStudent": 50,
+        "TotalSikkha": 50,
+        "GurdianMeeting": 48,
+        "TotalAgeSikkha": 50,
+        "MadrasahAdmit": 50,
+        "NewMuslim": 49,
+        "editorContent": "<p>Very Good.</p>"
+      }
+    },
+    "ctgdaye3@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 150,
+        "MoktobAdmit": 150,
+        "NewMoktob": 150,
+        "Sikkha": 150,
+        "TotalStudent": 150,
+        "TotalSikkha": 150,
+        "GurdianMeeting": 150,
+        "TotalAgeSikkha": 150,
+        "MadrasahAdmit": 150,
+        "NewMuslim": 148,
+        "editorContent": "<p>Very Good</p>"
+      }
+    },
+    "ctgdaye4@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 200,
+        "MoktobAdmit": 200,
+        "NewMoktob": 200,
+        "Sikkha": 200,
+        "TotalStudent": 200,
+        "TotalSikkha": 200,
+        "GurdianMeeting": 200,
+        "TotalAgeSikkha": 200,
+        "MadrasahAdmit": 200,
+        "NewMuslim": 200,
+        "editorContent": "<p>Very Good.</p>"
+      }
+    },
+    "ctgdaye5@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 500,
+        "MoktobAdmit": 500,
+        "NewMoktob": 500,
+        "Sikkha": 499,
+        "TotalStudent": 500,
+        "TotalSikkha": 500,
+        "GurdianMeeting": 500,
+        "TotalAgeSikkha": 500,
+        "MadrasahAdmit": 500,
+        "NewMuslim": 499,
+        "editorContent": "<p>Very Good.</p>"
+      }
+    },
+    "yasir@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 1000,
+        "MoktobAdmit": 1000,
+        "NewMoktob": 1000,
+        "Sikkha": 1000,
+        "TotalStudent": 1000,
+        "TotalSikkha": 999,
+        "GurdianMeeting": 1000,
+        "TotalAgeSikkha": 999,
+        "MadrasahAdmit": 1000,
+        "NewMuslim": 1000,
+        "editorContent": "<p>Very Good.&nbsp;</p>"
+      }
+    },
+    "saurav@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 1000,
+        "MoktobAdmit": 1000,
+        "NewMoktob": 1000,
+        "Sikkha": 1000,
+        "TotalStudent": 1000,
+        "TotalSikkha": 1000,
+        "GurdianMeeting": 1000,
+        "TotalAgeSikkha": 999,
+        "MadrasahAdmit": 1000,
+        "NewMuslim": 1000,
+        "editorContent": "<p>Hello..</p>"
+      }
+    },
+    "saifuddin@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 1000,
+        "MoktobAdmit": 1000,
+        "NewMoktob": 1000,
+        "Sikkha": 1000,
+        "TotalStudent": 1000,
+        "TotalSikkha": 1000,
+        "GurdianMeeting": 1000,
+        "TotalAgeSikkha": 1000,
+        "MadrasahAdmit": 1000,
+        "NewMuslim": 998,
+        "editorContent": "<p>Very Good.</p>"
+      }
+    },
+    "tamim@gmail.com": {
+      "2025-02-05": {
+        "MoktobChalu": 1000,
+        "MoktobAdmit": 1000,
+        "NewMoktob": 1000,
+        "Sikkha": 1000,
+        "TotalStudent": 1000,
+        "TotalSikkha": 1000,
+        "GurdianMeeting": 1000,
+        "TotalAgeSikkha": 1000,
+        "MadrasahAdmit": 1000,
+        "NewMuslim": 1000,
+        "editorContent": "<p>Nice</p>"
+      }
     }
   }
 };

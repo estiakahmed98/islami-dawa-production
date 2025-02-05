@@ -96,6 +96,18 @@ export const userDawatiMojlishData = {
         "mashwaraPoint": 12,
         "editorContent": "<p>Dawati Bisoy Motamot</p>"
       }
+    },
+    "ctgdaye1@gmail.com": {
+      "2025-02-05": {
+        "dawatterGuruttoMojlish": 100,
+        "mojlisheOnshogrohon": 100,
+        "prosikkhonKormoshalaAyojon": 100,
+        "prosikkhonOnshogrohon": 99,
+        "jummahAlochona": 100,
+        "dhormoSova": 100,
+        "mashwaraPoint": 98,
+        "editorContent": "<p>Nice.</p>"
+      }
     }
   }
 };

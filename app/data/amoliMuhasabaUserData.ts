@@ -523,6 +523,177 @@ export const userAmoliData = {
         "ayat": "10-20",
         "percentage": "100.00"
       }
+    },
+    "ctgdaye1@gmail.com": {
+      "2025-02-05": {
+        "tahajjud": 10,
+        "surah": "সুরা হিজর",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 4,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "না",
+        "ayamroja": "",
+        "hijbulBahar": "না",
+        "ayat": "10-20",
+        "percentage": "80.00"
+      }
+    },
+    "ctgdaye2@gmail.com": {
+      "2025-02-05": {
+        "tahajjud": 30,
+        "surah": "সুরা হিজর",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-20",
+        "percentage": "100.00"
+      }
+    },
+    "ctgdaye3@gmail.com": {
+      "2025-02-05": {
+        "tahajjud": 10,
+        "surah": "সুরা নাহল",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "আওয়াবীন",
+        "jamat": 3,
+        "sirat": "Hadis",
+        "Dua": "না",
+        "ilm": "Hadis",
+        "tasbih": "না",
+        "dayeeAmol": "না",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-20",
+        "percentage": "70.77"
+      }
+    },
+    "ctgdaye4@gmail.com": {
+      "2025-02-05": {
+        "tahajjud": 22,
+        "surah": "সুরা নাহল",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "না",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-20",
+        "percentage": "92.31"
+      }
+    },
+    "ctgdaye5@gmail.com": {
+      "2025-02-05": {
+        "tahajjud": 30,
+        "surah": "সুরা নাহল",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-20",
+        "percentage": "100.00"
+      }
+    },
+    "yasir@gmail.com": {
+      "2025-02-05": {
+        "tahajjud": 30,
+        "surah": "সুরা হিজর",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-20",
+        "percentage": "100.00"
+      }
+    },
+    "saurav@gmail.com": {
+      "2025-02-05": {
+        "tahajjud": 24,
+        "surah": "সুরা ইসরা",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-20",
+        "percentage": "100.00"
+      }
+    },
+    "saifuddin@gmail.com": {
+      "2025-02-05": {
+        "tahajjud": 24,
+        "surah": "সুরা নাহল",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-20",
+        "percentage": "100.00"
+      }
+    },
+    "tamim@gmail.com": {
+      "2025-02-05": {
+        "tahajjud": 20,
+        "surah": "সুরা ইউসুফ",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-20",
+        "percentage": "100.00"
+      }
     }
   }
 };

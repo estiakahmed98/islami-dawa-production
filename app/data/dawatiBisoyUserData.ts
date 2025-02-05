@@ -126,6 +126,96 @@ export const userDawatiBisoyData = {
         "nonMuslimSaptahikGasht": 50,
         "editorContent": "<p>Dawati Bisoy Motamot,,...</p>"
       }
+    },
+    "ctgdaye1@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 100,
+        "murtadDawat": 100,
+        "alemderSatheyMojlish": 100,
+        "publicSatheyMojlish": 100,
+        "nonMuslimSaptahikGasht": 100,
+        "editorContent": "<p>Very Good.</p>"
+      }
+    },
+    "ctgdaye2@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 50,
+        "murtadDawat": 50,
+        "alemderSatheyMojlish": 50,
+        "publicSatheyMojlish": 50,
+        "nonMuslimSaptahikGasht": 50,
+        "editorContent": "<p>Very Good,</p>"
+      }
+    },
+    "ctgdaye3@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 150,
+        "murtadDawat": 150,
+        "alemderSatheyMojlish": 150,
+        "publicSatheyMojlish": 150,
+        "nonMuslimSaptahikGasht": 149,
+        "editorContent": "<p>Nice.............</p>"
+      }
+    },
+    "ctgdaye4@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 200,
+        "murtadDawat": 200,
+        "alemderSatheyMojlish": 200,
+        "publicSatheyMojlish": 200,
+        "nonMuslimSaptahikGasht": 200,
+        "editorContent": "<p>Nice.</p>"
+      }
+    },
+    "ctgdaye5@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 500,
+        "murtadDawat": 500,
+        "alemderSatheyMojlish": 500,
+        "publicSatheyMojlish": 500,
+        "nonMuslimSaptahikGasht": 499,
+        "editorContent": "<p>Nice.</p>"
+      }
+    },
+    "yasir@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 1000,
+        "murtadDawat": 1000,
+        "alemderSatheyMojlish": 1000,
+        "publicSatheyMojlish": 1000,
+        "nonMuslimSaptahikGasht": 1000,
+        "editorContent": "<p>Hello&nbsp;</p>"
+      }
+    },
+    "saurav@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 1000,
+        "murtadDawat": 1000,
+        "alemderSatheyMojlish": 1000,
+        "publicSatheyMojlish": 1000,
+        "nonMuslimSaptahikGasht": 998,
+        "editorContent": "<p>Very Good Performance.</p>"
+      }
+    },
+    "saifuddin@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 1000,
+        "murtadDawat": 1000,
+        "alemderSatheyMojlish": 1000,
+        "publicSatheyMojlish": 1000,
+        "nonMuslimSaptahikGasht": 1000,
+        "editorContent": "<p>Very Good</p>"
+      }
+    },
+    "tamim@gmail.com": {
+      "2025-02-05": {
+        "nonMuslimDawat": 1000,
+        "murtadDawat": 1000,
+        "alemderSatheyMojlish": 1000,
+        "publicSatheyMojlish": 1000,
+        "nonMuslimSaptahikGasht": 998,
+        "editorContent": "<p>Niceeee</p>"
+      }
     }
   }
 };

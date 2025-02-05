@@ -294,42 +294,42 @@ export default function UsersTable() {
 
       <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-y-auto h-[65vh]">
         <Table className="w-full">
-          <TableHeader className="sticky top-0 z-10 bg-teal-100 shadow-md border-b-2">
-            <TableRow>
-              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+          <TableHeader className="sticky top-0 z-10 bg-[#155E75] shadow-md border-b-2">
+            <TableRow className="text-white">
+              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 Name
               </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 Email
               </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 Role
               </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 Division
               </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 District
               </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 Upazila
               </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 Union
               </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 Phone
               </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 Markaz
               </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 Admin Assigned
               </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 Status
               </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-gray-800 font-bold">
+              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 Actions
               </TableHead>
             </TableRow>
@@ -340,7 +340,7 @@ export default function UsersTable() {
           {filteredUsers.map((user) => (
               <TableRow key={user.id} className="text-center">
                 <TableCell
-                  className="border-r hover:text-green-700  cursor-pointer hover:underline"
+                  className="border-r font-semibold hover:text-green-600  cursor-pointer hover:underline"
                   onClick={() => setSelectedUser(user)}
                 >
                   {user.name}

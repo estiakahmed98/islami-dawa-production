@@ -57,73 +57,186 @@ const AdminDashboard: React.FC = () => {
     fetchUsers();
   }, []);
 
+  // useEffect(() => {
+  //   if (!users.length) return;
+
+  //   if (selectedUser) {
+  //     const selectedUserObj = users.find((u) => u.email === selectedUser);
+
+  //     if (selectedUserObj) {
+  //       let collectedEmails: string[] = [selectedUserObj.email];
+
+  //       // Function to collect all child emails recursively
+  //       const findChildEmails = (parentEmail: string) => {
+  //         users.forEach((user) => {
+  //           if (getParentEmail(user, users) === parentEmail) {
+  //             collectedEmails.push(user.email);
+  //             findChildEmails(user.email);
+  //           }
+  //         });
+  //       };
+
+  //       findChildEmails(selectedUserObj.email);
+
+  //       // Collect "daye" emails based on the role
+  //       if (selectedUserObj.role === "unionadmin") {
+  //         const dayeEmails = users
+  //           .filter(
+  //             (user) =>
+  //               user.role === "daye" && user.union === selectedUserObj.union
+  //           )
+  //           .map((user) => user.email);
+  //         collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+  //       } else if (selectedUserObj.role === "upozilaadmin") {
+  //         const dayeEmails = users
+  //           .filter(
+  //             (user) =>
+  //               user.role === "daye" && user.upazila === selectedUserObj.upazila
+  //           )
+  //           .map((user) => user.email);
+  //         collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+  //       } else if (selectedUserObj.role === "districtadmin") {
+  //         const dayeEmails = users
+  //           .filter(
+  //             (user) =>
+  //               user.role === "daye" &&
+  //               user.district === selectedUserObj.district
+  //           )
+  //           .map((user) => user.email);
+  //         collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+  //       } else if (selectedUserObj.role === "divisionadmin") {
+  //         const dayeEmails = users
+  //           .filter(
+  //             (user) =>
+  //               user.role === "daye" &&
+  //               user.division === selectedUserObj.division
+  //           )
+  //           .map((user) => user.email);
+  //         collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+  //       }
+
+  //       setEmailList(collectedEmails);
+  //     } else {
+  //       setEmailList([selectedUser]);
+  //     }
+  //   } else {
+  //     setEmailList([userEmail]); // Default to logged-in user
+  //   }
+  // }, [selectedUser, users, userEmail]);
+
+
+
+
   useEffect(() => {
     if (!users.length) return;
-
+  
+    const loggedInUser = users.find((u) => u.email === userEmail);
+    if (!loggedInUser) return;
+  
+    let collectedEmails: string[] = [loggedInUser.email];
+  
+    // Function to collect all child emails recursively
+    const findChildEmails = (parentEmail: string) => {
+      users.forEach((user) => {
+        if (getParentEmail(user, users) === parentEmail) {
+          collectedEmails.push(user.email);
+          findChildEmails(user.email);
+        }
+      });
+    };
+  
+    findChildEmails(loggedInUser.email);
+  
+    // Collect "daye" emails based on the logged-in user's role
+    if (loggedInUser.role === "unionadmin") {
+      const dayeEmails = users
+        .filter(
+          (user) => user.role === "daye" && user.union === loggedInUser.union
+        )
+        .map((user) => user.email);
+      collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+    } else if (loggedInUser.role === "upozilaadmin") {
+      const dayeEmails = users
+        .filter(
+          (user) => user.role === "daye" && user.upazila === loggedInUser.upazila
+        )
+        .map((user) => user.email);
+      collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+    } else if (loggedInUser.role === "districtadmin") {
+      const dayeEmails = users
+        .filter(
+          (user) => user.role === "daye" && user.district === loggedInUser.district
+        )
+        .map((user) => user.email);
+      collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+    } else if (loggedInUser.role === "divisionadmin") {
+      const dayeEmails = users
+        .filter(
+          (user) => user.role === "daye" && user.division === loggedInUser.division
+        )
+        .map((user) => user.email);
+      collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+    }
+  
     if (selectedUser) {
       const selectedUserObj = users.find((u) => u.email === selectedUser);
-
+  
       if (selectedUserObj) {
-        let collectedEmails: string[] = [selectedUserObj.email];
-
+        let selectedEmails: string[] = [selectedUserObj.email];
+  
         // Function to collect all child emails recursively
-        const findChildEmails = (parentEmail: string) => {
+        const findSelectedChildEmails = (parentEmail: string) => {
           users.forEach((user) => {
             if (getParentEmail(user, users) === parentEmail) {
-              collectedEmails.push(user.email);
-              findChildEmails(user.email);
+              selectedEmails.push(user.email);
+              findSelectedChildEmails(user.email);
             }
           });
         };
-
-        findChildEmails(selectedUserObj.email);
-
-        // Collect "daye" emails based on the role
+  
+        findSelectedChildEmails(selectedUserObj.email);
+  
+        // Collect "daye" emails based on the selected user's role
         if (selectedUserObj.role === "unionadmin") {
           const dayeEmails = users
             .filter(
-              (user) =>
-                user.role === "daye" && user.union === selectedUserObj.union
+              (user) => user.role === "daye" && user.union === selectedUserObj.union
             )
             .map((user) => user.email);
-          collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+          selectedEmails = [...new Set([...selectedEmails, ...dayeEmails])];
         } else if (selectedUserObj.role === "upozilaadmin") {
           const dayeEmails = users
             .filter(
-              (user) =>
-                user.role === "daye" && user.upazila === selectedUserObj.upazila
+              (user) => user.role === "daye" && user.upazila === selectedUserObj.upazila
             )
             .map((user) => user.email);
-          collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+          selectedEmails = [...new Set([...selectedEmails, ...dayeEmails])];
         } else if (selectedUserObj.role === "districtadmin") {
           const dayeEmails = users
             .filter(
-              (user) =>
-                user.role === "daye" &&
-                user.district === selectedUserObj.district
+              (user) => user.role === "daye" && user.district === selectedUserObj.district
             )
             .map((user) => user.email);
-          collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+          selectedEmails = [...new Set([...selectedEmails, ...dayeEmails])];
         } else if (selectedUserObj.role === "divisionadmin") {
           const dayeEmails = users
             .filter(
-              (user) =>
-                user.role === "daye" &&
-                user.division === selectedUserObj.division
+              (user) => user.role === "daye" && user.division === selectedUserObj.division
             )
             .map((user) => user.email);
-          collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
+          selectedEmails = [...new Set([...selectedEmails, ...dayeEmails])];
         }
-
-        setEmailList(collectedEmails);
+  
+        setEmailList(selectedEmails);
       } else {
         setEmailList([selectedUser]);
       }
     } else {
-      setEmailList([userEmail]); // Default to logged-in user
+      // Default to all users under the logged-in user
+      setEmailList(collectedEmails);
     }
   }, [selectedUser, users, userEmail]);
-
+  
   console.log("Email List:", emailList);
 
   return (
