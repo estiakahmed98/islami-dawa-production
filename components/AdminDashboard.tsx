@@ -41,6 +41,59 @@ const AdminDashboard: React.FC = () => {
   const [emailList, setEmailList] = useState<string[]>([userEmail]);
   const [users, setUsers] = useState<User[]>([]);
 
+  const [selectedMonth, setSelectedMonth] = useState<number>(
+    new Date().getMonth()
+  );
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  const [searchMonth, setSearchMonth] = useState<string>(""); // Stores the search input
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const filterChartAndTallyData = (userData: any) => {
+    if (!userData || !userData.records) return userData;
+
+    const filteredRecords = Object.keys(userData.records).reduce<
+      Record<string, any>
+    >((filtered, email) => {
+      const emailData = userData.records[email];
+
+      // Filter records by selected month and year
+      const filteredDates = Object.keys(emailData).reduce<Record<string, any>>(
+        (acc, date) => {
+          const [year, month] = date.split("-").map(Number);
+          if (year === selectedYear && month === selectedMonth + 1) {
+            acc[date] = emailData[date];
+          }
+          return acc;
+        },
+        {}
+      );
+
+      if (Object.keys(filteredDates).length > 0) {
+        filtered[email] = filteredDates;
+      }
+
+      return filtered;
+    }, {});
+
+    return { ...userData, records: filteredRecords };
+  };
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -57,84 +110,14 @@ const AdminDashboard: React.FC = () => {
     fetchUsers();
   }, []);
 
-  // useEffect(() => {
-  //   if (!users.length) return;
-
-  //   if (selectedUser) {
-  //     const selectedUserObj = users.find((u) => u.email === selectedUser);
-
-  //     if (selectedUserObj) {
-  //       let collectedEmails: string[] = [selectedUserObj.email];
-
-  //       // Function to collect all child emails recursively
-  //       const findChildEmails = (parentEmail: string) => {
-  //         users.forEach((user) => {
-  //           if (getParentEmail(user, users) === parentEmail) {
-  //             collectedEmails.push(user.email);
-  //             findChildEmails(user.email);
-  //           }
-  //         });
-  //       };
-
-  //       findChildEmails(selectedUserObj.email);
-
-  //       // Collect "daye" emails based on the role
-  //       if (selectedUserObj.role === "unionadmin") {
-  //         const dayeEmails = users
-  //           .filter(
-  //             (user) =>
-  //               user.role === "daye" && user.union === selectedUserObj.union
-  //           )
-  //           .map((user) => user.email);
-  //         collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
-  //       } else if (selectedUserObj.role === "upozilaadmin") {
-  //         const dayeEmails = users
-  //           .filter(
-  //             (user) =>
-  //               user.role === "daye" && user.upazila === selectedUserObj.upazila
-  //           )
-  //           .map((user) => user.email);
-  //         collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
-  //       } else if (selectedUserObj.role === "districtadmin") {
-  //         const dayeEmails = users
-  //           .filter(
-  //             (user) =>
-  //               user.role === "daye" &&
-  //               user.district === selectedUserObj.district
-  //           )
-  //           .map((user) => user.email);
-  //         collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
-  //       } else if (selectedUserObj.role === "divisionadmin") {
-  //         const dayeEmails = users
-  //           .filter(
-  //             (user) =>
-  //               user.role === "daye" &&
-  //               user.division === selectedUserObj.division
-  //           )
-  //           .map((user) => user.email);
-  //         collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
-  //       }
-
-  //       setEmailList(collectedEmails);
-  //     } else {
-  //       setEmailList([selectedUser]);
-  //     }
-  //   } else {
-  //     setEmailList([userEmail]); // Default to logged-in user
-  //   }
-  // }, [selectedUser, users, userEmail]);
-
-
-
-
   useEffect(() => {
     if (!users.length) return;
-  
+
     const loggedInUser = users.find((u) => u.email === userEmail);
     if (!loggedInUser) return;
-  
+
     let collectedEmails: string[] = [loggedInUser.email];
-  
+
     // Function to collect all child emails recursively
     const findChildEmails = (parentEmail: string) => {
       users.forEach((user) => {
@@ -144,9 +127,9 @@ const AdminDashboard: React.FC = () => {
         }
       });
     };
-  
+
     findChildEmails(loggedInUser.email);
-  
+
     // Collect "daye" emails based on the logged-in user's role
     if (loggedInUser.role === "unionadmin") {
       const dayeEmails = users
@@ -158,40 +141,40 @@ const AdminDashboard: React.FC = () => {
     } else if (loggedInUser.role === "upozilaadmin") {
       const dayeEmails = users
         .filter(
-          (user) => user.role === "daye" && user.upazila === loggedInUser.upazila
+          (user) =>
+            user.role === "daye" && user.upazila === loggedInUser.upazila
         )
         .map((user) => user.email);
       collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
     } else if (loggedInUser.role === "districtadmin") {
       const dayeEmails = users
         .filter(
-          (user) => user.role === "daye" && user.district === loggedInUser.district
+          (user) =>
+            user.role === "daye" && user.district === loggedInUser.district
         )
         .map((user) => user.email);
       collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
     } else if (loggedInUser.role === "divisionadmin") {
       const dayeEmails = users
         .filter(
-          (user) => user.role === "daye" && user.division === loggedInUser.division
+          (user) =>
+            user.role === "daye" && user.division === loggedInUser.division
         )
         .map((user) => user.email);
       collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
-    }
-    else if (loggedInUser.role === "centraladmin") {
+    } else if (loggedInUser.role === "centraladmin") {
       const dayeEmails = users
-        .filter(
-          (user) => user.role === "daye"
-        )
+        .filter((user) => user.role === "daye")
         .map((user) => user.email);
       collectedEmails = [...new Set([...collectedEmails, ...dayeEmails])];
     }
-  
+
     if (selectedUser) {
       const selectedUserObj = users.find((u) => u.email === selectedUser);
-  
+
       if (selectedUserObj) {
         let selectedEmails: string[] = [selectedUserObj.email];
-  
+
         // Function to collect all child emails recursively
         const findSelectedChildEmails = (parentEmail: string) => {
           users.forEach((user) => {
@@ -201,48 +184,51 @@ const AdminDashboard: React.FC = () => {
             }
           });
         };
-  
+
         findSelectedChildEmails(selectedUserObj.email);
-  
+
         // Collect "daye" emails based on the selected user's role
         if (selectedUserObj.role === "unionadmin") {
           const dayeEmails = users
             .filter(
-              (user) => user.role === "daye" && user.union === selectedUserObj.union
+              (user) =>
+                user.role === "daye" && user.union === selectedUserObj.union
             )
             .map((user) => user.email);
           selectedEmails = [...new Set([...selectedEmails, ...dayeEmails])];
         } else if (selectedUserObj.role === "upozilaadmin") {
           const dayeEmails = users
             .filter(
-              (user) => user.role === "daye" && user.upazila === selectedUserObj.upazila
+              (user) =>
+                user.role === "daye" && user.upazila === selectedUserObj.upazila
             )
             .map((user) => user.email);
           selectedEmails = [...new Set([...selectedEmails, ...dayeEmails])];
         } else if (selectedUserObj.role === "districtadmin") {
           const dayeEmails = users
             .filter(
-              (user) => user.role === "daye" && user.district === selectedUserObj.district
+              (user) =>
+                user.role === "daye" &&
+                user.district === selectedUserObj.district
             )
             .map((user) => user.email);
           selectedEmails = [...new Set([...selectedEmails, ...dayeEmails])];
         } else if (selectedUserObj.role === "divisionadmin") {
           const dayeEmails = users
             .filter(
-              (user) => user.role === "daye" && user.division === selectedUserObj.division
+              (user) =>
+                user.role === "daye" &&
+                user.division === selectedUserObj.division
             )
             .map((user) => user.email);
           selectedEmails = [...new Set([...selectedEmails, ...dayeEmails])];
-        }
-        else if (selectedUserObj.role === "centraladmin") {
+        } else if (selectedUserObj.role === "centraladmin") {
           const dayeEmails = users
-            .filter(
-              (user) => user.role === "daye"
-            )
+            .filter((user) => user.role === "daye")
             .map((user) => user.email);
           selectedEmails = [...new Set([...selectedEmails, ...dayeEmails])];
         }
-  
+
         setEmailList(selectedEmails);
       } else {
         setEmailList([selectedUser]);
@@ -252,60 +238,101 @@ const AdminDashboard: React.FC = () => {
       setEmailList(collectedEmails);
     }
   }, [selectedUser, users, userEmail]);
-  
+
   console.log("Email List:", emailList);
+
+  const filteredAmoliData = filterChartAndTallyData(userAmoliData);
+  console.log("Filtered Amoli Data:", filteredAmoliData);
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold">
+      <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl">
+        {/* Welcome Message */}
+        <h1 className="text-2xl font-bold text-gray-800">
           Welcome,{" "}
-          <span className="text-2xl text-emerald-600">
-            {session?.user?.name}
-          </span>
+          <span className="text-emerald-600">{session?.user?.name}</span>
         </h1>
+
+        {/* Filter Controls */}
+        <div className="flex flex-wrap items-center gap-4 mt-4 lg:mt-0">
+          {/* Month Selection Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+              className="w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
+            >
+              {months
+                .filter(
+                  (month) =>
+                    month.toLowerCase().includes(searchMonth.toLowerCase()) // 🔍 Filters months dynamically
+                )
+                .map((month, index) => (
+                  <option key={index} value={index}>
+                    {month}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* Year Selection Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className="w-24 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
+            >
+              {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-4">
         <div className="grow grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-8 pb-4 pt-2">
-          <AmoliChartAdmin data={userAmoliData.records} emailList={emailList} />
+          {/* Pass Filtered Data to Charts & Tally */}
+          <AmoliChartAdmin data={filteredAmoliData.records} emailList={emailList} />
           <TallyAdmin
-            userData={userMoktobBisoyData}
+            userData={filterChartAndTallyData(userMoktobBisoyData)}
             emails={emailList}
             title="Moktob Bisoy Tally"
           />
           <TallyAdmin
-            userData={userDawatiBisoyData}
+            userData={filterChartAndTallyData(userDawatiBisoyData)}
             emails={emailList}
             title="Dawati Bisoy Tally"
           />
           <TallyAdmin
-            userData={userDawatiMojlishData}
+            userData={filterChartAndTallyData(userDawatiMojlishData)}
             emails={emailList}
             title="Dawati Mojlish Tally"
           />
           <TallyAdmin
-            userData={userJamatBisoyData}
+            userData={filterChartAndTallyData(userJamatBisoyData)}
             emails={emailList}
             title="Jamat Bisoy Tally"
           />
           <TallyAdmin
-            userData={userDineFeraData}
+            userData={filterChartAndTallyData(userDineFeraData)}
             emails={emailList}
             title="Dine Fireche Tally"
           />
           <TallyAdmin
-            userData={userTalimBisoyData}
+            userData={filterChartAndTallyData(userTalimBisoyData)}
             emails={emailList}
             title="Talim Bisoy Tally"
           />
           <TallyAdmin
-            userData={userSoforBishoyData}
+            userData={filterChartAndTallyData(userSoforBishoyData)}
             emails={emailList}
             title="Sofor Bisoy Tally"
           />
           <TallyAdmin
-            userData={userDayeData}
+            userData={filterChartAndTallyData(userDayeData)}
             emails={emailList}
             title="Dayee Bisoy Tally"
           />
@@ -339,7 +366,10 @@ const AdminDashboard: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="dawatimojlish">
-            <AdminTable userData={userDawatiMojlishData} emailList={emailList} />
+            <AdminTable
+              userData={userDawatiMojlishData}
+              emailList={emailList}
+            />
           </TabsContent>
           <TabsContent value="jamat">
             <AdminTable userData={userJamatBisoyData} emailList={emailList} />
