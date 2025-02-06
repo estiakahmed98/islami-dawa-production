@@ -404,9 +404,9 @@ export default function UsersTable() {
           ))}
       </div>
 
-      <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-y-auto h-[65vh]">
+      <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-y-auto max-h-[calc(100vh-254px)]">
         <Table className="w-full">
-          <TableHeader className="sticky top-0 z-10 bg-[#155E75] shadow-md border-b-2">
+          <TableHeader className="sticky top-0 z-50 bg-[#155E75] shadow-md border-b-2">
             <TableRow className="text-white">
               <TableHead className="border-r text-center border-gray-300 text-white font-bold">
                 Name
@@ -451,10 +451,7 @@ export default function UsersTable() {
           <TableBody>
             {filteredUsers.map((user) => (
               <TableRow key={user.id} className="text-center">
-                <TableCell
-                  className="border-r font-semibold hover:text-green-600  cursor-pointer hover:underline"
-                  onClick={() => setSelectedUser(user)}
-                >
+                <TableCell className="border-r border-gray-300">
                   {user.name}
                 </TableCell>
                 <TableCell className="border-r border-gray-300">
@@ -494,6 +491,13 @@ export default function UsersTable() {
                       className={user.banned ? "bg-red-500" : "bg-green-500"}
                     >
                       {user.banned ? "Unban" : "Ban"}
+                    </Button>
+
+                    <Button
+                      className="border-r font-semibold  cursor-pointer hover:underline"
+                      onClick={() => setSelectedUser(user)}
+                    >
+                      Edit
                     </Button>
 
                     <Button
