@@ -15,6 +15,22 @@ import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
 import markazList from "@/app/data/markazList";
+import AdminTable from "@/components/AdminTable";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/TabButton";
+import { userMoktobBisoyData } from "@/app/data/moktobBisoyUserData";
+import { userDawatiBisoyData } from "@/app/data/dawatiBisoyUserData";
+import { userDawatiMojlishData } from "@/app/data/dawatiMojlishUserData";
+import { userJamatBisoyData } from "@/app/data/jamatBisoyUserData";
+import { userDineFeraData } from "@/app/data/dineferaUserData";
+import { userSoforBishoyData } from "@/app/data/soforBishoyUserData";
+import { userDayeData } from "@/app/data/dayiUserData";
+import { userTalimBisoyData } from "@/app/data/talimBisoyUserData";
+import { userAmoliData } from "@/app/data/amoliMuhasabaUserData";
 
 interface User {
   id: string;
@@ -95,6 +111,14 @@ export default function UsersTable() {
 
   const { data, isPending } = useSession();
   const sessionUser = data?.user;
+  const [emailList, setEmailList] = useState<string[]>([]);
+
+  console.log("Filtered Users Table List:", emailList);
+
+  useEffect(() => {
+    const extractedEmails = filteredUsers.map((user) => user.email);
+    setEmailList(extractedEmails);
+  }, [filteredUsers]);
 
   useEffect(() => {
     if (isPending) return;
@@ -371,319 +395,382 @@ export default function UsersTable() {
 
   return (
     <div className="w-full mx-auto p-2">
-      <h1 className="text-2xl font-bold text-center mb-6">Users Table</h1>
+      <div>
+        <h1 className="text-2xl font-bold text-center mb-6">Users Table</h1>
 
-      {/* Filters */}
-      <div className="mb-4 grid grid-cols-3 md:grid-cols-6 gap-4">
-        <select
-          value={filters.role}
-          onChange={(e) => handleFilterChange("role", e.target.value)}
-          className="border border-slate-500 rounded-md px-4 py-2"
-        >
-          <option value="">All Roles</option>
-          <option value="centraladmin">Central Admin</option>
-          <option value="divisionadmin">Division Admin</option>
-          <option value="districtadmin">District Admin</option>
-          <option value="upozilaadmin">Upazila Admin</option>
-          <option value="daye">Da'ee</option>
-        </select>
+        {/* Filters */}
+        <div className="mb-4 grid grid-cols-3 md:grid-cols-6 gap-4">
+          <select
+            value={filters.role}
+            onChange={(e) => handleFilterChange("role", e.target.value)}
+            className="border border-slate-500 rounded-md px-4 py-2"
+          >
+            <option value="">All Roles</option>
+            <option value="centraladmin">Central Admin</option>
+            <option value="divisionadmin">Division Admin</option>
+            <option value="districtadmin">District Admin</option>
+            <option value="upozilaadmin">Upazila Admin</option>
+            <option value="unionadmin">Union Admin</option>
+            <option value="daye">Da'ee</option>
+          </select>
 
-        {Object.keys(filters)
-          .filter((key) => key !== "role")
-          .map((key) => (
-            <Input
-              key={key}
-              type="text"
-              placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
-              className="border-slate-500"
-              value={filters[key as keyof Filters]}
-              onChange={(e) =>
-                handleFilterChange(key as keyof Filters, e.target.value)
-              }
-            />
-          ))}
-      </div>
-
-      <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-y-auto max-h-[calc(100vh-254px)]">
-        <Table className="w-full">
-          <TableHeader className="sticky top-0 z-50 bg-[#155E75] shadow-md border-b-2">
-            <TableRow className="text-white">
-              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                Name
-              </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                Email
-              </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                Role
-              </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                Division
-              </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                District
-              </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                Upazila
-              </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                Union
-              </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                Phone
-              </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                Markaz
-              </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                Admin Assigned
-              </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                Status
-              </TableHead>
-              <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-
-          {/* Table Body */}
-          <TableBody>
-            {filteredUsers.map((user) => (
-              <TableRow key={user.id} className="text-center">
-                <TableCell className="border-r border-gray-300">
-                  {user.name}
-                </TableCell>
-                <TableCell className="border-r border-gray-300">
-                  {user.email}
-                </TableCell>
-                <TableCell className="border-r border-gray-300">
-                  {user.role}
-                </TableCell>
-                <TableCell className="border-r border-gray-300">
-                  {user.division}
-                </TableCell>
-                <TableCell className="border-r border-gray-300">
-                  {user.district}
-                </TableCell>
-                <TableCell className="border-r border-gray-300">
-                  {user.upazila}
-                </TableCell>
-                <TableCell className="border-r border-gray-300">
-                  {user.union}
-                </TableCell>
-                <TableCell className="border-r border-gray-300">
-                  {user.phone}
-                </TableCell>
-                <TableCell className="border-r border-gray-300">
-                  {user.markaz}
-                </TableCell>
-                <TableCell className="border-r border-gray-300 text-center">
-                  {getParentEmail(user, users) || "N/A"}
-                </TableCell>
-                <TableCell className="border-r border-gray-300">
-                  {user.banned ? "Banned" : "Active"}
-                </TableCell>
-                <TableCell>
-                  <div className="flex space-x-2 justify-center items-center">
-                    <Button
-                      onClick={() => toggleBan(user.id, user.banned)}
-                      className={user.banned ? "bg-red-500" : "bg-green-500"}
-                    >
-                      {user.banned ? "Unban" : "Ban"}
-                    </Button>
-
-                    <Button
-                      className="border-r font-semibold  cursor-pointer hover:underline"
-                      onClick={() => setSelectedUser(user)}
-                    >
-                      Edit
-                    </Button>
-
-                    <Button
-                      onClick={() => handleDelete(user.id)}
-                      className="bg-red-800"
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+          {Object.keys(filters)
+            .filter((key) => key !== "role")
+            .map((key) => (
+              <Input
+                key={key}
+                type="text"
+                placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+                className="border-slate-500"
+                value={filters[key as keyof Filters]}
+                onChange={(e) =>
+                  handleFilterChange(key as keyof Filters, e.target.value)
+                }
+              />
             ))}
-          </TableBody>
-        </Table>
-      </div>
+        </div>
 
-      {selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white m-4 p-6 rounded-lg max-w-[80vh]">
-            <h2 className="text-xl font-bold mb-4">
-              Edit User: {selectedUser.name}
-            </h2>
-            <form onSubmit={handleSubmit}>
-              {/* Form Fields */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Name */}
-                <div>
-                  <label>Name</label>
-                  <Input
-                    name="name"
-                    defaultValue={selectedUser.name}
-                    readOnly={sessionUser?.role !== "centraladmin"}
-                    required
-                  />
-                </div>
+        <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-y-auto max-h-[calc(100vh-254px)]">
+          <Table className="w-full">
+            <TableHeader className="sticky top-0 z-50 bg-[#155E75] shadow-md border-b-2">
+              <TableRow className="text-white">
+                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                  Name
+                </TableHead>
+                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                  Email
+                </TableHead>
+                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                  Role
+                </TableHead>
+                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                  Division
+                </TableHead>
+                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                  District
+                </TableHead>
+                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                  Upazila
+                </TableHead>
+                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                  Union
+                </TableHead>
+                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                  Phone
+                </TableHead>
+                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                  Markaz
+                </TableHead>
+                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                  Admin Assigned
+                </TableHead>
+                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                  Status
+                </TableHead>
+                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
 
-                {/* Email */}
-                <div>
-                  <label>Email</label>
-                  <Input
-                    name="email"
-                    type="email"
-                    defaultValue={selectedUser.email}
-                    readOnly={sessionUser?.role !== "centraladmin"}
-                    required
-                  />
-                </div>
+            {/* Table Body */}
+            <TableBody>
+              {filteredUsers.map((user) => (
+                <TableRow key={user.id} className="text-center">
+                  <TableCell className="border-r font-semibold border-gray-300">
+                    {user.name}
+                  </TableCell>
+                  <TableCell className="border-r border-gray-300">
+                    {user.email}
+                  </TableCell>
+                  <TableCell className="border-r border-gray-300">
+                    {user.role}
+                  </TableCell>
+                  <TableCell className="border-r border-gray-300">
+                    {user.division}
+                  </TableCell>
+                  <TableCell className="border-r border-gray-300">
+                    {user.district}
+                  </TableCell>
+                  <TableCell className="border-r border-gray-300">
+                    {user.upazila}
+                  </TableCell>
+                  <TableCell className="border-r border-gray-300">
+                    {user.union}
+                  </TableCell>
+                  <TableCell className="border-r border-gray-300">
+                    {user.phone}
+                  </TableCell>
+                  <TableCell className="border-r border-gray-300">
+                    {user.markaz}
+                  </TableCell>
+                  <TableCell className="border-r border-gray-300 text-center">
+                    {getParentEmail(user, users) || "N/A"}
+                  </TableCell>
+                  <TableCell className="border-r border-gray-300">
+                    {user.banned ? "Banned" : "Active"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2 justify-center items-center">
+                      <Button
+                        onClick={() => toggleBan(user.id, user.banned)}
+                        className={user.banned ? "bg-red-500" : "bg-green-500"}
+                      >
+                        {user.banned ? "Unban" : "Ban"}
+                      </Button>
 
-                {/* Role Dropdown */}
-                <div>
-                  <label>Role</label>
-                  <select
-                    name="role"
-                    defaultValue={selectedUser.role}
-                    disabled={sessionUser?.role !== "centraladmin"}
-                    className="w-full p-2 border rounded-md"
-                    required
-                  >
-                    <option value="divisionadmin">Division Admin</option>
-                    <option value="districtadmin">District Admin</option>
-                    <option value="markaz">Markaz Admin (Not Avilable)</option>
-                    <option value="upozilaadmin">Upazila Admin</option>
-                    <option value="daye">Da'ee</option>
-                  </select>
-                </div>
+                      <Button
+                        className="border-r font-semibold  cursor-pointer hover:underline"
+                        onClick={() => setSelectedUser(user)}
+                      >
+                        Edit
+                      </Button>
 
-                {/* Location Fields */}
-                {["division", "district", "upazila", "union"].map((field) => (
-                  <div key={field}>
-                    <label>
-                      {field.charAt(0).toUpperCase() + field.slice(1)}
-                    </label>
-                    <select
-                      name={`${field}Id`}
-                      value={
-                        field === "division"
-                          ? divisionId
-                          : field === "district"
-                            ? districtId
-                            : field === "upazila"
-                              ? upazilaId
-                              : unionId
-                      }
-                      onChange={(e) =>
-                        handleLocationChange(`${field}Id`, e.target.value)
-                      }
-                      disabled={
-                        sessionUser?.role !== "centraladmin" ||
-                        (field === "district" && !divisionId) ||
-                        (field === "upazila" && !districtId) ||
-                        (field === "union" && !upazilaId)
-                      }
-                      className="w-full p-2 border rounded-md"
-                    >
-                      <option value="">
-                        Select {field.charAt(0).toUpperCase() + field.slice(1)}
-                      </option>
-                      {field === "division" &&
-                        divisions.map((d) => (
-                          <option key={d.value} value={d.value}>
-                            {d.title}
-                          </option>
-                        ))}
-                      {field === "district" &&
-                        divisionId &&
-                        districts[divisionId]?.map((d) => (
-                          <option key={d.value} value={d.value}>
-                            {d.title}
-                          </option>
-                        ))}
-                      {field === "upazila" &&
-                        districtId &&
-                        upazilas[districtId]?.map((u) => (
-                          <option key={u.value} value={u.value}>
-                            {u.title}
-                          </option>
-                        ))}
-                      {field === "union" &&
-                        upazilaId &&
-                        unions[upazilaId]?.map((u) => (
-                          <option key={u.value} value={u.value}>
-                            {u.title}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-                ))}
+                      <Button
+                        onClick={() => handleDelete(user.id)}
+                        className="bg-red-800"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
-                {/* Phone */}
-                <div>
-                  <label>Phone</label>
-                  <Input
-                    name="phone"
-                    defaultValue={selectedUser.phone}
-                    readOnly={sessionUser?.role !== "centraladmin"}
-                    required
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <SelectField
-                    label="Markaz"
-                    name="markaz"
-                    value={selectedUser.markaz}
-                    onChange={(e) => {
-                      setSelectedUser((prev) =>
-                        prev ? { ...prev, markaz: e.target.value } : null
-                      );
-                    }}
-                    options={markazList.map(({ name }) => ({
-                      value: name,
-                      title: name,
-                    }))}
-                  />
-                </div>
-
-                {/* Note Field (Central Admin Only) */}
-                {sessionUser?.role === "centraladmin" && (
-                  <div className="col-span-2">
-                    <label>Note (Reason for Changes)</label>
-                    <textarea
-                      name="note"
+        {selectedUser && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white m-4 p-6 rounded-lg max-w-[80vh]">
+              <h2 className="text-xl font-bold mb-4">
+                Edit User: {selectedUser.name}
+              </h2>
+              <form onSubmit={handleSubmit}>
+                {/* Form Fields */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Name */}
+                  <div>
+                    <label>Name</label>
+                    <Input
+                      name="name"
+                      defaultValue={selectedUser.name}
+                      readOnly={sessionUser?.role !== "centraladmin"}
                       required
-                      className="w-full p-2 border rounded-md"
                     />
                   </div>
-                )}
-              </div>
 
-              {/* Form Actions */}
-              <div className="mt-4 flex justify-end gap-2">
-                <Button
-                  type="button"
-                  onClick={() => setSelectedUser(null)}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-                {sessionUser?.role === "centraladmin" && (
-                  <Button type="submit">Save Changes</Button>
-                )}
-              </div>
-            </form>
+                  {/* Email */}
+                  <div>
+                    <label>Email</label>
+                    <Input
+                      name="email"
+                      type="email"
+                      defaultValue={selectedUser.email}
+                      readOnly={sessionUser?.role !== "centraladmin"}
+                      required
+                    />
+                  </div>
+
+                  {/* Role Dropdown */}
+                  <div>
+                    <label>Role</label>
+                    <select
+                      name="role"
+                      defaultValue={selectedUser.role}
+                      disabled={sessionUser?.role !== "centraladmin"}
+                      className="w-full p-2 border rounded-md"
+                      required
+                    >
+                      <option value="divisionadmin">Division Admin</option>
+                      <option value="districtadmin">District Admin</option>
+                      <option value="markaz">
+                        Markaz Admin (Not Avilable)
+                      </option>
+                      <option value="upozilaadmin">Upazila Admin</option>
+                      <option value="daye">Da'ee</option>
+                    </select>
+                  </div>
+
+                  {/* Location Fields */}
+                  {["division", "district", "upazila", "union"].map((field) => (
+                    <div key={field}>
+                      <label>
+                        {field.charAt(0).toUpperCase() + field.slice(1)}
+                      </label>
+                      <select
+                        name={`${field}Id`}
+                        value={
+                          field === "division"
+                            ? divisionId
+                            : field === "district"
+                              ? districtId
+                              : field === "upazila"
+                                ? upazilaId
+                                : unionId
+                        }
+                        onChange={(e) =>
+                          handleLocationChange(`${field}Id`, e.target.value)
+                        }
+                        disabled={
+                          sessionUser?.role !== "centraladmin" ||
+                          (field === "district" && !divisionId) ||
+                          (field === "upazila" && !districtId) ||
+                          (field === "union" && !upazilaId)
+                        }
+                        className="w-full p-2 border rounded-md"
+                      >
+                        <option value="">
+                          Select{" "}
+                          {field.charAt(0).toUpperCase() + field.slice(1)}
+                        </option>
+                        {field === "division" &&
+                          divisions.map((d) => (
+                            <option key={d.value} value={d.value}>
+                              {d.title}
+                            </option>
+                          ))}
+                        {field === "district" &&
+                          divisionId &&
+                          districts[divisionId]?.map((d) => (
+                            <option key={d.value} value={d.value}>
+                              {d.title}
+                            </option>
+                          ))}
+                        {field === "upazila" &&
+                          districtId &&
+                          upazilas[districtId]?.map((u) => (
+                            <option key={u.value} value={u.value}>
+                              {u.title}
+                            </option>
+                          ))}
+                        {field === "union" &&
+                          upazilaId &&
+                          unions[upazilaId]?.map((u) => (
+                            <option key={u.value} value={u.value}>
+                              {u.title}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  ))}
+
+                  {/* Phone */}
+                  <div>
+                    <label>Phone</label>
+                    <Input
+                      name="phone"
+                      defaultValue={selectedUser.phone}
+                      readOnly={sessionUser?.role !== "centraladmin"}
+                      required
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <SelectField
+                      label="Markaz"
+                      name="markaz"
+                      value={selectedUser.markaz}
+                      onChange={(e) => {
+                        setSelectedUser((prev) =>
+                          prev ? { ...prev, markaz: e.target.value } : null
+                        );
+                      }}
+                      options={markazList.map(({ name }) => ({
+                        value: name,
+                        title: name,
+                      }))}
+                    />
+                  </div>
+
+                  {/* Note Field (Central Admin Only) */}
+                  {sessionUser?.role === "centraladmin" && (
+                    <div className="col-span-2">
+                      <label>Note (Reason for Changes)</label>
+                      <textarea
+                        name="note"
+                        required
+                        className="w-full p-2 border rounded-md"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Form Actions */}
+                <div className="mt-4 flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => setSelectedUser(null)}
+                    variant="outline"
+                  >
+                    Cancel
+                  </Button>
+                  {sessionUser?.role === "centraladmin" && (
+                    <Button type="submit">Save Changes</Button>
+                  )}
+                </div>
+              </form>
+            </div>
           </div>
+        )}
+      </div>
+      <div className="mt-4">
+        <h3 className="text-center text-2xl font-semibold">
+          Aggeregation Users Table
+        </h3>
+        <div className="border border-[#155E75] p-6 mt-10 rounded-xl overflow-y-auto">
+          <Tabs defaultValue="moktob" className="w-full p-4">
+            <TabsList className="mx-10 my-6">
+              <TabsTrigger value="moktob">Moktob Bisoy</TabsTrigger>
+              <TabsTrigger value="talim">Talim Bisoy</TabsTrigger>
+              <TabsTrigger value="daye">Daye Bisoy</TabsTrigger>
+              <TabsTrigger value="dawati">Dawati Bisoy</TabsTrigger>
+              <TabsTrigger value="dawatimojlish">Dawati Mojlish</TabsTrigger>
+              <TabsTrigger value="jamat">Jamat Bisoy</TabsTrigger>
+              <TabsTrigger value="dinefera">Dine Fire Asa</TabsTrigger>
+              <TabsTrigger value="sofor">Sofor Bisoy</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="moktob">
+              <AdminTable
+                userData={userMoktobBisoyData}
+                emailList={emailList}
+              />
+            </TabsContent>
+            <TabsContent value="talim">
+              <AdminTable userData={userTalimBisoyData} emailList={emailList} />
+            </TabsContent>
+            <TabsContent value="daye">
+              <AdminTable userData={userDayeData} emailList={emailList} />
+            </TabsContent>
+            <TabsContent value="dawati">
+              <AdminTable
+                userData={userDawatiBisoyData}
+                emailList={emailList}
+              />
+            </TabsContent>
+
+            <TabsContent value="dawatimojlish">
+              <AdminTable
+                userData={userDawatiMojlishData}
+                emailList={emailList}
+              />
+            </TabsContent>
+            <TabsContent value="jamat">
+              <AdminTable userData={userJamatBisoyData} emailList={emailList} />
+            </TabsContent>
+            <TabsContent value="dinefera">
+              <AdminTable userData={userDineFeraData} emailList={emailList} />
+            </TabsContent>
+            <TabsContent value="sofor">
+              <AdminTable
+                userData={userSoforBishoyData}
+                emailList={emailList}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
-      )}
+      </div>
     </div>
   );
 }
