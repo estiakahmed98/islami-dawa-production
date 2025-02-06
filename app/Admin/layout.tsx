@@ -18,17 +18,17 @@ const AdmindLayout = async ({ children }: { children: React.ReactNode }) => {
 
   return (
     // <TreeProvider>
-      <SidebarProvider>
-        <div className="flex fixed size-full">
-          <ImpersonateSidebar />
-          <div className="w-full overflow-hidden">
-            <Header />
-            <main className="h-[calc(100vh-80px)] overflow-y-auto p-6">
-              {children}
-            </main>
-          </div>
+    <SidebarProvider>
+      <div className="flex fixed size-full">
+        <ImpersonateSidebar />
+        <div className="w-full overflow-hidden">
+          <Header />
+          <main className="h-[calc(100vh-80px)] overflow-y-auto p-6">
+            {children}
+          </main>
         </div>
-      </SidebarProvider>
+      </div>
+    </SidebarProvider>
     // </TreeProvider>
   );
 };
