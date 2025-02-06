@@ -3,6 +3,9 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
 
+/**
+ * GET: Fetch users with optional filters
+ */
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
@@ -46,17 +49,11 @@ export async function GET(req: NextRequest) {
         phone: true,
         markaz: true,
         banned: true,
-        note: true, // Ensure note is included
+        note: true,
       },
     });
 
-    // Ensure note is always null unless explicitly changed
-    const usersWithNullNote = users.map((user) => ({
-      ...user,
-      note: user.note ?? null,
-    }));
-
-    return NextResponse.json({ users: usersWithNullNote }, { status: 200 });
+    return NextResponse.json({ users }, { status: 200 });
   } catch (error) {
     console.error("Error fetching users:", error);
     return NextResponse.json(
@@ -69,6 +66,9 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/**
+ * PUT: Update user details (Central Admin only)
+ */
 export async function PUT(req: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -84,7 +84,6 @@ export async function PUT(req: NextRequest) {
     }
 
     const { userId, updates, note } = await req.json();
-
     if (!userId || typeof updates !== "object" || updates === null) {
       return NextResponse.json(
         { message: "Invalid request data" },
@@ -92,16 +91,9 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const updateData: Record<string, any> = { ...updates };
-
-    // Only update note if explicitly provided
-    if (note !== undefined) {
-      updateData.note = note;
-    }
-
     const updatedUser = await db.users.update({
       where: { id: userId },
-      data: updateData,
+      data: { ...updates, note },
     });
 
     return NextResponse.json({ user: updatedUser }, { status: 200 });
@@ -114,18 +106,17 @@ export async function PUT(req: NextRequest) {
   }
 }
 
+/**
+ * DELETE: Remove a user (Central Admin only)
+ */
 export async function DELETE(req: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
+    const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const { userId } = await req.json();
-
     if (typeof userId !== "string") {
       return NextResponse.json(
         { message: "Invalid request body: userId is required" },
@@ -133,14 +124,11 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // Check if user exists before deletion
     const user = await db.users.findUnique({ where: { id: userId } });
-
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    // Delete user
     await db.users.delete({ where: { id: userId } });
 
     return NextResponse.json(
@@ -154,6 +142,52 @@ export async function DELETE(req: NextRequest) {
         message: "Error deleting user",
         error: error instanceof Error ? error.message : "Unknown error",
       },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * POST: Ban/Unban a user (Central Admin only)
+ */
+export async function POST(req: NextRequest) {
+  try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const currentUser = await db.users.findUnique({
+      where: { id: session.user.id },
+    });
+    if (currentUser?.role !== "centraladmin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
+    const { userId, banned } = await req.json();
+    if (!userId || typeof banned !== "boolean") {
+      return NextResponse.json(
+        { message: "Invalid request data" },
+        { status: 400 }
+      );
+    }
+
+    const updatedUser = await db.users.update({
+      where: { id: userId },
+      data: { banned },
+    });
+
+    return NextResponse.json(
+      {
+        message: `User ${banned ? "banned" : "unbanned"} successfully!`,
+        user: updatedUser,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Ban/unban error:", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
       { status: 500 }
     );
   }
