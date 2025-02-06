@@ -149,11 +149,11 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     const html2pdfModule = await import("html2pdf.js");
     return html2pdfModule.default || html2pdfModule; // Ensure correct function access
   };
-  
+
   const convertToPDF = async () => {
     const monthName = months[selectedMonth];
     const year = selectedYear;
-  
+
     if (
       !monthName ||
       !year ||
@@ -164,11 +164,11 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       console.error("Invalid data for PDF generation");
       return;
     }
-  
+
     // Filter out unwanted rows
     const filteredData = transposedData.filter((row) => row.label !== "মতামত");
     const filteredData2 = filteredData.filter((row) => row.label !== "Edit");
-  
+
     // Create table structure
     let tableHTML = `
         <html>
@@ -235,19 +235,19 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           </body>
         </html>
       `;
-  
+
     const element = document.createElement("div");
     element.innerHTML = tableHTML;
-  
+
     try {
       const html2pdf = await getHtml2Pdf(); // Load library dynamically
       console.log("html2pdf Loaded:", html2pdf); // Debugging
-  
+
       if (typeof html2pdf !== "function") {
         console.error("html2pdf is not a function, received:", html2pdf);
         return;
       }
-  
+
       html2pdf()
         .set({
           margin: 10,
@@ -264,7 +264,11 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           for (let i = 1; i <= totalPages; i++) {
             pdf.setPage(i);
             pdf.setFontSize(10);
-            pdf.text(`Page ${i} of ${totalPages}`, pdf.internal.pageSize.getWidth() - 20, pdf.internal.pageSize.getHeight() - 10);
+            pdf.text(
+              `Page ${i} of ${totalPages}`,
+              pdf.internal.pageSize.getWidth() - 20,
+              pdf.internal.pageSize.getHeight() - 10
+            );
           }
         })
         .save();
@@ -272,7 +276,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       console.error("Error generating PDF:", error);
     }
   };
-  
 
   const handleSaveEdit = (day: number, updatedData: any) => {
     const newData = [...transposedData];
@@ -287,48 +290,53 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
 
   return (
     <div>
-      <div className="grid lg:flex lg:justify-between py-4 space-y-2">
-        <div className="flex gap-4">
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-            className="border px-4 py-2 rounded"
-          >
-            {months.map((month, index) => (
-              <option key={index} value={index}>
-                {month}
-              </option>
-            ))}
-          </select>
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="border px-4 py-2 rounded w-24"
-            style={{
-              maxHeight: "150px",
-              overflowY: "auto",
-            }}
-          >
-            {Array.from({ length: 101 }, (_, i) => 2020 + i).map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
+      <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl">
+        {/* Dropdown Selectors */}
+        <div className="flex items-center gap-4">
+          {/* Month Selection Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+              className="w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
+            >
+              {months.map((month, index) => (
+                <option key={index} value={index}>
+                  {month}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Year Selection Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className="w-24 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
+            >
+              {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="flex gap-4">
+        {/* Action Buttons */}
+        <div className="flex gap-4 mt-4 lg:mt-0">
           <button
-            className="text-xs lg:text-lg p-2 text-white border-2 bg-teal-700 rounded-md"
+            className="flex items-center gap-2 text-sm lg:text-lg px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-md transition duration-300"
             onClick={convertToCSV}
           >
-            Download CSV
+            📥 Download CSV
           </button>
           <button
-            className="text-xs lg:text-lg p-2 text-white border-2 bg-teal-700 rounded-md"
+            className="flex items-center gap-2 text-sm lg:text-lg px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition duration-300"
             onClick={convertToPDF}
           >
-            Download PDF
+            📄 Download PDF
           </button>
         </div>
       </div>
