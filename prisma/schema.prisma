@@ -11,14 +11,14 @@ model users {
   id            String     @id @default(cuid())
   email         String     @unique
   name          String?
-  role          String?
-  division      String
-  district      String
+  role          String
+  division      String?
+  district      String?
   area          String?
-  upazila       String
-  union         String
+  upazila       String?
+  union         String?
   markaz        String?
-  phone         String
+  phone         String?
   emailVerified Boolean
   image         String?
   createdAt     DateTime
