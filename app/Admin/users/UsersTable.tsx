@@ -115,17 +115,9 @@ export default function UsersTable() {
 
   console.log("Filtered Users Table List:", emailList);
 
+  // ✅ 1st useEffect: Fetch users (Runs only when session changes)
   useEffect(() => {
-    const extractedEmails = filteredUsers.map((user) => user.email);
-    setEmailList(extractedEmails);
-  }, [filteredUsers]);
-
-  useEffect(() => {
-    if (isPending) return;
-    if (!sessionUser) {
-      console.log("User not authenticated");
-      return;
-    }
+    if (isPending || !sessionUser) return;
 
     const fetchUsers = async () => {
       setLoading(true);
@@ -142,8 +134,9 @@ export default function UsersTable() {
     };
 
     fetchUsers();
-  }, [isPending, sessionUser]);
+  }, [isPending, sessionUser]); // Runs only when authentication status changes
 
+  // ✅ 2nd useEffect: Filter users & update email list (Runs when filters/users change)
   useEffect(() => {
     const filtered = users.filter((user) =>
       Object.entries(filters).every(
@@ -157,7 +150,8 @@ export default function UsersTable() {
     );
 
     setFilteredUsers(filtered);
-  }, [filters, users]);
+    setEmailList(filtered.map((user) => user.email)); // Extract filtered emails
+  }, [filters, users]); // Runs when users or filters change
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -743,11 +737,11 @@ export default function UsersTable() {
           </div>
         )}
       </div>
-      <div className="mt-4">
+      <div className="mt-8">
         <h3 className="text-center text-2xl font-semibold">
           Aggeregation Users Table
         </h3>
-        <div className="border border-[#155E75] p-6 mt-10 rounded-xl overflow-y-auto">
+        <div className="border border-[#155E75] p-6 mt-4 rounded-xl overflow-y-auto">
           <Tabs defaultValue="moktob" className="w-full p-4">
             <TabsList className="mx-10 my-6">
               <TabsTrigger value="moktob">Moktob Bisoy</TabsTrigger>
