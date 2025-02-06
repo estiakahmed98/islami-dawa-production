@@ -349,16 +349,43 @@ export default function UsersTable() {
         parentUser = users.find(
           (u) => u.role === "divisionadmin" && u.division === user.division
         );
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
         break;
       case "upozilaadmin":
         parentUser = users.find(
           (u) => u.role === "districtadmin" && u.district === user.district
         );
+        // Step 4: If no districtadmin is found, find a divisiontadmin in the same division
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "divisionadmin" && u.division === user.division
+          );
+        }
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
         break;
       case "unionadmin":
         parentUser = users.find(
           (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
         );
+        // Step 3: If no unionadmin is found, find a districtadmin in the same district
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "districtadmin" && u.district === user.district
+          );
+        }
+        // Step 4: If no districtadmin is found, find a divisiontadmin in the same division
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "divisionadmin" && u.division === user.division
+          );
+        }
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
         break;
       case "daye":
         // Step 1: Try to find a unionadmin in the same union
@@ -385,6 +412,9 @@ export default function UsersTable() {
             (u) => u.role === "divisionadmin" && u.division === user.division
           );
         }
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
         break;
 
       default:
@@ -392,7 +422,6 @@ export default function UsersTable() {
     }
     return parentUser ? `${parentUser.name} (${parentUser.role})` : null;
   };
-
   return (
     <div className="w-full mx-auto p-2">
       <div>
