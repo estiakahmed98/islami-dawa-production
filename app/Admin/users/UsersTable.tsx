@@ -587,7 +587,6 @@ export default function UsersTable() {
                         (field === "union" && !upazilaId)
                       }
                       className="w-full p-2 border rounded-md"
-                      required
                     >
                       <option value="">
                         Select {field.charAt(0).toUpperCase() + field.slice(1)}
