@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import AmoliChart from "@/components/AmoliCharts";
 import dynamic from "next/dynamic";
 import { userAmoliData } from "@/app/data/amoliMuhasabaUserData";
@@ -33,64 +33,165 @@ const Dashboard: React.FC<TallyProps> = () => {
   const userEmail = session?.user?.email || "";
   // console.log("Session", session);
 
+  const [selectedMonth, setSelectedMonth] = useState<number>(
+    new Date().getMonth()
+  );
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  const [searchMonth, setSearchMonth] = useState<string>(""); // Stores the search input
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const filterChartAndTallyData = (userData: any) => {
+    if (!userData || !userData.records) return userData;
+
+    const filteredRecords = Object.keys(userData.records).reduce<
+      Record<string, any>
+    >((filtered, email) => {
+      const emailData = userData.records[email];
+
+      // Filter records by selected month and year
+      const filteredDates = Object.keys(emailData).reduce<Record<string, any>>(
+        (acc, date) => {
+          const [year, month] = date.split("-").map(Number);
+          if (year === selectedYear && month === selectedMonth + 1) {
+            acc[date] = emailData[date];
+          }
+          return acc;
+        },
+        {}
+      );
+
+      if (Object.keys(filteredDates).length > 0) {
+        filtered[email] = filteredDates;
+      }
+
+      return filtered;
+    }, {});
+
+    return { ...userData, records: filteredRecords };
+  };
+
+   const filteredAmoliData = filterChartAndTallyData(userAmoliData);
+
   return (
     <div className="space-y-4">
-      <div>
+      {/* <div>
         <h1 className="text-xl font-semibold">
           Welcome,{"  "}
           <span className="text-2xl text-emerald-600">
             {session?.user?.name}
           </span>
         </h1>
+      </div> */}
+
+      <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl">
+        {/* Welcome Message */}
+        <h1 className="text-2xl font-bold text-gray-800">
+          Welcome,{" "}
+          <span className="text-emerald-600">{session?.user?.name}</span>
+        </h1>
+
+        {/* Filter Controls */}
+        <div className="flex flex-wrap items-center gap-4 mt-4 lg:mt-0">
+          {/* Month Selection Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+              className="w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
+            >
+              {months
+                .filter(
+                  (month) =>
+                    month.toLowerCase().includes(searchMonth.toLowerCase()) // 🔍 Filters months dynamically
+                )
+                .map((month, index) => (
+                  <option key={index} value={index}>
+                    {month}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* Year Selection Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className="w-24 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
+            >
+              {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       <div className="grid xl:grid-cols-3 p-2 lg:p-6 gap-6 overflow-y-auto border border-[#155E75] rounded-xl">
-        <AmoliChart data={userAmoliData.records} userEmail={userEmail} />
+        <AmoliChart data={filteredAmoliData.records} userEmail={userEmail} />
 
         <TallyAdmin
-          userData={userMoktobBisoyData}
+          userData={filterChartAndTallyData(userMoktobBisoyData)}
           emails={userEmail}
           title="Moktob Bisoy Tally"
         />
 
         <TallyAdmin
-          userData={userDawatiBisoyData}
+          userData={filterChartAndTallyData(userDawatiBisoyData)}
           emails={userEmail}
           title="Dawati Bisoy Tally"
         />
 
         <TallyAdmin
-          userData={userDawatiMojlishData}
+          userData={filterChartAndTallyData(userDawatiMojlishData)}
           emails={userEmail}
           title="Dawati Mojlish Tally"
         />
 
         <TallyAdmin
-          userData={userJamatBisoyData}
+          userData={filterChartAndTallyData(userJamatBisoyData)}
           emails={userEmail}
           title="Jamat Bisoy Tally"
         />
 
         <TallyAdmin
-          userData={userDineFeraData}
+          userData={filterChartAndTallyData(userDineFeraData)}
           emails={userEmail}
           title="Dine Fireche Tally"
         />
 
         <TallyAdmin
-          userData={userTalimBisoyData}
+          userData={filterChartAndTallyData(userTalimBisoyData)}
           emails={userEmail}
           title="Talim Bisoy Tally"
         />
 
         <TallyAdmin
-          userData={userSoforBishoyData}
+          userData={filterChartAndTallyData(userSoforBishoyData)}
           emails={userEmail}
           title="Sofor Bisoy Tally"
         />
 
         <TallyAdmin
-          userData={userDayeData}
+          userData={filterChartAndTallyData(userDayeData)}
           emails={userEmail}
           title="Dayee Bisoy Tally"
         />
