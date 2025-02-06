@@ -57,7 +57,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 }) => {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <label className="text-sm font-medium text-gray-700">{label}</label>
       <select
         name={name}
         value={value}
@@ -66,7 +66,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
       >
         <option value="">Select {label}</option>
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <option className="truncate" key={option.value} value={option.value}>
             {option.title}
           </option>
         ))}
@@ -512,7 +512,7 @@ export default function UsersTable() {
 
       {selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
+          <div className="bg-white m-4 p-6 rounded-lg max-w-[80vh]">
             <h2 className="text-xl font-bold mb-4">
               Edit User: {selectedUser.name}
             </h2>
