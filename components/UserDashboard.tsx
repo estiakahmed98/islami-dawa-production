@@ -102,7 +102,7 @@ const Dashboard: React.FC<TallyProps> = () => {
       <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl">
         {/* Welcome Message */}
         <h1 className="text-2xl font-bold text-gray-800">
-          Welcome,{" "}
+          স্বাগতম ,{" "}
           <span className="text-emerald-600">{session?.user?.name}</span>
         </h1>
 

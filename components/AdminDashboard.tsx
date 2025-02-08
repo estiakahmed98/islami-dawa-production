@@ -249,7 +249,7 @@ const AdminDashboard: React.FC = () => {
       <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl">
         {/* Welcome Message */}
         <h1 className="text-2xl font-bold text-gray-800">
-          Welcome,{" "}
+          স্বাগতম,{" "}
           <span className="text-emerald-600">{session?.user?.name}</span>
         </h1>
 
@@ -342,7 +342,7 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="border border-[#155E75] p-6 mt-10 rounded-xl overflow-y-auto">
+      <div className="border border-[#155E75] lg:p-6 mt-10 rounded-xl overflow-y-auto">
         <Tabs defaultValue="moktob" className="w-full p-4">
           <TabsList className="grid grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="moktob">মক্তব বিষয়</TabsTrigger>

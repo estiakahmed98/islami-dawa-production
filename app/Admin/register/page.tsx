@@ -221,7 +221,7 @@ const Register = () => {
   return (
     <div className="flex items-center justify-center bg-gray-50 lg:m-10">
       <div className="w-full p-8 space-y-6 shadow-lg rounded-lg bg-white">
-        <h2 className="text-2xl font-bold text-center">Add New User</h2>
+        <h2 className="text-2xl font-bold text-center">নতুন যোগ করুন</h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <InputField
             label="Full Name"
