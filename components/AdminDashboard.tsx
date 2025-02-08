@@ -22,6 +22,7 @@ import { userSoforBishoyData } from "@/app/data/soforBishoyUserData";
 import { userDayeData } from "@/app/data/dayiUserData";
 import { userTalimBisoyData } from "@/app/data/talimBisoyUserData";
 import { userAmoliData } from "@/app/data/amoliMuhasabaUserData";
+import { useRouter } from "next/navigation";
 
 interface User {
   id: string;
@@ -35,6 +36,7 @@ interface User {
 }
 
 const AdminDashboard: React.FC = () => {
+  const router = useRouter();
   const { selectedUser } = useSelectedUser();
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
@@ -255,6 +257,14 @@ const AdminDashboard: React.FC = () => {
 
         {/* Filter Controls */}
         <div className="flex flex-wrap items-center gap-4 mt-4 lg:mt-0">
+          <div className="flex justify-center">
+            <button
+              onClick={() => router.push("/comparison")}
+              className="bg-emerald-600 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-emerald-700 transition-all duration-300 focus:ring focus:ring-emerald-300"
+            >
+              📊 তুলনা দেখুন
+            </button>
+          </div>
           {/* Month Selection Dropdown */}
           <div className="relative">
             <select
