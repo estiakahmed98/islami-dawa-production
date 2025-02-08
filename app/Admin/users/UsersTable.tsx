@@ -744,7 +744,7 @@ export default function UsersTable() {
         <h3 className="text-center text-2xl font-semibold">
           সর্ব মোটডাটা দেখুন
         </h3>
-        <div className="border border-[#155E75] p-6 mt-4 rounded-xl overflow-y-auto">
+        <div className="border border-[#155E75] lg:p-6 mt-4 rounded-xl overflow-y-auto">
           <Tabs defaultValue="moktob" className="w-full p-4">
             <TabsList className="grid grid-cols-2 md:grid-cols-4">
               <TabsTrigger value="Amolimusahaba">আ’মলি মুহাসাবা</TabsTrigger>

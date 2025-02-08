@@ -9,7 +9,7 @@ import * as yup from "yup";
 
 type LocationOption = { value: number | string; title: string };
 
-const Register = () => {
+const SpeacialRegister = () => {
   const [formData, setFormData] = useState({
     name: "",
     role: "",
@@ -68,7 +68,6 @@ const Register = () => {
 
   function getRoleTitle(role: string) {
     const roleTitles: Record<string, string> = {
-      centraladmin: "কেন্দ্রীয় এডমিন",
       divisionadmin: "বিভাগীয় এডমিন",
       districtadmin: "জেলা এডমিন",
       upozilaadmin: "উপজেলা এডমিন",
@@ -221,7 +220,7 @@ const Register = () => {
   return (
     <div className="flex items-center justify-center bg-gray-50 lg:m-10">
       <div className="w-full p-8 space-y-6 shadow-lg rounded-lg bg-white">
-        <h2 className="text-2xl font-bold text-center">নতুন দা'ঈ যোগ করুন</h2>
+        <h2 className="text-2xl font-bold text-center">বিশেষ দা'ঈ যোগ করুন</h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <InputField
             label="Full Name"
@@ -235,7 +234,6 @@ const Register = () => {
             value={formData.role}
             onChange={handleChange}
             options={roleOptions}
-            required
           />
           <SelectField
             label="Division"
@@ -243,7 +241,6 @@ const Register = () => {
             value={formData.divisionId}
             onChange={handleChange}
             options={divisions}
-            required
           />
           {!hideDistrict && (
             <SelectField
@@ -253,7 +250,6 @@ const Register = () => {
               onChange={handleChange}
               options={districtsList}
               disabled={!districtsList.length}
-              required
             />
           )}
           {!hideUpazila && (
@@ -264,7 +260,6 @@ const Register = () => {
               onChange={handleChange}
               options={upazilasList}
               disabled={!upazilasList.length}
-              required
             />
           )}
           {!hideUnion && (
@@ -275,7 +270,6 @@ const Register = () => {
               onChange={handleChange}
               options={unionsList}
               disabled={!unionsList.length}
-              required
             />
           )}
 
@@ -288,7 +282,6 @@ const Register = () => {
               value: name,
               title: name,
             }))}
-            required
           />
 
           <InputField
@@ -363,4 +356,4 @@ const SelectField: React.FC<SelectFieldProps> = ({
   </div>
 );
 
-export default Register;
+export default SpeacialRegister;
