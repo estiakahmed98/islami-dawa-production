@@ -154,13 +154,6 @@ const SpeacialRegister = () => {
   );
 
   const { role } = formData;
-  const hideDistrict = role === "divisionadmin";
-  const hideUpazila = role === "divisionadmin" || role === "districtadmin";
-  const hideUnion =
-    role === "divisionadmin" ||
-    role === "districtadmin" ||
-    role === "upozilaadmin";
-  const hideMarkaz = hideUnion || role === "unionadmin";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -218,8 +211,8 @@ const SpeacialRegister = () => {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-50 lg:m-10">
-      <div className="w-full p-8 space-y-6 shadow-lg rounded-lg bg-white">
+    <div className="flex items-center justify-center lg:m-10">
+      <div className="w-full p-8 space-y-6 ">
         <h2 className="text-2xl font-bold text-center">বিশেষ দা'ঈ যোগ করুন</h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <InputField
@@ -242,36 +235,33 @@ const SpeacialRegister = () => {
             onChange={handleChange}
             options={divisions}
           />
-          {!hideDistrict && (
-            <SelectField
-              label="District"
-              name="districtId"
-              value={formData.districtId}
-              onChange={handleChange}
-              options={districtsList}
-              disabled={!districtsList.length}
-            />
-          )}
-          {!hideUpazila && (
-            <SelectField
-              label="Upazila"
-              name="upazilaId"
-              value={formData.upazilaId}
-              onChange={handleChange}
-              options={upazilasList}
-              disabled={!upazilasList.length}
-            />
-          )}
-          {!hideUnion && (
-            <SelectField
-              label="Union"
-              name="unionId"
-              value={formData.unionId}
-              onChange={handleChange}
-              options={unionsList}
-              disabled={!unionsList.length}
-            />
-          )}
+
+          <SelectField
+            label="District"
+            name="districtId"
+            value={formData.districtId}
+            onChange={handleChange}
+            options={districtsList}
+            disabled={!districtsList.length}
+          />
+
+          <SelectField
+            label="Upazila"
+            name="upazilaId"
+            value={formData.upazilaId}
+            onChange={handleChange}
+            options={upazilasList}
+            disabled={!upazilasList.length}
+          />
+
+          <SelectField
+            label="Union"
+            name="unionId"
+            value={formData.unionId}
+            onChange={handleChange}
+            options={unionsList}
+            disabled={!unionsList.length}
+          />
 
           <SelectField
             label="Markaz"
