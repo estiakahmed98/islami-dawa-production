@@ -4,7 +4,6 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { signInSchema } from "@/validators/authValidators";
 import { useForm } from "react-hook-form";
-
 import {
   Card,
   CardHeader,
@@ -24,15 +23,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { signIn } from "@/lib/auth-client";
+import { signIn, useSession } from "@/lib/auth-client";
 import { FormError } from "@/components/FormError";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
+import { FcGoogle } from "react-icons/fc";
 
 const SigninForm = () => {
   const [formError, setFormError] = useState("");
   const router = useRouter();
+  const session = useSession();
 
   const form = useForm<yup.InferType<typeof signInSchema>>({
     resolver: yupResolver(signInSchema),
@@ -61,6 +63,37 @@ const SigninForm = () => {
         },
       }
     );
+  };
+
+  // Corrected Google Sign-In Function
+  const handleGoogleLogin = async () => {
+    try {
+      await authClient.signIn.social(
+        { provider: "google" },
+        {
+          onRequest: () => {
+            setFormError("");
+          },
+          onSuccess: async () => {
+            toast.success("Login Successful");
+            // ✅ Wait for session to be available before redirecting
+            const interval = setInterval(async () => {
+              const session = await authClient.getSession();
+              if (session?.data?.user) {
+                clearInterval(interval);
+                router.push("/admin");
+              }
+            }, 500);
+          },
+          onError: (ctx) => {
+            setFormError(ctx.error.message);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      toast.error("Google Login Failed. Try again.");
+    }
   };
 
   return (
@@ -114,6 +147,16 @@ const SigninForm = () => {
             </Button>
           </form>
         </Form>
+
+        {/* Google Sign-In Button */}
+        <Button
+          onClick={handleGoogleLogin}
+          className="mt-4 w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+        >
+          <FcGoogle size={20} />
+          Sign in with Google
+        </Button>
+
         <div className="mt-5 space-x-1 text-center text-sm">
           <Link
             href="/auth/sign-up"

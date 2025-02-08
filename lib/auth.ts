@@ -4,55 +4,43 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { db } from "@/lib/db";
 
 export const auth = betterAuth({
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    },
+  },
+
   database: prismaAdapter(db, {
     provider: "postgresql",
   }),
+
   user: {
     modelName: "users",
     additionalFields: {
-      role: {
-        type: "string",
-        required: false,
-      },
-      division: {
-        type: "string",
-        required: true,
-      },
-      district: {
-        type: "string",
-        required: true,
-      },
-      area: {
-        type: "string",
-        required: true,
-      },
-      upazila: {
-        type: "string",
-        required: true,
-      },
-      union: {
-        type: "string",
-        required: true,
-      },
-      markaz: {
-        type: "string",
-        required: false,
-      },
-      phone: {
-        type: "string",
-        required: true,
-      },
+      role: { type: "string", required: false },
+      division: { type: "string", required: false },
+      district: { type: "string", required: false },
+      area: { type: "string", required: false },
+      upazila: { type: "string", required: false },
+      union: { type: "string", required: false },
+      markaz: { type: "string", required: false },
+      phone: { type: "string", required: false },
     },
   },
+
   session: {
     modelName: "sessions",
   },
+
   account: {
     modelName: "accounts",
   },
+
   verification: {
     modelName: "verifications",
   },
+
   emailAndPassword: {
     enabled: true,
   },
