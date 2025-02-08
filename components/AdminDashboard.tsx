@@ -295,61 +295,64 @@ const AdminDashboard: React.FC = () => {
       <div className="flex flex-col gap-4">
         <div className="grow grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-8 pb-4 pt-2">
           {/* Pass Filtered Data to Charts & Tally */}
-          <AmoliChartAdmin data={filteredAmoliData.records} emailList={emailList} />
+          <AmoliChartAdmin
+            data={filteredAmoliData.records}
+            emailList={emailList}
+          />
           <TallyAdmin
             userData={filterChartAndTallyData(userMoktobBisoyData)}
             emails={emailList}
-            title="Moktob Bisoy Tally"
+            title="মক্তব বিষয়"
           />
           <TallyAdmin
             userData={filterChartAndTallyData(userDawatiBisoyData)}
             emails={emailList}
-            title="Dawati Bisoy Tally"
+            title="দাওয়াতি বিষয়"
           />
           <TallyAdmin
             userData={filterChartAndTallyData(userDawatiMojlishData)}
             emails={emailList}
-            title="Dawati Mojlish Tally"
+            title="দাওয়াতি মজলিশ"
           />
           <TallyAdmin
             userData={filterChartAndTallyData(userJamatBisoyData)}
             emails={emailList}
-            title="Jamat Bisoy Tally"
+            title="জামাত বিষয়"
           />
           <TallyAdmin
             userData={filterChartAndTallyData(userDineFeraData)}
             emails={emailList}
-            title="Dine Fireche Tally"
+            title="দ্বীনে ফিরে এসেছে"
           />
           <TallyAdmin
             userData={filterChartAndTallyData(userTalimBisoyData)}
             emails={emailList}
-            title="Talim Bisoy Tally"
+            title="মহিলাদের তালিম বিষয়"
           />
           <TallyAdmin
             userData={filterChartAndTallyData(userSoforBishoyData)}
             emails={emailList}
-            title="Sofor Bisoy Tally"
+            title="সফর বিষয়"
           />
           <TallyAdmin
             userData={filterChartAndTallyData(userDayeData)}
             emails={emailList}
-            title="Dayee Bisoy Tally"
+            title="দায়ী বিষয়"
           />
         </div>
       </div>
 
       <div className="border border-[#155E75] p-6 mt-10 rounded-xl overflow-y-auto">
         <Tabs defaultValue="moktob" className="w-full p-4">
-          <TabsList className="mx-10 my-6">
-            <TabsTrigger value="moktob">Moktob Bisoy</TabsTrigger>
-            <TabsTrigger value="talim">Talim Bisoy</TabsTrigger>
-            <TabsTrigger value="daye">Daye Bisoy</TabsTrigger>
-            <TabsTrigger value="dawati">Dawati Bisoy</TabsTrigger>
-            <TabsTrigger value="dawatimojlish">Dawati Mojlish</TabsTrigger>
-            <TabsTrigger value="jamat">Jamat Bisoy</TabsTrigger>
-            <TabsTrigger value="dinefera">Dine Fire Asa</TabsTrigger>
-            <TabsTrigger value="sofor">Sofor Bisoy</TabsTrigger>
+          <TabsList className="grid grid-cols-2 md:grid-cols-4">
+            <TabsTrigger value="moktob">মক্তব বিষয়</TabsTrigger>
+            <TabsTrigger value="talim">মহিলাদের তালিম</TabsTrigger>
+            <TabsTrigger value="daye">দায়ী বিষয়</TabsTrigger>
+            <TabsTrigger value="dawati">দাওয়াতি বিষয়</TabsTrigger>
+            <TabsTrigger value="dawatimojlish">দাওয়াতি মজলিশ</TabsTrigger>
+            <TabsTrigger value="jamat">জামাত বিষয়</TabsTrigger>
+            <TabsTrigger value="dinefera">দ্বীনে ফিরে এসেছে</TabsTrigger>
+            <TabsTrigger value="sofor">সফর বিষয়</TabsTrigger>
           </TabsList>
 
           <TabsContent value="moktob">

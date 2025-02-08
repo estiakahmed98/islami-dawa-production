@@ -588,6 +588,7 @@ export default function UsersTable() {
                         Markaz Admin (Not Avilable)
                       </option>
                       <option value="upozilaadmin">Upazila Admin</option>
+                      <option value="unionadmin">Union Admin</option>
                       <option value="daye">Da'ee</option>
                     </select>
                   </div>

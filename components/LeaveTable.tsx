@@ -74,8 +74,8 @@ const LeaveTable: React.FC = () => {
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold">Leave Records</h2>
-        <Button onClick={() => setShowForm(true)}>+ Apply for Leave</Button>
+        <h2 className="text-2xl font-semibold">ছুটি বিষয়</h2>
+        <Button onClick={() => setShowForm(true)}>+ ছুটির আবেদন করুন</Button>
       </div>
 
       {/* Leave Form Modal */}
@@ -83,14 +83,13 @@ const LeaveTable: React.FC = () => {
         <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
           <div className="z-30 max-w-[95vh] max-h-[70vh] overflow-y-auto">
             <LeaveForm
-            
               onClose={() => {
                 setShowForm(false);
                 setSelectedLeave(null);
               }}
               onRefresh={fetchLeaves}
               existingData={selectedLeave} // ✅ Pass existing leave data for editing
-              userEmail={userEmail} 
+              userEmail={userEmail}
               // ✅ Pass the logged-in user's email
             />
           </div>
@@ -126,8 +125,8 @@ const LeaveTable: React.FC = () => {
                         leave.status === "Pending"
                           ? "bg-red-200 text-red-700"
                           : leave.status === "Approved"
-                          ? "bg-green-500 text-white"
-                          : "bg-red-800 text-white"
+                            ? "bg-green-500 text-white"
+                            : "bg-red-800 text-white"
                       }`}
                     >
                       {leave.status}

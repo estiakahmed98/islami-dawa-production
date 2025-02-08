@@ -86,7 +86,7 @@ const Dashboard: React.FC<TallyProps> = () => {
     return { ...userData, records: filteredRecords };
   };
 
-   const filteredAmoliData = filterChartAndTallyData(userAmoliData);
+  const filteredAmoliData = filterChartAndTallyData(userAmoliData);
 
   return (
     <div className="space-y-4">
@@ -151,64 +151,64 @@ const Dashboard: React.FC<TallyProps> = () => {
         <TallyAdmin
           userData={filterChartAndTallyData(userMoktobBisoyData)}
           emails={userEmail}
-          title="Moktob Bisoy Tally"
+          title="মক্তব বিষয়"
         />
 
         <TallyAdmin
           userData={filterChartAndTallyData(userDawatiBisoyData)}
           emails={userEmail}
-          title="Dawati Bisoy Tally"
+          title="দাওয়াতি বিষয়"
         />
 
         <TallyAdmin
           userData={filterChartAndTallyData(userDawatiMojlishData)}
           emails={userEmail}
-          title="Dawati Mojlish Tally"
+          title="দাওয়াতি মজলিশ"
         />
 
         <TallyAdmin
           userData={filterChartAndTallyData(userJamatBisoyData)}
           emails={userEmail}
-          title="Jamat Bisoy Tally"
+          title="জামাত বিষয়"
         />
 
         <TallyAdmin
           userData={filterChartAndTallyData(userDineFeraData)}
           emails={userEmail}
-          title="Dine Fireche Tally"
+          title="দ্বীনে ফিরে এসেছে"
         />
 
         <TallyAdmin
           userData={filterChartAndTallyData(userTalimBisoyData)}
           emails={userEmail}
-          title="Talim Bisoy Tally"
+          title="মহিলাদের তালিম বিষয়"
         />
 
         <TallyAdmin
           userData={filterChartAndTallyData(userSoforBishoyData)}
           emails={userEmail}
-          title="Sofor Bisoy Tally"
+          title="সফর বিষয়"
         />
 
         <TallyAdmin
           userData={filterChartAndTallyData(userDayeData)}
           emails={userEmail}
-          title="Dayee Bisoy Tally"
+          title="দায়ী বিষয়"
         />
       </div>
 
       <div className="border border-[#155E75] p-2 lg:p-6 mt-10 rounded-xl overflow-y-auto">
-        <Tabs defaultValue="Amolimusahaba" className="w-full lg:p-4">
-          <TabsList className="mx-10 my-6">
-            <TabsTrigger value="Amolimusahaba">Amolimusahaba</TabsTrigger>
-            <TabsTrigger value="moktob">Moktob Bisoy</TabsTrigger>
-            <TabsTrigger value="talim">Talim Bisoy</TabsTrigger>
-            <TabsTrigger value="daye">Daye Bisoy</TabsTrigger>
-            <TabsTrigger value="dawati">Dawati Bisoy</TabsTrigger>
-            <TabsTrigger value="dawatimojlish">Dawati Mojlish</TabsTrigger>
-            <TabsTrigger value="jamat">Jamat Bisoy</TabsTrigger>
-            <TabsTrigger value="dinefera">Dine Fire Asa</TabsTrigger>
-            <TabsTrigger value="sofor">Sofor Bisoy</TabsTrigger>
+        <Tabs defaultValue="Amolimusahaba" className="w-full  lg:p-4">
+          <TabsList className="mx-10 grid grid-cols-2 md:grid-cols-4 my-6">
+            <TabsTrigger value="Amolimusahaba">আ’মলি মুহাসাবা</TabsTrigger>
+            <TabsTrigger value="moktob">মক্তব বিষয়</TabsTrigger>
+            <TabsTrigger value="talim">মহিলাদের তালিম বিষয়</TabsTrigger>
+            <TabsTrigger value="daye">দায়ী বিষয়</TabsTrigger>
+            <TabsTrigger value="dawati">দাওয়াতি বিষয়</TabsTrigger>
+            <TabsTrigger value="dawatimojlish">দাওয়াতি মজলিশ</TabsTrigger>
+            <TabsTrigger value="jamat">জামাত বিষয়</TabsTrigger>
+            <TabsTrigger value="dinefera">দ্বীনে ফিরে এসেছে</TabsTrigger>
+            <TabsTrigger value="sofor">সফর বিষয়</TabsTrigger>
           </TabsList>
 
           {/* Tab Content */}
