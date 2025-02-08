@@ -115,17 +115,9 @@ export default function UsersTable() {
 
   console.log("Filtered Users Table List:", emailList);
 
+  // ✅ 1st useEffect: Fetch users (Runs only when session changes)
   useEffect(() => {
-    const extractedEmails = filteredUsers.map((user) => user.email);
-    setEmailList(extractedEmails);
-  }, [filteredUsers]);
-
-  useEffect(() => {
-    if (isPending) return;
-    if (!sessionUser) {
-      console.log("User not authenticated");
-      return;
-    }
+    if (isPending || !sessionUser) return;
 
     const fetchUsers = async () => {
       setLoading(true);
@@ -142,8 +134,9 @@ export default function UsersTable() {
     };
 
     fetchUsers();
-  }, [isPending, sessionUser]);
+  }, [isPending, sessionUser]); // Runs only when authentication status changes
 
+  // ✅ 2nd useEffect: Filter users & update email list (Runs when filters/users change)
   useEffect(() => {
     const filtered = users.filter((user) =>
       Object.entries(filters).every(
@@ -157,7 +150,8 @@ export default function UsersTable() {
     );
 
     setFilteredUsers(filtered);
-  }, [filters, users]);
+    setEmailList(filtered.map((user) => user.email)); // Extract filtered emails
+  }, [filters, users]); // Runs when users or filters change
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -349,16 +343,43 @@ export default function UsersTable() {
         parentUser = users.find(
           (u) => u.role === "divisionadmin" && u.division === user.division
         );
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
         break;
       case "upozilaadmin":
         parentUser = users.find(
           (u) => u.role === "districtadmin" && u.district === user.district
         );
+        // Step 4: If no districtadmin is found, find a divisiontadmin in the same division
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "divisionadmin" && u.division === user.division
+          );
+        }
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
         break;
       case "unionadmin":
         parentUser = users.find(
           (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
         );
+        // Step 3: If no unionadmin is found, find a districtadmin in the same district
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "districtadmin" && u.district === user.district
+          );
+        }
+        // Step 4: If no districtadmin is found, find a divisiontadmin in the same division
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "divisionadmin" && u.division === user.division
+          );
+        }
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
         break;
       case "daye":
         // Step 1: Try to find a unionadmin in the same union
@@ -385,6 +406,9 @@ export default function UsersTable() {
             (u) => u.role === "divisionadmin" && u.division === user.division
           );
         }
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
         break;
 
       default:
@@ -392,7 +416,6 @@ export default function UsersTable() {
     }
     return parentUser ? `${parentUser.name} (${parentUser.role})` : null;
   };
-
   return (
     <div className="w-full mx-auto p-2">
       <div>
@@ -715,11 +738,11 @@ export default function UsersTable() {
           </div>
         )}
       </div>
-      <div className="mt-4">
+      <div className="mt-8">
         <h3 className="text-center text-2xl font-semibold">
           Aggeregation Users Table
         </h3>
-        <div className="border border-[#155E75] p-6 mt-10 rounded-xl overflow-y-auto">
+        <div className="border border-[#155E75] p-6 mt-4 rounded-xl overflow-y-auto">
           <Tabs defaultValue="moktob" className="w-full p-4">
             <TabsList className="mx-10 my-6">
               <TabsTrigger value="moktob">Moktob Bisoy</TabsTrigger>
