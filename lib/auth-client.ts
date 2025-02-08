@@ -1,8 +1,13 @@
 import { createAuthClient } from "better-auth/react";
-import { inferAdditionalFields } from "better-auth/client/plugins";
+import { inferAdditionalFields, adminClient } from "better-auth/client/plugins";
 import { auth } from "./auth";
-import { adminClient } from "better-auth/client/plugins";
 
+// Create a single authentication client instance
+export const authClient = createAuthClient({
+  plugins: [inferAdditionalFields<typeof auth>(), adminClient()],
+});
+
+// Destructure authentication functions
 export const {
   signIn,
   signUp,
@@ -13,6 +18,14 @@ export const {
   updateUser,
   changeEmail,
   changePassword,
-} = createAuthClient({
-  plugins: [inferAdditionalFields<typeof auth>(), adminClient()],
-});
+} = authClient;
+
+// Google Sign-In Function
+export const signInWithGoogle = async () => {
+  try {
+    await authClient.signIn.social({ provider: "google" });
+  } catch (error) {
+    console.error("Google Sign-In Error:", error);
+    throw error;
+  }
+};

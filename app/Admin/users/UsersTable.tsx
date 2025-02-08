@@ -30,7 +30,6 @@ import { userDineFeraData } from "@/app/data/dineferaUserData";
 import { userSoforBishoyData } from "@/app/data/soforBishoyUserData";
 import { userDayeData } from "@/app/data/dayiUserData";
 import { userTalimBisoyData } from "@/app/data/talimBisoyUserData";
-import { userAmoliData } from "@/app/data/amoliMuhasabaUserData";
 
 interface User {
   id: string;
@@ -416,10 +415,13 @@ export default function UsersTable() {
     }
     return parentUser ? `${parentUser.name} (${parentUser.role})` : null;
   };
+
   return (
     <div className="w-full mx-auto p-2">
       <div>
-        <h1 className="text-2xl font-bold text-center mb-6">Users Table</h1>
+        <h1 className="text-2xl font-bold text-center mb-6">
+          সকল এডমিন ও দায়ী দেখুন
+        </h1>
 
         {/* Filters */}
         <div className="mb-4 grid grid-cols-3 md:grid-cols-6 gap-4">
@@ -740,19 +742,19 @@ export default function UsersTable() {
       </div>
       <div className="mt-8">
         <h3 className="text-center text-2xl font-semibold">
-          Aggeregation Users Table
+          সর্ব মোটডাটা দেখুন
         </h3>
-        <div className="border border-[#155E75] p-6 mt-4 rounded-xl overflow-y-auto">
+        <div className="border border-[#155E75] lg:p-6 mt-4 rounded-xl overflow-y-auto">
           <Tabs defaultValue="moktob" className="w-full p-4">
-            <TabsList className="mx-10 my-6">
-              <TabsTrigger value="moktob">Moktob Bisoy</TabsTrigger>
-              <TabsTrigger value="talim">Talim Bisoy</TabsTrigger>
-              <TabsTrigger value="daye">Daye Bisoy</TabsTrigger>
-              <TabsTrigger value="dawati">Dawati Bisoy</TabsTrigger>
-              <TabsTrigger value="dawatimojlish">Dawati Mojlish</TabsTrigger>
-              <TabsTrigger value="jamat">Jamat Bisoy</TabsTrigger>
-              <TabsTrigger value="dinefera">Dine Fire Asa</TabsTrigger>
-              <TabsTrigger value="sofor">Sofor Bisoy</TabsTrigger>
+            <TabsList className="grid grid-cols-2 md:grid-cols-4">
+              <TabsTrigger value="moktob">মক্তব বিষয়</TabsTrigger>
+              <TabsTrigger value="talim">মহিলাদের তালিম</TabsTrigger>
+              <TabsTrigger value="daye">দায়ী বিষয়</TabsTrigger>
+              <TabsTrigger value="dawati">দাওয়াতি বিষয়</TabsTrigger>
+              <TabsTrigger value="dawatimojlish">দাওয়াতি মজলিশ</TabsTrigger>
+              <TabsTrigger value="jamat">জামাত বিষয়</TabsTrigger>
+              <TabsTrigger value="dinefera">দ্বীনে ফিরে এসেছে</TabsTrigger>
+              <TabsTrigger value="sofor">সফর বিষয়</TabsTrigger>
             </TabsList>
 
             <TabsContent value="moktob">

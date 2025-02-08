@@ -9,7 +9,7 @@ import * as yup from "yup";
 
 type LocationOption = { value: number | string; title: string };
 
-const Register = () => {
+const SpeacialRegister = () => {
   const [formData, setFormData] = useState({
     name: "",
     role: "",
@@ -68,7 +68,6 @@ const Register = () => {
 
   function getRoleTitle(role: string) {
     const roleTitles: Record<string, string> = {
-      centraladmin: "কেন্দ্রীয় এডমিন",
       divisionadmin: "বিভাগীয় এডমিন",
       districtadmin: "জেলা এডমিন",
       upozilaadmin: "উপজেলা এডমিন",
@@ -155,13 +154,6 @@ const Register = () => {
   );
 
   const { role } = formData;
-  const hideDistrict = role === "divisionadmin";
-  const hideUpazila = role === "divisionadmin" || role === "districtadmin";
-  const hideUnion =
-    role === "divisionadmin" ||
-    role === "districtadmin" ||
-    role === "upozilaadmin";
-  const hideMarkaz = hideUnion || role === "unionadmin";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -221,7 +213,7 @@ const Register = () => {
   return (
     <div className="flex items-center justify-center lg:m-10">
       <div className="w-full p-8 space-y-6 ">
-        <h2 className="text-2xl font-bold text-center">নতুন দা'ঈ যোগ করুন</h2>
+        <h2 className="text-2xl font-bold text-center">বিশেষ দা'ঈ যোগ করুন</h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <InputField
             label="Full Name"
@@ -235,7 +227,6 @@ const Register = () => {
             value={formData.role}
             onChange={handleChange}
             options={roleOptions}
-            required
           />
           <SelectField
             label="Division"
@@ -243,41 +234,34 @@ const Register = () => {
             value={formData.divisionId}
             onChange={handleChange}
             options={divisions}
-            required
           />
-          {!hideDistrict && (
-            <SelectField
-              label="District"
-              name="districtId"
-              value={formData.districtId}
-              onChange={handleChange}
-              options={districtsList}
-              disabled={!districtsList.length}
-              required
-            />
-          )}
-          {!hideUpazila && (
-            <SelectField
-              label="Upazila"
-              name="upazilaId"
-              value={formData.upazilaId}
-              onChange={handleChange}
-              options={upazilasList}
-              disabled={!upazilasList.length}
-              required
-            />
-          )}
-          {!hideUnion && (
-            <SelectField
-              label="Union"
-              name="unionId"
-              value={formData.unionId}
-              onChange={handleChange}
-              options={unionsList}
-              disabled={!unionsList.length}
-              required
-            />
-          )}
+
+          <SelectField
+            label="District"
+            name="districtId"
+            value={formData.districtId}
+            onChange={handleChange}
+            options={districtsList}
+            disabled={!districtsList.length}
+          />
+
+          <SelectField
+            label="Upazila"
+            name="upazilaId"
+            value={formData.upazilaId}
+            onChange={handleChange}
+            options={upazilasList}
+            disabled={!upazilasList.length}
+          />
+
+          <SelectField
+            label="Union"
+            name="unionId"
+            value={formData.unionId}
+            onChange={handleChange}
+            options={unionsList}
+            disabled={!unionsList.length}
+          />
 
           <SelectField
             label="Markaz"
@@ -288,7 +272,6 @@ const Register = () => {
               value: name,
               title: name,
             }))}
-            required
           />
 
           <InputField
@@ -363,4 +346,4 @@ const SelectField: React.FC<SelectFieldProps> = ({
   </div>
 );
 
-export default Register;
+export default SpeacialRegister;

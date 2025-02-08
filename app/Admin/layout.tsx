@@ -23,7 +23,7 @@ const AdmindLayout = async ({ children }: { children: React.ReactNode }) => {
         <ImpersonateSidebar />
         <div className="w-full overflow-hidden">
           <Header />
-          <main className="h-[calc(100vh-80px)] overflow-y-auto p-6">
+          <main className="h-[calc(100vh-80px)] overflow-y-auto p-2 lg:p-6 ">
             {children}
           </main>
         </div>
