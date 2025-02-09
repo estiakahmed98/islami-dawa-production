@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 export default async function authMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const protectedRoute = pathname.startsWith("/dashboard");
+  const protectedRoute =
+    pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
   const authRoute = pathname.startsWith("/");
 
   // Get the cookie from the request
