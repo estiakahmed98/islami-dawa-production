@@ -20,12 +20,12 @@ export const {
   changePassword,
 } = authClient;
 
-// Google Sign-In Function
-export const signInWithGoogle = async () => {
-  try {
-    await authClient.signIn.social({ provider: "google" });
-  } catch (error) {
-    console.error("Google Sign-In Error:", error);
-    throw error;
-  }
-};
+// // Google Sign-In Function
+// export const signInWithGoogle = async () => {
+//   try {
+//     await authClient.signIn.social({ provider: "google" });
+//   } catch (error) {
+//     console.error("Google Sign-In Error:", error);
+//     throw error;
+//   }
+// };
