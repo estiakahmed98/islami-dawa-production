@@ -103,6 +103,7 @@ const Header = () => {
                     fetchOptions: {
                       onSuccess: () => {
                         router.replace("/");
+                        router.refresh();
                       },
                     },
                   });

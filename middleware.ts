@@ -1,27 +1,45 @@
-import { betterFetch } from "@better-fetch/fetch";
-import type { auth } from "@/lib/auth";
 import { NextResponse, type NextRequest } from "next/server";
 
-type Session = typeof auth.$Infer.Session;
-
 export default async function authMiddleware(request: NextRequest) {
-  const { data: session } = await betterFetch<Session>(
-    "/api/auth/get-session",
+  const { pathname } = request.nextUrl;
+
+  const protectedRoute = pathname.startsWith("/dashboard");
+  const authRoute = pathname.startsWith("/");
+
+  // Get the cookie from the request
+  const response = await fetch(
+    `${request.nextUrl.origin}/api/auth/get-session`,
     {
-      baseURL: request.nextUrl.origin,
       headers: {
-        //get the cookie from the request
         cookie: request.headers.get("cookie") || "",
       },
     }
   );
+  const session = await response.json();
 
-  if (!session) {
-    return NextResponse.redirect(new URL("/", request.url));
+  /**
+   * If not authenticated don't allow /dashboard pages
+   * Redirect to /auth/sign-in
+   */
+  if (protectedRoute) {
+    return session
+      ? NextResponse.next()
+      : NextResponse.redirect(new URL("/", request.url));
   }
+
+  /**
+   * If authenticated don't allow /auth pages
+   * Redirect to /dashboard
+   */
+  if (authRoute) {
+    return session
+      ? NextResponse.redirect(new URL("/dashboard", request.url))
+      : NextResponse.next();
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard(.*)", "/admin(.*)"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/"],
 };
