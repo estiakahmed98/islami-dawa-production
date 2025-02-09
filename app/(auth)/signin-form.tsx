@@ -57,6 +57,7 @@ const SigninForm = () => {
         onSuccess: () => {
           toast.success("Login Successful");
           router.push("/admin");
+          router.refresh();
         },
         onError: (ctx) => {
           setFormError(ctx.error.message);
@@ -69,21 +70,14 @@ const SigninForm = () => {
   const handleGoogleLogin = async () => {
     try {
       await authClient.signIn.social(
-        { provider: "google" },
+        { provider: "google", callbackURL: "/admin" },
         {
           onRequest: () => {
             setFormError("");
           },
           onSuccess: async () => {
+            router.refresh();
             toast.success("Login Successful");
-            // ✅ Wait for session to be available before redirecting
-            const interval = setInterval(async () => {
-              const session = await authClient.getSession();
-              if (session?.data?.user) {
-                clearInterval(interval);
-                router.push("/admin");
-              }
-            }, 500);
           },
           onError: (ctx) => {
             setFormError(ctx.error.message);
