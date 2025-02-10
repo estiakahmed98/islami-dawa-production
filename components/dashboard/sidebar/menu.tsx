@@ -146,7 +146,7 @@ const SidebarMenu = () => {
     {
       title: "কর্সূমচী",
       icon: <GrSchedules className="size-5" />,
-      url: "/dashboard/todo",
+      url: "/dashboard/calendar",
     },
   ];
 
