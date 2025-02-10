@@ -30,9 +30,12 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { FcGoogle } from "react-icons/fc";
+import { Loader2 } from "lucide-react"; // Loading Icon
 
 const SigninForm = () => {
   const [formError, setFormError] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // State for Sign In button
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false); // State for Google Sign-In
   const router = useRouter();
   const session = useSession();
 
@@ -52,6 +55,7 @@ const SigninForm = () => {
       },
       {
         onRequest: () => {
+          setIsLoading(true);
           setFormError("");
         },
         onSuccess: () => {
@@ -62,12 +66,19 @@ const SigninForm = () => {
         onError: (ctx) => {
           setFormError(ctx.error.message);
         },
+        onFinally: () => {
+          setIsLoading(false); // Stop loading
+        },
       }
     );
+
+    setIsLoading(false);
   };
 
-  // Corrected Google Sign-In Function
+  // Google Sign-In Function with Loading State
   const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true); // Start loading
+
     try {
       await authClient.signIn.social(
         { provider: "google", callbackURL: "/admin" },
@@ -87,6 +98,8 @@ const SigninForm = () => {
     } catch (error) {
       console.error("Google Sign-In Error:", error);
       toast.error("Google Login Failed. Try again.");
+    } finally {
+      setIsGoogleLoading(false); // Stop loading
     }
   };
 
@@ -136,19 +149,38 @@ const SigninForm = () => {
               />
             </FormFieldset>
             <FormError message={formError} />
-            <Button type="submit" className="mt-4 w-full">
-              Sign In
+
+            {/* Sign In Button with Loading Indicator */}
+            <Button type="submit" className="mt-4 w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin mr-2" size={18} />
+                  Signing In...
+                </>
+              ) : (
+                "Sign In"
+              )}
             </Button>
           </form>
         </Form>
 
-        {/* Google Sign-In Button */}
+        {/* Google Sign-In Button with Loading Indicator */}
         <Button
           onClick={handleGoogleLogin}
           className="mt-4 w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+          disabled={isLoading || isGoogleLoading}
         >
-          <FcGoogle size={20} />
-          Sign in with Google
+          {isGoogleLoading ? (
+            <>
+              <Loader2 className="animate-spin" size={18} />
+              Signing In...
+            </>
+          ) : (
+            <>
+              <FcGoogle size={20} />
+              Sign in with Google
+            </>
+          )}
         </Button>
 
         <div className="mt-5 space-x-1 text-center text-sm">
