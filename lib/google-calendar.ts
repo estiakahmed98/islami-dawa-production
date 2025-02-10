@@ -40,16 +40,29 @@ export async function getCalanderEventTimes(
 }
 
 export async function getGoogleAuthClient(userId: string) {
-  const userAccount = await db.accounts.findFirst({
+  const userWithGoogleAccessToken = await db.users.findUnique({
     where: {
-      userId,
+      id: userId,
+      accounts: {
+        some: {
+          providerId: "google",
+          accessToken: {
+            not: null,
+          },
+        },
+      },
+    },
+    include: {
+      accounts: {
+        select: {
+          providerId: true,
+          accessToken: true,
+        },
+      },
     },
   });
-  console.log("User Account:", userAccount);
 
-  const token = userAccount?.accessToken;
-
-  if (!token) {
+  if (!userWithGoogleAccessToken) {
     throw new Error("No Google account linked to this user");
   }
 
@@ -61,7 +74,7 @@ export async function getGoogleAuthClient(userId: string) {
   );
 
   client.setCredentials({
-    access_token: token,
+    access_token: userWithGoogleAccessToken.accounts[0].accessToken,
   });
 
   return client;

@@ -1,76 +1,201 @@
 "use client";
 
-import { useSession } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { CalendarEvent } from "@prisma/client";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { format } from "date-fns/format";
+import { parse } from "date-fns/parse";
+import { startOfWeek } from "date-fns/startOfWeek";
+import { getDay } from "date-fns/getDay";
+import { enUS } from "date-fns/locale/en-US";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import CalendarEventForm from "./CalendarForm";
+import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 
-export const CalendarComponent = () => {
-  const { data: session } = useSession();
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [loading, setLoading] = useState(false);
+interface GoogleEvent {
+  id: string;
+  title: string;
+  description: string;
+  start: Date;
+  end: Date;
+  color?: string;
+}
 
-  const fetchEvents = async () => {
-    setLoading(true);
+// Setup the localizer for react-big-calendar
+const locales = {
+  "en-US": enUS,
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
+
+export default function GoogleCalendar() {
+  const [events, setEvents] = useState<GoogleEvent[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<GoogleEvent | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [currentDateRange, setCurrentDateRange] = useState<{
+    start: Date;
+    end: Date;
+  }>({
+    start: new Date(),
+    end: new Date(),
+  });
+
+  // Fetch events from API
+  const fetchEvents = async (start: Date, end: Date) => {
     try {
-      const response = await fetch("/api/calendar");
-      const data = await response.json();
-      setEvents(data.items || []);
-    } catch (error) {
-      console.error("Failed to fetch events:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const timeMin = start.toISOString();
+      const timeMax = end.toISOString();
 
-  const createEvent = async () => {
-    const newEvent = {
-      summary: "New Meeting",
-      description: "Important discussion",
-      start: { dateTime: new Date().toISOString() },
-      end: { dateTime: new Date(Date.now() + 3600000).toISOString() },
-    };
+      const response = await fetch(
+        `/api/calendar?timeMin=${timeMin}&timeMax=${timeMax}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch events");
 
-    try {
-      const response = await fetch("/api/calendar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ event: newEvent }),
-      });
-      await fetchEvents();
+      const googleEvents = await response.json();
+
+      const formattedEvents = googleEvents.map((event: any) => ({
+        id: event.id,
+        title: event.summary,
+        description: event.description,
+        start: new Date(event.start.dateTime || event.start.date),
+        end: new Date(event.end.dateTime || event.end.date),
+        color: event.color || "blue",
+      }));
+
+      setEvents(formattedEvents);
     } catch (error) {
-      console.error("Failed to create event:", error);
+      console.error("Error fetching events:", error);
     }
   };
 
   useEffect(() => {
-    if (session) fetchEvents();
-  }, [session]);
+    fetchEvents(currentDateRange.start, currentDateRange.end);
+  }, [currentDateRange]);
 
-  if (!session) return <div>Please login to access calendar</div>;
+  // Handle date range change (when navigating between months/weeks)
+  const handleRangeChange = (range: Date[] | { start: Date; end: Date }) => {
+    if (Array.isArray(range)) {
+      setCurrentDateRange({ start: range[0], end: range[range.length - 1] });
+    } else {
+      setCurrentDateRange(range);
+    }
+  };
+
+  // Handle event creation when a time slot is selected
+  const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
+    setSelectedEvent(null);
+    setIsFormOpen(true);
+    const initialEvent = {
+      title: "",
+      description: "",
+      start: slotInfo.start.toISOString().slice(0, 16),
+      end: slotInfo.end.toISOString().slice(0, 16),
+    };
+    setSelectedEvent(initialEvent as any);
+  };
+
+  // Handle event editing when an event is clicked
+  const handleSelectEvent = (event: GoogleEvent) => {
+    setSelectedEvent(event);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      await fetch(`/api/calendar?eventId=${eventId}`, {
+        method: "DELETE",
+      });
+      fetchEvents(currentDateRange.start, currentDateRange.end);
+      setIsFormOpen(false);
+    } catch (error) {
+      console.error("Error deleting event:", error);
+    }
+  };
+
+  const handleSubmitEvent = async (eventData: any) => {
+    try {
+      const method = selectedEvent?.id ? "PUT" : "POST";
+      const url = selectedEvent?.id ? "/api/calendar" : "/api/calendar";
+
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          calendarId: "primary",
+          eventId: selectedEvent?.id,
+          event: {
+            title: eventData.title,
+            description: eventData.description,
+            start: eventData.start,
+            end: eventData.end,
+          },
+        }),
+      });
+
+      if (!response.ok) throw new Error("Operation failed");
+
+      fetchEvents(currentDateRange.start, currentDateRange.end);
+      setIsFormOpen(false);
+    } catch (error) {
+      console.error("Error saving event:", error);
+    }
+  };
+
+  const initialValues = {
+    title: selectedEvent?.title || "",
+    description: selectedEvent?.description || "",
+    start: selectedEvent?.start
+      ? new Date(selectedEvent.start).toISOString().slice(0, 16)
+      : "",
+    end: selectedEvent?.end
+      ? new Date(selectedEvent.end).toISOString().slice(0, 16)
+      : "",
+  };
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between mb-4">
-        <h2 className="text-2xl font-bold">Calendar Events</h2>
-        <Button onClick={createEvent} disabled={loading}>
-          {loading ? "Creating..." : "Create New Event"}
-        </Button>
-      </div>
+    <div className="relative h-[800px]">
+      <Calendar
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        onRangeChange={handleRangeChange}
+        onSelectEvent={handleSelectEvent}
+        onSelectSlot={handleSelectSlot}
+        selectable
+        defaultView="week"
+        views={["month", "week", "day"]}
+      />
 
-      <div className="space-y-4">
-        {events.map((event) => (
-          <div key={event.id} className="p-4 border rounded-lg">
-            <h3 className="font-bold">{event.title}</h3>
-            <p>{event.description}</p>
-            <p>{new Date(event.start).toLocaleString()}</p>
-            <div className="flex gap-2 mt-2">
-              <Button variant="outline">Edit</Button>
-              <Button variant="destructive">Delete</Button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent>
+          <DialogTitle className="text-xl font-bold">
+            {initialValues ? "Edit Event" : "Create Event"}
+          </DialogTitle>
+          {selectedEvent && (
+            <CalendarEventForm
+              initialValues={initialValues}
+              onSubmit={handleSubmitEvent}
+              onCancel={() => setIsFormOpen(false)}
+            />
+          )}
+          {selectedEvent?.id && (
+            <Button
+              variant="destructive"
+              onClick={() => handleDeleteEvent(selectedEvent.id)}
+              className="mt-4"
+            >
+              Delete Event
+            </Button>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
-};
+}

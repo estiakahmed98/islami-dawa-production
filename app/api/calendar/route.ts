@@ -4,54 +4,10 @@ import { google } from "googleapis";
 import { getGoogleAuthClient } from "@/lib/google-calendar";
 
 /**
- * GET: Fetch a Google Calendar Event
- */
-export async function GET(req: NextRequest) {
-  try {
-    // Retrieve user session
-    const session = await auth.api.getSession({
-      headers: req.headers,
-    });
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Extract eventId from request query
-    const { searchParams } = new URL(req.url);
-    const eventId = searchParams.get("eventId");
-    const calendarId = searchParams.get("calendarId") || "primary";
-
-    if (!eventId) {
-      return NextResponse.json(
-        { error: "Event ID is required." },
-        { status: 400 }
-      );
-    }
-
-    // Initialize Google Calendar client
-    const calendar = google.calendar({ version: "v3" });
-    const response = await calendar.events.get({
-      calendarId,
-      eventId,
-    });
-
-    return NextResponse.json(response.data);
-  } catch (error) {
-    console.error("GET Event Error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch event." },
-      { status: 500 }
-    );
-  }
-}
-
-/**
  * POST: Create a Google Calendar Event
  */
 export async function POST(req: NextRequest) {
   try {
-    // Retrieve user session
     const session = await auth.api.getSession({
       headers: req.headers,
     });
@@ -62,22 +18,35 @@ export async function POST(req: NextRequest) {
 
     const { calendarId = "primary", event } = await req.json();
 
-    // Validate event data
-    if (!event || !event.summary || !event.start || !event.end) {
+    if (!event.title || !event.description || !event.start || !event.end) {
       return NextResponse.json(
         { error: "Invalid event data." },
         { status: 400 }
       );
     }
 
+    console.log(event);
+
     const oAuthClient = await getGoogleAuthClient(session.user.id);
 
-    // Initialize Google Calendar client
-    const calendar = google.calendar({ version: "v3" });
+    console.log(oAuthClient);
+
+    const calendar = google.calendar({ version: "v3", auth: oAuthClient });
     const response = await calendar.events.insert({
       calendarId,
       auth: oAuthClient,
-      requestBody: event,
+      requestBody: {
+        summary: event.title,
+        description: event.description || "",
+        start: {
+          dateTime: new Date(event.start).toISOString(),
+          timeZone: "UTC",
+        },
+        end: {
+          dateTime: new Date(event.end).toISOString(),
+          timeZone: "UTC",
+        },
+      },
     });
 
     return NextResponse.json(response.data);
@@ -91,11 +60,49 @@ export async function POST(req: NextRequest) {
 }
 
 /**
+ * GET: Retrieve Google Calendar Events
+ */
+export async function GET(req: NextRequest) {
+  try {
+    const session = await auth.api.getSession({
+      headers: req.headers,
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const calendarId = searchParams.get("calendarId") || "primary";
+    const timeMin = searchParams.get("timeMin");
+    const timeMax = searchParams.get("timeMax");
+
+    const oAuthClient = await getGoogleAuthClient(session.user.id);
+
+    const calendar = google.calendar({ version: "v3", auth: oAuthClient });
+    const response = await calendar.events.list({
+      calendarId,
+      timeMin: timeMin ? new Date(timeMin).toISOString() : undefined,
+      timeMax: timeMax ? new Date(timeMax).toISOString() : undefined,
+      singleEvents: true,
+      orderBy: "startTime",
+    });
+
+    return NextResponse.json(response.data.items);
+  } catch (error) {
+    console.error("Get Events Error:", error);
+    return NextResponse.json(
+      { error: "Failed to retrieve events." },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * PUT: Update a Google Calendar Event
  */
 export async function PUT(req: NextRequest) {
   try {
-    // Retrieve user session
     const session = await auth.api.getSession({
       headers: req.headers,
     });
@@ -106,19 +113,38 @@ export async function PUT(req: NextRequest) {
 
     const { calendarId = "primary", eventId, event } = await req.json();
 
-    if (!eventId || !event) {
+    if (
+      !eventId ||
+      !event.title ||
+      !event.description ||
+      !event.start ||
+      !event.end
+    ) {
       return NextResponse.json(
-        { error: "Event ID and data are required." },
+        { error: "Invalid event data." },
         { status: 400 }
       );
     }
 
-    // Initialize Google Calendar client
-    const calendar = google.calendar({ version: "v3" });
+    const oAuthClient = await getGoogleAuthClient(session.user.id);
+
+    const calendar = google.calendar({ version: "v3", auth: oAuthClient });
     const response = await calendar.events.update({
       calendarId,
       eventId,
-      requestBody: event,
+      auth: oAuthClient,
+      requestBody: {
+        summary: event.title,
+        description: event.description || "",
+        start: {
+          dateTime: new Date(event.start).toISOString(),
+          timeZone: "UTC",
+        },
+        end: {
+          dateTime: new Date(event.end).toISOString(),
+          timeZone: "UTC",
+        },
+      },
     });
 
     return NextResponse.json(response.data);
@@ -132,11 +158,10 @@ export async function PUT(req: NextRequest) {
 }
 
 /**
- * DELETE: Remove a Google Calendar Event
+ * DELETE: Delete a Google Calendar Event
  */
 export async function DELETE(req: NextRequest) {
   try {
-    // Retrieve user session
     const session = await auth.api.getSession({
       headers: req.headers,
     });
@@ -145,7 +170,9 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { calendarId = "primary", eventId } = await req.json();
+    const { searchParams } = new URL(req.url);
+    const calendarId = searchParams.get("calendarId") || "primary";
+    const eventId = searchParams.get("eventId");
 
     if (!eventId) {
       return NextResponse.json(
@@ -154,17 +181,16 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // Initialize Google Calendar client
-    const calendar = google.calendar({ version: "v3" });
-    await calendar.events.delete({
+    const oAuthClient = await getGoogleAuthClient(session.user.id);
+
+    const calendar = google.calendar({ version: "v3", auth: oAuthClient });
+    const response = await calendar.events.delete({
       calendarId,
       eventId,
+      auth: oAuthClient,
     });
 
-    return NextResponse.json(
-      { message: "Event deleted successfully." },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete Event Error:", error);
     return NextResponse.json(
