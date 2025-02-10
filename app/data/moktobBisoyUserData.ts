@@ -273,6 +273,19 @@ export const userMoktobBisoyData = {
         "MadrasahAdmit": 100,
         "NewMuslim": 98,
         "editorContent": ""
+      },
+      "2025-02-09": {
+        "MoktobChalu": 200,
+        "MoktobAdmit": 200,
+        "NewMoktob": 175,
+        "Sikkha": 120,
+        "TotalStudent": 150,
+        "TotalSikkha": 150,
+        "GurdianMeeting": 150,
+        "TotalAgeSikkha": 130,
+        "MadrasahAdmit": 140,
+        "NewMuslim": 190,
+        "editorContent": ""
       }
     },
     "faysal@gmail.com": {
@@ -600,6 +613,19 @@ export const userMoktobBisoyData = {
         "MadrasahAdmit": 450,
         "NewMuslim": 500,
         "editorContent": "<p>hELLO</p>"
+      },
+      "2024-02-08": {
+        "MoktobChalu": 200,
+        "MoktobAdmit": 200,
+        "NewMoktob": 200,
+        "Sikkha": 200,
+        "TotalStudent": 200,
+        "TotalSikkha": 200,
+        "GurdianMeeting": 200,
+        "TotalAgeSikkha": 200,
+        "MadrasahAdmit": 200,
+        "NewMuslim": 201,
+        "editorContent": ""
       }
     },
     "selim@gmail.com": {
@@ -673,6 +699,19 @@ export const userMoktobBisoyData = {
         "MadrasahAdmit": 100,
         "NewMuslim": 100,
         "editorContent": ""
+      },
+      "2025-02-09": {
+        "MoktobChalu": 100,
+        "MoktobAdmit": 100,
+        "NewMoktob": 99,
+        "Sikkha": 100,
+        "TotalStudent": 100,
+        "TotalSikkha": 100,
+        "GurdianMeeting": 100,
+        "TotalAgeSikkha": 100,
+        "MadrasahAdmit": 100,
+        "NewMuslim": 100,
+        "editorContent": ""
       }
     },
     "shakil@gmail.com": {
@@ -685,6 +724,32 @@ export const userMoktobBisoyData = {
         "TotalSikkha": 100,
         "GurdianMeeting": 100,
         "TotalAgeSikkha": 98,
+        "MadrasahAdmit": 100,
+        "NewMuslim": 100,
+        "editorContent": ""
+      },
+      "2025-05-09": {
+        "MoktobChalu": 100,
+        "MoktobAdmit": 100,
+        "NewMoktob": 100,
+        "Sikkha": 100,
+        "TotalStudent": 100,
+        "TotalSikkha": 100,
+        "GurdianMeeting": 98,
+        "TotalAgeSikkha": 100,
+        "MadrasahAdmit": 100,
+        "NewMuslim": 100,
+        "editorContent": ""
+      },
+      "2025-04-09": {
+        "MoktobChalu": 100,
+        "MoktobAdmit": 100,
+        "NewMoktob": 100,
+        "Sikkha": 100,
+        "TotalStudent": 100,
+        "TotalSikkha": 100,
+        "GurdianMeeting": 98,
+        "TotalAgeSikkha": 100,
         "MadrasahAdmit": 100,
         "NewMuslim": 100,
         "editorContent": ""
@@ -916,7 +981,7 @@ export const userMoktobBisoyData = {
       }
     },
     "aftab@gmail.com": {
-      "2025-02-05": {
+      "2024-02-05": {
         "MoktobChalu": 50,
         "MoktobAdmit": 50,
         "NewMoktob": 50,

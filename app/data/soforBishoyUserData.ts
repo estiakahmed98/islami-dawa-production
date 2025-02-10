@@ -44,6 +44,16 @@ export const userSoforBishoyData = {
           "School 1"
         ],
         "editorContent": "<p>hillooooo</p>"
+      },
+      "2025-02-09": {
+        "moktobVisit": 100,
+        "madrasaVisits": [
+          "100"
+        ],
+        "schoolCollegeVisits": [
+          "100"
+        ],
+        "editorContent": ""
       }
     },
     "faysal@gmail.com": {

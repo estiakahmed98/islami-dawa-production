@@ -36,6 +36,10 @@ export const userDayeData = {
       "2025-01-19": {
         "sohojogiDayeToiri": 50,
         "editorContent": "<p><span style=\"color: rgb(55, 65, 81); font-family: Arial, Helvetica, sans-serif; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 500; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;\">সহযোগি দাঈ তৈরি হয়েছে</span></p>"
+      },
+      "2024-02-09": {
+        "sohojogiDayeToiri": 500,
+        "editorContent": ""
       }
     },
     "zisan@gmail.com": {
