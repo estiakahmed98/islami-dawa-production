@@ -8,8 +8,8 @@ datasource db {
 }
 
 model users {
-  id            String     @id @default(cuid())
-  email         String     @unique
+  id            String          @id @default(cuid())
+  email         String          @unique
   name          String?
   role          String
   division      String?
@@ -29,6 +29,7 @@ model users {
   note          String?
   sessions      sessions[]
   accounts      accounts[]
+  CalendarEvent CalendarEvent[]
 }
 
 model sessions {
@@ -44,6 +45,22 @@ model sessions {
   user           users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
+}
+
+model CalendarEvent {
+  id            String   @id @default(cuid())
+  googleEventId String   @unique
+  calendarId    String
+  title         String
+  description   String?
+  start         DateTime
+  end           DateTime
+  location      String?
+  creator       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId        String
+  user          users    @relation(fields: [userId], references: [id])
 }
 
 model accounts {
