@@ -502,7 +502,7 @@ export const userMoktobBisoyData = {
         "NewMuslim": 1000
       }
     },
-    "estiak@gmail.com": {
+    "estiakahmed898@gmail.com": {
       "2025-01-12": {
         "MoktobChalu": 4,
         "MoktobAdmit": 76,
@@ -527,6 +527,19 @@ export const userMoktobBisoyData = {
         "MadrasahAdmit": 74,
         "NewMuslim": 13,
         "editorContent": ""
+      },
+      "2025-02-11": {
+        "MoktobChalu": 4,
+        "MoktobAdmit": 76,
+        "NewMoktob": 15,
+        "Sikkha": 3,
+        "TotalStudent": 255,
+        "TotalSikkha": 7,
+        "GurdianMeeting": 4,
+        "TotalAgeSikkha": 74,
+        "MadrasahAdmit": 76,
+        "NewMuslim": 13,
+        "editorContent": "<p>Good&nbsp;</p>"
       }
     },
     "tauhid@gmail.com": {
