@@ -26,7 +26,7 @@ interface Task {
 interface TaskFormProps {
   userEmail: string;
   userRole: string;
-  selectedDate: string | null;
+  selectedDate: string | " ";
   setIsOpen: (isOpen: boolean) => void;
   fetchTasks: () => void;
   taskData?: Task | null;

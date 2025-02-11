@@ -144,7 +144,7 @@ const SidebarMenu = () => {
       url: "/dashboard/leave",
     },
     {
-      title: "কর্সূমচী",
+      title: "কর্মসূচি",
       icon: <GrSchedules className="size-5" />,
       url: "/dashboard/calendar",
     },

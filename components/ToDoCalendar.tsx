@@ -4,8 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
 import TaskForm from "./ToDoTaskForm";
-import { DayPilotMonth, DayPilot } from "@daypilot/daypilot-lite-react";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { format, parse, startOfWeek, getDay } from "date-fns";
+import { enUS } from "date-fns/locale/en-US";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 
 interface Task {
   id: string;
@@ -21,24 +23,32 @@ interface Task {
   area?: string;
   upazila?: string;
   union?: string;
-  // For DayPilot usage:
-  text?: string;
-  start?: string;
-  end?: string;
+  start: Date;
+  end: Date;
 }
+
+// Setup the localizer for react-big-calendar
+const locales = {
+  "en-US": enUS,
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
 
 const TodoListCalendar = () => {
   const { data: session } = useSession();
-
   const userEmail = session?.user?.email || "";
-
   const userRole = session?.user?.role || "";
 
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [startDate, setStartDate] = useState(DayPilot.Date.today());
   const [isEditing, setIsEditing] = useState(false);
 
   // Fetch tasks
@@ -57,18 +67,16 @@ const TodoListCalendar = () => {
       const data = await response.json();
       const allTasks: Task[] = data.records;
 
-      // Convert each to DayPilot event format
+      // Convert each to Calendar event format
       const mapped = allTasks.map((task) => {
-        const d = new Date(task.date);
-        const safeDate = isNaN(d.getTime())
-          ? new Date().toISOString().split("T")[0]
-          : d.toISOString().split("T")[0];
+        const start = new Date(task.date);
+        const end = new Date(task.date);
+        end.setHours(end.getHours() + 1); // Set end time 1 hour after start
 
         return {
           ...task,
-          text: task.title,
-          start: safeDate,
-          end: safeDate,
+          start,
+          end,
         };
       });
 
@@ -87,29 +95,28 @@ const TodoListCalendar = () => {
   }, [fetchTasks]);
 
   // Handle selecting an empty date cell
-  const handleDateClick = (date: Date | undefined) => {
-    if (!date) return;
+  const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
+    const selectedDate = new Date(slotInfo.start);
+    selectedDate.setHours(0, 0, 0, 0);
 
-    // Zero-out hours, minutes, and seconds
-    const selectedMidnight = new Date(date);
-    selectedMidnight.setHours(0, 0, 0, 0);
-
-    const todayMidnight = new Date();
-    todayMidnight.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     // Prevent selecting past dates
-    if (selectedMidnight < todayMidnight) {
+    if (selectedDate < today) {
       toast.error("You cannot select a past date.");
       return;
     }
 
-    // ✅ Fix: Use toLocaleDateString for proper YYYY-MM-DD format in local time
-    const dayString = selectedMidnight.toLocaleDateString("en-CA");
-    console.log("DayString :", dayString);
-    setSelectedDate(dayString);
+    setSelectedDate(selectedDate);
     setSelectedTask(null);
     setIsOpen(true);
     setIsEditing(false);
+  };
+
+  // Handle event editing when an event is clicked
+  const handleSelectEvent = (event: Task) => {
+    setSelectedTask(event);
   };
 
   // Delete a task
@@ -154,43 +161,22 @@ const TodoListCalendar = () => {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-4">কর্সূমচী </h2>
+      <h2 className="text-2xl font-semibold mb-4">কর্মসূচি</h2>
 
-      {/* Nav + current month */}
-      <div className="flex mb-2 gap-2 items-center">
-        <button
-          className="bg-[#227f9b] text-white px-4 py-2 rounded"
-          onClick={() => setStartDate(startDate.addMonths(-1))}
-        >
-          <FaArrowLeft />
-        </button>
-        <p className="bg-[#227f9b] text-white px-4 py-2 rounded">
-          {startDate.toString("MMMM yyyy")}
-        </p>
-        <button
-          className="bg-[#227f9b] text-white px-4 py-2 rounded"
-          onClick={() => setStartDate(startDate.addMonths(1))}
-        >
-          <FaArrowRight />
-        </button>
+      {/* Calendar Component */}
+      <div className="h-[800px]">
+        <Calendar
+          localizer={localizer}
+          events={tasks}
+          startAccessor="start"
+          endAccessor="end"
+          defaultView="month"
+          views={["month", "week", "day"]}
+          onSelectSlot={handleSelectSlot}
+          onSelectEvent={handleSelectEvent}
+          selectable
+        />
       </div>
-
-      <DayPilotMonth
-        startDate={startDate}
-        onTimeRangeSelected={(args) => {
-          handleDateClick(new Date(args.start.toString()));
-        }}
-        events={tasks.map((t) => ({
-          id: t.id,
-          text: t.text ?? t.title,
-          start: t.start!,
-          end: t.end!,
-        }))}
-        onEventClick={(args) => {
-          const found = tasks.find((t) => t.id === args.e.id());
-          if (found) setSelectedTask(found);
-        }}
-      />
 
       {/* If event is clicked, show details */}
       {selectedTask && (
@@ -231,19 +217,13 @@ const TodoListCalendar = () => {
                 Close
               </button>
 
-              {/* 
-                Show Edit/Delete if:
-                  - user is the owner (email match)
-                  (If you want centraladmin to also be able, 
-                   add condition like userRole==="centraladmin" ) 
-              */}
               {selectedTask.email === userEmail && (
                 <div className="space-x-2">
                   <button
                     className="bg-yellow-500 text-white px-4 py-2 rounded"
                     onClick={() => {
                       setIsEditing(true);
-                      setSelectedDate(selectedTask.date);
+                      setSelectedDate(new Date(selectedTask.date));
                       setIsOpen(true);
                     }}
                   >
