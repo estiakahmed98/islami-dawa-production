@@ -260,7 +260,7 @@ const AdminDashboard: React.FC = () => {
         <div className="flex flex-wrap items-center gap-4 mt-4 lg:mt-0">
           <div className="flex justify-center">
             <button
-              onClick={() => router.push("/comparison")}
+              onClick={() => router.push("admin/comparison")}
               className="bg-emerald-600 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-emerald-700 transition-all duration-300 focus:ring focus:ring-emerald-300"
             >
               📊 তুলনা দেখুন

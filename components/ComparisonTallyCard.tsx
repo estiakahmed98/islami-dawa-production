@@ -53,36 +53,34 @@ const ComparisonTallyCard: React.FC<{
               <span className="text-sm font-medium block">{current.label}</span>
 
               {/* Value Comparison */}
-              <div className="flex justify-between text-sm">
-                <span className={`font-medium ${textColorClass}`}>
+              <div className="grid space-y-4 text-sm">
+                <div className={`font-medium ${textColorClass}`}>
                   বর্তমান: {current.value}{" "}
                   <span className={`text-xs ${percentageColor}`}>
                     ({percentageChange > 0 ? "+" : ""}
                     {percentageChange.toFixed(1)}%)
                   </span>
-                </span>
-                <span className="text-gray-500 font-medium">
+                  {/* Current Value Progress Bar (Green if increased, Red if decreased) */}
+                  <div className="w-full bg-gray-200 rounded-full h-4 relative">
+                    <div
+                      className={`h-4 rounded-full ${progressBarColor}`}
+                      style={{ width: `${currentPercentage}%` }}
+                    ></div>
+                  </div>
+                </div>
+                <div className="text-gray-500 font-medium">
                   পূর্ববর্তী: {previous.value}
-                </span>
-              </div>
-
-              <div className="grid space-y-4">
-                {/* Current Value Progress Bar (Green if increased, Red if decreased) */}
-                <div className="w-full bg-gray-200 rounded-full h-4 relative">
-                  <div
-                    className={`h-4 rounded-full ${progressBarColor}`}
-                    style={{ width: `${currentPercentage}%` }}
-                  ></div>
-                </div>
-
-                {/* Previous Value Progress Bar (Always Blue) */}
-                <div className="w-full bg-gray-200 rounded-full h-4 relative">
-                  <div
-                    className="h-4 rounded-full bg-blue-500"
-                    style={{ width: `${previousPercentage}%` }}
-                  ></div>
+                  {/* Previous Value Progress Bar (Always Blue) */}
+                  <div className="w-full bg-gray-200 rounded-full h-4 relative">
+                    <div
+                      className="h-4 rounded-full bg-blue-500"
+                      style={{ width: `${previousPercentage}%` }}
+                    ></div>
+                  </div>
                 </div>
               </div>
+
+              <div className="grid space-y-4"></div>
             </div>
           );
         })}

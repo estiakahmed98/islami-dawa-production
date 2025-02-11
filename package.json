@@ -45,6 +45,7 @@
     "date-fns": "^4.1.0",
     "formik": "^2.4.6",
     "googleapis": "^144.0.0",
+    "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.10.2",
     "input-otp": "^1.4.2",
     "jodit": "^4.2.47",
