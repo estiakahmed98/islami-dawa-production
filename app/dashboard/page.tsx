@@ -1,4 +1,4 @@
-import Dashboard from "@/components/UserDashboard";
+import Dashboard from "@/components/UserDashboard copy";
 import React from "react";
 
 const DashboardPage: React.FC = () => {

@@ -11,6 +11,7 @@ import { userDayeData } from "@/app/data/dayiUserData";
 import { userDawatiBisoyData } from "@/app/data/dawatiBisoyUserData";
 import { userJamatBisoyData } from "@/app/data/jamatBisoyUserData";
 import { userDineFeraData } from "@/app/data/dineferaUserData";
+import { useRouter } from "next/navigation";
 import { userSoforBishoyData } from "@/app/data/soforBishoyUserData";
 import {
   Tabs,
@@ -29,6 +30,7 @@ interface TallyProps {
 }
 
 const Dashboard: React.FC<TallyProps> = () => {
+  const router = useRouter();
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
   // console.log("Session", session);
@@ -106,41 +108,50 @@ const Dashboard: React.FC<TallyProps> = () => {
           <span className="text-emerald-600">{session?.user?.name}</span>
         </h1>
 
-        {/* Filter Controls */}
-        <div className="flex flex-wrap items-center gap-4 mt-4 lg:mt-0">
-          {/* Month Selection Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-              className="w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
-            >
-              {months
-                .filter(
-                  (month) =>
-                    month.toLowerCase().includes(searchMonth.toLowerCase()) // 🔍 Filters months dynamically
-                )
-                .map((month, index) => (
-                  <option key={index} value={index}>
-                    {month}
+        <div className="flex justify-center gap-3">
+          <button
+            onClick={() => router.push("/comparison")}
+            className="bg-emerald-600 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-emerald-700 transition-all duration-300 focus:ring focus:ring-emerald-300"
+          >
+            📊 তুলনা দেখুন
+          </button>
+
+          {/* Filter Controls */}
+          <div className="flex flex-wrap items-center gap-4 mt-4 lg:mt-0">
+            {/* Month Selection Dropdown */}
+            <div className="relative">
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                className="w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
+              >
+                {months
+                  .filter(
+                    (month) =>
+                      month.toLowerCase().includes(searchMonth.toLowerCase()) // 🔍 Filters months dynamically
+                  )
+                  .map((month, index) => (
+                    <option key={index} value={index}>
+                      {month}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            {/* Year Selection Dropdown */}
+            <div className="relative">
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="w-24 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
+              >
+                {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
+                  <option key={year} value={year}>
+                    {year}
                   </option>
                 ))}
-            </select>
-          </div>
-
-          {/* Year Selection Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="w-24 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
-            >
-              {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
+              </select>
+            </div>
           </div>
         </div>
       </div>

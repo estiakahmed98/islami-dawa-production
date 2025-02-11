@@ -169,7 +169,7 @@ export default function GoogleCalendar() {
         onSelectEvent={handleSelectEvent}
         onSelectSlot={handleSelectSlot}
         selectable
-        defaultView="week"
+        defaultView="month"
         views={["month", "week", "day"]}
       />
 
