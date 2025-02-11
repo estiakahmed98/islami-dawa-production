@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import AmoliChart from "@/components/AmoliCharts";
-import dynamic from "next/dynamic";
 import { userAmoliData } from "@/app/data/amoliMuhasabaUserData";
 import { userMoktobBisoyData } from "@/app/data/moktobBisoyUserData";
 import { userDawatiMojlishData } from "@/app/data/dawatiMojlishUserData";
@@ -11,7 +10,6 @@ import { userDayeData } from "@/app/data/dayiUserData";
 import { userDawatiBisoyData } from "@/app/data/dawatiBisoyUserData";
 import { userJamatBisoyData } from "@/app/data/jamatBisoyUserData";
 import { userDineFeraData } from "@/app/data/dineferaUserData";
-import { useRouter } from "next/navigation";
 import { userSoforBishoyData } from "@/app/data/soforBishoyUserData";
 import {
   Tabs,
@@ -22,6 +20,7 @@ import {
 import { useSession } from "@/lib/auth-client";
 import AmoliTableShow from "@/components/TableShow";
 import TallyAdmin from "@/components/TallyAdmin";
+import ComparisonTallyCard from "@/components/ComparisonTallyCard";
 
 interface TallyProps {
   userData: Record<string, any>;
@@ -30,18 +29,23 @@ interface TallyProps {
 }
 
 const Dashboard: React.FC<TallyProps> = () => {
-  const router = useRouter();
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
-  // console.log("Session", session);
 
+  // State for main dashboard
   const [selectedMonth, setSelectedMonth] = useState<number>(
     new Date().getMonth()
   );
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear()
   );
-  const [searchMonth, setSearchMonth] = useState<string>(""); // Stores the search input
+
+  // State for comparison feature
+  const [showComparison, setShowComparison] = useState(false);
+  const [comparisonType, setComparisonType] = useState("day");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [comparisonData, setComparisonData] = useState<any[]>([]);
 
   const months = [
     "January",
@@ -58,6 +62,7 @@ const Dashboard: React.FC<TallyProps> = () => {
     "December",
   ];
 
+  // Filter data by selected month and year
   const filterChartAndTallyData = (userData: any) => {
     if (!userData || !userData.records) return userData;
 
@@ -65,8 +70,6 @@ const Dashboard: React.FC<TallyProps> = () => {
       Record<string, any>
     >((filtered, email) => {
       const emailData = userData.records[email];
-
-      // Filter records by selected month and year
       const filteredDates = Object.keys(emailData).reduce<Record<string, any>>(
         (acc, date) => {
           const [year, month] = date.split("-").map(Number);
@@ -81,28 +84,135 @@ const Dashboard: React.FC<TallyProps> = () => {
       if (Object.keys(filteredDates).length > 0) {
         filtered[email] = filteredDates;
       }
-
       return filtered;
     }, {});
 
     return { ...userData, records: filteredRecords };
   };
 
-  const filteredAmoliData = filterChartAndTallyData(userAmoliData);
+  // Convert values to points for comparison
+  const convertToPoints = (value: any, field: string): number => {
+    if (typeof value === "number" && !isNaN(value)) return value;
+
+    if (typeof value === "string") {
+      value = value.trim();
+
+      if (field === "zikir") {
+        if (value === "সকাল-সন্ধ্যা") return 2;
+        if (value === "সকাল" || value === "সন্ধ্যা") return 1;
+        return 0;
+      } else if (field === "ayat") {
+        // Extract ayat number from range (e.g., "10-20")
+        const ayatNumber = parseInt(value.split("-")[0], 10) || 0;
+        return ayatNumber;
+      } else if (["surah", "ishraq", "ilm", "sirat"].includes(field)) {
+        return value ? 1 : 0;
+      } else if (field === "jamat") {
+        const numValue = Number(value) || 0;
+        return numValue >= 1 && numValue <= 5 ? numValue : 0;
+      } else if (field === "tahajjud") {
+        const numValue = Number(value) || 0;
+        return numValue;
+      } else if (
+        [
+          "Dua",
+          "tasbih",
+          "amoliSura",
+          "hijbulBahar",
+          "dayeeAmol",
+          "ayamroja",
+        ].includes(field)
+      ) {
+        return value === "হ্যাঁ" ? 1 : 0;
+      }
+    }
+
+    return 0;
+  };
+
+  // Fetch comparison data
+  const fetchUserComparisonData = (
+    userData: any,
+    comparisonType: string,
+    from: string,
+    to: string
+  ) => {
+    if (!userData?.records) return [];
+    const userRecords = userData.records[userEmail] || {};
+
+    return Object.keys(userData.labelMap).map((metric) => {
+      let totalFrom = 0;
+      let totalTo = 0;
+
+      if (comparisonType === "day") {
+        totalFrom += convertToPoints(userRecords[from]?.[metric], metric);
+        totalTo += convertToPoints(userRecords[to]?.[metric], metric);
+      } else {
+        Object.keys(userRecords).forEach((date) => {
+          if (comparisonType === "month" && date.startsWith(from))
+            totalFrom += convertToPoints(userRecords[date]?.[metric], metric);
+          if (comparisonType === "month" && date.startsWith(to))
+            totalTo += convertToPoints(userRecords[date]?.[metric], metric);
+          else if (comparisonType === "year" && date.startsWith(from))
+            totalFrom += convertToPoints(userRecords[date]?.[metric], metric);
+          if (comparisonType === "year" && date.startsWith(to))
+            totalTo += convertToPoints(userRecords[date]?.[metric], metric);
+        });
+      }
+
+      let change = "0%";
+      if (totalFrom === 0 && totalTo > 0) {
+        change = "∞% ↑";
+      } else if (totalFrom > 0 && totalTo === 0) {
+        change = "-∞% ↓";
+      } else if (totalFrom === totalTo) {
+        change = "0%";
+      } else {
+        let percentageChange =
+          (Math.abs(totalTo - totalFrom) / Math.max(totalFrom, 1)) * 100;
+        change = `${percentageChange.toFixed(2)}% ${totalTo > totalFrom ? "↑" : "↓"}`;
+      }
+
+      return {
+        label: userData.labelMap[metric],
+        from: totalFrom,
+        to: totalTo,
+        onchange: change,
+        isIncrease: change.includes("↑"),
+      };
+    });
+  };
+
+  // Handle comparison button click
+  const handleCompare = () => {
+    if (!from || !to) {
+      alert("Please select both 'From' and 'To' values.");
+      return;
+    }
+
+    const allData = [
+      userAmoliData,
+      userMoktobBisoyData,
+      userDawatiBisoyData,
+      userDawatiMojlishData,
+      userJamatBisoyData,
+      userDineFeraData,
+      userTalimBisoyData,
+      userSoforBishoyData,
+      userDayeData,
+    ];
+
+    const combinedData = allData.flatMap((data) =>
+      fetchUserComparisonData(data, comparisonType, from, to)
+    );
+
+    setComparisonData(combinedData);
+  };
 
   return (
     <div className="space-y-4">
-      {/* <div>
-        <h1 className="text-xl font-semibold">
-          Welcome,{"  "}
-          <span className="text-2xl text-emerald-600">
-            {session?.user?.name}
-          </span>
-        </h1>
-      </div> */}
-
+      {/* Header Section */}
       <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl">
-        {/* Welcome Message */}
         <h1 className="text-2xl font-bold text-gray-800">
           স্বাগতম ,{" "}
           <span className="text-emerald-600">{session?.user?.name}</span>
@@ -110,36 +220,25 @@ const Dashboard: React.FC<TallyProps> = () => {
 
         <div className="flex justify-center gap-3">
           <button
-            onClick={() => router.push("/comparison")}
-            className="bg-emerald-600 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-emerald-700 transition-all duration-300 focus:ring focus:ring-emerald-300"
+            onClick={() => setShowComparison(!showComparison)}
+            className="bg-emerald-600 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-emerald-700 transition-all duration-300"
           >
-            📊 তুলনা দেখুন
+            {showComparison ? "ড্যাশবোর্ডে ফিরে জান" : "📊 তুলনা দেখুন"}
           </button>
 
-          {/* Filter Controls */}
-          <div className="flex flex-wrap items-center gap-4 mt-4 lg:mt-0">
-            {/* Month Selection Dropdown */}
-            <div className="relative">
+          {!showComparison && (
+            <div className="flex flex-wrap items-center gap-4">
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
                 className="w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
               >
-                {months
-                  .filter(
-                    (month) =>
-                      month.toLowerCase().includes(searchMonth.toLowerCase()) // 🔍 Filters months dynamically
-                  )
-                  .map((month, index) => (
-                    <option key={index} value={index}>
-                      {month}
-                    </option>
-                  ))}
+                {months.map((month, index) => (
+                  <option key={index} value={index}>
+                    {month}
+                  </option>
+                ))}
               </select>
-            </div>
-
-            {/* Year Selection Dropdown */}
-            <div className="relative">
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
@@ -152,128 +251,226 @@ const Dashboard: React.FC<TallyProps> = () => {
                 ))}
               </select>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
-      <div className="grid xl:grid-cols-3 p-2 lg:p-6 gap-6 overflow-y-auto border border-[#155E75] rounded-xl">
-        <AmoliChart data={filteredAmoliData.records} userEmail={userEmail} />
+      {showComparison ? (
+        <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
+          <div className="flex flex-wrap gap-4 items-center">
+            <select
+              value={comparisonType}
+              onChange={(e) => setComparisonType(e.target.value)}
+              className="border px-4 py-2 rounded-md shadow-sm"
+            >
+              <option value="day">দিন অনুযায়ী</option>
+              <option value="month">মাস অনুযায়ী</option>
+              <option value="year">বছর অনুযায়ী</option>
+            </select>
 
-        <TallyAdmin
-          userData={filterChartAndTallyData(userMoktobBisoyData)}
-          emails={userEmail}
-          title="মক্তব বিষয়"
-        />
+            {comparisonType === "day" && (
+              <>
+                <input
+                  type="date"
+                  value={from}
+                  onChange={(e) => setFrom(e.target.value)}
+                  className="border px-4 py-2 rounded-md shadow-sm"
+                />
+                <input
+                  type="date"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  className="border px-4 py-2 rounded-md shadow-sm"
+                />
+              </>
+            )}
 
-        <TallyAdmin
-          userData={filterChartAndTallyData(userDawatiBisoyData)}
-          emails={userEmail}
-          title="দাওয়াতি বিষয়"
-        />
+            {comparisonType === "month" && (
+              <div className="flex gap-2 items-center">
+                <input
+                  type="month"
+                  value={from}
+                  onChange={(e) => setFrom(e.target.value)}
+                  className="border px-4 py-2 rounded-md shadow-sm"
+                />
+                <span className="font-bold">থেকে</span>
+                <input
+                  type="month"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  className="border px-4 py-2 rounded-md shadow-sm"
+                />
+              </div>
+            )}
 
-        <TallyAdmin
-          userData={filterChartAndTallyData(userDawatiMojlishData)}
-          emails={userEmail}
-          title="দাওয়াতি মজলিশ"
-        />
+            {comparisonType === "year" && (
+              <div className="flex gap-2 items-center">
+                <select
+                  value={from}
+                  onChange={(e) => setFrom(e.target.value)}
+                  className="border px-4 py-2 rounded-md shadow-sm"
+                >
+                  {Array.from({ length: 10 }, (_, i) => 2020 + i).map(
+                    (year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    )
+                  )}
+                </select>
+                <span className="font-bold">থেকে</span>
+                <select
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  className="border px-4 py-2 rounded-md shadow-sm"
+                >
+                  {Array.from({ length: 10 }, (_, i) => 2020 + i).map(
+                    (year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    )
+                  )}
+                </select>
+              </div>
+            )}
 
-        <TallyAdmin
-          userData={filterChartAndTallyData(userJamatBisoyData)}
-          emails={userEmail}
-          title="জামাত বিষয়"
-        />
+            <button
+              onClick={handleCompare}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
+            >
+              তুলনা করুন
+            </button>
+          </div>
 
-        <TallyAdmin
-          userData={filterChartAndTallyData(userDineFeraData)}
-          emails={userEmail}
-          title="দ্বীনে ফিরে এসেছে"
-        />
+          {comparisonData.length > 0 && (
+            <ComparisonTallyCard
+              currentData={comparisonData.map((item) => ({
+                label: item.label,
+                value: item.to,
+              }))}
+              previousData={comparisonData.map((item) => ({
+                label: item.label,
+                value: item.from,
+              }))}
+            />
+          )}
+        </div>
+      ) : (
+        <>
+          <div className="grid xl:grid-cols-3 p-2 lg:p-6 gap-6 overflow-y-auto border border-[#155E75] rounded-xl">
+            <AmoliChart
+              data={filterChartAndTallyData(userAmoliData).records}
+              userEmail={userEmail}
+            />
+            <TallyAdmin
+              userData={filterChartAndTallyData(userMoktobBisoyData)}
+              emails={userEmail}
+              title="মক্তব বিষয়"
+            />
+            <TallyAdmin
+              userData={filterChartAndTallyData(userDawatiBisoyData)}
+              emails={userEmail}
+              title="দাওয়াতি বিষয়"
+            />
+            <TallyAdmin
+              userData={filterChartAndTallyData(userDawatiMojlishData)}
+              emails={userEmail}
+              title="দাওয়াতি মজলিশ"
+            />
+            <TallyAdmin
+              userData={filterChartAndTallyData(userJamatBisoyData)}
+              emails={userEmail}
+              title="জামাত বিষয়"
+            />
+            <TallyAdmin
+              userData={filterChartAndTallyData(userDineFeraData)}
+              emails={userEmail}
+              title="দ্বীনে ফিরে এসেছে"
+            />
+            <TallyAdmin
+              userData={filterChartAndTallyData(userTalimBisoyData)}
+              emails={userEmail}
+              title="মহিলাদের তালিম বিষয়"
+            />
+            <TallyAdmin
+              userData={filterChartAndTallyData(userSoforBishoyData)}
+              emails={userEmail}
+              title="সফর বিষয়"
+            />
+            <TallyAdmin
+              userData={filterChartAndTallyData(userDayeData)}
+              emails={userEmail}
+              title="দায়ী বিষয়"
+            />
+          </div>
 
-        <TallyAdmin
-          userData={filterChartAndTallyData(userTalimBisoyData)}
-          emails={userEmail}
-          title="মহিলাদের তালিম বিষয়"
-        />
+          <div className="border border-[#155E75] p-2 lg:p-6 mt-10 rounded-xl overflow-y-auto">
+            <Tabs defaultValue="Amolimusahaba" className="w-full lg:p-4">
+              <TabsList className="mx-10 grid grid-cols-2 md:grid-cols-4 my-6">
+                <TabsTrigger value="Amolimusahaba">আ’মলি মুহাসাবা</TabsTrigger>
+                <TabsTrigger value="moktob">মক্তব বিষয়</TabsTrigger>
+                <TabsTrigger value="talim">মহিলাদের তালিম বিষয়</TabsTrigger>
+                <TabsTrigger value="daye">দায়ী বিষয়</TabsTrigger>
+                <TabsTrigger value="dawati">দাওয়াতি বিষয়</TabsTrigger>
+                <TabsTrigger value="dawatimojlish">দাওয়াতি মজলিশ</TabsTrigger>
+                <TabsTrigger value="jamat">জামাত বিষয়</TabsTrigger>
+                <TabsTrigger value="dinefera">দ্বীনে ফিরে এসেছে</TabsTrigger>
+                <TabsTrigger value="sofor">সফর বিষয়</TabsTrigger>
+              </TabsList>
 
-        <TallyAdmin
-          userData={filterChartAndTallyData(userSoforBishoyData)}
-          emails={userEmail}
-          title="সফর বিষয়"
-        />
-
-        <TallyAdmin
-          userData={filterChartAndTallyData(userDayeData)}
-          emails={userEmail}
-          title="দায়ী বিষয়"
-        />
-      </div>
-
-      <div className="border border-[#155E75] p-2 lg:p-6 mt-10 rounded-xl overflow-y-auto">
-        <Tabs defaultValue="Amolimusahaba" className="w-full  lg:p-4">
-          <TabsList className="mx-10 grid grid-cols-2 md:grid-cols-4 my-6">
-            <TabsTrigger value="Amolimusahaba">আ’মলি মুহাসাবা</TabsTrigger>
-            <TabsTrigger value="moktob">মক্তব বিষয়</TabsTrigger>
-            <TabsTrigger value="talim">মহিলাদের তালিম বিষয়</TabsTrigger>
-            <TabsTrigger value="daye">দায়ী বিষয়</TabsTrigger>
-            <TabsTrigger value="dawati">দাওয়াতি বিষয়</TabsTrigger>
-            <TabsTrigger value="dawatimojlish">দাওয়াতি মজলিশ</TabsTrigger>
-            <TabsTrigger value="jamat">জামাত বিষয়</TabsTrigger>
-            <TabsTrigger value="dinefera">দ্বীনে ফিরে এসেছে</TabsTrigger>
-            <TabsTrigger value="sofor">সফর বিষয়</TabsTrigger>
-          </TabsList>
-
-          {/* Tab Content */}
-          <TabsContent value="Amolimusahaba">
-            <div className="bg-gray-50 rounded shadow">
-              <AmoliTableShow userData={userAmoliData} />
-            </div>
-          </TabsContent>
-          <TabsContent value="moktob">
-            <div className="bg-gray-50 rounded shadow">
-              <AmoliTableShow userData={userMoktobBisoyData} />
-            </div>
-          </TabsContent>
-          <TabsContent value="talim">
-            <div className="bg-gray-50 rounded shadow">
-              <AmoliTableShow userData={userTalimBisoyData} />
-            </div>
-          </TabsContent>
-          <TabsContent value="daye">
-            <div className="bg-gray-50 rounded shadow">
-              <AmoliTableShow userData={userDayeData} />
-            </div>
-          </TabsContent>
-          <TabsContent value="dawati">
-            <div className="bg-gray-50 rounded shadow">
-              <AmoliTableShow userData={userDawatiBisoyData} />
-            </div>
-          </TabsContent>
-          <TabsContent value="dawatimojlish">
-            <div className="bg-gray-50 rounded shadow">
-              <AmoliTableShow userData={userDawatiMojlishData} />
-            </div>
-          </TabsContent>
-          <TabsContent value="jamat">
-            <div className="bg-gray-50 rounded shadow">
-              <AmoliTableShow userData={userJamatBisoyData} />
-            </div>
-          </TabsContent>
-          <TabsContent value="dinefera">
-            <div className="bg-gray-50 rounded shadow">
-              <AmoliTableShow userData={userDineFeraData} />
-            </div>
-          </TabsContent>
-          <TabsContent value="sofor">
-            <div className="bg-gray-50 rounded shadow">
-              <AmoliTableShow userData={userSoforBishoyData} />
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
+              {/* Tab Content */}
+              <TabsContent value="Amolimusahaba">
+                <div className="bg-gray-50 rounded shadow">
+                  <AmoliTableShow userData={userAmoliData} />
+                </div>
+              </TabsContent>
+              <TabsContent value="moktob">
+                <div className="bg-gray-50 rounded shadow">
+                  <AmoliTableShow userData={userMoktobBisoyData} />
+                </div>
+              </TabsContent>
+              <TabsContent value="talim">
+                <div className="bg-gray-50 rounded shadow">
+                  <AmoliTableShow userData={userTalimBisoyData} />
+                </div>
+              </TabsContent>
+              <TabsContent value="daye">
+                <div className="bg-gray-50 rounded shadow">
+                  <AmoliTableShow userData={userDayeData} />
+                </div>
+              </TabsContent>
+              <TabsContent value="dawati">
+                <div className="bg-gray-50 rounded shadow">
+                  <AmoliTableShow userData={userDawatiBisoyData} />
+                </div>
+              </TabsContent>
+              <TabsContent value="dawatimojlish">
+                <div className="bg-gray-50 rounded shadow">
+                  <AmoliTableShow userData={userDawatiMojlishData} />
+                </div>
+              </TabsContent>
+              <TabsContent value="jamat">
+                <div className="bg-gray-50 rounded shadow">
+                  <AmoliTableShow userData={userJamatBisoyData} />
+                </div>
+              </TabsContent>
+              <TabsContent value="dinefera">
+                <div className="bg-gray-50 rounded shadow">
+                  <AmoliTableShow userData={userDineFeraData} />
+                </div>
+              </TabsContent>
+              <TabsContent value="sofor">
+                <div className="bg-gray-50 rounded shadow">
+                  <AmoliTableShow userData={userSoforBishoyData} />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </>
+      )}
     </div>
   );
 };
 
-// Export dynamically to disable SSR
-// export default dynamic(() => Promise.resolve(Dashboard), { ssr: false });
 export default Dashboard;
