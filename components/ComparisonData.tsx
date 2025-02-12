@@ -141,8 +141,8 @@ const convertToPoints = (value: any, field: string): number => {
       return 0;
     } else if (field === "ayat") {
       // Extract ayat number from range (e.g., "10-20")
-      const ayatNumber = parseInt(value.split("-")[0], 10) || 0;
-      return ayatNumber;
+      const [start, end] = value.split("-").map((num: string) => parseInt(num, 10) || 0);
+      return Math.abs((end || start) - start); // Return difference
     } else if (["surah", "ishraq", "ilm", "sirat"].includes(field)) {
       return value ? 1 : 0;
     } else if (field === "jamat") {

@@ -146,6 +146,40 @@ export const userAmoliData = {
         "hijbulBahar": "হ্যাঁ",
         "ayat": "10-20",
         "percentage": "100.00"
+      },
+      "2025-02-11": {
+        "tahajjud": 20,
+        "surah": "সুরা রাদ",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 5,
+        "sirat": "Hadis",
+        "Dua": "হ্যাঁ",
+        "ilm": "Hadis",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-20",
+        "percentage": "100.00"
+      },
+      "2025-02-12": {
+        "tahajjud": 30,
+        "surah": "সুরা বাকারা",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "আওয়াবীন",
+        "jamat": 2,
+        "sirat": "Hadis",
+        "Dua": "না",
+        "ilm": "Hadis",
+        "tasbih": "না",
+        "dayeeAmol": "না",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-50",
+        "percentage": "72.31"
       }
     },
     "moni@gmail.com": {
@@ -899,7 +933,6 @@ export const userAmoliData = {
         "percentage": "100.00"
       },
       "2025-02-12": {
-
         "tahajjud": 8,
         "surah": "সুরা রাদ",
         "zikir": "সকাল-সন্ধ্যা",

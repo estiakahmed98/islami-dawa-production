@@ -1061,7 +1061,34 @@ export const userMoktobBisoyData = {
         "NewMuslim": 99,
         "editorContent": ""
       }
-    
+    },
+    "jewelranashepon@gmail.com": {
+      "2025-02-11": {
+        "MoktobChalu": 100,
+        "MoktobAdmit": 100,
+        "NewMoktob": 100,
+        "Sikkha": 100,
+        "TotalStudent": 100,
+        "TotalSikkha": 100,
+        "GurdianMeeting": 100,
+        "TotalAgeSikkha": 100,
+        "MadrasahAdmit": 100,
+        "NewMuslim": 98,
+        "editorContent": ""
+      },
+      "2025-02-12": {
+        "MoktobChalu": 150,
+        "MoktobAdmit": 100,
+        "NewMoktob": 150,
+        "Sikkha": 100,
+        "TotalStudent": 120,
+        "TotalSikkha": 50,
+        "GurdianMeeting": 69,
+        "TotalAgeSikkha": 130,
+        "MadrasahAdmit": 45,
+        "NewMuslim": 76,
+        "editorContent": ""
+      }
     }
   }
 };

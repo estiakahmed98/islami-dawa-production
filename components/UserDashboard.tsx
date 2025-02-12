@@ -103,8 +103,8 @@ const Dashboard: React.FC<TallyProps> = () => {
         return 0;
       } else if (field === "ayat") {
         // Extract ayat number from range (e.g., "10-20")
-        const ayatNumber = parseInt(value.split("-")[0], 10) || 0;
-        return ayatNumber;
+        const [start, end] = value.split("-").map((num: string) => parseInt(num, 10) || 0);
+        return Math.abs((end || start) - start); // Return difference
       } else if (["surah", "ishraq", "ilm", "sirat"].includes(field)) {
         return value ? 1 : 0;
       } else if (field === "jamat") {
@@ -168,16 +168,38 @@ const Dashboard: React.FC<TallyProps> = () => {
       } else if (totalFrom === totalTo) {
         change = "0%";
       } else {
-        let percentageChange =
-          (Math.abs(totalTo - totalFrom) / Math.max(totalFrom, 1)) * 100;
-        change = `${percentageChange.toFixed(2)}% ${totalTo > totalFrom ? "↑" : "↓"}`;
+        let percentageChange;
+        totalFrom = isNaN(totalFrom) ? 0 : totalFrom;
+        totalTo = isNaN(totalTo) ? 0 : totalTo;
+        if (totalTo - totalFrom > 0) {
+          percentageChange =
+            ((Math.max(totalTo, totalFrom) - Math.min(totalTo, totalFrom)) /
+              Math.min(totalTo, totalFrom)) *
+            100;
+        } else {
+          percentageChange =
+            -(
+              (Math.max(totalTo, totalFrom) - Math.min(totalTo, totalFrom)) /
+              Math.min(totalTo, totalFrom)
+            ) * 100;
+        }
+
+        if (totalFrom === 0 && totalTo > 0) {
+          change = "∞% ↑"; // Infinite increase
+        } else if (totalFrom > 0 && totalTo === 0) {
+          change = "-∞% ↓"; // Infinite decrease
+        } else if (totalFrom === totalTo) {
+          change = "0%";
+        } else {
+          change = `${percentageChange.toFixed(2)}% ${percentageChange > 0 ? "↑" : "↓"}`;
+        }
       }
 
       return {
         label: userData.labelMap[metric],
         from: totalFrom,
         to: totalTo,
-        onchange: change,
+        change,
         isIncrease: change.includes("↑"),
       };
     });
