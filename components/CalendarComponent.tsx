@@ -13,12 +13,12 @@ import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 
 interface GoogleEvent {
-  id: string;
+  id?: string;
   title: string;
   description: string;
   start: Date;
   end: Date;
-  color?: string;
+  attendees?: string[];
 }
 
 // Setup the localizer for react-big-calendar
@@ -61,12 +61,13 @@ export default function GoogleCalendar() {
 
       const formattedEvents = googleEvents.map((event: any) => ({
         id: event.id,
-        title: event.summary,
-        description: event.description,
-        start: new Date(event.start.dateTime || event.start.date),
-        end: new Date(event.end.dateTime || event.end.date),
-        color: event.color || "blue",
+        title: event.summary || "Untitled Event",
+        description: event.description || "",
+        start: event.start?.dateTime ? new Date(event.start.dateTime) : new Date(event.start?.date),
+        end: event.end?.dateTime ? new Date(event.end.dateTime) : new Date(event.end?.date),
+        attendees: Array.isArray(event.attendees) ? event.attendees.map((att: any) => att.email) : [],
       }));
+      
 
       setEvents(formattedEvents);
     } catch (error) {
@@ -91,13 +92,13 @@ export default function GoogleCalendar() {
   const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
     setSelectedEvent(null);
     setIsFormOpen(true);
-    const initialEvent = {
+    setSelectedEvent({
       title: "",
       description: "",
-      start: slotInfo.start.toISOString().slice(0, 16),
-      end: slotInfo.end.toISOString().slice(0, 16),
-    };
-    setSelectedEvent(initialEvent as any);
+      start: slotInfo.start,
+      end: slotInfo.end,
+      attendees: [],
+    });
   };
 
   // Handle event editing when an event is clicked
@@ -121,7 +122,7 @@ export default function GoogleCalendar() {
   const handleSubmitEvent = async (eventData: any) => {
     try {
       const method = selectedEvent?.id ? "PUT" : "POST";
-      const url = selectedEvent?.id ? "/api/calendar" : "/api/calendar";
+      const url = "/api/calendar";
 
       const response = await fetch(url, {
         method,
@@ -134,6 +135,9 @@ export default function GoogleCalendar() {
             description: eventData.description,
             start: eventData.start,
             end: eventData.end,
+            attendees: eventData.attendees.map((email: string) => ({
+              email: email.trim(),
+            })),
           },
         }),
       });
@@ -150,12 +154,9 @@ export default function GoogleCalendar() {
   const initialValues = {
     title: selectedEvent?.title || "",
     description: selectedEvent?.description || "",
-    start: selectedEvent?.start
-      ? new Date(selectedEvent.start).toISOString().slice(0, 16)
-      : "",
-    end: selectedEvent?.end
-      ? new Date(selectedEvent.end).toISOString().slice(0, 16)
-      : "",
+    start: selectedEvent?.start?.toISOString().slice(0, 16) || "",
+    end: selectedEvent?.end?.toISOString().slice(0, 16) || "",
+    attendees: selectedEvent?.attendees?.join(", ") || "",
   };
 
   return (
@@ -176,7 +177,7 @@ export default function GoogleCalendar() {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent>
           <DialogTitle className="text-xl font-bold">
-            {initialValues ? "Edit Event" : "Create Event"}
+            {selectedEvent?.id ? "Edit Event" : "Create Event"}
           </DialogTitle>
           {selectedEvent && (
             <CalendarEventForm
@@ -188,7 +189,7 @@ export default function GoogleCalendar() {
           {selectedEvent?.id && (
             <Button
               variant="destructive"
-              onClick={() => handleDeleteEvent(selectedEvent.id)}
+              onClick={() => handleDeleteEvent(selectedEvent.id!)}
               className="mt-4"
             >
               Delete Event
