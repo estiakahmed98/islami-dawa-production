@@ -16,7 +16,7 @@ export const userAmoliData = {
     "hijbulBahar": "দৈনিক হিজবুল বাহার পাঠ"
   },
   "records": {
-    "jewel@gmail.com": {
+    "jewelranashepon@gmail.com": {
       "2025-01-01": {
         "tahajjud": "10",
         "ayat": "sura Yunus",

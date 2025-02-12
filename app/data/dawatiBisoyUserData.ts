@@ -35,7 +35,7 @@ export const userDawatiBisoyData = {
         "motamotdin": "Helloooooooo"
       }
     },
-    "jewel@gmail.com": {
+    "jewelranashepon@gmail.com": {
       "2025-01-14": {
         "nonMuslimDawat": "500",
         "murtadDawat": "44",
