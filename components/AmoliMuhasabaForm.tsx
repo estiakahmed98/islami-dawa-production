@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, ChangeEvent } from "react";
@@ -103,7 +102,7 @@ const AmoliMuhasabaForm = () => {
   const hijriDate = moment().format("iD");
 
   const showAyamRojaSection =
-    hijriDate === "13" || hijriDate === "14" || hijriDate === "15";
+    hijriDate === "14" || hijriDate === "15" || hijriDate === "16";
 
   const calculatePoints = (value: any, field: string): number => {
     if (field === "zikir") {
@@ -557,7 +556,9 @@ const AmoliMuhasabaForm = () => {
               </div>
               {showAyamRojaSection && (
                 <div className="mb-2">
-                  <label className="mb-2 block text-gray-700">আয়াম রজব</label>
+                  <label className="mb-2 block text-gray-700">
+                    আয়াম বীজ রোজা
+                  </label>
                   <Field
                     name="ayamroja"
                     as="select"

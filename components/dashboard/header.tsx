@@ -52,7 +52,7 @@ const Header = () => {
           </h1>
           <div className="text-[8px] md:text-lg">
             দাওয়াতি বছর ({formattedDate}) ইং /
-            {moment().format(" iD iMMMM iYYYY")} হিজ
+            {moment().subtract(1, "day").format(" iD iMMMM iYYYY")} হিজ
           </div>
         </div>
       </div>
