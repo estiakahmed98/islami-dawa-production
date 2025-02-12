@@ -343,6 +343,45 @@ const Dashboard: React.FC<TallyProps> = () => {
             </button>
           </div>
 
+          <div className="bg-gray-100 p-4 rounded-lg shadow">
+            {comparisonData.length > 0 ? (
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="border px-4 py-2">Label</th>
+                    <th className="border px-4 py-2">{from}</th>
+                    <th className="border px-4 py-2">{to}</th>
+                    <th className="border px-4 py-2">Difference</th>
+                    <th className="border px-4 py-2">Change</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {comparisonData.map((item, index) => (
+                    <tr key={index} className="text-center">
+                      <td className="border px-4 py-2">{item.label}</td>
+                      <td className="border px-4 py-2">{item.from}</td>
+                      <td className="border px-4 py-2">{item.to}</td>
+                      <td
+                        className={`border px-4 py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
+                      >
+                        {item.to - item.from}
+                      </td>
+                      <td
+                        className={`border px-4 py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
+                      >
+                        {item.change}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="text-center text-gray-600">
+                Select values and click "Compare" to see results.
+              </p>
+            )}
+          </div>
+
           {comparisonData.length > 0 && (
             <ComparisonTallyCard
               currentData={comparisonData.map((item) => ({
