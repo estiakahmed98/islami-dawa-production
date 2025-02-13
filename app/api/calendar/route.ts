@@ -25,7 +25,10 @@ export async function POST(req) {
     console.log("Received event:", event); // Log the event data to check
 
     if (!event?.title || !event?.start || !event?.end) {
-      return NextResponse.json({ error: "Invalid event data." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid event data." },
+        { status: 400 }
+      );
     }
 
     // Ensure attendees is an array of objects with 'email' field
@@ -38,7 +41,7 @@ export async function POST(req) {
     // }
 
     console.log("Formatted attendees in backend:", event.attendees);
-     // Log attendees to check
+    // Log attendees to check
 
     const calendar = google.calendar({ version: "v3", auth: oAuthClient });
     const response = await calendar.events.insert({
@@ -46,9 +49,12 @@ export async function POST(req) {
       requestBody: {
         summary: event.title,
         description: event.description || "",
-        start: { dateTime: new Date(event.start).toISOString(), timeZone: "UTC" },
+        start: {
+          dateTime: new Date(event.start).toISOString(),
+          timeZone: "UTC",
+        },
         end: { dateTime: new Date(event.end).toISOString(), timeZone: "UTC" },
-        attendees: event.attendees, 
+        attendees: event.attendees,
         reminders: {
           useDefault: true,
         },
@@ -59,12 +65,12 @@ export async function POST(req) {
     return NextResponse.json(response.data);
   } catch (error) {
     console.error("Create Event Error:", error);
-    return NextResponse.json({ error: error.message || "Failed to create event." }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Failed to create event." },
+      { status: 500 }
+    );
   }
 }
-
-
-
 
 /**
  * GET: Retrieve Google Calendar Events
@@ -84,12 +90,17 @@ export async function GET(req) {
       timeMax: timeMax ? new Date(timeMax).toISOString() : undefined,
       singleEvents: true,
       orderBy: "startTime",
+      fields:
+        "items(id,summary,description,start,end,attendees,creator,visibility)",
     });
 
     return NextResponse.json(response.data.items);
   } catch (error) {
     console.error("Get Events Error:", error);
-    return NextResponse.json({ error: "Failed to retrieve events." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to retrieve events." },
+      { status: 500 }
+    );
   }
 }
 
@@ -102,7 +113,10 @@ export async function PUT(req) {
     const { calendarId = "primary", eventId, event } = await req.json();
 
     if (!eventId || !event?.title || !event?.start || !event?.end) {
-      return NextResponse.json({ error: "Invalid event data." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid event data." },
+        { status: 400 }
+      );
     }
 
     const calendar = google.calendar({ version: "v3", auth: oAuthClient });
@@ -112,7 +126,10 @@ export async function PUT(req) {
       requestBody: {
         summary: event.title,
         description: event.description || "",
-        start: { dateTime: new Date(event.start).toISOString(), timeZone: "UTC" },
+        start: {
+          dateTime: new Date(event.start).toISOString(),
+          timeZone: "UTC",
+        },
         end: { dateTime: new Date(event.end).toISOString(), timeZone: "UTC" },
       },
     });
@@ -120,7 +137,10 @@ export async function PUT(req) {
     return NextResponse.json(response.data);
   } catch (error) {
     console.error("Update Event Error:", error);
-    return NextResponse.json({ error: "Failed to update event." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update event." },
+      { status: 500 }
+    );
   }
 }
 
@@ -135,7 +155,10 @@ export async function DELETE(req) {
     const eventId = searchParams.get("eventId");
 
     if (!eventId) {
-      return NextResponse.json({ error: "Event ID is required." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Event ID is required." },
+        { status: 400 }
+      );
     }
 
     const calendar = google.calendar({ version: "v3", auth: oAuthClient });
@@ -144,6 +167,9 @@ export async function DELETE(req) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete Event Error:", error);
-    return NextResponse.json({ error: "Failed to delete event." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete event." },
+      { status: 500 }
+    );
   }
 }

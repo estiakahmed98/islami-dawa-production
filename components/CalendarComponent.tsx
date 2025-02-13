@@ -1,11 +1,7 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { format } from "date-fns/format";
-import { parse } from "date-fns/parse";
-import { startOfWeek } from "date-fns/startOfWeek";
-import { getDay } from "date-fns/getDay";
+import { format, parse, startOfWeek, getDay } from "date-fns";
 import { enUS } from "date-fns/locale/en-US";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import CalendarEventForm from "./CalendarForm";
@@ -19,9 +15,13 @@ interface GoogleEvent {
   start: Date;
   end: Date;
   attendees?: string[];
+  creator?: {
+    email: string;
+    displayName?: string;
+  };
+  visibility?: string;
 }
 
-// Setup the localizer for react-big-calendar
 const locales = {
   "en-US": enUS,
 };
@@ -38,15 +38,18 @@ export default function GoogleCalendar() {
   const [events, setEvents] = useState<GoogleEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<GoogleEvent | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [currentDateRange, setCurrentDateRange] = useState<{
     start: Date;
     end: Date;
-  }>({
-    start: new Date(),
-    end: new Date(),
-  });
+  }>({ start: new Date(), end: new Date() });
 
-  // Fetch events from API
+  // Mock user - replace with actual authentication
+  const currentUser = {
+    email: "user@example.com",
+    role: "user",
+  };
+
   const fetchEvents = async (start: Date, end: Date) => {
     try {
       const timeMin = start.toISOString();
@@ -63,11 +66,16 @@ export default function GoogleCalendar() {
         id: event.id,
         title: event.summary || "Untitled Event",
         description: event.description || "",
-        start: event.start?.dateTime ? new Date(event.start.dateTime) : new Date(event.start?.date),
-        end: event.end?.dateTime ? new Date(event.end.dateTime) : new Date(event.end?.date),
-        attendees: Array.isArray(event.attendees) ? event.attendees.map((att: any) => att.email) : [],
+        start: event.start?.dateTime
+          ? new Date(event.start.dateTime)
+          : new Date(event.start?.date),
+        end: event.end?.dateTime
+          ? new Date(event.end.dateTime)
+          : new Date(event.end?.date),
+        attendees: event.attendees?.map((att: any) => att.email) || [],
+        creator: event.creator,
+        visibility: event.visibility || "default",
       }));
-      
 
       setEvents(formattedEvents);
     } catch (error) {
@@ -79,41 +87,35 @@ export default function GoogleCalendar() {
     fetchEvents(currentDateRange.start, currentDateRange.end);
   }, [currentDateRange]);
 
-  // Handle date range change (when navigating between months/weeks)
   const handleRangeChange = (range: Date[] | { start: Date; end: Date }) => {
-    if (Array.isArray(range)) {
-      setCurrentDateRange({ start: range[0], end: range[range.length - 1] });
-    } else {
-      setCurrentDateRange(range);
-    }
+    const newRange = Array.isArray(range)
+      ? { start: range[0], end: range[range.length - 1] }
+      : range;
+    setCurrentDateRange(newRange);
   };
 
-  // Handle event creation when a time slot is selected
   const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
-    setSelectedEvent(null);
-    setIsFormOpen(true);
     setSelectedEvent({
       title: "",
       description: "",
       start: slotInfo.start,
       end: slotInfo.end,
       attendees: [],
+      creator: { email: currentUser.email },
     });
+    setIsFormOpen(true);
+    setIsEditing(false);
   };
 
-  // Handle event editing when an event is clicked
   const handleSelectEvent = (event: GoogleEvent) => {
     setSelectedEvent(event);
-    setIsFormOpen(true);
   };
 
   const handleDeleteEvent = async (eventId: string) => {
     try {
-      await fetch(`/api/calendar?eventId=${eventId}`, {
-        method: "DELETE",
-      });
+      await fetch(`/api/calendar?eventId=${eventId}`, { method: "DELETE" });
       fetchEvents(currentDateRange.start, currentDateRange.end);
-      setIsFormOpen(false);
+      setSelectedEvent(null);
     } catch (error) {
       console.error("Error deleting event:", error);
     }
@@ -135,7 +137,7 @@ export default function GoogleCalendar() {
             description: eventData.description,
             start: eventData.start,
             end: eventData.end,
-            attendees: eventData.attendees.map((email: string) => ({
+            attendees: eventData.attendees.split(",").map((email: string) => ({
               email: email.trim(),
             })),
           },
@@ -146,6 +148,7 @@ export default function GoogleCalendar() {
 
       fetchEvents(currentDateRange.start, currentDateRange.end);
       setIsFormOpen(false);
+      setSelectedEvent(null);
     } catch (error) {
       console.error("Error saving event:", error);
     }
@@ -174,27 +177,86 @@ export default function GoogleCalendar() {
         views={["month", "week", "day"]}
       />
 
+      {/* Event Details Modal */}
+      {selectedEvent && !isFormOpen && (
+        <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white m-4 p-6 rounded-lg shadow-lg max-w-[60vh] max-h-[70vh] overflow-y-auto z-10">
+            <h3 className="text-xl font-semibold mb-4">Event Details</h3>
+            <p>
+              <strong>Title:</strong> {selectedEvent.title}
+            </p>
+            <p>
+              <strong>Creator Email:</strong> {selectedEvent.creator?.email}
+            </p>
+            <p>
+              <strong>Visibility:</strong> {selectedEvent.visibility}
+            </p>
+            <p>
+              <strong>Time:</strong>{" "}
+              {selectedEvent.start.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}{" "}
+              -{" "}
+              {selectedEvent.end.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </p>
+            <p>
+              <strong>Description:</strong>
+            </p>
+            <div
+              dangerouslySetInnerHTML={{ __html: selectedEvent.description }}
+            />
+
+            <div className="flex justify-between mt-4">
+              <Button variant="outline" onClick={() => setSelectedEvent(null)}>
+                Close
+              </Button>
+
+              {selectedEvent.creator?.email === currentUser.email && (
+                <div className="space-x-2">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setIsEditing(true);
+                      setIsFormOpen(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() =>
+                      selectedEvent.id && handleDeleteEvent(selectedEvent.id)
+                    }
+                  >
+                    Delete
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Event Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent>
           <DialogTitle className="text-xl font-bold">
-            {selectedEvent?.id ? "Edit Event" : "Create Event"}
+            {isEditing ? "Edit Event" : "Create Event"}
           </DialogTitle>
-          {selectedEvent && (
-            <CalendarEventForm
-              initialValues={initialValues}
-              onSubmit={handleSubmitEvent}
-              onCancel={() => setIsFormOpen(false)}
-            />
-          )}
-          {selectedEvent?.id && (
-            <Button
-              variant="destructive"
-              onClick={() => handleDeleteEvent(selectedEvent.id!)}
-              className="mt-4"
-            >
-              Delete Event
-            </Button>
-          )}
+          <CalendarEventForm
+            initialValues={initialValues}
+            onSubmit={handleSubmitEvent}
+            onCancel={() => {
+              setIsFormOpen(false);
+              setSelectedEvent(null);
+            }}
+          />
         </DialogContent>
       </Dialog>
     </div>
