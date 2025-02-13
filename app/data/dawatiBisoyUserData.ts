@@ -276,6 +276,32 @@ export const userDawatiBisoyData = {
         "nonMuslimSaptahikGasht": 48,
         "editorContent": ""
       }
+    },
+    "taskin@gmail.com": {
+      "2025-01-13": {
+        "nonMuslimDawat": 100,
+        "murtadDawat": 100,
+        "alemderSatheyMojlish": 100,
+        "publicSatheyMojlish": 100,
+        "nonMuslimSaptahikGasht": 100,
+        "editorContent": ""
+      },
+      "2025-01-14": {
+        "nonMuslimDawat": 100,
+        "murtadDawat": 100,
+        "alemderSatheyMojlish": 100,
+        "publicSatheyMojlish": 100,
+        "nonMuslimSaptahikGasht": 100,
+        "editorContent": ""
+      },
+      "2025-01-15": {
+        "nonMuslimDawat": 100,
+        "murtadDawat": 100,
+        "alemderSatheyMojlish": 100,
+        "publicSatheyMojlish": 100,
+        "nonMuslimSaptahikGasht": 100,
+        "editorContent": ""
+      }
     }
   }
 };

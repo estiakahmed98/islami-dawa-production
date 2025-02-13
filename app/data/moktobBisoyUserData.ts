@@ -708,6 +708,19 @@ export const userMoktobBisoyData = {
         "MadrasahAdmit": 50,
         "NewMuslim": 50,
         "editorContent": "<p>Very Good.</p>"
+      },
+      "2025-02-13": {
+        "MoktobChalu": 40,
+        "MoktobAdmit": 40,
+        "NewMoktob": 40,
+        "Sikkha": 40,
+        "TotalStudent": 40,
+        "TotalSikkha": 40,
+        "GurdianMeeting": 40,
+        "TotalAgeSikkha": 39,
+        "MadrasahAdmit": 40,
+        "NewMuslim": 39,
+        "editorContent": ""
       }
     },
     "robi@gmail.com": {
@@ -970,6 +983,32 @@ export const userMoktobBisoyData = {
         "MadrasahAdmit": 10,
         "NewMuslim": 8,
         "editorContent": "<p>Hello</p>"
+      },
+      "2025-02-06": {
+        "MoktobChalu": 90,
+        "MoktobAdmit": 90,
+        "NewMoktob": 90,
+        "Sikkha": 90,
+        "TotalStudent": 90,
+        "TotalSikkha": 90,
+        "GurdianMeeting": 90,
+        "TotalAgeSikkha": 90,
+        "MadrasahAdmit": 90,
+        "NewMuslim": 92,
+        "editorContent": "<p>Hello</p>"
+      },
+      "2025-01-05": {
+        "MoktobChalu": 100,
+        "MoktobAdmit": 100,
+        "NewMoktob": 100,
+        "Sikkha": 100,
+        "TotalStudent": 100,
+        "TotalSikkha": 100,
+        "GurdianMeeting": 100,
+        "TotalAgeSikkha": 100,
+        "MadrasahAdmit": 100,
+        "NewMuslim": 100,
+        "editorContent": "<p>Hello</p>"
       }
     },
     "daye2dhaka@gmail.com": {
@@ -984,6 +1023,32 @@ export const userMoktobBisoyData = {
         "TotalAgeSikkha": 20,
         "MadrasahAdmit": 20,
         "NewMuslim": 20,
+        "editorContent": "<p>Hello Daye2</p>"
+      },
+      "2025-02-10": {
+        "MoktobChalu": 100,
+        "MoktobAdmit": 100,
+        "NewMoktob": 100,
+        "Sikkha": 100,
+        "TotalStudent": 100,
+        "TotalSikkha": 100,
+        "GurdianMeeting": 100,
+        "TotalAgeSikkha": 100,
+        "MadrasahAdmit": 100,
+        "NewMuslim": 100,
+        "editorContent": "<p>Hello Daye2</p>"
+      },
+      "2025-01-06": {
+        "MoktobChalu": 200,
+        "MoktobAdmit": 200,
+        "NewMoktob": 200,
+        "Sikkha": 200,
+        "TotalStudent": 200,
+        "TotalSikkha": 180,
+        "GurdianMeeting": 200,
+        "TotalAgeSikkha": 200,
+        "MadrasahAdmit": 200,
+        "NewMuslim": 200,
         "editorContent": "<p>Hello Daye2</p>"
       }
     },
@@ -1058,6 +1123,32 @@ export const userMoktobBisoyData = {
         "MadrasahAdmit": 50,
         "NewMuslim": 50,
         "editorContent": "<p>Hello</p>"
+      },
+      "2025-01-13": {
+        "MoktobChalu": 100,
+        "MoktobAdmit": 100,
+        "NewMoktob": 100,
+        "Sikkha": 99,
+        "TotalStudent": 100,
+        "TotalSikkha": 100,
+        "GurdianMeeting": 100,
+        "TotalAgeSikkha": 100,
+        "MadrasahAdmit": 100,
+        "NewMuslim": 101,
+        "editorContent": ""
+      },
+      "2025-02-13": {
+        "MoktobChalu": 100,
+        "MoktobAdmit": 100,
+        "NewMoktob": 100,
+        "Sikkha": 99,
+        "TotalStudent": 100,
+        "TotalSikkha": 100,
+        "GurdianMeeting": 100,
+        "TotalAgeSikkha": 100,
+        "MadrasahAdmit": 100,
+        "NewMuslim": 101,
+        "editorContent": ""
       }
     },
     "dayesylhet@gmail.com": {
@@ -1100,6 +1191,34 @@ export const userMoktobBisoyData = {
         "TotalAgeSikkha": 130,
         "MadrasahAdmit": 45,
         "NewMuslim": 76,
+        "editorContent": ""
+      }
+    },
+    "ashraful@gmail.com": {
+      "2025-02-13": {
+        "MoktobChalu": 90,
+        "MoktobAdmit": 90,
+        "NewMoktob": 90,
+        "Sikkha": 90,
+        "TotalStudent": 90,
+        "TotalSikkha": 90,
+        "GurdianMeeting": 90,
+        "TotalAgeSikkha": 88,
+        "MadrasahAdmit": 90,
+        "NewMuslim": 88,
+        "editorContent": ""
+      },
+      "2025-01-13": {
+        "MoktobChalu": 90,
+        "MoktobAdmit": 90,
+        "NewMoktob": 90,
+        "Sikkha": 90,
+        "TotalStudent": 90,
+        "TotalSikkha": 90,
+        "GurdianMeeting": 90,
+        "TotalAgeSikkha": 88,
+        "MadrasahAdmit": 90,
+        "NewMuslim": 88,
         "editorContent": ""
       }
     }
