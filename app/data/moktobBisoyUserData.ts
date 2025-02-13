@@ -665,6 +665,19 @@ export const userMoktobBisoyData = {
         "MadrasahAdmit": 200,
         "NewMuslim": 201,
         "editorContent": ""
+      },
+      "2025-02-13": {
+        "MoktobChalu": 100,
+        "MoktobAdmit": 100,
+        "NewMoktob": 100,
+        "Sikkha": 100,
+        "TotalStudent": 100,
+        "TotalSikkha": 100,
+        "GurdianMeeting": 100,
+        "TotalAgeSikkha": 100,
+        "MadrasahAdmit": 100,
+        "NewMuslim": 100,
+        "editorContent": ""
       }
     },
     "selim@gmail.com": {

@@ -400,37 +400,89 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
-// Function to get the parent email
-const getParentEmail = (user: User, users: User[]): string | null => {
-  switch (user.role) {
-    case "divisionadmin":
-      return users.find((u) => u.role === "centraladmin")?.email || null;
-    case "districtadmin":
-      return (
-        users.find(
+  const getParentEmail = (user: User, users: User[]): string | null => {
+    let parentUser: User | undefined;
+    switch (user.role) {
+      case "divisionadmin":
+        parentUser = users.find((u) => u.role === "centraladmin");
+        break;
+      case "districtadmin":
+        parentUser = users.find(
           (u) => u.role === "divisionadmin" && u.division === user.division
-        )?.email || null
-      );
-    case "upozilaadmin":
-      return (
-        users.find(
+        );
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
+        break;
+      case "upozilaadmin":
+        parentUser = users.find(
           (u) => u.role === "districtadmin" && u.district === user.district
-        )?.email || null
-      );
-    case "unionadmin":
-      return (
-        users.find(
+        );
+        // Step 4: If no districtadmin is found, find a divisiontadmin in the same division
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "divisionadmin" && u.division === user.division
+          );
+        }
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
+        break;
+      case "unionadmin":
+        parentUser = users.find(
           (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
-        )?.email || null
-      );
-    case "daye":
-      return (
-        users.find((u) => u.role === "unionadmin" && u.union === user.union)
-          ?.email || null
-      );
-    default:
-      return null;
-  }
-};
+        );
+        // Step 3: If no unionadmin is found, find a districtadmin in the same district
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "districtadmin" && u.district === user.district
+          );
+        }
+        // Step 4: If no districtadmin is found, find a divisiontadmin in the same division
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "divisionadmin" && u.division === user.division
+          );
+        }
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
+        break;
+      case "daye":
+        // Step 1: Try to find a unionadmin in the same union
+        parentUser = users.find(
+          (u) => u.role === "unionadmin" && u.union === user.union
+        );
+
+        // Step 2: If no unionadmin is found, find a upozila in the same upozila
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
+          );
+        }
+
+        // Step 3: If no unionadmin is found, find a districtadmin in the same district
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "districtadmin" && u.district === user.district
+          );
+        }
+        // Step 4: If no districtadmin is found, find a divisiontadmin in the same division
+        if (!parentUser) {
+          parentUser = users.find(
+            (u) => u.role === "divisionadmin" && u.division === user.division
+          );
+        }
+        if (!parentUser) {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
+        break;
+
+      default:
+        return null;
+    }
+    return parentUser ? parentUser.email : null;
+  };
+
 
 export default AdminDashboard;

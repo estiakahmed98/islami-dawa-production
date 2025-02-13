@@ -103,7 +103,9 @@ const Dashboard: React.FC<TallyProps> = () => {
         return 0;
       } else if (field === "ayat") {
         // Extract ayat number from range (e.g., "10-20")
-        const [start, end] = value.split("-").map((num: string) => parseInt(num, 10) || 0);
+        const [start, end] = value
+          .split("-")
+          .map((num: string) => parseInt(num, 10) || 0);
         return Math.abs((end || start) - start); // Return difference
       } else if (["surah", "ishraq", "ilm", "sirat"].includes(field)) {
         return value ? 1 : 0;
@@ -229,6 +231,117 @@ const Dashboard: React.FC<TallyProps> = () => {
     );
 
     setComparisonData(combinedData);
+  };
+
+  const getHtml2Pdf = async () => {
+    const html2pdfModule = await import("html2pdf.js");
+    return html2pdfModule.default || html2pdfModule; // Ensure correct function access
+  };
+
+  const convertToPDF = async () => {
+    if (!comparisonData.length) {
+      console.error("No data available for PDF generation");
+      return;
+    }
+
+    const element = document.createElement("div");
+
+    let tableHTML = `
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
+            body {
+              font-family: 'Noto Sans Bengali', sans-serif;
+              text-align: center;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+              text-align: center;
+            }
+            th, td {
+              border: 1px solid #000;
+              padding: 10px;
+              text-align: center;
+            }
+            th {
+              background-color: #16A085;
+              color: white;
+            }
+            thead {
+              display: table-header-group; 
+            }
+            tr {
+              page-break-inside: avoid;
+            }
+          </style>
+        </head>
+        <body>
+          <h2>তুলনা রিপোর্ট</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Label</th>
+                <th>${from}</th>
+                <th>${to}</th>
+                <th>Difference</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${comparisonData
+                .map(
+                  (item) => `
+                    <tr>
+                      <td>${item.label}</td>
+                      <td>${item.from}</td>
+                      <td>${item.to}</td>
+                      <td style="color: ${item.isIncrease ? "green" : "red"};">${item.to - item.from}</td>
+                      <td style="color: ${item.isIncrease ? "green" : "red"};">${item.change}</td>
+                    </tr>
+                  `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </body>
+      </html>`;
+
+    element.innerHTML = tableHTML;
+
+    try {
+      const html2pdf = await getHtml2Pdf();
+
+      html2pdf()
+        .set({
+          margin: 10,
+          filename: `comparison_report.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+        })
+        .from(element)
+        .toPdf()
+        .get("pdf")
+        .then((pdf) => {
+          const totalPages = pdf.internal.getNumberOfPages();
+          for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(10);
+            pdf.text(
+              `Page ${i} of ${totalPages}`,
+              pdf.internal.pageSize.getWidth() - 20,
+              pdf.internal.pageSize.getHeight() - 5
+            );
+          }
+        })
+        .save();
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
   };
 
   return (
@@ -401,6 +514,17 @@ const Dashboard: React.FC<TallyProps> = () => {
               <p className="text-center text-gray-600">
                 Select values and click "Compare" to see results.
               </p>
+            )}
+
+            {comparisonData.length > 0 && (
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={convertToPDF}
+                  className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+                >
+                  Download PDF
+                </button>
+              </div>
             )}
           </div>
 
