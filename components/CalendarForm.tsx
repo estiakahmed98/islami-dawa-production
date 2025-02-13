@@ -338,10 +338,11 @@ const CalendarEventForm = ({
         placeholder="Additional attendees (comma-separated)"
         value={event.attendees.filter((e) => !emailList.includes(e)).join(", ")}
         onChange={handleAttendeeChange}
+        className="hidden"
       />
 
       {/* Auto-included attendees display */}
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-600 hidden">
         Auto-included attendees: {emailList.join(", ")}
       </div>
 

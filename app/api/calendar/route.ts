@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { google } from "googleapis";
 import { getGoogleAuthClient } from "@/lib/google-calendar";
@@ -6,7 +6,7 @@ import { getGoogleAuthClient } from "@/lib/google-calendar";
 /**
  * Helper function to verify session and get OAuth client
  */
-async function getAuthenticatedClient(req) {
+async function getAuthenticatedClient(req: NextRequest) {
   const session = await auth.api.getSession({ headers: req.headers });
   if (!session?.user) {
     throw new Error("Unauthorized");
@@ -17,7 +17,7 @@ async function getAuthenticatedClient(req) {
 /**
  * POST: Create a Google Calendar Event with Attendees
  */
-export async function POST(req) {
+export async function POST(req: NextRequest) {
   try {
     const oAuthClient = await getAuthenticatedClient(req);
     const { calendarId = "primary", event } = await req.json();
@@ -66,7 +66,7 @@ export async function POST(req) {
   } catch (error) {
     console.error("Create Event Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to create event." },
+      { error: error?.message || "Failed to create event." },
       { status: 500 }
     );
   }
@@ -75,7 +75,7 @@ export async function POST(req) {
 /**
  * GET: Retrieve Google Calendar Events
  */
-export async function GET(req) {
+export async function GET(req: NextRequest) {
   try {
     const oAuthClient = await getAuthenticatedClient(req);
     const { searchParams } = new URL(req.url);
@@ -107,7 +107,7 @@ export async function GET(req) {
 /**
  * PUT: Update a Google Calendar Event
  */
-export async function PUT(req) {
+export async function PUT(req: NextRequest) {
   try {
     const oAuthClient = await getAuthenticatedClient(req);
     const { calendarId = "primary", eventId, event } = await req.json();
@@ -157,7 +157,7 @@ export async function PUT(req) {
 /**
  * DELETE: Delete a Google Calendar Event
  */
-export async function DELETE(req) {
+export async function DELETE(req: NextRequest) {
   try {
     const oAuthClient = await getAuthenticatedClient(req);
     const { searchParams } = new URL(req.url);

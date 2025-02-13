@@ -180,7 +180,7 @@ const TodoListCalendar = () => {
 
       {/* If event is clicked, show details */}
       {selectedTask && (
-        <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+        <div>
           <div className="bg-white m-4 p-6 rounded-lg shadow-lg max-w-[60vh] max-h-[70vh] overflow-y-auto z-10">
             <h3 className="text-xl font-semibold mb-4">Task Details</h3>
             <p>

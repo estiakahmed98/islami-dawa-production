@@ -7,6 +7,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import CalendarEventForm from "./CalendarForm";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import { useSession } from "@/lib/auth-client";
 
 interface GoogleEvent {
   id?: string;
@@ -38,17 +39,12 @@ export default function GoogleCalendar() {
   const [events, setEvents] = useState<GoogleEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<GoogleEvent | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const session = useSession();
   const [isEditing, setIsEditing] = useState(false);
   const [currentDateRange, setCurrentDateRange] = useState<{
     start: Date;
     end: Date;
   }>({ start: new Date(), end: new Date() });
-
-  // Mock user - replace with actual authentication
-  const currentUser = {
-    email: "user@example.com",
-    role: "user",
-  };
 
   const fetchEvents = async (start: Date, end: Date) => {
     try {
@@ -101,7 +97,7 @@ export default function GoogleCalendar() {
       start: slotInfo.start,
       end: slotInfo.end,
       attendees: [],
-      creator: { email: currentUser.email },
+      creator: { email: session.data?.user.email as string },
     });
     setIsFormOpen(true);
     setIsEditing(false);
@@ -180,28 +176,31 @@ export default function GoogleCalendar() {
       />
 
       {/* Event Details Modal */}
-      {selectedEvent && !isFormOpen && (
-        <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white m-4 p-6 rounded-lg shadow-lg max-w-[60vh] max-h-[70vh] overflow-y-auto z-10">
-            <h3 className="text-xl font-semibold mb-4">Event Details</h3>
+      <Dialog
+        open={selectedEvent && !isFormOpen ? true : undefined}
+        onOpenChange={() => setSelectedEvent(null)}
+      >
+        <DialogContent>
+          <DialogTitle className="text-xl font-bold">Event Details</DialogTitle>
+          <div className="space-y-3">
             <p>
-              <strong>Title:</strong> {selectedEvent.title}
+              <strong>Title:</strong> {selectedEvent?.title}
             </p>
             <p>
-              <strong>Creator Email:</strong> {selectedEvent.creator?.email}
+              <strong>Creator Email:</strong> {selectedEvent?.creator?.email}
             </p>
             <p>
-              <strong>Visibility:</strong> {selectedEvent.visibility}
+              <strong>Visibility:</strong> {selectedEvent?.visibility}
             </p>
             <p>
               <strong>Time:</strong>{" "}
-              {selectedEvent.start.toLocaleTimeString("en-US", {
+              {selectedEvent?.start?.toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
               })}{" "}
               -{" "}
-              {selectedEvent.end.toLocaleTimeString("en-US", {
+              {selectedEvent?.end?.toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
@@ -211,15 +210,16 @@ export default function GoogleCalendar() {
               <strong>Description:</strong>
             </p>
             <div
-              dangerouslySetInnerHTML={{ __html: selectedEvent.description }}
+              dangerouslySetInnerHTML={{
+                __html: selectedEvent?.description ?? "",
+              }}
             />
-
             <div className="flex justify-between mt-4">
               <Button variant="outline" onClick={() => setSelectedEvent(null)}>
                 Close
               </Button>
 
-              {selectedEvent.creator?.email === currentUser.email && (
+              {selectedEvent?.creator?.email === session.data?.user?.email && (
                 <div className="space-x-2">
                   <Button
                     variant="secondary"
@@ -233,7 +233,7 @@ export default function GoogleCalendar() {
                   <Button
                     variant="destructive"
                     onClick={() =>
-                      selectedEvent.id && handleDeleteEvent(selectedEvent.id)
+                      selectedEvent?.id && handleDeleteEvent(selectedEvent.id)
                     }
                   >
                     Delete
@@ -242,8 +242,8 @@ export default function GoogleCalendar() {
               )}
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Event Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
