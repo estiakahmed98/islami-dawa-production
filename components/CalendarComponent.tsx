@@ -137,9 +137,10 @@ export default function GoogleCalendar() {
             description: eventData.description,
             start: eventData.start,
             end: eventData.end,
-            attendees: eventData.attendees.split(",").map((email: string) => ({
-              email: email.trim(),
-            })),
+            attendees: eventData.attendees,
+            // attendees: eventData.attendees.split(",").map((email: string) => ({
+            //   email: email.trim(),
+            // })),
           },
         }),
       });
@@ -159,7 +160,8 @@ export default function GoogleCalendar() {
     description: selectedEvent?.description || "",
     start: selectedEvent?.start?.toISOString().slice(0, 16) || "",
     end: selectedEvent?.end?.toISOString().slice(0, 16) || "",
-    attendees: selectedEvent?.attendees?.join(", ") || "",
+    // attendees: selectedEvent?.attendees?.join(", ") || "",
+    attendees: selectedEvent?.attendees || [],
   };
 
   return (
@@ -245,7 +247,7 @@ export default function GoogleCalendar() {
 
       {/* Event Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent>
+        <DialogContent key={selectedEvent?.id || "new-event"}>
           <DialogTitle className="text-xl font-bold">
             {isEditing ? "Edit Event" : "Create Event"}
           </DialogTitle>

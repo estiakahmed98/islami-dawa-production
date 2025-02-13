@@ -33,23 +33,21 @@ const CalendarEventForm = ({
   onSubmitSuccess,
   onCancel,
 }: CalendarEventFormProps) => {
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email || "";
+  const [emailList, setEmailList] = useState<string[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+
+  // Initialize event state with proper type
   const [event, setEvent] = useState({
     title: "",
     description: "",
     start: "",
     end: "",
-    attendees: [] as string[], // Ensure this is always an array
+    attendees: [] as string[],
   });
 
-  const { data: session } = useSession();
-
-  const userEmail = session?.user?.email || "";
-  const [emailList, setEmailList] = useState<string[]>([userEmail]);
-  const [users, setUsers] = useState<User[]>([]);
-
-
-  console.log("Calender Collection Mails::", emailList);
-
+  // Fetch users and process email list
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -64,40 +62,72 @@ const CalendarEventForm = ({
     fetchUsers();
   }, []);
 
+  // Process email list based on user hierarchy
   useEffect(() => {
     if (!users.length) return;
 
-    const loggedInUser = users.find((u) => u.email === userEmail);
-    if (!loggedInUser) return;
+    const processEmails = () => {
+      const loggedInUser = users.find((u) => u.email === userEmail);
+      if (!loggedInUser) return;
 
-    let collectedEmails = new Set<string>(); // Use Set to prevent duplicates
-    collectedEmails.add(loggedInUser.email);
+      const collectedEmails = new Set<string>();
+      collectedEmails.add(loggedInUser.email);
 
-    const findChildEmails = (parentEmail: string) => {
-      users.forEach((user) => {
-        if (
-          getParentEmail(user, users) === parentEmail &&
-          !collectedEmails.has(user.email)
-        ) {
-          collectedEmails.add(user.email);
-          findChildEmails(user.email);
-        }
-      });
+      const findChildEmails = (parentEmail: string) => {
+        users.forEach((user) => {
+          if (
+            getParentEmail(user, users) === parentEmail &&
+            !collectedEmails.has(user.email)
+          ) {
+            collectedEmails.add(user.email);
+            findChildEmails(user.email);
+          }
+        });
+      };
+
+      findChildEmails(loggedInUser.email);
+      return Array.from(collectedEmails);
     };
 
-    findChildEmails(loggedInUser.email);
-
-    setEmailList(Array.from(collectedEmails)); // Convert Set back to Array
+    setEmailList(processEmails() || []);
   }, [users, userEmail]);
+
+  // Initialize form with email list and any existing values
+  // useEffect(() => {
+  //   if (initialValues) {
+  //     // Merge initial values with email list
+  //     const mergedAttendees = [
+  //       ...new Set([...initialValues.attendees, ...emailList]),
+  //     ];
+  //     setEvent({
+  //       ...initialValues,
+  //       attendees: mergedAttendees,
+  //     });
+  //   } else {
+  //     // Set default attendees to email list
+  //     setEvent((prev) => ({
+  //       ...prev,
+  //       attendees: emailList,
+  //     }));
+  //   }
+  // }, [initialValues, emailList]);
 
   useEffect(() => {
     if (initialValues) {
+      const mergedAttendees = [
+        ...new Set([...initialValues.attendees, ...emailList]),
+      ];
       setEvent({
         ...initialValues,
-        attendees: emailList || [], // Ensure attendees is always an array
+        attendees: mergedAttendees,
       });
+    } else {
+      setEvent((prev) => ({
+        ...prev,
+        attendees: emailList,
+      }));
     }
-  }, [initialValues]);
+  }, [initialValues, emailList]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -106,50 +136,64 @@ const CalendarEventForm = ({
   };
 
   // const handleAttendeeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = e.target.value;
-  //   setEvent((prevEvent) => ({
-  //     ...prevEvent,
-  //     attendees: value ? value.split(",").map((email) => email.trim()) : [], // Split and trim emails
+  //   const enteredEmails = e.target.value
+  //     .split(",")
+  //     .map((email) => email.trim());
+  //   // Merge entered emails with email list
+  //   const mergedEmails = [...new Set([...emailList, ...enteredEmails])];
+  //   setEvent((prev) => ({
+  //     ...prev,
+  //     attendees: mergedEmails,
   //   }));
   // };
 
+  const handleAttendeeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const enteredEmails = e.target.value
+      .split(",")
+      .map((email) => email.trim())
+      .filter((email) => email.includes("@")); // Basic validation
+    setEvent((prev) => ({
+      ...prev,
+      attendees: [...emailList, ...enteredEmails],
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Submitting event:", event);
 
-    // Ensure attendees are properly formatted
-    // const formattedAttendees = event.attendees
-    //   .filter((email) => email) // Remove empty emails
-    //   .map((email) => ({ email })); // Format each attendee as { email: 'email@example.com' }
+    // Ensure we have valid attendees
+    const validAttendees = event.attendees
+      .filter((email) => email && email.includes("@"))
+      .map((email) => ({ email }));
 
-    if (event.attendees.length === 0) {
-      console.error("No valid attendees provided.");
-      return; // Prevent sending the request if no valid attendees
+    if (validAttendees.length === 0) {
+      console.error("No valid attendees provided");
+      return;
     }
 
-    // Log formatted attendees to check
-    // console.log("Formatted attendees:", formattedAttendees);
-
     try {
+      const eventData = {
+        ...event,
+        attendees: validAttendees,
+      };
+
       if (onSubmit) {
-        await onSubmit(event);
+        await onSubmit(eventData);
       } else {
         const response = await fetch("/api/calendar", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             calendarId: "primary",
-            event: {
-              ...event,
-              attendees: emailList, // Add the formatted attendees here
-            },
+            event: eventData,
           }),
         });
 
         if (!response.ok) throw new Error("Failed to create event");
-        const data = await response.json(); // Log the response for debugging
+        const data = await response.json();
         console.log("Event created:", data);
       }
+
       onSubmitSuccess?.();
       setEvent({
         title: "",
@@ -159,7 +203,7 @@ const CalendarEventForm = ({
         attendees: [],
       });
     } catch (err) {
-      console.error("Operation failed:", err); // Log the error
+      console.error("Operation failed:", err);
     }
   };
 
@@ -249,6 +293,7 @@ const CalendarEventForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg">
+      {/* Title Input */}
       <input
         type="text"
         name="title"
@@ -258,6 +303,8 @@ const CalendarEventForm = ({
         required
         className="block w-full p-2 border rounded"
       />
+
+      {/* Description Textarea */}
       <textarea
         name="description"
         placeholder="Event Description"
@@ -265,6 +312,8 @@ const CalendarEventForm = ({
         onChange={handleChange}
         className="block w-full p-2 border rounded"
       />
+
+      {/* Start Time Input */}
       <input
         type="datetime-local"
         name="start"
@@ -273,6 +322,8 @@ const CalendarEventForm = ({
         required
         className="block w-full p-2 border rounded"
       />
+
+      {/* End Time Input */}
       <input
         type="datetime-local"
         name="end"
@@ -281,14 +332,20 @@ const CalendarEventForm = ({
         required
         className="block w-full p-2 border rounded"
       />
+
       <input
         type="text"
-        name="attendees"
-        placeholder="Enter Attendees (comma separated emails)"
-        value={emailList} // Ensure it's an array before calling .join()
-        //onChange={handleAttendeeChange}
-        className="block w-full p-2 border rounded"
+        placeholder="Additional attendees (comma-separated)"
+        value={event.attendees.filter((e) => !emailList.includes(e)).join(", ")}
+        onChange={handleAttendeeChange}
       />
+
+      {/* Auto-included attendees display */}
+      <div className="text-sm text-gray-600">
+        Auto-included attendees: {emailList.join(", ")}
+      </div>
+
+      {/* Form Buttons */}
       <div className="flex gap-2">
         <button
           type="submit"

@@ -131,7 +131,17 @@ export async function PUT(req) {
           timeZone: "UTC",
         },
         end: { dateTime: new Date(event.end).toISOString(), timeZone: "UTC" },
+        attendees: event.attendees,
       },
+      // requestBody: {
+      //   summary: event.title,
+      //   description: event.description || "",
+      //   start: {
+      //     dateTime: new Date(event.start).toISOString(),
+      //     timeZone: "UTC",
+      //   },
+      //   end: { dateTime: new Date(event.end).toISOString(), timeZone: "UTC" },
+      // },
     });
 
     return NextResponse.json(response.data);
