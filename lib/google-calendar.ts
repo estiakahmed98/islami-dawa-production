@@ -43,17 +43,15 @@ export async function getGoogleAuthClient(userId: string) {
   const userWithGoogleAccessToken = await db.users.findUnique({
     where: {
       id: userId,
+    },
+    include: {
       accounts: {
-        some: {
+        where: {
           providerId: "google",
           accessToken: {
             not: null,
           },
         },
-      },
-    },
-    include: {
-      accounts: {
         select: {
           providerId: true,
           accessToken: true,
@@ -62,7 +60,10 @@ export async function getGoogleAuthClient(userId: string) {
     },
   });
 
-  if (!userWithGoogleAccessToken) {
+  if (
+    !userWithGoogleAccessToken?.accounts &&
+    !userWithGoogleAccessToken?.accounts.length
+  ) {
     throw new Error("No Google account linked to this user");
   }
 

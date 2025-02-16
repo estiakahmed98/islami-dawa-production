@@ -92,26 +92,6 @@ const CalendarEventForm = ({
     setEmailList(processEmails() || []);
   }, [users, userEmail]);
 
-  // Initialize form with email list and any existing values
-  // useEffect(() => {
-  //   if (initialValues) {
-  //     // Merge initial values with email list
-  //     const mergedAttendees = [
-  //       ...new Set([...initialValues.attendees, ...emailList]),
-  //     ];
-  //     setEvent({
-  //       ...initialValues,
-  //       attendees: mergedAttendees,
-  //     });
-  //   } else {
-  //     // Set default attendees to email list
-  //     setEvent((prev) => ({
-  //       ...prev,
-  //       attendees: emailList,
-  //     }));
-  //   }
-  // }, [initialValues, emailList]);
-
   useEffect(() => {
     if (initialValues) {
       const mergedAttendees = [
@@ -134,18 +114,6 @@ const CalendarEventForm = ({
   ) => {
     setEvent({ ...event, [e.target.name]: e.target.value });
   };
-
-  // const handleAttendeeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const enteredEmails = e.target.value
-  //     .split(",")
-  //     .map((email) => email.trim());
-  //   // Merge entered emails with email list
-  //   const mergedEmails = [...new Set([...emailList, ...enteredEmails])];
-  //   setEvent((prev) => ({
-  //     ...prev,
-  //     attendees: mergedEmails,
-  //   }));
-  // };
 
   const handleAttendeeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const enteredEmails = e.target.value

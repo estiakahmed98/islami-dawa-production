@@ -44,7 +44,13 @@ export default function GoogleCalendar() {
   const [currentDateRange, setCurrentDateRange] = useState<{
     start: Date;
     end: Date;
-  }>({ start: new Date(), end: new Date() });
+  }>(() => {
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), 1);
+    const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    end.setHours(23, 59, 59, 999); // Include entire last day
+    return { start, end };
+  });
 
   const fetchEvents = async (start: Date, end: Date) => {
     try {
@@ -58,20 +64,35 @@ export default function GoogleCalendar() {
 
       const googleEvents = await response.json();
 
-      const formattedEvents = googleEvents.map((event: any) => ({
-        id: event.id,
-        title: event.summary || "Untitled Event",
-        description: event.description || "",
-        start: event.start?.dateTime
-          ? new Date(event.start.dateTime)
-          : new Date(event.start?.date),
-        end: event.end?.dateTime
-          ? new Date(event.end.dateTime)
-          : new Date(event.end?.date),
-        attendees: event.attendees?.map((att: any) => att.email) || [],
-        creator: event.creator,
-        visibility: event.visibility || "default",
-      }));
+      const formattedEvents = googleEvents.map((event: any) => {
+        let start, end;
+        if (event.start.dateTime) {
+          start = new Date(event.start.dateTime);
+          end = new Date(event.end.dateTime);
+        } else {
+          // All-day event: parse dates in local time zone
+          const [startYear, startMonth, startDay] = event.start.date
+            .split("-")
+            .map(Number);
+          start = new Date(startYear, startMonth - 1, startDay);
+
+          const [endYear, endMonth, endDay] = event.end.date
+            .split("-")
+            .map(Number);
+          end = new Date(endYear, endMonth - 1, endDay);
+        }
+
+        return {
+          id: event.id,
+          title: event.summary || "Untitled Event",
+          description: event.description || "",
+          start,
+          end,
+          attendees: event.attendees?.map((att: any) => att.email) || [],
+          creator: event.creator,
+          visibility: event.visibility || "default",
+        };
+      });
 
       setEvents(formattedEvents);
     } catch (error) {
