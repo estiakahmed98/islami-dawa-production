@@ -1,4 +1,4 @@
-"use client";
+"use client"; //Juwel
 import React, { useState } from "react";
 import ComparisonModal from "./ComparisonComponent";
 

@@ -1,4 +1,4 @@
-"use client";
+"use client"; //Juwel
 
 import React, { useState, useEffect } from "react";
 import Sidebar from "./dashboard/sidebar";

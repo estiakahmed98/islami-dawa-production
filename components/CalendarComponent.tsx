@@ -1,4 +1,5 @@
-"use client";
+"use client"; //Estiak
+
 import { useEffect, useState } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";

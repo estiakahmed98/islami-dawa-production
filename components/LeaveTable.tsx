@@ -1,4 +1,4 @@
-"use client";
+"use client"; //Estiak
 
 import { useState, useEffect } from "react";
 import { useSession } from "@/lib/auth-client";

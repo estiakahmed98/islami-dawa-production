@@ -1,5 +1,4 @@
-
-"use client";
+"use client"; //Juwel
 import React, { useMemo } from "react";
 
 type TallyAdminProps = {

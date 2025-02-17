@@ -1,4 +1,4 @@
-"use client";
+"use client"; //Estiak
 
 import React, { useState, useEffect } from "react";
 import { UserCircle, Mail, Phone, MapPin, Landmark } from "lucide-react";

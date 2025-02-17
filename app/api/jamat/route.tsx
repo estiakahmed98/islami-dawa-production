@@ -1,12 +1,11 @@
+//Faysal Updated by //Juwel
+
 import fs from "fs";
 import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 
 // Path to the user data file
-const userDataPath = path.join(
-  process.cwd(),
-  "app/data/jamatBisoyUserData.ts"
-);
+const userDataPath = path.join(process.cwd(), "app/data/jamatBisoyUserData.ts");
 
 // Type definitions
 interface JamatBisoyData {
@@ -138,4 +137,3 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 }
-

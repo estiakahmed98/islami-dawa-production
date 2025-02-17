@@ -1,4 +1,4 @@
-"use client";
+"use client"; //Estiak
 
 import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
@@ -122,9 +122,7 @@ const LeaveForm: React.FC<LeaveFormProps> = ({ onClose, onRefresh }) => {
                 const formattedFromDate = values.from
                   ? new Date(values.from)
                   : "N/A";
-                const formattedToDate = values.to
-                  ? new Date(values.to)
-                  : "N/A";
+                const formattedToDate = values.to ? new Date(values.to) : "N/A";
 
                 // Send email
                 await fetch("/api/emails", {

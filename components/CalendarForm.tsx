@@ -1,4 +1,4 @@
-"use client";
+"use client"; //Estiak
 
 import { useState, useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
@@ -320,7 +320,7 @@ const CalendarEventForm = ({
           type="submit"
           className="bg-blue-500 text-white p-2 rounded flex-1"
         >
-          {initialValues ? "Update Event" : "Create Event"}
+          {initialValues ? "Create Event" : "Update Event"}
         </button>
         {onCancel && (
           <button
