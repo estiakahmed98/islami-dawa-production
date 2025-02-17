@@ -34,23 +34,23 @@ const SignupForm = () => {
   const [formError, setFormError] = useState("");
   const router = useRouter();
 
-  const form = useForm<yup.InferType<typeof signUpSchema>>({
-    resolver: yupResolver(signUpSchema),
+  const form = useForm({
     defaultValues: {
       name: "",
       email: "",
       password: "",
-      role: "",
-      division: "",
-      district: "",
-      area: "",
-      upazila: "",
-      union: "",
-      phone: "",
+      role: "centraladmin",
+      division: "Dhaka",
+      district: "Dhaka",
+      area: "Dhanmondi",
+      upazila: "Dhaka",
+      union: "Dhaka",
+      phone: "01736486851",
     },
   });
 
-  const onSubmit = async (values: yup.InferType<typeof signUpSchema>) => {
+  const onSubmit = async (values) => {
+    console.log(values);
     await signUp.email(
       {
         name: values.name,

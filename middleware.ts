@@ -9,7 +9,7 @@ export default async function authMiddleware(request: NextRequest) {
 
   // Get the cookie from the request
   const response = await fetch(
-    `${request.nextUrl.origin}/api/auth/get-session`,
+    `${process.env.BETTER_AUTH_URL}/api/auth/get-session`,
     {
       headers: {
         cookie: request.headers.get("cookie") || "",
