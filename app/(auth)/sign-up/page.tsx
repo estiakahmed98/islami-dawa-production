@@ -1,7 +1,7 @@
-import SignupForm from "./signup-form";
+// import SignupForm from "./signup-form";
 
 const SingupPage = () => {
-  return <SignupForm />;
+  return <div>Signup Form</div>;
 };
 
 export default SingupPage;
