@@ -48,8 +48,10 @@ const SidebarMenu = () => {
   const userRoutes = ["/dashboard", "/dashboard/amoli-muhasaba", "/dashboard/*"];
 
   // State for admin/user mode and button text
-  const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
-  const [buttText, setButtonText] = useState<string>("");
+  // const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
+  // const [buttText, setButtonText] = useState<string>("");
+  const [isAdminMode, setIsAdminMode] = useState<boolean>(adminRoutes.includes(currentRoute));
+  const [buttText, setButtonText] = useState<string>(isAdmin ? "Goto User Mode" : "Goto Admin Mode");
 
   // Initialize mode based on current route
   useEffect(() => {
