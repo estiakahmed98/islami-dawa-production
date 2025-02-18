@@ -10,6 +10,7 @@ import { useSession } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
+import Loading from "@/app/dashboard/loading";
 
 const DayeeBishoyForm: React.FC = () => {
   const router = useRouter();
@@ -78,7 +79,7 @@ const DayeeBishoyForm: React.FC = () => {
   };
 
   // Render loading state
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loading />;
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">

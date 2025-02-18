@@ -8,6 +8,7 @@ import { useSession } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
+import Loading from "@/app/dashboard/loading";
 
 const MoktobBishoyForm = () => {
   const router = useRouter();
@@ -76,7 +77,7 @@ const MoktobBishoyForm = () => {
   };
 
   // Render loading state
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loading />;
 
   return (
     <div className="w-full mx-auto mt-8 rounded bg-white p-10 shadow-lg">
