@@ -1,11 +1,16 @@
-
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import MenuItem from "./menu-item";
 
 // Importing React icons
 import { LuLayoutDashboard } from "react-icons/lu";
-import { FaRegFileAlt, FaRegHandshake, FaUsers, FaQuran } from "react-icons/fa";
+import {
+  FaRegFileAlt,
+  FaRegHandshake,
+  FaUsers,
+  FaQuran,
+  FaTree,
+} from "react-icons/fa";
 import { LiaChalkboardTeacherSolid } from "react-icons/lia";
 import { FcAcceptDatabase, FcLeave } from "react-icons/fc";
 import {
@@ -45,8 +50,17 @@ const SidebarMenu = () => {
   const currentRoute = usePathname();
 
   // Admin routes list
-  const adminRoutes = ["/admin", "/admin/users", "/admin/register", "/admin/notification"];
-  const userRoutes = ["/dashboard", "/dashboard/amoli-muhasaba", "/dashboard/*"];
+  const adminRoutes = [
+    "/admin",
+    "/admin/users",
+    "/admin/register",
+    "/admin/notification",
+  ];
+  const userRoutes = [
+    "/dashboard",
+    "/dashboard/amoli-muhasaba",
+    "/dashboard/*",
+  ];
 
   // State for admin/user mode and button text
   const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
@@ -54,16 +68,21 @@ const SidebarMenu = () => {
 
   // Initialize mode based on current route
   useEffect(() => {
-    if (adminRoutes.includes(currentRoute)) {
+    if (
+      currentRoute === "/admin" ||
+      "/admin/users" ||
+      "/admin/register" ||
+      "/admin/notification"
+    ) {
       setIsAdminMode(true);
       setButtonText("Goto User Mode");
-    } else if (userRoutes.some(route => currentRoute.startsWith(route))) {
+    } else if (userRoutes.some((route) => currentRoute.startsWith(route))) {
       setIsAdminMode(false);
       setButtonText("Goto Admin Mode");
     }
   }, [currentRoute]);
 
-    const handleModeToggle = () => {
+  const handleModeToggle = () => {
     const newMode = !isAdminMode;
     setIsAdminMode(newMode);
     setButtonText(newMode ? "Goto User Mode" : "Goto Admin Mode");
@@ -169,6 +188,11 @@ const SidebarMenu = () => {
       icon: <FcAcceptDatabase className="size-6" />,
       title: "অনুমতি দিন",
     },
+    {
+      url: "/admin/notification",
+      icon: <FaTree className="size-6" />,
+      title: "Real Tree",
+    },
   ];
 
   return (
@@ -237,7 +261,7 @@ const SidebarMenu = () => {
             ))}
             {userName && (
               <div className="mt-4 px-1 overflow-y-auto">
-                <MuiTreeView /> 
+                <MuiTreeView />
               </div>
             )}
           </>
@@ -249,5 +273,3 @@ const SidebarMenu = () => {
 };
 
 export default SidebarMenu;
-
-
