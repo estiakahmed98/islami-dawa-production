@@ -55,25 +55,23 @@ const initialFormData: AmoliMuhasabaFormValues = {
 };
 
 const validationSchema = Yup.object({
-  tahajjud: Yup.number()
-    .min(0, "Value should not be less than 0")
-    .required("This field is required"),
+  tahajjud: Yup.number().min(0, "Value should not be less than 0").optional(),
   jamat: Yup.number()
     .min(0, "Value should not be less than 0")
     .max(5, "Value should not exceed 5")
-    .required("This field is required"),
-  surah: Yup.string().required("Select Surah required"),
-  zikir: Yup.string().required("This field is required"),
-  ishraq: Yup.string().required("This field is required"),
-  sirat: Yup.string().required("This field is required"),
-  Dua: Yup.string().required("This field is required"),
-  ilm: Yup.string().required("This field is required"),
-  tasbih: Yup.string().required("This field is required"),
-  dayeeAmol: Yup.string().required("This field is required"),
-  amoliSura: Yup.string().required("This field is required"),
-  ayamroja: Yup.string().notRequired(),
-  hijbulBahar: Yup.string().required("This field is required"),
-  ayat: Yup.string().required("This field is required"),
+    .optional(),
+  surah: Yup.string().optional(),
+  zikir: Yup.string().optional(),
+  ishraq: Yup.string().optional(),
+  sirat: Yup.string().optional(),
+  Dua: Yup.string().optional(),
+  ilm: Yup.string().optional(),
+  tasbih: Yup.string().optional(),
+  dayeeAmol: Yup.string().optional(),
+  amoliSura: Yup.string().optional(),
+  ayamroja: Yup.string().optional(),
+  hijbulBahar: Yup.string().optional(),
+  ayat: Yup.string().optional(),
 });
 
 const AmoliMuhasabaForm = () => {

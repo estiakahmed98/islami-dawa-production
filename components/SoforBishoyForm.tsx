@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
+import Loading from "@/app/dashboard/loading";
 
 interface FormValues {
   moktobVisit: string;
@@ -67,7 +68,7 @@ const SoforBishoyForm: React.FC = () => {
     checkSubmissionStatus();
   }, [email]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loading />;
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-10 shadow-lg">

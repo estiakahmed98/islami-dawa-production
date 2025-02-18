@@ -38,7 +38,7 @@ const Header = () => {
   const formattedDate = `${day}-${month}-${year}`;
 
   return (
-    <header className="flex h-20 bg-[#155E75] text-white shrink-0 items-center justify-between border-b px-6 dark:bg-slate-900">
+    <header className="flex h-20 bg-[#155E75] text-white shrink-0 items-center justify-between border-b px-6">
       <Button onClick={toggleSidebar} size="icon" variant="secondary">
         <Menu />
       </Button>
