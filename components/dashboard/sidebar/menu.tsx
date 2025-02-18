@@ -189,7 +189,7 @@ const SidebarMenu = () => {
       title: "অনুমতি দিন",
     },
     {
-      url: "/admin/notification",
+      url: "/admin/RealTree",
       icon: <FaTree className="size-6" />,
       title: "Real Tree",
     },
