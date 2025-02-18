@@ -4,7 +4,13 @@ import MenuItem from "./menu-item";
 
 // Importing React icons
 import { LuLayoutDashboard } from "react-icons/lu";
-import { FaRegFileAlt, FaRegHandshake, FaUsers, FaQuran } from "react-icons/fa";
+import {
+  FaRegFileAlt,
+  FaRegHandshake,
+  FaUsers,
+  FaQuran,
+  FaTree,
+} from "react-icons/fa";
 import { LiaChalkboardTeacherSolid } from "react-icons/lia";
 import { FcAcceptDatabase, FcLeave } from "react-icons/fc";
 import {
@@ -52,7 +58,12 @@ const SidebarMenu = () => {
 
   // Initialize the mode based on the current route (only on first render)
   useEffect(() => {
-    if (currentRoute === "/admin" || "/admin/users" || "/admin/register" || "/admin/notification") {
+    if (
+      currentRoute === "/admin" ||
+      "/admin/users" ||
+      "/admin/register" ||
+      "/admin/notification"
+    ) {
       setIsAdminMode(true);
       setButtonText("Goto User Mode"); // Set Admin Mode when on "/admin"
     } else if (currentRoute === "/dashboard" || "/dashboard/*") {
@@ -171,6 +182,11 @@ const SidebarMenu = () => {
       icon: <FcAcceptDatabase className="size-6" />,
       title: "অনুমতি দিন",
     },
+    {
+      url: "/admin/notification",
+      icon: <FaTree className="size-6" />,
+      title: "Real Tree",
+    },
   ];
 
   return (
@@ -239,7 +255,7 @@ const SidebarMenu = () => {
             ))}
             {userName && (
               <div className="mt-4 px-1 overflow-y-auto">
-                <MuiTreeView /> 
+                <MuiTreeView />
               </div>
             )}
           </>
