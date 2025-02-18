@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeSwitcher } from "@/components/ui/theme-switcher";
+// import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, LogOut, Menu, UserRound } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -57,7 +57,7 @@ const Header = () => {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <ThemeSwitcher />
+        {/* <ThemeSwitcher /> */}
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
