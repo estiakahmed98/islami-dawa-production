@@ -10,6 +10,7 @@ import {
 import { IoPersonAddSharp } from "react-icons/io5";
 import { MdPeople } from "react-icons/md";
 import { FcAcceptDatabase } from "react-icons/fc";
+import { FaTree } from "react-icons/fa";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import MuiTreeView from "./MuiTreeView";
@@ -81,7 +82,18 @@ const ImpersonateSidebar: React.FC = () => {
         "districtadmin",
         "areaadmin",
         "upozilaadmin",
-        "user",
+      ],
+    },
+    {
+      href: "/admin/RealTree",
+      icon: <FaTree className="size-6" />,
+      label: "Real Tree",
+      roles: [
+        "centraladmin",
+        "divisionadmin",
+        "districtadmin",
+        "areaadmin",
+        "upozilaadmin",
       ],
     },
   ];
