@@ -12,7 +12,7 @@ import { userJamatBisoyData } from "@/app/data/jamatBisoyUserData";
 const JamatPage: React.FC = () => {
   return (
     <div>
-      <Tabs defaultValue="dataForm" className="w-full p-4">
+      <Tabs defaultValue="dataForm" className="w-full p-2 lg:p-4">
         <div className="flex justify-between">
           <TabsList>
             <TabsTrigger value="dataForm">তথ্য দিন</TabsTrigger>
@@ -20,7 +20,7 @@ const JamatPage: React.FC = () => {
           </TabsList>
         </div>
         <TabsContent value="dataForm">
-          <div className=" bg-gray-50 rounded shadow">
+          <div className=" bg-gray-50 lg:rounded lg:shadow">
             <JamatBishoyForm />
           </div>
         </TabsContent>
