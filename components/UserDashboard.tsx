@@ -346,50 +346,6 @@ const Dashboard: React.FC<TallyProps> = () => {
 
   return (
     <div className="space-y-4">
-      {/* Header Section */}
-      {/* <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl">
-        <h1 className="text-2xl font-bold text-gray-800">
-          স্বাগতম ,{" "}
-          <span className="text-emerald-600">{session?.user?.name}</span>
-        </h1>
-
-        <div className="lg:flex lg:justify-center gap-3">
-          <button
-            onClick={() => setShowComparison(!showComparison)}
-            className="bg-emerald-600 text-white font-semibold lg:px-6 lg:py-2 rounded-lg shadow-md hover:bg-emerald-700 transition-all duration-300"
-          >
-            {showComparison ? "ড্যাশবোর্ডে ফিরে জান" : "📊 তুলনা দেখুন"}
-          </button>
-
-          {!showComparison && (
-            <div className="flex flex-wrap items-center gap-4">
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                className="w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
-              >
-                {months.map((month, index) => (
-                  <option key={index} value={index}>
-                    {month}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="w-24 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
-              >
-                {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
-      </div> */}
-
       <div className="flex flex-col gap-4 lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl">
         {/* Heading */}
         <h1 className="text-xl md:text-2xl font-bold text-gray-800 text-center lg:text-left">
@@ -436,8 +392,8 @@ const Dashboard: React.FC<TallyProps> = () => {
       </div>
 
       {showComparison ? (
-        <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
-          <div className="flex flex-wrap gap-4 items-center">
+        <div className="bg-white p-2 lg:p-6 rounded-lg shadow-md space-y-4">
+          <div className="grid lg:flex lg:flex-wrap gap-4 items-center">
             <select
               value={comparisonType}
               onChange={(e) => setComparisonType(e.target.value)}
@@ -466,7 +422,7 @@ const Dashboard: React.FC<TallyProps> = () => {
             )}
 
             {comparisonType === "month" && (
-              <div className="flex gap-2 items-center">
+              <div className="grid lg:flex gap-2">
                 <input
                   type="month"
                   value={from}
@@ -484,7 +440,7 @@ const Dashboard: React.FC<TallyProps> = () => {
             )}
 
             {comparisonType === "year" && (
-              <div className="flex gap-2 items-center">
+              <div className="grid max-w-sm:w-full lg:flex lg:gap-2">
                 <select
                   value={from}
                   onChange={(e) => setFrom(e.target.value)}
@@ -523,31 +479,39 @@ const Dashboard: React.FC<TallyProps> = () => {
             </button>
           </div>
 
-          <div className="bg-gray-100 p-4 rounded-lg shadow">
+          <div className="bg-gray-100 p-2 lg:p-4 rounded-lg shadow overflow-x-auto">
             {comparisonData.length > 0 ? (
-              <table className="w-full border-collapse border border-gray-300">
+              <table className="w-full border-collapse border border-gray-300 text-sm lg:text-base">
                 <thead>
                   <tr className="bg-gray-200">
-                    <th className="border px-4 py-2">Label</th>
-                    <th className="border px-4 py-2">{from}</th>
-                    <th className="border px-4 py-2">{to}</th>
-                    <th className="border px-4 py-2">Difference</th>
-                    <th className="border px-4 py-2">Change</th>
+                    <th className="border px-2 lg:px-4 py-1 lg:py-2">Label</th>
+                    <th className="border px-2 lg:px-4 py-1 lg:py-2">{from}</th>
+                    <th className="border px-2 lg:px-4 py-1 lg:py-2">{to}</th>
+                    <th className="border px-2 lg:px-4 py-1 lg:py-2">
+                      Difference
+                    </th>
+                    <th className="border px-2 lg:px-4 py-1 lg:py-2">Change</th>
                   </tr>
                 </thead>
                 <tbody>
                   {comparisonData.map((item, index) => (
                     <tr key={index} className="text-center">
-                      <td className="border px-4 py-2">{item.label}</td>
-                      <td className="border px-4 py-2">{item.from}</td>
-                      <td className="border px-4 py-2">{item.to}</td>
+                      <td className="border px-2 lg:px-4 py-1 lg:py-2">
+                        {item.label}
+                      </td>
+                      <td className="border px-2 lg:px-4 py-1 lg:py-2">
+                        {item.from}
+                      </td>
+                      <td className="border px-2 lg:px-4 py-1 lg:py-2">
+                        {item.to}
+                      </td>
                       <td
-                        className={`border px-4 py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
+                        className={`border px-2 lg:px-4 py-1 lg:py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
                       >
                         {item.to - item.from}
                       </td>
                       <td
-                        className={`border px-4 py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
+                        className={`border px-2 lg:px-4 py-1 lg:py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
                       >
                         {item.change}
                       </td>

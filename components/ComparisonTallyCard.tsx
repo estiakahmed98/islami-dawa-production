@@ -10,8 +10,8 @@ const ComparisonTallyCard: React.FC<{
   previousData: DataSet[];
 }> = ({ currentData, previousData }) => {
   return (
-    <div className="w-full bg-white shadow-lg rounded-lg p-10 border border-gray-200">
-      <h2 className="text-3xl font-semibold text-center mb-10">তুলনা দেখুন</h2>
+    <div className="w-full bg-white lg:shadow-lg rounded-lg p-2 lg:p-10 border border-gray-200">
+      <h2 className="text-xl lg:text-3xl font-semibold text-center mt-4 mb-10">তুলনা দেখুন</h2>
       <div className="grid grid-cols-2 gap-10">
         {currentData.map((item, index) => {
           const current = item;

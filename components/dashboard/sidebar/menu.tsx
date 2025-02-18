@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation"; // Import useRouter and usePathname for navigation
+import { useRouter, usePathname } from "next/navigation";
 import MenuItem from "./menu-item";
 
 // Importing React icons
@@ -22,14 +23,14 @@ import { IoPersonAddSharp } from "react-icons/io5";
 import MuiTreeView from "@/components/MuiTreeView";
 
 const SidebarMenu = () => {
-  const router = useRouter(); // Router instance for navigation
+  const router = useRouter();
   const { data: session } = useSession();
   const userRole = session?.user?.role;
-  const userEmail = session?.user.email;
+  const userEmail = session?.user?.email || "";
 
   const { isMobile } = useSidebar();
 
-  // Admin role list
+  // Define admin roles
   const adminRoles = [
     "centraladmin",
     "superadmin",
@@ -40,35 +41,32 @@ const SidebarMenu = () => {
     "unionadmin",
   ];
 
-  // Check if user role is in the admin role list
   const isAdmin = adminRoles.includes(userRole as string);
-
-  // Get the current route
   const currentRoute = usePathname();
 
-  // State to toggle between User Mode and Admin Mode
-  const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
-  const [buttText, setButtonText] = useState<String>("");
+  // Admin routes list
+  const adminRoutes = ["/admin", "/admin/users", "/admin/register", "/admin/notification"];
+  const userRoutes = ["/dashboard", "/dashboard/amoli-muhasaba", "/dashboard/*"];
 
-  // Initialize the mode based on the current route (only on first render)
+  // State for admin/user mode and button text
+  const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
+  const [buttText, setButtonText] = useState<string>("");
+
+  // Initialize mode based on current route
   useEffect(() => {
-    if (currentRoute === "/admin" || "/admin/users" || "/admin/register" || "/admin/notification") {
+    if (adminRoutes.includes(currentRoute)) {
       setIsAdminMode(true);
-      setButtonText("Goto User Mode"); // Set Admin Mode when on "/admin"
-    } else if (currentRoute === "/dashboard" || "/dashboard/*") {
+      setButtonText("Goto User Mode");
+    } else if (userRoutes.some(route => currentRoute.startsWith(route))) {
       setIsAdminMode(false);
-      setButtonText("Goto Admin Mode"); // Set User Mode when on "/dashboard"
+      setButtonText("Goto Admin Mode");
     }
   }, [currentRoute]);
 
-  const handleModeToggle = () => {
+    const handleModeToggle = () => {
     const newMode = !isAdminMode;
     setIsAdminMode(newMode);
-    if (isAdminMode) {
-      setButtonText("Goto User Mode");
-    } else {
-      setButtonText("Goto Admin Mode");
-    }
+    setButtonText(newMode ? "Goto User Mode" : "Goto Admin Mode");
     router.push(newMode ? "/admin" : "/dashboard");
   };
 
@@ -251,3 +249,5 @@ const SidebarMenu = () => {
 };
 
 export default SidebarMenu;
+
+

@@ -337,9 +337,9 @@ const ComparisonDataComponent: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-white shadow-md rounded-lg">
+    <div className="p-2 lg:p-6 bg-white shadow-md rounded-lg">
       <h1 className="text-2xl font-bold text-gray-800 mb-4">তুলনা দেখুন</h1>
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="grid lg:flex lg:flex-wrap gap-4 mb-6">
         <select
           value={comparisonType}
           onChange={(e) => {
@@ -374,7 +374,7 @@ const ComparisonDataComponent: React.FC = () => {
 
         {comparisonType === "month" && (
           <>
-            <div className="flex gap-2">
+            <div className="grid lg:flex gap-2">
               <input
                 type="month"
                 value={from}
@@ -394,7 +394,7 @@ const ComparisonDataComponent: React.FC = () => {
 
         {comparisonType === "year" && (
           <>
-            <div className="flex gap-2">
+            <div className="grid max-w-sm:w-full lg:flex lg:gap-2">
               <select
                 value={from}
                 onChange={(e) => setFrom(e.target.value)}
@@ -402,7 +402,7 @@ const ComparisonDataComponent: React.FC = () => {
               >
                 {generateYearOptions()}
               </select>
-              <span className="self-center font-bold">to</span>
+              <span className="py-1 self-center font-bold">to</span>
               <select
                 value={to}
                 onChange={(e) => setTo(e.target.value)}
@@ -422,31 +422,31 @@ const ComparisonDataComponent: React.FC = () => {
         </button>
       </div>
 
-      <div className="bg-gray-100 p-4 rounded-lg shadow">
+      <div className="bg-gray-100 p-2 lg:p-4 rounded-lg shadow overflow-x-auto">
         {comparisonData.length > 0 ? (
-          <table className="w-full border-collapse border border-gray-300">
+          <table className="w-full border-collapse border border-gray-300 text-sm lg:text-base">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border px-4 py-2">Label</th>
-                <th className="border px-4 py-2">{from}</th>
-                <th className="border px-4 py-2">{to}</th>
-                <th className="border px-4 py-2">Difference</th>
-                <th className="border px-4 py-2">Change</th>
+                <th className="border px-2 lg:px-4 py-1 lg:py-2">Label</th>
+                <th className="border px-2 lg:px-4 py-1 lg:py-2">{from}</th>
+                <th className="border px-2 lg:px-4 py-1 lg:py-2">{to}</th>
+                <th className="border px-2 lg:px-4 py-1 lg:py-2">Difference</th>
+                <th className="border px-2 lg:px-4 py-1 lg:py-2">Change</th>
               </tr>
             </thead>
             <tbody>
               {comparisonData.map((item, index) => (
                 <tr key={index} className="text-center">
-                  <td className="border px-4 py-2">{item.label}</td>
-                  <td className="border px-4 py-2">{item.from}</td>
-                  <td className="border px-4 py-2">{item.to}</td>
+                  <td className="border px-2 lg:px-4 py-1 lg:py-2">{item.label}</td>
+                  <td className="border px-2 lg:px-4 py-1 lg:py-2">{item.from}</td>
+                  <td className="border px-2 lg:px-4 py-1 lg:py-2">{item.to}</td>
                   <td
-                    className={`border px-4 py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
+                    className={`border px-2 lg:px-4 py-1 lg:py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
                   >
                     {item.to - item.from}
                   </td>
                   <td
-                    className={`border px-4 py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
+                    className={`border px-2 lg:px-4 py-1 lg:py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
                   >
                     {item.change}
                   </td>
