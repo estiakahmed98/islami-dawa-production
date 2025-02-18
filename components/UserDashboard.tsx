@@ -407,7 +407,7 @@ const Dashboard: React.FC<TallyProps> = () => {
           </button>
 
           {!showComparison && (
-            <div className="flex flex-col sm:flex-row gap-3 items-center w-full md:w-auto">
+            <div className="flex gap-3 items-center w-full md:w-auto">
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(parseInt(e.target.value))}

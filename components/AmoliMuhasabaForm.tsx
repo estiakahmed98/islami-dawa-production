@@ -224,7 +224,7 @@ const AmoliMuhasabaForm = () => {
   };
 
   return (
-    <div className="mx-auto mt-8 rounded bg-white p-10 shadow-lg">
+    <div className="mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
       <h2 className="mb-2 text-2xl">আ’মলি মুহাসাবা</h2>
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">

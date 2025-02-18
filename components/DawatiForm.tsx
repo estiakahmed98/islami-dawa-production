@@ -88,7 +88,7 @@ const DawatiForm: React.FC = () => {
   if (loading) return <Loading />;
 
   return (
-    <div className="w-full mx-auto mt-8 rounded bg-white p-10 shadow-lg">
+    <div className="w-full mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
           You already have submitted today.
