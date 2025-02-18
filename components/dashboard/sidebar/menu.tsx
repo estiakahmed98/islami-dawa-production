@@ -19,7 +19,7 @@ import { useSidebar } from "@/providers/sidebar-provider";
 import { GrSchedules } from "react-icons/gr";
 import { useSession } from "@/lib/auth-client";
 import { IoPersonAddSharp } from "react-icons/io5";
-import OnItemClick from "@/components/MuiTreeView";
+import MuiTreeView from "@/components/MuiTreeView";
 
 const SidebarMenu = () => {
   const router = useRouter(); // Router instance for navigation
@@ -52,7 +52,7 @@ const SidebarMenu = () => {
 
   // Initialize the mode based on the current route (only on first render)
   useEffect(() => {
-    if (currentRoute === "/admin") {
+    if (currentRoute === "/admin" || "/admin/users" || "/admin/register" || "/admin/notification") {
       setIsAdminMode(true);
       setButtonText("Goto User Mode"); // Set Admin Mode when on "/admin"
     } else if (currentRoute === "/dashboard" || "/dashboard/*") {
@@ -239,10 +239,7 @@ const SidebarMenu = () => {
             ))}
             {userName && (
               <div className="mt-4 px-1 overflow-y-auto">
-                <OnItemClick
-                  loggedInUser={userName}
-                  onItemClick={navigateToUserPage}
-                />
+                <MuiTreeView /> 
               </div>
             )}
           </>
