@@ -110,7 +110,7 @@ const TallyMobileCombine: React.FC<TallyAdminProps> = ({
   const isMobile = typeof window !== "undefined" && window.innerWidth < 600;
 
   return (
-    <div className="bg-white border shadow-lg rounded-lg p-4 md:p-6 w-full">
+    <div className="bg-white border shadow-lg rounded-lg p-0 md:p-6 w-full">
       <h2 className="text-lg md:text-xl font-bold mb-4 text-gray-800">
         {title}
       </h2>
@@ -122,8 +122,8 @@ const TallyMobileCombine: React.FC<TallyAdminProps> = ({
             barSize={isMobile ? 25 : 60} // Slightly wider bars for mobile
             margin={{
               top: isMobile ? 20 : 40,
-              right: 20,
-              left: 20,
+              right: isMobile ? 0 : 20,
+              left: isMobile ? 0 : 20,
               bottom: 30,
             }} // Adjust spacing for mobile
           >
