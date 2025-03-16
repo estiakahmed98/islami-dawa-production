@@ -327,13 +327,13 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
         {/* Action Buttons */}
         <div className="flex gap-4 mt-4 lg:mt-0">
           <button
-            className="flex items-center gap-2 text-sm lg:text-lg px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-md transition duration-300"
+            className="flex items-center gap-2 text-xs lg:text-lg px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-md transition duration-300"
             onClick={convertToCSV}
           >
             📥 Download CSV
           </button>
           <button
-            className="flex items-center gap-2 text-sm lg:text-lg px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition duration-300"
+            className="flex items-center gap-2 text-xs  lg:text-lg px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition duration-300"
             onClick={convertToPDF}
           >
             📄 Download PDF
