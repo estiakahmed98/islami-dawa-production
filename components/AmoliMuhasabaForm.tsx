@@ -106,6 +106,7 @@ const AmoliMuhasabaForm = () => {
     if (field === "zikir") {
       if (value === "সকাল-সন্ধ্যা") return 5;
       if (value === "সকাল" || value === "সন্ধ্যা") return 3;
+      if (value === "না") return 0;
       return 0;
     } else if (
       field === "surah" ||
@@ -113,7 +114,7 @@ const AmoliMuhasabaForm = () => {
       field === "ilm" ||
       field === "sirat"
     ) {
-      return value ? 5 : 0;
+      return value === "না" ? 0 : 5;
     } else if (field === "jamat") {
       if (value >= 1 && value <= 5) return value;
       return 0;
@@ -319,7 +320,7 @@ const AmoliMuhasabaForm = () => {
                 <Field
                   name="ayat"
                   type="text"
-                  placeholder="Enter Ayat"
+                  placeholder="Start - End"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                   onChange={(
                     e:
@@ -613,6 +614,25 @@ const AmoliMuhasabaForm = () => {
                 </div>
               </div>
             </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mt-4 mb-2">
+                কারণ উল্লেখ করুন (Show Cause)
+              </label>
+              <Field
+                as="textarea"
+                name="showCause"
+                placeholder="আপনার কারণ লিখুন..."
+                rows={6}
+                className="w-full rounded border border-gray-300 px-4 py-2"
+                disabled={isSubmittedToday}
+              />
+              <ErrorMessage
+                name="showCause"
+                component="div"
+                className="text-red-500 mt-1"
+              />
+            </div>
+
             <div className="mt-6 flex items-center justify-between">
               <div className="text-gray-600 text-lg">
                 Total Points:{" "}

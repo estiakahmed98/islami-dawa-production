@@ -20,6 +20,7 @@ const AmoliMuhasabaPage: React.FC = () => {
               <TabsTrigger value="report">প্রতিবেদন</TabsTrigger>
             </TabsList>
           </div>
+          
           <TabsContent value="dataForm">
             <div className="bg-gray-50 lg:rounded lg:shadow">
               <AmoliMuhasabaForm />

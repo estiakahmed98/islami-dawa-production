@@ -21,6 +21,7 @@ import { useSession } from "@/lib/auth-client";
 import AmoliTableShow from "@/components/TableShow";
 import TallyAdmin from "@/components/TallyAdmin";
 import ComparisonTallyCard from "@/components/ComparisonTallyCard";
+import TallyMobileCombine from "./TallyMobileCombine";
 
 interface TallyProps {
   userData: Record<string, any>;

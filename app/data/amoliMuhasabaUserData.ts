@@ -180,6 +180,23 @@ export const userAmoliData = {
         "hijbulBahar": "হ্যাঁ",
         "ayat": "10-50",
         "percentage": "72.31"
+      },
+      "2025-03-20": {
+        "tahajjud": 7,
+        "surah": "সুরা ইব্রাহিম",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক",
+        "jamat": 4,
+        "sirat": "Hadis",
+        "Dua": "না",
+        "ilm": "H..",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "10-20",
+        "percentage": "86.15"
       }
     },
     "moni@gmail.com": {
