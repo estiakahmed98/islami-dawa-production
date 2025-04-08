@@ -40,17 +40,9 @@ const Register = () => {
   });
 
   const roleHierarchy = {
-    centraladmin: [
-      "divisionadmin",
-      "districtadmin",
-      "upozilaadmin",
-      "unionadmin",
-      "daye",
-    ],
-    divisionadmin: ["districtadmin", "upozilaadmin", "unionadmin", "daye"],
-    districtadmin: ["upozilaadmin", "unionadmin", "daye"],
-    upozilaadmin: ["unionadmin", "daye"],
-    unionadmin: ["daye"],
+    centraladmin: ["divisionadmin", "markazadmin", "daye"],
+    divisionadmin: ["markazadmin", "daye"],
+    markazadmin: ["daye"],
   };
 
   const { data: session } = useSession();
@@ -72,9 +64,7 @@ const Register = () => {
     const roleTitles: Record<string, string> = {
       centraladmin: "কেন্দ্রীয় এডমিন",
       divisionadmin: "বিভাগীয় এডমিন",
-      districtadmin: "জেলা এডমিন",
-      upozilaadmin: "উপজেলা এডমিন",
-      unionadmin: "ইউনিয়ন এডমিন",
+      markazadmin: "মার্কায এডমিন",
       daye: "দা'ঈ",
     };
     return roleTitles[role] || role;

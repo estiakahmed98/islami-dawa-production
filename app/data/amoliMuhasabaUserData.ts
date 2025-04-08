@@ -965,6 +965,23 @@ export const userAmoliData = {
         "hijbulBahar": "হ্যাঁ",
         "ayat": "90",
         "percentage": "90.00"
+      },
+      "2025-04-08": {
+        "tahajjud": 20,
+        "surah": "সুরা কাহফ(110)",
+        "zikir": "সকাল-সন্ধ্যা",
+        "ishraq": "ইশরাক-আওয়াবীন-চাশ্ত",
+        "jamat": 5,
+        "sirat": "bukhari",
+        "Dua": "হ্যাঁ",
+        "ilm": "Yes",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "132",
+        "percentage": "100.00"
       }
     },
     "faysalmohammed@gmail.com": {
@@ -984,6 +1001,25 @@ export const userAmoliData = {
         "hijbulBahar": "না",
         "ayat": "1-20",
         "percentage": "87.69"
+      }
+    },
+    "mm@gmail.com": {
+      "2025-04-08": {
+        "tahajjud": 20,
+        "surah": "সুরা আনফাল(75)",
+        "zikir": "না",
+        "ishraq": "না",
+        "jamat": 5,
+        "sirat": "bukhari",
+        "Dua": "হ্যাঁ",
+        "ilm": "Yes",
+        "tasbih": "হ্যাঁ",
+        "dayeeAmol": "হ্যাঁ",
+        "amoliSura": "হ্যাঁ",
+        "ayamroja": "",
+        "hijbulBahar": "হ্যাঁ",
+        "ayat": "20",
+        "percentage": "84.62"
       }
     }
   }

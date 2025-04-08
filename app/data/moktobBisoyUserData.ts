@@ -1093,6 +1093,19 @@ export const userMoktobBisoyData = {
         "MadrasahAdmit": 40,
         "NewMuslim": 40,
         "editorContent": ""
+      },
+      "2025-04-08": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 10,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 9,
+        "editorContent": ""
       }
     },
     "daye5dhaka@gmail.com": {
@@ -1219,6 +1232,156 @@ export const userMoktobBisoyData = {
         "TotalAgeSikkha": 88,
         "MadrasahAdmit": 90,
         "NewMuslim": 88,
+        "editorContent": ""
+      }
+    },
+    "mm2@gmail.com": {
+      "2025-04-08": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 9,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 10,
+        "editorContent": ""
+      }
+    },
+    "cma@gmail.com": {
+      "2025-04-08": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 10,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 10,
+        "editorContent": ""
+      }
+    },
+    "ca@gmail.com": {
+      "2025-04-08": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 10,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 10,
+        "editorContent": ""
+      }
+    },
+    "mm@gmail.com": {
+      "2025-04-08": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 10,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 10,
+        "editorContent": ""
+      }
+    },
+    "csd@gmail.com": {
+      "2025-04-08": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 10,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 10,
+        "editorContent": ""
+      }
+    },
+    "mmd@gmail.com": {
+      "2025-04-08": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 10,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 10,
+        "editorContent": ""
+      }
+    },
+    "sd@gmail.com": {
+      "2025-04-08": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 10,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 10,
+        "editorContent": ""
+      }
+    },
+    "cd@gmail.com": {
+      "2025-04-08": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 10,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 10,
+        "editorContent": ""
+      }
+    },
+    "msd@gmail.com": {
+      "2025-04-08": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 10,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 10,
+        "editorContent": ""
+      }
+    },
+    "ssd@gmail.com": {
+      "2025-04-08": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 10,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 10,
         "editorContent": ""
       }
     }

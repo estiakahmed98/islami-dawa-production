@@ -19,6 +19,7 @@ model users {
   union         String?
   markaz        String?
   phone         String?
+  parent        String?
   emailVerified Boolean
   image         String?
   createdAt     DateTime

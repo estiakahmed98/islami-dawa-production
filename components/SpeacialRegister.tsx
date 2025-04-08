@@ -1,6 +1,7 @@
 "use client"; //Estiak
 
-import React, { useState, useCallback, useMemo } from "react";
+import type React from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
 import { admin, useSession } from "@/lib/auth-client";
@@ -8,6 +9,18 @@ import markazList from "@/app/data/markazList";
 import * as yup from "yup";
 
 type LocationOption = { value: number | string; title: string };
+
+type User = {
+  id: string;
+  name: string;
+  role: string;
+};
+
+type UserWithRole = {
+  id: string;
+  name: string;
+  role: string;
+};
 
 const SpeacialRegister = () => {
   const [formData, setFormData] = useState({
@@ -24,8 +37,10 @@ const SpeacialRegister = () => {
     markaz: "",
     phone: "",
     email: "",
+    parent: "",
     password: "",
   });
+  const [userList, setUserList] = useState([]);
 
   const [loading, setLoading] = useState(false);
 
@@ -37,46 +52,58 @@ const SpeacialRegister = () => {
     phone: yup.string().required("Phone is required"),
   });
 
-  const roleHierarchy = {
-    centraladmin: [
-      "divisionadmin",
-      "districtadmin",
-      "upozilaadmin",
-      "unionadmin",
-      "daye",
-    ],
-    divisionadmin: ["districtadmin", "upozilaadmin", "unionadmin", "daye"],
-    districtadmin: ["upozilaadmin", "unionadmin", "daye"],
-    upozilaadmin: ["unionadmin", "daye"],
-    unionadmin: ["daye"],
+  const roleHierarchy: Record<string, string[]> = {
+    centraladmin: ["divisionadmin", "markazadmin", "daye"],
+    divisionadmin: ["markazadmin", "daye"],
+    markazadmin: ["daye"],
   };
 
   const { data: session } = useSession();
   const loggedInUserRole = session?.user?.role || null;
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const users = await admin.listUsers({
+          query: {
+            limit: 100,
+          },
+        });
+
+        if (users.data?.users.length) {
+          setUserList(users.data?.users || []);
+        }
+      } catch (err) {
+        console.error("Failed to load users", err);
+        toast.error("Failed to load users");
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
   const roleOptions = useMemo(() => {
     if (!loggedInUserRole) return [];
-    return (
-      roleHierarchy[loggedInUserRole as keyof typeof roleHierarchy]?.map(
-        (r) => ({
-          value: r,
-          title: getRoleTitle(r),
-        })
-      ) || []
-    );
+    // Check if the role exists in the hierarchy before trying to map
+    const roles = roleHierarchy[loggedInUserRole as keyof typeof roleHierarchy];
+    if (roles) {
+      return roles.map((r) => ({
+        value: r,
+        title: getRoleTitle(r),
+      }));
+    }
+    return []; // Return empty array if role doesn't exist in hierarchy
   }, [loggedInUserRole]);
 
   function getRoleTitle(role: string) {
     const roleTitles: Record<string, string> = {
-      divisionadmin: "বিভাগীয় এডমিন",
-      districtadmin: "জেলা এডমিন",
-      upozilaadmin: "উপজেলা এডমিন",
-      unionadmin: "ইউনিয়ন এডমিন",
+      centraladmin: "কেন্দ্রীয় এডমিন",
+      divisionadmin: "বিভাগীয় এডমিন",
+      markazadmin: "মার্কায এডমিন",
       daye: "দা'ঈ",
     };
     return roleTitles[role] || role;
   }
-
   const districtsList: LocationOption[] = formData.divisionId
     ? districts[formData.divisionId] || []
     : [];
@@ -153,51 +180,38 @@ const SpeacialRegister = () => {
     [districtsList, upazilasList, unionsList]
   );
 
-  const { role } = formData;
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     setLoading(true);
     try {
-      await signUpSchemaUser.validate(formData, { abortEarly: false });
-      await admin.createUser(
-        {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-          data: {
-            division: formData.division,
-            district: formData.district,
-            upazila: formData.upazila,
-            union: formData.union,
-            markaz: formData.markaz,
-            phone: formData.phone,
-          },
+      const data = await signUpSchemaUser.validate(formData, {
+        abortEarly: false,
+      });
+
+      await admin.createUser(data, {
+        onSuccess: () => {
+          toast.success("User created!");
+          setFormData({
+            name: "",
+            role: "",
+            divisionId: "",
+            districtId: "",
+            upazilaId: "",
+            unionId: "",
+            division: "",
+            district: "",
+            upazila: "",
+            union: "",
+            markaz: "",
+            phone: "",
+            email: "",
+            parent: "",
+            password: "",
+          });
         },
-        {
-          onSuccess: () => {
-            toast.success("User created!");
-            setFormData({
-              name: "",
-              role: "",
-              divisionId: "",
-              districtId: "",
-              upazilaId: "",
-              unionId: "",
-              division: "",
-              district: "",
-              upazila: "",
-              union: "",
-              markaz: "",
-              phone: "",
-              email: "",
-              password: "",
-            });
-          },
-          onError: (ctx) => toast.error(ctx.error.message),
-        }
-      );
+        onError: (ctx) => toast.error(ctx.error.message),
+      });
     } catch (error) {
       if (error instanceof yup.ValidationError) {
         error.inner.forEach((err) => toast.error(err.message));
@@ -209,6 +223,16 @@ const SpeacialRegister = () => {
       setLoading(false);
     }
   };
+
+  // Create parent options safely
+  const parentOptions = useMemo(() => {
+    if (!userList || userList.length === 0) return [];
+    const filteredUsers = userList.filter((user) => user.role !== "daye");
+    return filteredUsers.map((user) => ({
+      value: user.id,
+      title: `${user.name} (${getRoleTitle(user.role)})`,
+    }));
+  }, [userList]);
 
   return (
     <div className="flex items-center justify-center lg:m-10">
@@ -274,6 +298,14 @@ const SpeacialRegister = () => {
             }))}
           />
 
+          <SelectField
+            label="Parent"
+            name="parent"
+            value={formData.parent}
+            onChange={handleChange}
+            options={parentOptions}
+          />
+
           <InputField
             label="Mobile Number"
             name="phone"
@@ -330,7 +362,7 @@ interface SelectFieldProps {
 }
 const SelectField: React.FC<SelectFieldProps> = ({
   label,
-  options,
+  options = [],
   ...props
 }) => (
   <div>
