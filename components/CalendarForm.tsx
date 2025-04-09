@@ -12,6 +12,8 @@ interface User {
   district?: string;
   upazila?: string;
   union?: string;
+  markaz?: string;
+  phone?: string;
 }
 
 interface CalendarEventFormProps {
@@ -181,7 +183,7 @@ const CalendarEventForm = ({
       case "divisionadmin":
         parentUser = users.find((u) => u.role === "centraladmin");
         break;
-      case "districtadmin":
+      case "markazadmin":
         parentUser = users.find(
           (u) => u.role === "divisionadmin" && u.division === user.division
         );
@@ -189,65 +191,10 @@ const CalendarEventForm = ({
           parentUser = users.find((u) => u.role === "centraladmin");
         }
         break;
-      case "upozilaadmin":
-        parentUser = users.find(
-          (u) => u.role === "districtadmin" && u.district === user.district
-        );
-        // Step 4: If no districtadmin is found, find a divisiontadmin in the same division
-        if (!parentUser) {
-          parentUser = users.find(
-            (u) => u.role === "divisionadmin" && u.division === user.division
-          );
-        }
-        if (!parentUser) {
-          parentUser = users.find((u) => u.role === "centraladmin");
-        }
-        break;
-      case "unionadmin":
-        parentUser = users.find(
-          (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
-        );
-        // Step 3: If no unionadmin is found, find a districtadmin in the same district
-        if (!parentUser) {
-          parentUser = users.find(
-            (u) => u.role === "districtadmin" && u.district === user.district
-          );
-        }
-        // Step 4: If no districtadmin is found, find a divisiontadmin in the same division
-        if (!parentUser) {
-          parentUser = users.find(
-            (u) => u.role === "divisionadmin" && u.division === user.division
-          );
-        }
-        if (!parentUser) {
-          parentUser = users.find((u) => u.role === "centraladmin");
-        }
-        break;
       case "daye":
-        // Step 1: Try to find a unionadmin in the same union
         parentUser = users.find(
-          (u) => u.role === "unionadmin" && u.union === user.union
+          (u) => u.role === "markazadmin" && u.markaz === user.markaz
         );
-
-        // Step 2: If no unionadmin is found, find a upozila in the same upozila
-        if (!parentUser) {
-          parentUser = users.find(
-            (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
-          );
-        }
-
-        // Step 3: If no unionadmin is found, find a districtadmin in the same district
-        if (!parentUser) {
-          parentUser = users.find(
-            (u) => u.role === "districtadmin" && u.district === user.district
-          );
-        }
-        // Step 4: If no districtadmin is found, find a divisiontadmin in the same division
-        if (!parentUser) {
-          parentUser = users.find(
-            (u) => u.role === "divisionadmin" && u.division === user.division
-          );
-        }
         if (!parentUser) {
           parentUser = users.find((u) => u.role === "centraladmin");
         }

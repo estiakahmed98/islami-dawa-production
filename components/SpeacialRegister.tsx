@@ -224,16 +224,6 @@ const SpeacialRegister = () => {
     }
   };
 
-  // Create parent options safely
-  const parentOptions = useMemo(() => {
-    if (!userList || userList.length === 0) return [];
-    const filteredUsers = userList.filter((user) => user.role !== "daye");
-    return filteredUsers.map((user) => ({
-      value: user.id,
-      title: `${user.name} (${getRoleTitle(user.role)})`,
-    }));
-  }, [userList]);
-
   return (
     <div className="flex items-center justify-center lg:m-10">
       <div className="w-full p-8 space-y-6 ">
@@ -296,14 +286,6 @@ const SpeacialRegister = () => {
               value: name,
               title: name,
             }))}
-          />
-
-          <SelectField
-            label="Parent"
-            name="parent"
-            value={formData.parent}
-            onChange={handleChange}
-            options={parentOptions}
           />
 
           <InputField

@@ -34,6 +34,7 @@ interface User {
   district?: string;
   upazila?: string;
   union?: string;
+  markaz?: string;
 }
 
 const AdminDashboard: React.FC = () => {
@@ -413,11 +414,7 @@ const getParentEmail = (user: User, users: User[]): string | null => {
       break;
     case "daye":
       parentUser = users.find(
-        (u) =>
-          (u.role === "markazadmin" && u.division === user.division) ||
-          u.district === user.district ||
-          u.upazila === user.upazila ||
-          u.union === user.union
+        (u) => u.role === "markazadmin" && u.markaz === user.markaz
       );
       if (!parentUser) {
         parentUser = users.find((u) => u.role === "centraladmin");

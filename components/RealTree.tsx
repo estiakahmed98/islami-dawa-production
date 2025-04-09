@@ -16,6 +16,8 @@ interface User {
   district?: string;
   upazila?: string;
   union?: string;
+  markaz?: string;
+  phone?: string;
 }
 
 interface TreeNode {
@@ -227,7 +229,7 @@ const RealTree = () => {
       case "divisionadmin":
         parentUser = users.find((u) => u.role === "centraladmin");
         break;
-      case "districtadmin":
+      case "markazadmin":
         parentUser = users.find(
           (u) => u.role === "divisionadmin" && u.division === user.division
         );
@@ -235,60 +237,15 @@ const RealTree = () => {
           parentUser = users.find((u) => u.role === "centraladmin");
         }
         break;
-      case "upozilaadmin":
-        parentUser = users.find(
-          (u) => u.role === "districtadmin" && u.district === user.district
-        );
-        if (!parentUser) {
-          parentUser = users.find(
-            (u) => u.role === "divisionadmin" && u.division === user.division
-          );
-        }
-        if (!parentUser) {
-          parentUser = users.find((u) => u.role === "centraladmin");
-        }
-        break;
-      case "unionadmin":
-        parentUser = users.find(
-          (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
-        );
-        if (!parentUser) {
-          parentUser = users.find(
-            (u) => u.role === "districtadmin" && u.district === user.district
-          );
-        }
-        if (!parentUser) {
-          parentUser = users.find(
-            (u) => u.role === "divisionadmin" && u.division === user.division
-          );
-        }
-        if (!parentUser) {
-          parentUser = users.find((u) => u.role === "centraladmin");
-        }
-        break;
       case "daye":
         parentUser = users.find(
-          (u) => u.role === "unionadmin" && u.union === user.union
+          (u) => u.role === "markazadmin" && u.markaz === user.markaz
         );
-        if (!parentUser) {
-          parentUser = users.find(
-            (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
-          );
-        }
-        if (!parentUser) {
-          parentUser = users.find(
-            (u) => u.role === "districtadmin" && u.district === user.district
-          );
-        }
-        if (!parentUser) {
-          parentUser = users.find(
-            (u) => u.role === "divisionadmin" && u.division === user.division
-          );
-        }
         if (!parentUser) {
           parentUser = users.find((u) => u.role === "centraladmin");
         }
         break;
+
       default:
         return null;
     }

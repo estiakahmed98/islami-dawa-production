@@ -1384,6 +1384,21 @@ export const userMoktobBisoyData = {
         "NewMuslim": 10,
         "editorContent": ""
       }
+    },
+    "estiak@gmail.com": {
+      "2025-04-08": {
+        "MoktobChalu": 10,
+        "MoktobAdmit": 10,
+        "NewMoktob": 10,
+        "Sikkha": 10,
+        "TotalStudent": 10,
+        "TotalSikkha": 10,
+        "GurdianMeeting": 10,
+        "TotalAgeSikkha": 10,
+        "MadrasahAdmit": 10,
+        "NewMuslim": 10,
+        "editorContent": ""
+      }
     }
   }
 };
