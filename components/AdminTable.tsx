@@ -1,8 +1,9 @@
 "use client"; //Juwel
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, use } from "react";
 import fileDownload from "js-file-download";
 import "@fontsource/noto-sans-bengali";
+import { useSelectedUser } from "@/providers/treeProvider";
 
 interface AdminTableProps {
   userData: any;
@@ -19,6 +20,35 @@ const AdminTable: React.FC<AdminTableProps> = ({ userData, emailList }) => {
   const [transposedData, setTransposedData] = useState<any[]>([]);
   const [filterLabel, setFilterLabel] = useState<string>("");
   const [filterValue, setFilterValue] = useState<string>("");
+
+  const { selectedUser } = useSelectedUser();
+
+  const [selectedUserData, setSelectedUserData] = useState<{
+    name: string;
+    role: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (!selectedUser) return;
+
+      try {
+        const response = await fetch(`/api/users?email=${selectedUser}`);
+        if (!response.ok) throw new Error("Failed to fetch user");
+
+        const userData = await response.json();
+        setSelectedUserData({
+          name: userData.name,
+          role: userData.role,
+        });
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+        setSelectedUserData(null);
+      }
+    };
+
+    fetchUserDetails();
+  }, [selectedUser]);
 
   const months = [
     "January",
@@ -118,77 +148,87 @@ const AdminTable: React.FC<AdminTableProps> = ({ userData, emailList }) => {
 
     // Create table structure
     let tableHTML = `
-        <html>
-          <head>
-            <meta charset="UTF-8">
-            <style>
-              @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
-              body {
-                font-family: 'Noto Sans Bengali', sans-serif;
-                text-align: center;
-                padding: 0px;
-              }
-              table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-              }
-              thead {
-                display: table-header-group; /* Ensures header repeats on every page */
-              }
-              tbody {
-                display: table-row-group;
-              }
-              tr {
-                page-break-inside: avoid; /* Prevents rows from splitting */
-              }
-              td {
-                border-bottom: 1px solid #000;
-                padding: 8px;
-                text-align: center;
-                font-size: 12px;
-              }
-              th {
-                background-color: #16A085;
-                color: white;
-                padding: 10px;
-                font-size: 14px;
-              }
-            </style>
-          </head>
-          <body>
-            <h2>${monthName} ${year}</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>দিন</th>
-                  ${filteredData2.map((row) => `<th>${row.label}</th>`).join("")}
-                </tr>
-              </thead>
-              <tbody>
-                ${monthDays
-                  .map(
-                    (day) => `
-                  <tr>
-                    <td>${day}</td>
-                    ${filteredData2
-                      .map((row) => `<td>${row[day] || "-"}</td>`)
-                      .join("")}
-                  </tr>`
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </body>
-        </html>
-      `;
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
+          body {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            padding: 0px;
+            text-align: center;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          thead {
+            display: table-header-group; /* Repeat header in each print page */
+          }
+          tbody {
+            display: table-row-group;
+          }
+          tr {
+            page-break-inside: avoid;
+          }
+          th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            font-size: 12px;
+            text-align: center;
+          }
+          th {
+            background-color: #16A085;
+            color: white;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+          }
+          .row-label {
+            background-color: #16A085;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            text-align: left;
+            padding-left: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>${monthName} ${year} - ${selectedUserData?.name || "User"} (${selectedUserData?.role || "Role"})</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>বিবরণ</th>
+              ${monthDays.map((day) => `<th>${day}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredData2
+              .map(
+                (row) => `
+              <tr>
+                <td class="row-label">${row.label}</td>
+                ${monthDays.map((day) => `<td>${row[day] || "-"}</td>`).join("")}
+              </tr>
+            `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </body>
+    </html>
+    `;
 
     const element = document.createElement("div");
     element.innerHTML = tableHTML;
 
     try {
       const html2pdf = await getHtml2Pdf(); // Load library dynamically
-      console.log("html2pdf Loaded:", html2pdf); // Debugging
 
       if (typeof html2pdf !== "function") {
         console.error("html2pdf is not a function, received:", html2pdf);
