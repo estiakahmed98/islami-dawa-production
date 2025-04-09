@@ -135,7 +135,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   const convertToCSV = () => {
     const BOM = "\uFEFF";
 
-    const headers = ["বিবরণ", ...monthDays.map((day) => `${day}`)];
+    const headers = ["${monthName}", ...monthDays.map((day) => `${day}`)];
 
     const rows = filteredData.map((row) => [
       row.label,
@@ -254,7 +254,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
         <table>
           <thead>
             <tr>
-              <th>বিবরণ</th>
+              <th>${monthName}</th>
               ${monthDays.map((day) => `<th>${day}</th>`).join("")}
             </tr>
           </thead>

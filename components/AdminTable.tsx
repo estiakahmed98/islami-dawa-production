@@ -124,10 +124,12 @@ const AdminTable: React.FC<AdminTableProps> = ({ userData, emailList }) => {
     });
   }, [transposedData, filterLabel, filterValue]);
 
-  const convertToCSV = () => {
+  const convertToCSV = (monthName: string) => {
     const BOM = "\uFEFF";
 
-    const headers = ["বিবরণ", ...monthDays.map((day) => `${day}`)];
+    // <span>${monthName} ${year} - ${selectedUserData?.name}</span>
+
+    const headers = ["Lable", ...monthDays.map((day) => `${day}`)];
 
     const rows = filteredData.map((row) => [
       row.label,
@@ -246,7 +248,7 @@ const AdminTable: React.FC<AdminTableProps> = ({ userData, emailList }) => {
         <table>
           <thead>
             <tr>
-              <th>বিবরণ</th>
+              <th>${monthName}</th>
               ${monthDays.map((day) => `<th>${day}</th>`).join("")}
             </tr>
           </thead>
