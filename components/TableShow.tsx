@@ -14,7 +14,7 @@ interface AmoliTableProps {
 const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
-  const userName = session?.user?.name;
+  const user = session?.user || null;
 
   const [selectedMonth, setSelectedMonth] = useState<number>(
     new Date().getMonth()
@@ -133,16 +133,21 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   }, [transposedData, filterLabel, filterValue]);
 
   const convertToCSV = () => {
-    const headers = ["Label", ...monthDays.map((day) => `Day ${day}`)];
-    const rows = transposedData.map((row) => [
+    const BOM = "\uFEFF";
+
+    const headers = ["বিবরণ", ...monthDays.map((day) => `${day}`)];
+
+    const rows = filteredData.map((row) => [
       row.label,
-      ...monthDays.map((day) => row[day]),
+      ...monthDays.map((day) => row[day] || "-"),
     ]);
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((row) => row.join(",")),
-    ].join("\n");
-    fileDownload(csvContent, "amoli-table.csv");
+
+    const csvContent =
+      BOM + [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+
+    const filename = `"report_of" ${session?.user.name}).csv`;
+
+    fileDownload(csvContent, filename);
   };
 
   const getHtml2Pdf = async () => {
@@ -171,70 +176,104 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
 
     // Create table structure
     let tableHTML = `
-        <html>
-          <head>
-            <meta charset="UTF-8">
-            <style>
-              @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
-              body {
-                font-family: 'Noto Sans Bengali', sans-serif;
-                text-align: center;
-                padding: 0px;
-              }
-              table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-              }
-              thead {
-                display: table-header-group; /* Ensures header repeats on every page */
-              }
-              tbody {
-                display: table-row-group;
-              }
-              tr {
-                page-break-inside: avoid; /* Prevents rows from splitting */
-              }
-              td {
-                border-bottom: 1px solid #000;
-                padding: 8px;
-                text-align: center;
-                font-size: 12px;
-              }
-              th {
-                background-color: #16A085;
-                color: white;
-                padding: 10px;
-                font-size: 14px;
-              }
-            </style>
-          </head>
-          <body>
-            <h2>${monthName} ${year} - ব্যবহারকারী: ${userName}</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>দিন</th>
-                  ${filteredData2.map((row) => `<th>${row.label}</th>`).join("")}
-                </tr>
-              </thead>
-              <tbody>
-                ${monthDays
-                  .map(
-                    (day) => `
-                  <tr>
-                    <td>${day}</td>
-                    ${filteredData2
-                      .map((row) => `<td>${row[day] || "-"}</td>`)
-                      .join("")}
-                  </tr>`
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </body>
-        </html>
-      `;
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
+          body {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            padding: 0px;
+            text-align: center;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          thead {
+            display: table-header-group; /* Repeat header in each print page */
+          }
+          tbody {
+            display: table-row-group;
+          }
+          tr {
+            page-break-inside: avoid;
+          }
+          th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            font-size: 12px;
+            text-align: center;
+          }
+          th {
+            background-color: #ffffff;
+            color: black;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+          }
+          .row-label {
+            background-color: #ffffff;
+            color: black;
+            font-weight: bold;
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            text-align: left;
+            padding-left: 10px;
+          }
+        </style>
+      </head>
+      <body>
+            <div style="font-size: 14px; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px;">
+                <!-- Left Column -->
+                <div style="text-align: left;">
+                  <span>Name: ${user?.name || "Name"}</span><br>
+                  <span>Phone: ${user?.phone || "Phone"}</span><br>
+                  <span>Email: ${user?.email || "Email"}</span><br>
+                  <span>Role: ${user?.role || "Role"}</span>
+                </div>
+
+                <!-- Middle Column -->
+                <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+                  <span>${monthName} ${year} - ${user?.name}</span>
+                  <span>Markaz: ${user?.markaz || "N/A"}</span>
+                </div>
+
+                <!-- Right Column -->
+                <div style="text-align: right;">
+                  <span>Division: ${user?.division || "N/A"}</span><br>
+                  <span>District: ${user?.district || "N/A"}</span><br>
+                  <span>Upazila: ${user?.upazila || "N/A"}</span><br>
+                  <span>Union: ${user?.union || "N/A"}</span><br>
+                </div>
+            </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>বিবরণ</th>
+              ${monthDays.map((day) => `<th>${day}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredData2
+              .map(
+                (row) => `
+              <tr>
+                <td class="row-label">${row.label}</td>
+                ${monthDays.map((day) => `<td>${row[day] || "-"}</td>`).join("")}
+              </tr>
+            `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </body>
+    </html>
+    `;
 
     const element = document.createElement("div");
     element.innerHTML = tableHTML;
@@ -251,7 +290,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       html2pdf()
         .set({
           margin: 10,
-          filename: `${monthName}_${year}_user_data.pdf`,
+          filename: ` ${user?.name} ${monthName}_${year} .pdf`,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2 },
           jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },

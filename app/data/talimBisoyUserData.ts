@@ -72,6 +72,13 @@ export const userTalimBisoyData = {
         "TalimOngshoGrohon": 12,
         "editorContent": "<p>Motamot Talim</p>"
       }
+    },
+    "estiak@gmail.com": {
+      "2025-04-09": {
+        "mohilaTalim": 25,
+        "TalimOngshoGrohon": 25,
+        "editorContent": ""
+      }
     }
   }
 };

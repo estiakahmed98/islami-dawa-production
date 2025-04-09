@@ -26,6 +26,13 @@ const AdminTable: React.FC<AdminTableProps> = ({ userData, emailList }) => {
   const [selectedUserData, setSelectedUserData] = useState<{
     name: string;
     role: string;
+    email: string;
+    division: string;
+    district: string;
+    upazila: string;
+    union: string;
+    markaz: string;
+    phone: string;
   } | null>(null);
 
   useEffect(() => {
@@ -40,6 +47,13 @@ const AdminTable: React.FC<AdminTableProps> = ({ userData, emailList }) => {
         setSelectedUserData({
           name: userData.name,
           role: userData.role,
+          email: userData.email,
+          division: userData.division,
+          district: userData.district,
+          upazila: userData.upazila,
+          union: userData.union,
+          markaz: userData.markaz,
+          phone: userData.phone,
         });
       } catch (error) {
         console.error("Error fetching user details:", error);
@@ -111,16 +125,21 @@ const AdminTable: React.FC<AdminTableProps> = ({ userData, emailList }) => {
   }, [transposedData, filterLabel, filterValue]);
 
   const convertToCSV = () => {
-    const headers = ["Label", ...monthDays.map((day) => `Day ${day}`)];
-    const rows = transposedData.map((row) => [
+    const BOM = "\uFEFF";
+
+    const headers = ["বিবরণ", ...monthDays.map((day) => `${day}`)];
+
+    const rows = filteredData.map((row) => [
       row.label,
-      ...monthDays.map((day) => row[day]),
+      ...monthDays.map((day) => row[day] || "-"),
     ]);
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((row) => row.join(",")),
-    ].join("\n");
-    fileDownload(csvContent, "admin-table.csv");
+
+    const csvContent =
+      BOM + [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+
+    const filename = `"report_of" ${selectedUserData?.name || "User"} (${selectedUserData?.role || "Role"}).csv`;
+
+    fileDownload(csvContent, filename);
   };
 
   const getHtml2Pdf = async () => {
@@ -179,16 +198,16 @@ const AdminTable: React.FC<AdminTableProps> = ({ userData, emailList }) => {
             text-align: center;
           }
           th {
-            background-color: #16A085;
-            color: white;
+            background-color: #ffffff;
+            color: black;
             font-size: 14px;
             position: sticky;
             top: 0;
             z-index: 2;
           }
           .row-label {
-            background-color: #16A085;
-            color: white;
+            background-color: #ffffff;
+            color: black;
             font-weight: bold;
             position: sticky;
             left: 0;
@@ -199,7 +218,31 @@ const AdminTable: React.FC<AdminTableProps> = ({ userData, emailList }) => {
         </style>
       </head>
       <body>
-        <h2>${monthName} ${year} - ${selectedUserData?.name || "User"} (${selectedUserData?.role || "Role"})</h2>
+        <div style="font-size: 14px; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px;">
+                <!-- Left Column -->
+                <div style="text-align: left;">
+                  <span>Name: ${selectedUserData?.name || "Name"}</span><br>
+                  <span>Phone: ${selectedUserData?.phone || "Phone"}</span><br>
+                  <span>Email: ${selectedUserData?.email || "Email"}</span><br>
+                  <span>Role: ${selectedUserData?.role || "Role"}</span>
+                </div>
+
+                <!-- Middle Column -->
+                <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+                  <span>${monthName} ${year} - ${selectedUserData?.name}</span>
+                  <span>Markaz: ${selectedUserData?.markaz || "N/A"}</span>
+                </div>
+
+                <!-- Right Column -->
+                <div style="text-align: right;">
+                  <span>Division: ${selectedUserData?.division || "N/A"}</span><br>
+                  <span>District: ${selectedUserData?.district || "N/A"}</span><br>
+                  <span>Upazila: ${selectedUserData?.upazila || "N/A"}</span><br>
+                  <span>Union: ${selectedUserData?.union || "N/A"}</span><br>
+                </div>
+            </div>
+
+
         <table>
           <thead>
             <tr>
@@ -238,7 +281,7 @@ const AdminTable: React.FC<AdminTableProps> = ({ userData, emailList }) => {
       html2pdf()
         .set({
           margin: 10,
-          filename: `${monthName}_${year}_user_data.pdf`,
+          filename: `${monthName}_${year}_ ${selectedUserData?.name} .pdf`,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2 },
           jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
