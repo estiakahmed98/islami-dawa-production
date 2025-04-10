@@ -245,26 +245,26 @@ const AdminTable: React.FC<AdminTableProps> = ({ userData, emailList }) => {
             </div>
 
 
-        <table>
-          <thead>
-            <tr>
-              <th>${monthName}</th>
-              ${monthDays.map((day) => `<th>${day}</th>`).join("")}
-            </tr>
-          </thead>
-          <tbody>
-            ${filteredData2
-              .map(
-                (row) => `
-              <tr>
-                <td class="row-label">${row.label}</td>
-                ${monthDays.map((day) => `<td>${row[day] || "-"}</td>`).join("")}
-              </tr>
-            `
-              )
-              .join("")}
-          </tbody>
-        </table>
+            <table>
+                <thead>
+                  <tr>
+                    <th>${monthName}</th>
+                    ${filteredData2.map((row) => `<th>${row.label}</th>`).join("")}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${monthDays
+                    .map(
+                      (day) => `
+                    <tr>
+                      <td class="row-label">${day}</td>
+                      ${filteredData2.map((row) => `<td>${row[day] || "-"}</td>`).join("")}
+                    </tr>
+                  `
+                    )
+                    .join("")}
+                </tbody>
+              </table>
       </body>
     </html>
     `;

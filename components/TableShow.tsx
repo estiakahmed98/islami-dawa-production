@@ -175,105 +175,204 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     const filteredData2 = filteredData.filter((row) => row.label !== "Edit");
 
     // Create table structure
+    // let tableHTML = `
+    // <html>
+    //   <head>
+    //     <meta charset="UTF-8">
+    //     <style>
+    //       @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
+    //       body {
+    //         font-family: 'Noto Sans Bengali', sans-serif;
+    //         padding: 0px;
+    //         text-align: center;
+    //       }
+    //       table {
+    //         width: 100%;
+    //         border-collapse: collapse;
+    //         margin-top: 20px;
+    //       }
+    //       thead {
+    //         display: table-header-group; /* Repeat header in each print page */
+    //       }
+    //       tbody {
+    //         display: table-row-group;
+    //       }
+    //       tr {
+    //         page-break-inside: avoid;
+    //       }
+    //       th, td {
+    //         border: 1px solid #000;
+    //         padding: 8px;
+    //         font-size: 12px;
+    //         text-align: center;
+    //       }
+    //       th {
+    //         background-color: #ffffff;
+    //         color: black;
+    //         font-size: 14px;
+    //         position: sticky;
+    //         top: 0;
+    //         z-index: 2;
+    //       }
+    //       .row-label {
+    //         background-color: #ffffff;
+    //         color: black;
+    //         font-weight: bold;
+    //         position: sticky;
+    //         left: 0;
+    //         z-index: 1;
+    //         text-align: left;
+    //         padding-left: 10px;
+    //       }
+    //     </style>
+    //   </head>
+    //   <body>
+    //         <div style="font-size: 14px; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px;">
+    //             <!-- Left Column -->
+    //             <div style="text-align: left;">
+    //               <span>Name: ${user?.name || "Name"}</span><br>
+    //               <span>Phone: ${user?.phone || "Phone"}</span><br>
+    //               <span>Email: ${user?.email || "Email"}</span><br>
+    //               <span>Role: ${user?.role || "Role"}</span>
+    //             </div>
+
+    //             <!-- Middle Column -->
+    //             <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+    //               <span>${monthName} ${year} - ${user?.name}</span>
+    //               <span>Markaz: ${user?.markaz || "N/A"}</span>
+    //             </div>
+
+    //             <!-- Right Column -->
+    //             <div style="text-align: right;">
+    //               <span>Division: ${user?.division || "N/A"}</span><br>
+    //               <span>District: ${user?.district || "N/A"}</span><br>
+    //               <span>Upazila: ${user?.upazila || "N/A"}</span><br>
+    //               <span>Union: ${user?.union || "N/A"}</span><br>
+    //             </div>
+    //         </div>
+
+    //     <table>
+    //       <thead>
+    //         <tr>
+    //           <th>${monthName}</th>
+    //           ${monthDays.map((day) => `<th>${day}</th>`).join("")}
+    //         </tr>
+    //       </thead>
+    //       <tbody>
+    //         ${filteredData2
+    //           .map(
+    //             (row) => `
+    //           <tr>
+    //             <td class="row-label">${row.label}</td>
+    //             ${monthDays.map((day) => `<td>${row[day] || "-"}</td>`).join("")}
+    //           </tr>
+    //         `
+    //           )
+    //           .join("")}
+    //       </tbody>
+    //     </table>
+    //   </body>
+    // </html>
+    // `;
+
     let tableHTML = `
-    <html>
-      <head>
-        <meta charset="UTF-8">
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
-          body {
-            font-family: 'Noto Sans Bengali', sans-serif;
-            padding: 0px;
-            text-align: center;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-          }
-          thead {
-            display: table-header-group; /* Repeat header in each print page */
-          }
-          tbody {
-            display: table-row-group;
-          }
-          tr {
-            page-break-inside: avoid;
-          }
-          th, td {
-            border: 1px solid #000;
-            padding: 8px;
-            font-size: 12px;
-            text-align: center;
-          }
-          th {
-            background-color: #ffffff;
-            color: black;
-            font-size: 14px;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-          }
-          .row-label {
-            background-color: #ffffff;
-            color: black;
-            font-weight: bold;
-            position: sticky;
-            left: 0;
-            z-index: 1;
-            text-align: left;
-            padding-left: 10px;
-          }
-        </style>
-      </head>
-      <body>
-            <div style="font-size: 14px; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px;">
-                <!-- Left Column -->
-                <div style="text-align: left;">
-                  <span>Name: ${user?.name || "Name"}</span><br>
-                  <span>Phone: ${user?.phone || "Phone"}</span><br>
-                  <span>Email: ${user?.email || "Email"}</span><br>
-                  <span>Role: ${user?.role || "Role"}</span>
-                </div>
-
-                <!-- Middle Column -->
-                <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
-                  <span>${monthName} ${year} - ${user?.name}</span>
-                  <span>Markaz: ${user?.markaz || "N/A"}</span>
-                </div>
-
-                <!-- Right Column -->
-                <div style="text-align: right;">
-                  <span>Division: ${user?.division || "N/A"}</span><br>
-                  <span>District: ${user?.district || "N/A"}</span><br>
-                  <span>Upazila: ${user?.upazila || "N/A"}</span><br>
-                  <span>Union: ${user?.union || "N/A"}</span><br>
-                </div>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
+            body {
+              font-family: 'Noto Sans Bengali', sans-serif;
+              padding: 0px;
+              text-align: center;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+            thead {
+              display: table-header-group;
+            }
+            tbody {
+              display: table-row-group;
+            }
+            tr {
+              page-break-inside: avoid;
+            }
+            th, td {
+              border: 1px solid #000;
+              padding: 8px;
+              font-size: 12px;
+              text-align: center;
+            }
+            th {
+              background-color: #ffffff;
+              color: black;
+              font-size: 14px;
+              position: sticky;
+              top: 0;
+              z-index: 2;
+            }
+            .row-label {
+              background-color: #ffffff;
+              color: black;
+              font-weight: bold;
+              position: sticky;
+              left: 0;
+              z-index: 1;
+              text-align: left;
+              padding-left: 10px;
+            }
+          </style>
+        </head>
+        <body>
+          <div style="font-size: 14px; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px;">
+            <!-- Left Column -->
+            <div style="text-align: left;">
+              <span>Name: ${user?.name || "Name"}</span><br>
+              <span>Phone: ${user?.phone || "Phone"}</span><br>
+              <span>Email: ${user?.email || "Email"}</span><br>
+              <span>Role: ${user?.role || "Role"}</span>
             </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>${monthName}</th>
-              ${monthDays.map((day) => `<th>${day}</th>`).join("")}
-            </tr>
-          </thead>
-          <tbody>
-            ${filteredData2
-              .map(
-                (row) => `
+            <!-- Middle Column -->
+            <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+              <span>${monthName} ${year} - ${user?.name}</span>
+              <span>Markaz: ${user?.markaz || "N/A"}</span>
+            </div>
+
+            <!-- Right Column -->
+            <div style="text-align: right;">
+              <span>Division: ${user?.division || "N/A"}</span><br>
+              <span>District: ${user?.district || "N/A"}</span><br>
+              <span>Upazila: ${user?.upazila || "N/A"}</span><br>
+              <span>Union: ${user?.union || "N/A"}</span><br>
+            </div>
+          </div>
+
+          <table>
+            <thead>
               <tr>
-                <td class="row-label">${row.label}</td>
-                ${monthDays.map((day) => `<td>${row[day] || "-"}</td>`).join("")}
+                <th>${monthName}</th>
+                ${filteredData2.map((row) => `<th>${row.label}</th>`).join("")}
               </tr>
-            `
-              )
-              .join("")}
-          </tbody>
-        </table>
-      </body>
-    </html>
-    `;
+            </thead>
+            <tbody>
+              ${monthDays
+                .map(
+                  (day) => `
+                <tr>
+                  <td class="row-label">${day}</td>
+                  ${filteredData2.map((row) => `<td>${row[day] || "-"}</td>`).join("")}
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </body>
+      </html>`;
 
     const element = document.createElement("div");
     element.innerHTML = tableHTML;
