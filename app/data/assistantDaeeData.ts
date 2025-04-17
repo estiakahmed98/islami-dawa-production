@@ -1,10 +1,10 @@
 export const assistantDaeeData = {
   "records": {
     "estiakahmed898@gmail.com_2025-04-17_0": {
-      "name": "E",
-      "phone": "2155",
-      "address": "fggf",
-      "email": "estiakahmed898@gmail.com",
+      "name": "Abdur Rohim",
+      "phone": "01720151678",
+      "address": "চট্রগ্রাম সিটি কর্পোরেশন",
+      "email": "rohim@gmail.com",
       "division": "Dhaka",
       "district": "Dhaka",
       "upazila": "Dhaka",
@@ -13,10 +13,10 @@ export const assistantDaeeData = {
       "mainDaeeEmail": "estiakahmed898@gmail.com"
     },
     "estiakahmed898@gmail.com_2025-04-17_1": {
-      "name": "F",
-      "phone": "521154",
-      "address": "Asdfdggh",
-      "email": "estiakahmed898@gmail.com",
+      "name": "Abdur Korim",
+      "phone": "01720151678",
+      "address": "চট্রগ্রাম সিটি কর্পোরেশন",
+      "email": "korim@gmail.com",
       "division": "Dhaka",
       "district": "Dhaka",
       "upazila": "Dhaka",
@@ -167,6 +167,19 @@ export const assistantDaeeData = {
       "union": "খুলনা সদর",
       "date": "2025-04-17",
       "mainDaeeEmail": "new123@gmail.com"
+    },
+    "cma@gmail.com_2025-04-17_0": {
+      "name": "Name 1",
+      "phone": "01245874526",
+      "address": "Shabazpur, Jamalpur Sadar, Jamalpur ",
+      "description": "Se Shabazpur jame Mosjid er imam",
+      "email": "cma@gmail.com",
+      "division": "চট্টগ্রাম",
+      "district": "চট্টগ্রাম",
+      "upazila": "চট্রগ্রাম সিটি কর্পোরেশন",
+      "union": "বায়জিদ বোস্তামী",
+      "date": "2025-04-17",
+      "mainDaeeEmail": "cma@gmail.com"
     }
   }
 };

@@ -14,6 +14,7 @@ interface AssistantDaee {
   name: string;
   phone: string;
   address: string;
+  description?: string;
 }
 
 const DayeeBishoyForm: React.FC = () => {
@@ -227,6 +228,24 @@ const DayeeBishoyForm: React.FC = () => {
                             handleAssistantChange(
                               index,
                               "address",
+                              e.target.value
+                            )
+                          }
+                          disabled={isSubmittedToday}
+                          className="w-full rounded border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-1">
+                          বিস্তারিত
+                        </label>
+                        <textarea
+                          value={assistant.description}
+                          onChange={(e) =>
+                            handleAssistantChange(
+                              index,
+                              "description",
                               e.target.value
                             )
                           }

@@ -1827,6 +1827,10 @@ export const userDayeData = {
       "2025-04-12": {
         "sohojogiDayeToiri": 10,
         "editorContent": ""
+      },
+      "2025-04-17": {
+        "sohojogiDayeToiri": "1",
+        "editorContent": ""
       }
     },
     "admin@gmail.com": {

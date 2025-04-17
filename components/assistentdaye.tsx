@@ -107,7 +107,7 @@ const AssistantDaeeList: React.FC = () => {
             <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">নাম</th>
             <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">ফোন নম্বর</th>
             <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">ঠিকানা</th>
-            <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">ইমেইল</th>
+            <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">বিস্তারিত</th>
             <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">তারিখ</th>
           </tr>
         </thead>
@@ -120,7 +120,7 @@ const AssistantDaeeList: React.FC = () => {
               <td style="padding: 10px; border: 1px solid #e2e8f0;">${assistant.name}</td>
               <td style="padding: 10px; border: 1px solid #e2e8f0;">${assistant.phone}</td>
               <td style="padding: 10px; border: 1px solid #e2e8f0;">${assistant.address}</td>
-              <td style="padding: 10px; border: 1px solid #e2e8f0;">${assistant.email || "-"}</td>
+              <td style="padding: 10px; border: 1px solid #e2e8f0;">${assistant.description || "-"}</td>
               <td style="padding: 10px; border: 1px solid #e2e8f0;">${assistant.date}</td>
             </tr>
           `
@@ -193,7 +193,7 @@ const AssistantDaeeList: React.FC = () => {
               <th className="border px-4 py-2 text-left">Name</th>
               <th className="border px-4 py-2 text-left">Phone</th>
               <th className="border px-4 py-2 text-left">Address</th>
-              <th className="border px-4 py-2 text-left">Email</th>
+              <th className="border px-4 py-2 text-left">Description</th>
               <th className="border px-4 py-2 text-left">Date</th>
             </tr>
           </thead>
@@ -207,7 +207,9 @@ const AssistantDaeeList: React.FC = () => {
                   <td className="border px-4 py-2">{assistant.name}</td>
                   <td className="border px-4 py-2">{assistant.phone}</td>
                   <td className="border px-4 py-2">{assistant.address}</td>
-                  <td className="border px-4 py-2">{assistant.email || "-"}</td>
+                  <td className="border px-4 py-2">
+                    {assistant.description || "-"}
+                  </td>
                   <td className="border px-4 py-2">{assistant.date}</td>
                 </tr>
               ))
