@@ -100,7 +100,7 @@ const SidebarMenu = () => {
       url: "/dashboard/talim",
     },
     {
-      title: "দায়ী বিষয়",
+      title: "সহযোগী দায়ী বিষয়",
       icon: <MdOutlinePeopleAlt className="size-5" />,
       url: "/dashboard/dayi",
     },

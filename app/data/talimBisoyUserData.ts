@@ -10,6 +10,7 @@ export const userTalimBisoyData = {
         TalimOngshoGrohon: 10,
         editorContent: "",
       },
+
       "2025-01-11": {
         mohilaTalim: 10,
         TalimOngshoGrohon: 10,
