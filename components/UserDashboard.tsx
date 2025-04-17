@@ -596,7 +596,7 @@ const Dashboard: React.FC<TallyProps> = () => {
             <TallyAdmin
               userData={filterChartAndTallyData(userDayeData)}
               emails={userEmail}
-              title="দায়ী বিষয়"
+              title="সহযোগী দায়ী বিষয"
             />
           </div>
 
@@ -606,7 +606,7 @@ const Dashboard: React.FC<TallyProps> = () => {
                 <TabsTrigger value="Amolimusahaba">আ’মলি মুহাসাবা</TabsTrigger>
                 <TabsTrigger value="moktob">মক্তব বিষয়</TabsTrigger>
                 <TabsTrigger value="talim">মহিলাদের তালিম বিষয়</TabsTrigger>
-                <TabsTrigger value="daye">দায়ী বিষয়</TabsTrigger>
+                <TabsTrigger value="daye">সহযোগী দায়ী বিষয</TabsTrigger>
                 <TabsTrigger value="dawati">দাওয়াতি বিষয়</TabsTrigger>
                 <TabsTrigger value="dawatimojlish">দাওয়াতি মজলিশ</TabsTrigger>
                 <TabsTrigger value="jamat">জামাত বিষয়</TabsTrigger>

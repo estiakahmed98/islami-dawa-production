@@ -8,6 +8,7 @@ import {
   TabsTrigger,
 } from "@/components/TabButton";
 import AmoliTableShow from "@/components/TableShow";
+import AssistantDaeeList from "@/components/assistentdaye";
 
 const DayiPage: React.FC = () => {
   return (
@@ -18,6 +19,9 @@ const DayiPage: React.FC = () => {
             <TabsList>
               <TabsTrigger value="dataForm">তথ্য দিন</TabsTrigger>
               <TabsTrigger value="report">প্রতিবেদন</TabsTrigger>
+              <TabsTrigger value="assistentdaye">
+                সহযোগী দায়ী দেখুন
+              </TabsTrigger>
             </TabsList>
           </div>
           <TabsContent value="dataForm">
@@ -29,6 +33,12 @@ const DayiPage: React.FC = () => {
           <TabsContent value="report">
             <div className=" bg-gray-50 rounded shadow">
               <AmoliTableShow userData={userDayeData} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="assistentdaye">
+            <div className=" bg-gray-50 rounded shadow">
+              <AssistantDaeeList />
             </div>
           </TabsContent>
         </Tabs>

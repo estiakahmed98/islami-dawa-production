@@ -47,6 +47,126 @@ export const assistantDaeeData = {
       "union": "চরনিলক্ষিয়া",
       "date": "2025-04-17",
       "mainDaeeEmail": "mmd@gmail.com"
+    },
+    "new123@gmail.com_2025-04-17_0": {
+      "name": "দাঈ #1",
+      "phone": "124584658",
+      "address": "খুলনা",
+      "email": "new123@gmail.com",
+      "division": "খুলনা",
+      "district": "খুলনা",
+      "upazila": "খুলনা সিটি কর্পোরেশন",
+      "union": "খুলনা সদর",
+      "date": "2025-04-17",
+      "mainDaeeEmail": "new123@gmail.com"
+    },
+    "new123@gmail.com_2025-04-17_1": {
+      "name": "সহযোগি দাঈ #2",
+      "phone": "124584658",
+      "address": "খুলনা",
+      "email": "new123@gmail.com",
+      "division": "খুলনা",
+      "district": "খুলনা",
+      "upazila": "খুলনা সিটি কর্পোরেশন",
+      "union": "খুলনা সদর",
+      "date": "2025-04-17",
+      "mainDaeeEmail": "new123@gmail.com"
+    },
+    "new123@gmail.com_2025-04-17_2": {
+      "name": "সহযোগি দাঈ #3",
+      "phone": "124584658",
+      "address": "খুলনা",
+      "email": "new123@gmail.com",
+      "division": "খুলনা",
+      "district": "খুলনা",
+      "upazila": "খুলনা সিটি কর্পোরেশন",
+      "union": "খুলনা সদর",
+      "date": "2025-04-17",
+      "mainDaeeEmail": "new123@gmail.com"
+    },
+    "new123@gmail.com_2025-04-17_3": {
+      "name": "সহযোগি দাঈ #3",
+      "phone": "124584658",
+      "address": "খুলনা",
+      "email": "new123@gmail.com",
+      "division": "খুলনা",
+      "district": "খুলনা",
+      "upazila": "খুলনা সিটি কর্পোরেশন",
+      "union": "খুলনা সদর",
+      "date": "2025-04-17",
+      "mainDaeeEmail": "new123@gmail.com"
+    },
+    "new123@gmail.com_2025-04-17_4": {
+      "name": "সহযোগি দাঈ #5",
+      "phone": "124584658",
+      "address": "খুলনা",
+      "email": "new123@gmail.com",
+      "division": "খুলনা",
+      "district": "খুলনা",
+      "upazila": "খুলনা সিটি কর্পোরেশন",
+      "union": "খুলনা সদর",
+      "date": "2025-04-17",
+      "mainDaeeEmail": "new123@gmail.com"
+    },
+    "new123@gmail.com_2025-04-17_5": {
+      "name": "সহযোগি দাঈ #6",
+      "phone": "124584658",
+      "address": "খুলনা",
+      "email": "new123@gmail.com",
+      "division": "খুলনা",
+      "district": "খুলনা",
+      "upazila": "খুলনা সিটি কর্পোরেশন",
+      "union": "খুলনা সদর",
+      "date": "2025-04-17",
+      "mainDaeeEmail": "new123@gmail.com"
+    },
+    "new123@gmail.com_2025-04-17_6": {
+      "name": "সহযোগি দাঈ #7",
+      "phone": "124584658",
+      "address": "খুলনা",
+      "email": "new123@gmail.com",
+      "division": "খুলনা",
+      "district": "খুলনা",
+      "upazila": "খুলনা সিটি কর্পোরেশন",
+      "union": "খুলনা সদর",
+      "date": "2025-04-17",
+      "mainDaeeEmail": "new123@gmail.com"
+    },
+    "new123@gmail.com_2025-04-17_7": {
+      "name": "সহযোগি দাঈ #8",
+      "phone": "124584658",
+      "address": "খুলনা",
+      "email": "new123@gmail.com",
+      "division": "খুলনা",
+      "district": "খুলনা",
+      "upazila": "খুলনা সিটি কর্পোরেশন",
+      "union": "খুলনা সদর",
+      "date": "2025-04-17",
+      "mainDaeeEmail": "new123@gmail.com"
+    },
+    "new123@gmail.com_2025-04-17_8": {
+      "name": "সহযোগি দাঈ #9",
+      "phone": "124584658",
+      "address": "খুলনা",
+      "email": "new123@gmail.com",
+      "division": "খুলনা",
+      "district": "খুলনা",
+      "upazila": "খুলনা সিটি কর্পোরেশন",
+      "union": "খুলনা সদর",
+      "date": "2025-04-17",
+      "mainDaeeEmail": "new123@gmail.com"
+    },
+    "new123@gmail.com_2025-04-17_9": {
+      "name": "সহযোগি দাঈ #10",
+      "phone": "124584658",
+      "address": "খুলনা",
+      "email": "new123@gmail.com",
+      "division": "খুলনা",
+      "district": "খুলনা",
+      "upazila": "খুলনা সিটি কর্পোরেশন",
+      "union": "খুলনা সদর",
+      "date": "2025-04-17",
+      "mainDaeeEmail": "new123@gmail.com"
     }
   }
 };

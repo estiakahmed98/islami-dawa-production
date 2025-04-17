@@ -813,7 +813,7 @@ export default function UsersTable() {
             <TabsList className="grid grid-cols-2 md:grid-cols-4">
               <TabsTrigger value="moktob">মক্তব বিষয়</TabsTrigger>
               <TabsTrigger value="talim">মহিলাদের তালিম</TabsTrigger>
-              <TabsTrigger value="daye">দায়ী বিষয়</TabsTrigger>
+              <TabsTrigger value="daye">সহযোগী দায়ী বিষয</TabsTrigger>
               <TabsTrigger value="dawati">দাওয়াতি বিষয়</TabsTrigger>
               <TabsTrigger value="dawatimojlish">দাওয়াতি মজলিশ</TabsTrigger>
               <TabsTrigger value="jamat">জামাত বিষয়</TabsTrigger>

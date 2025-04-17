@@ -137,7 +137,7 @@ const DayeeBishoyForm: React.FC = () => {
         </div>
       )}
       <h2 className="mb-6 text-2xl font-semibold text-gray-800">
-        সহযোগী দায়ী বিষয়
+        সহযোগী দায়ী বিষয
       </h2>
       <Formik
         initialValues={initialFormData}

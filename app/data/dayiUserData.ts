@@ -2030,6 +2030,12 @@ export const userDayeData = {
         "sohojogiDayeToiri": 10,
         "editorContent": ""
       }
+    },
+    "new123@gmail.com": {
+      "2025-04-17": {
+        "sohojogiDayeToiri": "10",
+        "editorContent": ""
+      }
     }
   }
 };
