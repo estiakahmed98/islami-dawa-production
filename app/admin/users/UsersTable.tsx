@@ -421,41 +421,43 @@ export default function UsersTable() {
               />
             ))}
 
-          <TablePdfExporter
-            tableData={{
-              headers: [
-                "Name",
-                "Email",
-                "Role",
-                "Division",
-                "District",
-                "Upazila",
-                "Union",
-                "Phone",
-                "Markaz",
-                "Admin Assigned",
-                "Status",
-              ],
-              rows: filteredUsers.map((user) => ({
-                Name: user.name,
-                Email: user.email,
-                Role: user.role,
-                Division: user.division,
-                District: user.district,
-                Upazila: user.upazila,
-                Union: user.union,
-                Phone: user.phone,
-                Markaz: user.markaz,
-                "Admin Assigned": getParentEmail(user, users) || "N/A",
-                Status: user.banned ? "Banned" : "Active",
-              })),
-              title: "User Report",
-              description: `Generated on ${new Date().toLocaleDateString()}`,
-            }}
-            fileName="users_report"
-            buttonText=" Download PDF"
-            buttonClassName="flex items-center gap-2 text-sm lg:text-lg px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition duration-300"
-          />
+          {sessionUser?.role === "centraladmin" && (
+            <TablePdfExporter
+              tableData={{
+                headers: [
+                  "Name",
+                  "Email",
+                  "Role",
+                  "Division",
+                  "District",
+                  "Upazila",
+                  "Union",
+                  "Phone",
+                  "Markaz",
+                  "Admin Assigned",
+                  "Status",
+                ],
+                rows: filteredUsers.map((user) => ({
+                  Name: user.name,
+                  Email: user.email,
+                  Role: user.role,
+                  Division: user.division,
+                  District: user.district,
+                  Upazila: user.upazila,
+                  Union: user.union,
+                  Phone: user.phone,
+                  Markaz: user.markaz,
+                  "Admin Assigned": getParentEmail(user, users) || "N/A",
+                  Status: user.banned ? "Banned" : "Active",
+                })),
+                title: "User Report",
+                description: `Generated on ${new Date().toLocaleDateString()}`,
+              }}
+              fileName="users_report"
+              buttonText=" Download PDF"
+              buttonClassName="bg-[#155E75] text-white rounded-md px-4 py-2 hover:bg-[#0f4c6b]"
+            />
+          )}
         </div>
 
         <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-y-auto max-h-[calc(100vh-254px)]">
