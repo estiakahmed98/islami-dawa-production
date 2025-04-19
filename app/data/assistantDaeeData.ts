@@ -180,6 +180,32 @@ export const assistantDaeeData = {
       "union": "বায়জিদ বোস্তামী",
       "date": "2025-04-17",
       "mainDaeeEmail": "cma@gmail.com"
+    },
+    "adnan@gmail.com_2025-04-19_0": {
+      "name": "Estiak",
+      "phone": "01720151612",
+      "address": "Jamalpur",
+      "description": "Software Engineer",
+      "email": "adnan@gmail.com",
+      "division": "",
+      "district": "",
+      "upazila": "",
+      "union": "",
+      "date": "2025-04-19",
+      "mainDaeeEmail": "adnan@gmail.com"
+    },
+    "adnan@gmail.com_2025-04-19_1": {
+      "name": "Jeson ",
+      "phone": "0125487654",
+      "address": "Ache ajk jaygay",
+      "description": "madrashar Student",
+      "email": "adnan@gmail.com",
+      "division": "",
+      "district": "",
+      "upazila": "",
+      "union": "",
+      "date": "2025-04-19",
+      "mainDaeeEmail": "adnan@gmail.com"
     }
   }
 };

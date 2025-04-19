@@ -1,267 +1,346 @@
-"use client"; //Estiak
+"use client";
 
-import React, { useEffect, useState } from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
-import { Input } from "@/components/ui/input";
+import type React from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { X } from "lucide-react";
 
-interface LeaveFormProps {
-  onClose: () => void;
-  onRefresh: () => void;
-}
-
-interface LeaveFormValues {
+interface LeaveRecord {
+  id?: string;
   leaveType: string;
-  from: Date | null;
-  to: Date | null;
+  from: string;
+  to: string;
   days: number;
   reason: string;
   approvedBy: string;
   status: string;
+  phone?: string;
 }
 
-const initialValues: LeaveFormValues = {
-  leaveType: "",
-  from: null,
-  to: null,
-  days: 0,
-  reason: "",
-  approvedBy: "",
-  status: "Pending",
-};
+interface LeaveFormProps {
+  onClose: () => void;
+  onRefresh: () => void;
+  existingData: LeaveRecord | null;
+  userEmail: string;
+  userName?: string;
+}
 
-const validationSchema = Yup.object().shape({
-  leaveType: Yup.string().required("Leave Type is required"),
-  from: Yup.date().nullable().required("Start Date is required"),
-  to: Yup.date().nullable().required("End Date is required"),
-  days: Yup.number()
-    .typeError("Days must be a number")
-    .required("Days Field is required"),
-  reason: Yup.string().required("Reason is required"),
-  approvedBy: Yup.string().required("Approved By is required"),
-  status: Yup.string().required("Status is required"),
-});
+const LeaveForm: React.FC<LeaveFormProps> = ({
+  onClose,
+  onRefresh,
+  existingData,
+  userEmail,
+  userName = "",
+}) => {
+  const [formData, setFormData] = useState<LeaveRecord>({
+    leaveType: "",
+    from: "",
+    to: "",
+    days: 0,
+    reason: "",
+    approvedBy: "Admin",
+    status: "Pending",
+    phone: "",
+  });
 
-const LeaveForm: React.FC<LeaveFormProps> = ({ onClose, onRefresh }) => {
-  const router = useRouter();
-  const { data: session } = useSession();
-  const email = session?.user?.email || "";
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [isSubmittedToday, setIsSubmittedToday] = useState(false);
-  const [loading, setLoading] = useState(true);
-
+  // Initialize form with existing data
   useEffect(() => {
-    const checkSubmissionStatus = async () => {
-      if (!email) return;
+    if (existingData) {
+      setFormData({
+        leaveType: existingData.leaveType || "",
+        from: existingData.from || "",
+        to: existingData.to || "",
+        days: existingData.days || 0,
+        reason: existingData.reason || "",
+        approvedBy: existingData.approvedBy || "Admin",
+        status: existingData.status || "Pending",
+        phone: existingData.phone || "",
+        id: existingData.id || undefined,
+      });
+    }
+  }, [existingData]);
 
-      try {
-        const response = await fetch(`/api/leaves?email=${email}`);
-        if (response.ok) {
-          const data = await response.json();
-          setIsSubmittedToday(data.isSubmittedToday);
-        } else {
-          toast.error("Failed to check leave submission status.");
-        }
-      } catch (error) {
-        console.error("Error checking submission status:", error);
-        toast.error("Error checking leave submission status.");
-      } finally {
-        setLoading(false);
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.leaveType) newErrors.leaveType = "Leave type is required";
+    if (!formData.from) newErrors.from = "Start date is required";
+    if (!formData.to) newErrors.to = "End date is required";
+    if (formData.days <= 0) newErrors.days = "Days must be greater than 0";
+    if (!formData.reason) newErrors.reason = "Reason is required";
+    if (!formData.phone) newErrors.phone = "Phone number is required";
+
+    // Validate phone number format (Bangladesh format)
+    if (formData.phone && !/^01[3-9]\d{8}$/.test(formData.phone)) {
+      newErrors.phone = "Please enter a valid Bangladesh phone number";
+    }
+
+    // Validate date range
+    if (formData.from && formData.to) {
+      const fromDate = new Date(formData.from);
+      const toDate = new Date(formData.to);
+
+      if (fromDate > toDate) {
+        newErrors.to = "End date must be after start date";
       }
-    };
+    }
 
-    checkSubmissionStatus();
-  }, [email]);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-  if (loading) return <p>Loading...</p>;
+  const calculateDays = (from: string, to: string) => {
+    if (from && to) {
+      const fromDate = new Date(from);
+      const toDate = new Date(to);
+
+      // Reset time part to ensure we're only comparing dates
+      fromDate.setHours(0, 0, 0, 0);
+      toDate.setHours(0, 0, 0, 0);
+
+      // Calculate the difference in milliseconds
+      const diffTime = Math.abs(toDate.getTime() - fromDate.getTime());
+
+      // Convert to days and add 1 to include both start and end dates
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+      return diffDays;
+    }
+    return 0;
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear the error for this field when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear the error for this field when user makes a selection
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    // Update the date field
+    const updatedForm = { ...formData, [name]: value };
+
+    // Recalculate days if both dates are present
+    if (updatedForm.from && updatedForm.to) {
+      updatedForm.days = calculateDays(updatedForm.from, updatedForm.to);
+    }
+
+    setFormData(updatedForm);
+
+    // Clear any existing errors for these fields
+    const newErrors = { ...errors };
+    if (name === "from" && newErrors.from) delete newErrors.from;
+    if (name === "to" && newErrors.to) delete newErrors.to;
+    if (newErrors.days) delete newErrors.days;
+    setErrors(newErrors);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        ...formData,
+        email: userEmail,
+        name: userName,
+      };
+
+      const url = "/api/leaves";
+      const method = existingData?.id ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        onRefresh();
+        onClose();
+      } else {
+        const data = await response.json();
+        alert(`Error: ${data.error || "Failed to save leave request"}`);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("An error occurred while submitting the form");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const isEditable = !existingData || existingData.status === "Pending";
 
   return (
-    <div className="modal bg-white p-10 border rounded-sm">
-      <div className="modal-content">
-        {isSubmittedToday && (
-          <div className="bg-red-500 text-red-500 p-4 rounded-lg mb-8">
-            You have already applied for leave today.
-          </div>
-        )}
-
-        <h2 className="mb-6 text-2xl">Apply for Leave</h2>
-
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={async (values, { setSubmitting, resetForm }) => {
-            if (isSubmittedToday) {
-              toast.error("You have already applied for leave today.");
-              setSubmitting(false);
-              return;
-            }
-
-            if (!email) {
-              toast.error("User email is not set. Please log in.");
-              setSubmitting(false);
-              return;
-            }
-
-            const formData = { ...values, email };
-
-            try {
-              // Submit leave data
-              const response = await fetch("/api/leaves", {
-                method: "POST",
-                body: JSON.stringify(formData),
-                headers: { "Content-Type": "application/json" },
-              });
-
-              if (response.ok) {
-                // Format dates for the email payload
-                const formattedFromDate = values.from
-                  ? new Date(values.from)
-                  : "N/A";
-                const formattedToDate = values.to ? new Date(values.to) : "N/A";
-
-                // Send email
-                await fetch("/api/emails", {
-                  method: "POST",
-                  body: JSON.stringify({
-                    action: "leaveApplication",
-                    email: "faysalmohammed.shah@gmail.com", // Replace with dynamic recipient email if needed
-                    name: session?.user?.name || "User",
-                    leaveType: values.leaveType,
-                    reason: values.reason,
-                    leaveDates: `${formattedFromDate} - ${formattedToDate}`,
-                  }),
-                  headers: { "Content-Type": "application/json" },
-                });
-
-                toast.success("Leave application submitted successfully!");
-                resetForm();
-                onRefresh();
-                onClose();
-                router.push("/dashboard/leave");
-              } else {
-                toast.error("Leave application submission failed! Try again.");
-              }
-            } catch (error) {
-              console.error("Error during leave application:", error);
-              toast.error("An unexpected error occurred. Please try again.");
-            } finally {
-              setSubmitting(false);
-            }
-          }}
-        >
-          {({ setFieldValue, values }) => (
-            <Form>
-              <div>
-                <label className="block mb-2 font-medium">Leave Type</label>
-                <Field
-                  as="select"
-                  name="leaveType"
-                  className="border rounded-md p-2 w-full"
-                >
-                  <option value="" disabled>
-                    Select Leave Type
-                  </option>
-                  <option value="Casual Leave">Casual Leave</option>
-                  <option value="Sick Leave">Sick Leave</option>
-                </Field>
-                <ErrorMessage
-                  name="leaveType"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label>From</label>
-                  <Calendar
-                    mode="single"
-                    selected={values.from || undefined}
-                    onSelect={(date) => setFieldValue("from", date)}
-                  />
-                  <ErrorMessage
-                    name="from"
-                    component="div"
-                    className="text-red-500"
-                  />
-                </div>
-
-                <div>
-                  <label>To</label>
-                  <Calendar
-                    mode="single"
-                    selected={values.to || undefined}
-                    onSelect={(date) => setFieldValue("to", date)}
-                  />
-                  <ErrorMessage
-                    name="to"
-                    component="div"
-                    className="text-red-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label>Days</label>
-                <Field
-                  name="days"
-                  type="number"
-                  as={Input}
-                  placeholder="Enter number of days"
-                />
-                <ErrorMessage
-                  name="days"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-
-              <div>
-                <label>Reason</label>
-                <Field name="reason" as={Input} placeholder="Enter reason" />
-                <ErrorMessage
-                  name="reason"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-
-              <div>
-                <label>Requested By</label>
-                <Field
-                  name="approvedBy"
-                  as={Input}
-                  placeholder="Enter approver's name"
-                />
-                <ErrorMessage
-                  name="approvedBy"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-
-              <div className="flex justify-end mt-6">
-                <Button
-                  variant="ghost"
-                  size="default"
-                  type="submit"
-                  disabled={isSubmittedToday}
-                >
-                  Submit
-                </Button>
-                <Button type="button" onClick={onClose} variant="outline">
-                  Cancel
-                </Button>
-              </div>
-            </Form>
-          )}
-        </Formik>
+    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">
+          {existingData
+            ? isEditable
+              ? "Edit Leave Request"
+              : "View Leave Request"
+            : "New Leave Request"}
+        </h2>
+        <Button variant="ghost" onClick={onClose} size="icon">
+          <X className="h-5 w-5" />
+        </Button>
       </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="leaveType">Leave Type</Label>
+            <Select
+              disabled={!isEditable}
+              value={formData.leaveType}
+              onValueChange={(value) => handleSelectChange("leaveType", value)}
+            >
+              <SelectTrigger
+                id="leaveType"
+                className={errors.leaveType ? "border-red-500" : ""}
+              >
+                <SelectValue placeholder="Select leave type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Casual">Casual Leave</SelectItem>
+                <SelectItem value="Sick">Sick Leave</SelectItem>
+                <SelectItem value="Annual">Annual Leave</SelectItem>
+                <SelectItem value="Maternity">Maternity Leave</SelectItem>
+                <SelectItem value="Paternity">Paternity Leave</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.leaveType && (
+              <p className="text-red-500 text-sm">{errors.leaveType}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone Number</Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="01XXXXXXXXX"
+              value={formData.phone}
+              onChange={handleChange}
+              disabled={!isEditable}
+              className={errors.phone ? "border-red-500" : ""}
+            />
+            {errors.phone && (
+              <p className="text-red-500 text-sm">{errors.phone}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="from">From Date</Label>
+            <Input
+              id="from"
+              name="from"
+              type="date"
+              value={formData.from}
+              onChange={handleDateChange}
+              disabled={!isEditable}
+              className={errors.from ? "border-red-500" : ""}
+            />
+            {errors.from && (
+              <p className="text-red-500 text-sm">{errors.from}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="to">To Date</Label>
+            <Input
+              id="to"
+              name="to"
+              type="date"
+              value={formData.to}
+              onChange={handleDateChange}
+              disabled={!isEditable}
+              className={errors.to ? "border-red-500" : ""}
+            />
+            {errors.to && <p className="text-red-500 text-sm">{errors.to}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="days">Total Days</Label>
+            <Input
+              id="days"
+              name="days"
+              type="number"
+              value={formData.days}
+              onChange={handleChange}
+              disabled
+              className={errors.days ? "border-red-500" : ""}
+            />
+            {errors.days && (
+              <p className="text-red-500 text-sm">{errors.days}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="reason">Reason</Label>
+          <Textarea
+            id="reason"
+            name="reason"
+            placeholder="Please provide a reason for your leave request"
+            value={formData.reason}
+            onChange={handleChange}
+            disabled={!isEditable}
+            className={`min-h-[100px] ${errors.reason ? "border-red-500" : ""}`}
+          />
+          {errors.reason && (
+            <p className="text-red-500 text-sm">{errors.reason}</p>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-2 pt-4">
+          <Button type="button" variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          {isEditable && (
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : existingData ? "Update" : "Submit"}
+            </Button>
+          )}
+        </div>
+      </form>
     </div>
   );
 };

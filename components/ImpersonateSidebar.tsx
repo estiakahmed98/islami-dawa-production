@@ -75,7 +75,7 @@ const ImpersonateSidebar: React.FC = () => {
     {
       href: "/admin/notification",
       icon: <FcAcceptDatabase className="size-6" />,
-      label: "অনুমতি দিন",
+      label: "ছুটির বিষয়",
       roles: [
         "centraladmin",
         "divisionadmin",

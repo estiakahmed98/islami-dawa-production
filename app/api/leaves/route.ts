@@ -1,8 +1,6 @@
-//Estiak
-
 import fs from "fs";
 import path from "path";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import * as Yup from "yup";
 
@@ -20,6 +18,8 @@ interface Leave {
   reason: string;
   approvedBy: string;
   status: string;
+  phone?: string;
+  name?: string;
 }
 
 interface UserLeaveData {
@@ -64,6 +64,10 @@ const validationSchema = Yup.object({
   reason: Yup.string().required("Reason is required"),
   approvedBy: Yup.string().required("Approved By is required"),
   status: Yup.string().required("Status is required"),
+  phone: Yup.string()
+    .required("Phone number is required")
+    .matches(/^01[3-9]\d{8}$/, "Please enter a valid Bangladesh phone number"),
+  name: Yup.string(),
 });
 
 // ✅ **GET: Fetch Leave Requests**
@@ -97,8 +101,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     await validationSchema.validate(body, { abortEarly: false });
 
-    const { email, leaveType, from, to, days, reason, approvedBy, status } =
-      body;
+    const {
+      email,
+      name,
+      leaveType,
+      from,
+      to,
+      days,
+      reason,
+      approvedBy,
+      status,
+      phone,
+    } = body;
     const currentDate = new Date().toISOString().split("T")[0];
 
     if (!email)
@@ -122,6 +136,8 @@ export async function POST(req: NextRequest) {
       reason,
       approvedBy,
       status,
+      phone,
+      name,
     };
 
     data.records[email][currentDate].push(newLeave);
@@ -132,6 +148,23 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    if (error instanceof Yup.ValidationError) {
+      const errors = error.inner.reduce(
+        (acc, err) => {
+          if (err.path) {
+            acc[err.path] = err.message;
+          }
+          return acc;
+        },
+        {} as Record<string, string>
+      );
+
+      return NextResponse.json(
+        { error: "Validation failed", errors },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -145,8 +178,19 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     await validationSchema.validate(body, { abortEarly: false });
 
-    const { id, email, leaveType, from, to, days, reason, approvedBy, status } =
-      body;
+    const {
+      id,
+      email,
+      name,
+      leaveType,
+      from,
+      to,
+      days,
+      reason,
+      approvedBy,
+      status,
+      phone,
+    } = body;
 
     if (!email || !id) {
       return NextResponse.json(
@@ -163,7 +207,18 @@ export async function PUT(req: NextRequest) {
       data.records[email][date] = data.records[email][date].map((leave) => {
         if (leave.id === id) {
           updated = true;
-          return { id, leaveType, from, to, days, reason, approvedBy, status };
+          return {
+            id,
+            leaveType,
+            from,
+            to,
+            days,
+            reason,
+            approvedBy,
+            status,
+            phone,
+            name,
+          };
         }
         return leave;
       });
@@ -179,6 +234,23 @@ export async function PUT(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
+    if (error instanceof Yup.ValidationError) {
+      const errors = error.inner.reduce(
+        (acc, err) => {
+          if (err.path) {
+            acc[err.path] = err.message;
+          }
+          return acc;
+        },
+        {} as Record<string, string>
+      );
+
+      return NextResponse.json(
+        { error: "Validation failed", errors },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to update leave." },
       { status: 500 }

@@ -148,6 +148,35 @@ model MasterTableDawa {
   mohilaOnshogrohon          Int?
 }
 
+model DayeeBishoy {
+  id                Int             @id @default(autoincrement())
+  email             String
+  date              String
+  editorContent     String
+  sohojogiDayeToiri Int
+  assistants        AssistantDaee[]
+
+  @@unique([email, date], name: "email_date")
+}
+
+model AssistantDaee {
+  id            Int         @id @default(autoincrement())
+  name          String
+  phone         String
+  address       String
+  description   String?
+  date          String
+  mainDaeeEmail String
+  division      String
+  district      String
+  upazila       String
+  union         String
+  dayeeBishoy   DayeeBishoy @relation(fields: [dayeeBishoyId], references: [id])
+  dayeeBishoyId Int
+
+  @@index([mainDaeeEmail])
+}
+
 model AmoliMuhasabaData {
   id          Int    @id @default(autoincrement())
   tahajjud    String

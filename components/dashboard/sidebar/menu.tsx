@@ -179,7 +179,7 @@ const SidebarMenu = () => {
     {
       url: "/admin/notification",
       icon: <FcAcceptDatabase className="size-6" />,
-      title: "অনুমতি দিন",
+      title: "ছুটির বিষয়",
     },
     {
       url: "/admin/RealTree",

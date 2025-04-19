@@ -1,0 +1,60 @@
+{
+  "records": {
+    "estiakahmed898@gmail.com": {
+      "2025-04-19": [
+        {
+          "id": "d792df3b-7cba-48f8-bff1-38dd1cb3f114",
+          "leaveType": "Casual Leave",
+          "from": "2025-04-19T18:00:00.000Z",
+          "to": "2025-04-19T18:00:00.000Z",
+          "days": 1,
+          "reason": "Sick",
+          "approvedBy": "Estiak",
+          "status": "Approved",
+          "phone": "01720151612",
+          "name": "Estiak Ahmed"
+        },
+        {
+          "id": "48697030-ed08-413f-8bed-bed245f2fe3a",
+          "leaveType": "Sick",
+          "from": "2025-04-16",
+          "to": "2025-04-17",
+          "days": 2,
+          "reason": "Sick",
+          "approvedBy": "Admin",
+          "status": "Pending",
+          "phone": "01720151612",
+          "name": "Estiak Ahmed"
+        },
+        {
+          "id": "cb1f6d9e-5333-4281-966d-3eeb7ad2b724",
+          "leaveType": "Maternity",
+          "from": "2025-04-30",
+          "to": "2025-05-01",
+          "days": "2",
+          "reason": "Need Leave",
+          "approvedBy": "Admin",
+          "status": "Rejected",
+          "phone": "01720151612",
+          "name": "Estiak Ahmed"
+        }
+      ]
+    },
+    "mm2@gmail.com": {
+      "2025-04-19": [
+        {
+          "id": "e76a2d1b-ae11-4013-9d81-ddc61de12ba5",
+          "leaveType": "Paternity",
+          "from": "2025-04-26",
+          "to": "2025-05-01",
+          "days": 6,
+          "reason": "Long Tour ",
+          "approvedBy": "Admin",
+          "status": "Rejected",
+          "phone": "01925161412",
+          "name": "Mymensingh Markaz Admin"
+        }
+      ]
+    }
+  }
+}

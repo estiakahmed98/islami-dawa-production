@@ -170,3 +170,137 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return new NextResponse("Failed to fetch user data", { status: 500 });
   }
 }
+
+//----------------------Database----------------------------------------------------------------------------------
+
+// import { type NextRequest, NextResponse } from "next/server";
+// import { db } from "@/lib/db";
+
+// export async function POST(req: NextRequest): Promise<NextResponse> {
+//   try {
+//     // Verify request has body
+//     if (!req.body) {
+//       return NextResponse.json(
+//         { error: "Request body is required" },
+//         { status: 400 }
+//       );
+//     }
+
+//     const body = await req.json();
+//     console.log("Received data:", JSON.stringify(body, null, 2));
+
+//     // Validate required fields
+//     if (!body?.email) {
+//       return NextResponse.json({ error: "Email is required" }, { status: 400 });
+//     }
+
+//     const {
+//       email,
+//       assistants = [],
+//       userInfo = {
+//         division: "",
+//         district: "",
+//         upazila: "",
+//         union: "",
+//       },
+//       editorContent = "",
+//       sohojogiDayeToiri = 0,
+//     } = body;
+
+//     const currentDate = new Date().toISOString().split("T")[0];
+
+//     // Check for existing submission
+//     const existingSubmission = await db.dayeeBishoy.findUnique({
+//       where: {
+//         email_date: {
+//           email,
+//           date: currentDate,
+//         },
+//       },
+//     });
+
+//     if (existingSubmission) {
+//       return NextResponse.json(
+//         { error: "You have already submitted today" },
+//         { status: 400 }
+//       );
+//     }
+
+//     // Create transaction
+//     const result = await db.$transaction(async (tx) => {
+//       // Create main record
+//       const dayeeBishoyRecord = await tx.dayeeBishoy.create({
+//         data: {
+//           email,
+//           date: currentDate,
+//           editorContent,
+//           sohojogiDayeToiri,
+//         },
+//       });
+
+//       // Create assistants if any
+//       if (assistants.length > 0) {
+//         await tx.assistantDaee.createMany({
+//           data: assistants.map((assistant: any) => ({
+//             name: assistant.name,
+//             phone: assistant.phone,
+//             address: assistant.address,
+//             description: assistant.description || "",
+//             date: currentDate,
+//             mainDaeeEmail: email,
+//             division: userInfo.division,
+//             district: userInfo.district,
+//             upazila: userInfo.upazila,
+//             union: userInfo.union,
+//             dayeeBishoyId: dayeeBishoyRecord.id,
+//           })),
+//         });
+//       }
+
+//       return dayeeBishoyRecord;
+//     });
+
+//     return NextResponse.json({ success: true, data: result }, { status: 201 });
+//   } catch (error: any) {
+//     console.error("Database error:", error);
+//     return NextResponse.json(
+//       {
+//         error: "Failed to save data",
+//         details: error.message,
+//         stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+// export async function GET(req: NextRequest) {
+//   const { searchParams } = new URL(req.url);
+//   const email = searchParams.get("email");
+
+//   if (!email) {
+//     return NextResponse.json({ error: "Email is required" }, { status: 400 });
+//   }
+
+//   const currentDate = new Date().toISOString().split("T")[0];
+
+//   try {
+//     const existing = await db.dayeeBishoy.findUnique({
+//       where: {
+//         email_date: {
+//           email,
+//           date: currentDate,
+//         },
+//       },
+//     });
+
+//     return NextResponse.json({
+//       isSubmittedToday: !!existing,
+//     });
+//   } catch (error: any) {
+//     return NextResponse.json(
+//       { error: "Failed to check submission", details: error.message },
+//       { status: 500 }
+//     );
+//   }
+// }
