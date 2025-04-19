@@ -297,33 +297,33 @@ const AdminNotifications: React.FC = () => {
           <h2 style="margin: 0 0 15px 0; color: #4a5568; font-size: 18px; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px;">দায়ী তথ্য</h2>
           <div style="display: flex; flex-wrap: wrap;">
             <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
-              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">Name:</strong> ${leave.name || "N/A"}</p>
-              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">Email:</strong> ${leave.email}</p>
+              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">নাম:</strong> ${leave.name || "N/A"}</p>
+              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">ইমেইল:</strong> ${leave.email}</p>
             </div>
             <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
-              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">Phone:</strong> ${leave.phone || "N/A"}</p>
-              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">Status:</strong> <span style="${statusStyle}">${leave.status}</span></p>
+              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">মোবাইল:</strong> ${leave.phone || "N/A"}</p>
+              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">স্ট্যাটাস:</strong> <span style="${statusStyle}">${leave.status}</span></p>
             </div>
           </div>
         </div>
         
         <!-- Leave Details -->
         <div style="padding: 25px;">
-          <h2 style="margin: 0 0 15px 0; color: #4a5568; font-size: 18px; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px;">Leave Details</h2>
+          <h2 style="margin: 0 0 15px 0; color: #4a5568; font-size: 18px; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px;">ছুটির বিবরন</h2>
           <div style="display: flex; flex-wrap: wrap;">
             <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
-              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">Leave Type:</strong> ${leave.leaveType}</p>
-              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">From:</strong> ${fromDate}</p>
-              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">To:</strong> ${toDate}</p>
+              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">ছুটির ধরন:</strong> ${leave.leaveType}</p>
+              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">শুরুর তারিখ:</strong> ${fromDate}</p>
+              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">শেষ তারিখ:</strong> ${toDate}</p>
             </div>
             <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
-              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">Days:</strong> ${leave.days}</p>
-              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">Approved By:</strong> ${leave.approvedBy || "Pending"}</p>
+              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">মোট দিন:</strong> ${leave.days}</p>
+              <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">অনুমুদন করেছে:</strong> ${leave.approvedBy || "Pending"}</p>
             </div>
           </div>
           
           <div style="margin-top: 20px;">
-            <h3 style="margin: 0 0 10px 0; color: #4a5568; font-size: 16px;">Reason for Leave:</h3>
+            <h3 style="margin: 0 0 10px 0; color: #4a5568; font-size: 16px;">ছুটির বিবরন:</h3>
             <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 15px; font-size: 15px;">
               ${leave.reason}
             </div>
@@ -333,7 +333,7 @@ const AdminNotifications: React.FC = () => {
         <!-- Note & Signature Section -->
         <div style="padding: 25px; background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
           <div style="margin-bottom: 30px;">
-            <h3 style="margin: 0 0 10px 0; color: #4a5568; font-size: 16px;">Note:</h3>
+            <h3 style="margin: 0 0 10px 0; color: #4a5568; font-size: 16px;">বিশেষ দ্রষ্টব্য:</h3>
             <p style="font-size: 14px; color: #4a5568; margin: 0;"> ছুটির আবেদনের একটি আনুষ্ঠানিক রেকর্ড এবং এর বর্তমান অবস্থার প্রতিনিধিত্ব করে। অনুগ্রহ করে এটি আপনার রেকর্ডের জন্য সংরক্ষণ করুন।</p>
           </div>
           
