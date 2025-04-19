@@ -1,4 +1,4 @@
-"use client"; //Juwel
+"use client"; //Estiak
 
 import React, { useState, useEffect, useMemo } from "react";
 import fileDownload from "js-file-download";
@@ -10,6 +10,18 @@ import "@fontsource/noto-sans-bengali"; // Import Bangla font
 interface AmoliTableProps {
   userData: any;
 }
+
+const isDateEditable = (day: number) => {
+  const currentDate = new Date();
+  const checkDate = new Date(day);
+
+  // Calculate difference in days
+  const diffTime = currentDate.getTime() - checkDate.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  // Allow edit if date is today or within last 2 days
+  return diffDays <= 2 && diffDays >= 0;
+};
 
 const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   const { data: session } = useSession();
@@ -100,20 +112,31 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     const editRow: { label: string; [key: number]: any } = {
       label: "Edit",
     };
+
+    const today = new Date();
+
     monthDays.forEach((day) => {
-      editRow[day] = (
-        <button
-          className="text-sm bg-blue-500 text-white py-1 px-3 rounded"
-          onClick={() =>
-            setEditPopup({
-              day,
-              data: transposed.slice(0, -2).map((row) => row[day]), // Exclude the last two rows (Motamot and Edit)
-            })
-          }
-        >
-          Edit
-        </button>
-      );
+      const entryDate = new Date(selectedYear, selectedMonth, day);
+      const timeDiff = today.getTime() - entryDate.getTime();
+      const daysDiff = timeDiff / (1000 * 3600 * 24);
+
+      if (daysDiff <= 2) {
+        editRow[day] = (
+          <button
+            className="text-sm bg-blue-500 text-white py-1 px-3 rounded"
+            onClick={() =>
+              setEditPopup({
+                day,
+                data: transposed.slice(0, -2).map((row) => row[day]),
+              })
+            }
+          >
+            Edit
+          </button>
+        );
+      } else {
+        editRow[day] = <span className="text-gray-400">Locked 🔒</span>;
+      }
     });
 
     transposed.push(editRow);
@@ -173,107 +196,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     // Filter out unwanted rows
     const filteredData = transposedData.filter((row) => row.label !== "মতামত");
     const filteredData2 = filteredData.filter((row) => row.label !== "Edit");
-
-    // Create table structure
-    // let tableHTML = `
-    // <html>
-    //   <head>
-    //     <meta charset="UTF-8">
-    //     <style>
-    //       @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
-    //       body {
-    //         font-family: 'Noto Sans Bengali', sans-serif;
-    //         padding: 0px;
-    //         text-align: center;
-    //       }
-    //       table {
-    //         width: 100%;
-    //         border-collapse: collapse;
-    //         margin-top: 20px;
-    //       }
-    //       thead {
-    //         display: table-header-group; /* Repeat header in each print page */
-    //       }
-    //       tbody {
-    //         display: table-row-group;
-    //       }
-    //       tr {
-    //         page-break-inside: avoid;
-    //       }
-    //       th, td {
-    //         border: 1px solid #000;
-    //         padding: 8px;
-    //         font-size: 12px;
-    //         text-align: center;
-    //       }
-    //       th {
-    //         background-color: #ffffff;
-    //         color: black;
-    //         font-size: 14px;
-    //         position: sticky;
-    //         top: 0;
-    //         z-index: 2;
-    //       }
-    //       .row-label {
-    //         background-color: #ffffff;
-    //         color: black;
-    //         font-weight: bold;
-    //         position: sticky;
-    //         left: 0;
-    //         z-index: 1;
-    //         text-align: left;
-    //         padding-left: 10px;
-    //       }
-    //     </style>
-    //   </head>
-    //   <body>
-    //         <div style="font-size: 14px; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px;">
-    //             <!-- Left Column -->
-    //             <div style="text-align: left;">
-    //               <span>Name: ${user?.name || "Name"}</span><br>
-    //               <span>Phone: ${user?.phone || "Phone"}</span><br>
-    //               <span>Email: ${user?.email || "Email"}</span><br>
-    //               <span>Role: ${user?.role || "Role"}</span>
-    //             </div>
-
-    //             <!-- Middle Column -->
-    //             <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
-    //               <span>${monthName} ${year} - ${user?.name}</span>
-    //               <span>Markaz: ${user?.markaz || "N/A"}</span>
-    //             </div>
-
-    //             <!-- Right Column -->
-    //             <div style="text-align: right;">
-    //               <span>Division: ${user?.division || "N/A"}</span><br>
-    //               <span>District: ${user?.district || "N/A"}</span><br>
-    //               <span>Upazila: ${user?.upazila || "N/A"}</span><br>
-    //               <span>Union: ${user?.union || "N/A"}</span><br>
-    //             </div>
-    //         </div>
-
-    //     <table>
-    //       <thead>
-    //         <tr>
-    //           <th>${monthName}</th>
-    //           ${monthDays.map((day) => `<th>${day}</th>`).join("")}
-    //         </tr>
-    //       </thead>
-    //       <tbody>
-    //         ${filteredData2
-    //           .map(
-    //             (row) => `
-    //           <tr>
-    //             <td class="row-label">${row.label}</td>
-    //             ${monthDays.map((day) => `<td>${row[day] || "-"}</td>`).join("")}
-    //           </tr>
-    //         `
-    //           )
-    //           .join("")}
-    //       </tbody>
-    //     </table>
-    //   </body>
-    // </html>
-    // `;
 
     let tableHTML = `
       <html>
@@ -416,6 +338,11 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   };
 
   const handleSaveEdit = (day: number, updatedData: any) => {
+    if (!isDateEditable(day)) {
+      alert("You can only edit data from today and the previous two days");
+      return;
+    }
+
     const newData = [...transposedData];
     updatedData.forEach((value: any, index: number) => {
       if (newData[index]) {
