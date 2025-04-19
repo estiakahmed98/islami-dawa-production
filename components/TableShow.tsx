@@ -1,4 +1,4 @@
-"use client"; //Estiak
+"use client"; //Juwel
 
 import React, { useState, useEffect, useMemo } from "react";
 import fileDownload from "js-file-download";
@@ -11,16 +11,18 @@ interface AmoliTableProps {
   userData: any;
 }
 
-const isDateEditable = (day: number) => {
+const isDateEditable = (
+  day: number,
+  selectedMonth: number,
+  selectedYear: number
+) => {
   const currentDate = new Date();
-  const checkDate = new Date(day);
+  const checkDate = new Date(selectedYear, selectedMonth, day);
 
-  // Calculate difference in days
   const diffTime = currentDate.getTime() - checkDate.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-  // Allow edit if date is today or within last 2 days
-  return diffDays <= 2 && diffDays >= 0;
+  return diffDays <= 1 && diffDays >= 0; // today and yesterday only
 };
 
 const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
@@ -113,14 +115,8 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       label: "Edit",
     };
 
-    const today = new Date();
-
     monthDays.forEach((day) => {
-      const entryDate = new Date(selectedYear, selectedMonth, day);
-      const timeDiff = today.getTime() - entryDate.getTime();
-      const daysDiff = timeDiff / (1000 * 3600 * 24);
-
-      if (daysDiff <= 2) {
+      if (isDateEditable(day, selectedMonth, selectedYear)) {
         editRow[day] = (
           <button
             className="text-sm bg-blue-500 text-white py-1 px-3 rounded"
@@ -338,7 +334,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   };
 
   const handleSaveEdit = (day: number, updatedData: any) => {
-    if (!isDateEditable(day)) {
+    if (!isDateEditable(day, selectedMonth, selectedYear)) {
       alert("You can only edit data from today and the previous two days");
       return;
     }
