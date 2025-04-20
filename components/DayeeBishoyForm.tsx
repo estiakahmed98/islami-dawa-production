@@ -87,24 +87,23 @@ const DayeeBishoyForm: React.FC = () => {
 
   // Handle form submission
   const handleSubmit = async (values: typeof initialFormData) => {
+    if (isSubmittedToday) {
+      toast.error("You have already submitted today. Try again tomorrow.");
+      return;
+    }
+
     const formData = {
       ...values,
       email,
       editorContent,
-      assistants: assistantCount > 0 ? assistants : undefined,
+      assistants: assistantCount > 0 ? assistants : [],
       userInfo: {
-        email,
         division: session?.user?.division || "",
         district: session?.user?.district || "",
         upazila: session?.user?.upazila || "",
         union: session?.user?.union || "",
       },
     };
-
-    if (isSubmittedToday) {
-      toast.error("You have already submitted today. Try again tomorrow.");
-      return;
-    }
 
     try {
       const response = await fetch("/api/dayi", {
@@ -113,17 +112,18 @@ const DayeeBishoyForm: React.FC = () => {
         headers: { "Content-Type": "application/json" },
       });
 
-      if (response.ok) {
-        setIsSubmittedToday(true);
-        toast.success("Form submitted successfully!");
-        router.push("/dashboard");
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.error || "Submission failed. Try again.");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Submission failed");
       }
-    } catch (error) {
-      console.error("Error during submission:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+
+      setIsSubmittedToday(true);
+      toast.success("Form submitted successfully!");
+      router.push("/dashboard");
+    } catch (error: any) {
+      console.error("Submission error:", error);
+      toast.error(error.message || "An unexpected error occurred");
     }
   };
 
@@ -185,7 +185,9 @@ const DayeeBishoyForm: React.FC = () => {
                       key={index}
                       className="border p-4 rounded-lg space-y-4"
                     >
-                      <h4 className="font-medium">সহযোগি দাঈ #{index + 1}</h4>
+                      <h4 className="font-extrabold text-[#155E75]">
+                        সহযোগি দাঈ #{index + 1}
+                      </h4>
                       <div>
                         <label className="block text-gray-700 mb-1">নাম</label>
                         <input

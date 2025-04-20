@@ -51,6 +51,18 @@
           "status": "Approved",
           "phone": "01720151612",
           "name": "Estiak Ahmed"
+        },
+        {
+          "id": "a24b01f8-4283-4665-8b46-5e5b35b183a6",
+          "leaveType": "Sick",
+          "from": "2025-04-22",
+          "to": "2025-04-23",
+          "days": 2,
+          "reason": "yjhj",
+          "approvedBy": "Admin",
+          "status": "Pending",
+          "phone": "01720151612",
+          "name": "Estiak Ahmed"
         }
       ]
     },

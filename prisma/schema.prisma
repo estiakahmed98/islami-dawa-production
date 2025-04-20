@@ -171,7 +171,7 @@ model AssistantDaee {
   district      String
   upazila       String
   union         String
-  dayeeBishoy   DayeeBishoy @relation(fields: [dayeeBishoyId], references: [id])
+  dayeeBishoy   DayeeBishoy @relation(fields: [dayeeBishoyId], references: [id], onDelete: Cascade)
   dayeeBishoyId Int
 
   @@index([mainDaeeEmail])
