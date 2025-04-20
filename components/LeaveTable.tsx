@@ -423,7 +423,12 @@ const LeaveTable: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">ছুটি বিষয়</h2>
         <div className="flex gap-2">
-          <Button onClick={() => setShowForm(true)}>+ ছুটির আবেদন করুন</Button>
+          <Button
+            className="bg-[#155E75] hover:bg-[#1d809e]"
+            onClick={() => setShowForm(true)}
+          >
+            + ছুটির আবেদন করুন
+          </Button>
           <Button
             onClick={handleDownloadAll}
             variant="outline"

@@ -212,9 +212,9 @@ const LeaveForm: React.FC<LeaveFormProps> = ({
         <h2 className="text-xl font-semibold">
           {existingData
             ? isEditable
-              ? "Edit Leave Request"
-              : "View Leave Request"
-            : "New Leave Request"}
+              ? "ছুটির অনুরোধ সম্পাদনা করুন"
+              : "ছুটির অনুরোধ দেখুন"
+            : "নতুন ছুটির অনুরোধ"}
         </h2>
         <Button variant="ghost" onClick={onClose} size="icon">
           <X className="h-5 w-5" />
@@ -237,12 +237,11 @@ const LeaveForm: React.FC<LeaveFormProps> = ({
                 <SelectValue placeholder="Select leave type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Casual">Casual Leave</SelectItem>
-                <SelectItem value="Sick">Sick Leave</SelectItem>
-                <SelectItem value="Annual">Annual Leave</SelectItem>
-                <SelectItem value="Maternity">Maternity Leave</SelectItem>
-                <SelectItem value="Paternity">Paternity Leave</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
+                <SelectItem value="Casual">নৈমিত্তিক ছুটি</SelectItem>
+                <SelectItem value="Sick">অসুস্থতা জনিত ছুটি</SelectItem>
+                <SelectItem value="Annual">বার্ষিক ছুটি</SelectItem>
+                <SelectItem value="Paternity">পিতৃত্বকালীন ছুটি</SelectItem>
+                <SelectItem value="Other">অন্যান্য</SelectItem>
               </SelectContent>
             </Select>
             {errors.leaveType && (
