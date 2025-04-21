@@ -174,7 +174,7 @@ const AssistantDaeeList: React.FC = () => {
 
       <div
         id="assistants-table"
-        className="overflow-x-auto h-[calc(80vh-200px)] overflow-y-auto border border-gray-700 rounded-xl p-4 shadow-lg"
+        className="overflow-x-auto max-h-[calc(80vh-200px)] overflow-y-auto border border-gray-700 rounded-xl p-4 shadow-lg"
       >
         <table className="min-w-full border-collapse table-auto">
           <thead>
@@ -187,7 +187,7 @@ const AssistantDaeeList: React.FC = () => {
               <th className="border px-4 py-2 text-left">Assign Dayee</th>
             </tr>
           </thead>
-          <tbody className="bg-red-500 ">
+          <tbody className="bg-red-100 ">
             {filteredAssistants.length > 0 ? (
               filteredAssistants.map((a, index) => (
                 <tr
@@ -204,7 +204,10 @@ const AssistantDaeeList: React.FC = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="text-center py-4 border rounded-xl ">
+                <td
+                  colSpan={6}
+                  className="text-center font-semibold py-4 text-red-500 "
+                >
                   কোন সহযোগী দায়ীঁ পাওয়া যায়নি!
                 </td>
               </tr>

@@ -872,9 +872,7 @@ export default function UsersTable() {
           </Tabs>
         </div>
       </div>
-      {/* 4. Add the save confirmation modals before the closing div of the component */}
-      {/* Add these right before the final closing div of the component */}
-      {/* First Save Confirmation Modal */}
+
       {showSaveFirstModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md text-center space-y-4">
