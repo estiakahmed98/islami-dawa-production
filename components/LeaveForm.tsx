@@ -239,7 +239,6 @@ const LeaveForm: React.FC<LeaveFormProps> = ({
               <SelectContent>
                 <SelectItem value="Casual">নৈমিত্তিক ছুটি</SelectItem>
                 <SelectItem value="Sick">অসুস্থতা জনিত ছুটি</SelectItem>
-                <SelectItem value="Annual">বার্ষিক ছুটি</SelectItem>
                 <SelectItem value="Paternity">পিতৃত্বকালীন ছুটি</SelectItem>
                 <SelectItem value="Other">অন্যান্য</SelectItem>
               </SelectContent>

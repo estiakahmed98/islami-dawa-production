@@ -33,6 +33,7 @@ import { userSoforBishoyData } from "@/app/data/soforBishoyUserData";
 import { userDayeData } from "@/app/data/dayiUserData";
 import { userTalimBisoyData } from "@/app/data/talimBisoyUserData";
 import { TablePdfExporter } from "@/components/TablePdfExporter";
+import AssistantDaeeList from "@/components/assistentdaye";
 
 interface User {
   id: string;
@@ -404,6 +405,7 @@ export default function UsersTable() {
             <option value="upozilaadmin">Upazila Admin</option>
             <option value="unionadmin">Union Admin</option>
             <option value="daye">Da'ee</option>
+            <option value="AssistantDaeeList">সহযোগী দায়ী</option>
           </select>
 
           {Object.keys(filters)
@@ -421,154 +423,161 @@ export default function UsersTable() {
               />
             ))}
 
-          {sessionUser?.role === "centraladmin" && (
-            <TablePdfExporter
-              tableData={{
-                headers: [
-                  "Name",
-                  "Email",
-                  "Role",
-                  "Division",
-                  "District",
-                  "Upazila",
-                  "Union",
-                  "Phone",
-                  "Markaz",
-                  "Admin Assigned",
-                  "Status",
-                ],
-                rows: filteredUsers.map((user) => ({
-                  Name: user.name,
-                  Email: user.email,
-                  Role: user.role,
-                  Division: user.division,
-                  District: user.district,
-                  Upazila: user.upazila,
-                  Union: user.union,
-                  Phone: user.phone,
-                  Markaz: user.markaz,
-                  "Admin Assigned": getParentEmail(user, users) || "N/A",
-                  Status: user.banned ? "Banned" : "Active",
-                })),
-                title: "User Report",
-                description: `Generated on ${new Date().toLocaleDateString()}`,
-              }}
-              fileName="users_report"
-              buttonText=" Download PDF"
-              buttonClassName="bg-[#155E75] text-white rounded-md px-4 py-2 hover:bg-[#0f4c6b]"
-            />
-          )}
+          {sessionUser?.role === "centraladmin" &&
+            filters.role !== "AssistantDaeeList" && (
+              <TablePdfExporter
+                tableData={{
+                  headers: [
+                    "Name",
+                    "Email",
+                    "Role",
+                    "Division",
+                    "District",
+                    "Upazila",
+                    "Union",
+                    "Phone",
+                    "Markaz",
+                    "Admin Assigned",
+                    "Status",
+                  ],
+                  rows: filteredUsers.map((user) => ({
+                    Name: user.name,
+                    Email: user.email,
+                    Role: user.role,
+                    Division: user.division,
+                    District: user.district,
+                    Upazila: user.upazila,
+                    Union: user.union,
+                    Phone: user.phone,
+                    Markaz: user.markaz,
+                    "Admin Assigned": getParentEmail(user, users) || "N/A",
+                    Status: user.banned ? "Banned" : "Active",
+                  })),
+                  title: "User Report",
+                  description: `Generated on ${new Date().toLocaleDateString()}`,
+                }}
+                fileName="users_report"
+                buttonText=" Download PDF"
+                buttonClassName="bg-[#155E75] text-white rounded-md px-4 py-2 hover:bg-[#0f4c6b]"
+              />
+            )}
         </div>
 
-        <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-y-auto max-h-[calc(100vh-254px)]">
-          <Table className="w-full">
-            <TableHeader className="sticky top-0 z-50 bg-[#155E75] shadow-md border-b-2">
-              <TableRow className="text-white">
-                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                  Name
-                </TableHead>
-                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                  Email
-                </TableHead>
-                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                  Role
-                </TableHead>
-                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                  Division
-                </TableHead>
-                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                  District
-                </TableHead>
-                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                  Upazila
-                </TableHead>
-                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                  Union
-                </TableHead>
-                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                  Phone
-                </TableHead>
-                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                  Markaz
-                </TableHead>
-                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                  Admin Assigned
-                </TableHead>
-                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                  Status
-                </TableHead>
-                <TableHead className="border-r text-center border-gray-300 text-white font-bold">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-
-            {/* Table Body */}
-            <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.id} className="text-center">
-                  <TableCell className="border-r font-semibold border-gray-300">
-                    {user.name}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-300">
-                    {user.email}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-300">
-                    {user.role}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-300">
-                    {user.division}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-300">
-                    {user.district}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-300">
-                    {user.upazila}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-300">
-                    {user.union}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-300">
-                    {user.phone}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-300">
-                    {user.markaz}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-300 text-center">
-                    {getParentEmail(user, users) || "N/A"}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-300">
-                    {user.banned ? "Banned" : "Active"}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2 justify-center items-center">
-                      <Button
-                        onClick={() => toggleBan(user.id, user.banned)}
-                        className={user.banned ? "bg-red-500" : "bg-green-500"}
-                      >
-                        {user.banned ? "Unban" : "Ban"}
-                      </Button>
-
-                      <Button
-                        className="border-r font-semibold  cursor-pointer hover:underline"
-                        onClick={() => setSelectedUser(user)}
-                      >
-                        Edit
-                      </Button>
-
-                      <Button
-                        onClick={() => handleDeleteClick(user.id)}
-                        className="bg-red-800"
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </TableCell>
+        {filters.role === "AssistantDaeeList" ? (
+          <AssistantDaeeList />
+        ) : (
+          <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-y-auto max-h-[calc(100vh-254px)]">
+            <Table className="w-full">
+              <TableHeader className="sticky top-0 z-50 bg-[#155E75] shadow-md border-b-2">
+                <TableRow className="text-white">
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                    Name
+                  </TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                    Email
+                  </TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                    Role
+                  </TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                    Division
+                  </TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                    District
+                  </TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                    Upazila
+                  </TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                    Union
+                  </TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                    Phone
+                  </TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                    Markaz
+                  </TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                    Admin Assigned
+                  </TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                    Status
+                  </TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">
+                    Actions
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+
+              {/* Table Body */}
+              <TableBody>
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.id} className="text-center">
+                    <TableCell className="border-r font-semibold border-gray-300">
+                      {user.name}
+                    </TableCell>
+                    <TableCell className="border-r border-gray-300">
+                      {user.email}
+                    </TableCell>
+                    <TableCell className="border-r border-gray-300">
+                      {user.role}
+                    </TableCell>
+                    <TableCell className="border-r border-gray-300">
+                      {user.division}
+                    </TableCell>
+                    <TableCell className="border-r border-gray-300">
+                      {user.district}
+                    </TableCell>
+                    <TableCell className="border-r border-gray-300">
+                      {user.upazila}
+                    </TableCell>
+                    <TableCell className="border-r border-gray-300">
+                      {user.union}
+                    </TableCell>
+                    <TableCell className="border-r border-gray-300">
+                      {user.phone}
+                    </TableCell>
+                    <TableCell className="border-r border-gray-300">
+                      {user.markaz}
+                    </TableCell>
+                    <TableCell className="border-r border-gray-300 text-center">
+                      {getParentEmail(user, users) || "N/A"}
+                    </TableCell>
+                    <TableCell className="border-r border-gray-300">
+                      {user.banned ? "Banned" : "Active"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2 justify-center items-center">
+                        <Button
+                          onClick={() => toggleBan(user.id, user.banned)}
+                          className={
+                            user.banned ? "bg-red-500" : "bg-green-500"
+                          }
+                        >
+                          {user.banned ? "Unban" : "Ban"}
+                        </Button>
+
+                        <Button
+                          className="border-r font-semibold  cursor-pointer hover:underline"
+                          onClick={() => setSelectedUser(user)}
+                        >
+                          Edit
+                        </Button>
+
+                        <Button
+                          onClick={() => handleDeleteClick(user.id)}
+                          className="bg-red-800"
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
         {/* First Confirmation Modal */}
         {showFirstModal && (

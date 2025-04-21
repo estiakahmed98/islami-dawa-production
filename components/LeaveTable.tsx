@@ -4,6 +4,7 @@ import type React from "react";
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
+import LeaveSummary from "./LeaveSummary";
 import LeaveForm from "./LeaveForm";
 import {
   Table,
@@ -78,106 +79,6 @@ const LeaveTable: React.FC = () => {
     setSelectedLeave(leave);
     setShowForm(true);
   };
-
-  // const handleDownloadPDF = () => {
-  //   if (pdfRef.current) {
-  //     const element = pdfRef.current;
-  //     const opt = {
-  //       margin: 10,
-  //       filename: `leave_records_${new Date().toISOString().split("T")[0]}.pdf`,
-  //       image: { type: "jpeg", quality: 0.98 },
-  //       html2canvas: { scale: 2 },
-  //       jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
-  //     };
-
-  //     const clone = element.cloneNode(true) as HTMLElement;
-  //     const title = document.createElement("h1");
-  //     title.textContent = "Leave Records";
-  //     title.style.textAlign = "center";
-  //     title.style.marginBottom = "20px";
-
-  //     const container = document.createElement("div");
-  //     container.style.padding = "20px";
-  //     container.appendChild(title);
-
-  //     const userInfo = document.createElement("div");
-  //     userInfo.innerHTML = `
-  //       <p><strong>Name:</strong> ${userName}</p>
-  //       <p><strong>Email:</strong> ${userEmail}</p>
-  //       <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
-  //     `;
-  //     userInfo.style.marginBottom = "20px";
-  //     container.appendChild(userInfo);
-
-  //     container.appendChild(clone);
-  //     html2pdf().from(container).set(opt).save();
-  //   }
-  // };
-
-  // const handleDownloadSingleLeave = (leave: LeaveRecord) => {
-  //   const container = document.createElement("div");
-  //   container.style.padding = "20px";
-
-  //   const title = document.createElement("h1");
-  //   title.textContent = "Leave Approval Certificate";
-  //   title.style.textAlign = "center";
-  //   title.style.marginBottom = "30px";
-  //   container.appendChild(title);
-
-  //   const userInfo = document.createElement("div");
-  //   userInfo.innerHTML = `
-  //       <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-  //         <p style="margin-bottom: 10px;"><strong>Name:</strong> ${userName}</p>
-  //         <p style="margin-bottom: 10px;"><strong>Email:</strong> ${userEmail}</p>
-  //         <p style="margin-bottom: 10px;"><strong>Phone:</strong> ${leave.phone || "N/A"}</p>
-  //         <p style="margin-bottom: 10px;"><strong>Leave Type:</strong> ${leave.leaveType}</p>
-  //         <p style="margin-bottom: 10px;"><strong>From:</strong> ${leave.from}</p>
-  //         <p style="margin-bottom: 10px;"><strong>To:</strong> ${leave.to}</p>
-  //         <p style="margin-bottom: 10px;"><strong>Total Days:</strong> ${leave.days}</p>
-  //         <p style="margin-bottom: 10px;"><strong>Reason:</strong> ${leave.reason}</p>
-  //         <p style="margin-bottom: 20px;"><strong >Status:</strong> ${leave.status}</p>
-  //         <p style="margin-bottom: 10px;"><strong>Approved By:</strong> ${leave.approvedBy}</p>
-  //         <p style="margin-bottom: 10px;"><strong>Approval Date:</strong> ${new Date().toLocaleDateString()}</p>
-  //       </div>
-  //     `;
-  //   userInfo.style.textAlign = "center";
-  //   userInfo.style.display = "flex";
-  //   userInfo.style.marginBottom = "30px";
-  //   container.appendChild(userInfo);
-
-  //   const signatureSection = document.createElement("div");
-  //   signatureSection.style.marginTop = "50px";
-  //   signatureSection.style.display = "flex";
-  //   signatureSection.style.justifyContent = "space-between";
-
-  //   const employeeSignature = document.createElement("div");
-  //   employeeSignature.innerHTML = `
-  //     <div style="border-top: 1px solid #000; padding-top: 10px; width: 200px; text-align: center;">
-  //       <p>Employee Signature</p>
-  //     </div>
-  //   `;
-
-  //   const approverSignature = document.createElement("div");
-  //   approverSignature.innerHTML = `
-  //     <div style="border-top: 1px solid #000; padding-top: 10px; width: 200px; text-align: center;">
-  //       <p>Approver Signature</p>
-  //     </div>
-  //   `;
-
-  //   signatureSection.appendChild(employeeSignature);
-  //   signatureSection.appendChild(approverSignature);
-  //   container.appendChild(signatureSection);
-
-  //   const opt = {
-  //     margin: 10,
-  //     filename: `leave_approval_${leave.leaveType}_${leave.from}.pdf`,
-  //     image: { type: "jpeg", quality: 0.98 },
-  //     html2canvas: { scale: 2 },
-  //     jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
-  //   };
-
-  //   html2pdf().from(container).set(opt).save();
-  // };
 
   const handleDownloadAll = async () => {
     if (pdfRef.current) {
@@ -420,6 +321,9 @@ const LeaveTable: React.FC = () => {
 
   return (
     <div className="p-4">
+      <div className="flex items-center justify-center">
+        {leaves.length > 0 && <LeaveSummary leaves={leaves} />}
+      </div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">ছুটি বিষয়</h2>
         <div className="flex gap-2">

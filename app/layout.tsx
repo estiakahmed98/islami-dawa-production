@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Anek_Bangla, Tiro_Bangla } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -15,6 +15,20 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Bangla
+const anekBangla = Anek_Bangla({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["bengali"],
+  display: "swap",
+});
+
+const tiroBangla = Tiro_Bangla({
+  weight: ["400"],
+  subsets: ["bengali"],
+  display: "swap",
+  variable: "--font-tiro-bangla",
+});
+
 export const metadata: Metadata = {
   title: "ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ",
   description: "ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ",
@@ -28,7 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${anekBangla.className} ${tiroBangla.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"

@@ -99,7 +99,7 @@ const ImpersonateSidebar: React.FC = () => {
   ];
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen font-tiro">
       {!isMobile && (
         <div
           className={`transition-all duration-300 fixed md:relative h-full bg-sky-900 overflow-y-auto ${

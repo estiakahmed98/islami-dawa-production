@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import { useEffect, useRef, useState } from "react";
 import {
   Table,
@@ -9,14 +11,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Search, X } from "lucide-react";
-import html2pdf from "html2pdf.js";
+import { ChevronDown, ChevronRight, Download, Search, X } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const html2pdf = dynamic(() => import("html2pdf.js"), {
+  ssr: false,
+});
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface LeaveRecord {
   id: string;
   email: string;
+  name?: string;
+  phone?: string;
   leaveType: string;
   from: string;
   to: string;
@@ -26,14 +34,27 @@ interface LeaveRecord {
   status: string;
   date: string;
   index: number;
-  phone?: string;
-  name?: string;
 }
 
-const AdminNotifications: React.FC = () => {
+interface LeaveUserSummary {
+  name: string;
+  email: string;
+  phone?: string;
+  casual: number;
+  sick: number;
+  paternity: number;
+  other: number;
+  total: number;
+  leaves: LeaveRecord[]; // full list of their leaves
+}
+
+const AdminLeaveManagement: React.FC = () => {
   const [leaveRequests, setLeaveRequests] = useState<LeaveRecord[]>([]);
   const [filteredLeaves, setFilteredLeaves] = useState<LeaveRecord[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedUsers, setExpandedUsers] = useState<Record<string, boolean>>(
+    {}
+  );
   const tableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,6 +90,52 @@ const AdminNotifications: React.FC = () => {
     }
   };
 
+  const groupLeavesByUser = (leaves: LeaveRecord[]): LeaveUserSummary[] => {
+    const grouped: Record<string, LeaveUserSummary> = {};
+
+    for (const leave of leaves) {
+      const email = leave.email;
+
+      if (!grouped[email]) {
+        grouped[email] = {
+          name: leave.name || "N/A",
+          email,
+          phone: leave.phone || "N/A",
+          casual: 0,
+          sick: 0,
+          paternity: 0,
+          other: 0,
+          total: 0,
+          leaves: [],
+        };
+      }
+
+      grouped[email].leaves.push(leave);
+
+      // Only count approved leaves in the summary totals
+      if (leave.status === "Approved") {
+        const type = leave.leaveType;
+        const days = Number(leave.days);
+
+        if (type === "Casual") grouped[email].casual += days;
+        else if (type === "Sick") grouped[email].sick += days;
+        else if (type === "Paternity") grouped[email].paternity += days;
+        else grouped[email].other += days;
+
+        grouped[email].total += days;
+      }
+    }
+
+    return Object.values(grouped);
+  };
+
+  const toggleUser = (email: string) => {
+    setExpandedUsers((prev) => ({
+      ...prev,
+      [email]: !prev[email],
+    }));
+  };
+
   const handleDownloadAll = () => {
     if (tableRef.current) {
       // Create a clone of the table for PDF generation
@@ -90,7 +157,7 @@ const AdminNotifications: React.FC = () => {
 
       // Add report title
       const title = document.createElement("h1");
-      title.textContent = "Leave Requests Report";
+      title.textContent = "Leave Summary Report";
       title.style.color = "#2d3748";
       title.style.margin = "0";
       title.style.fontSize = "28px";
@@ -115,85 +182,59 @@ const AdminNotifications: React.FC = () => {
         minute: "2-digit",
       });
 
+      const userSummaries = groupLeavesByUser(filteredLeaves);
+
       meta.innerHTML = `
         <div style="display:flex;justify-content:space-between">
           <p style="margin:5px 0;font-size:14px;"><strong>Generated on:</strong> ${currentDate}</p>
-          <p style="margin:5px 0;font-size:14px;"><strong>Total Requests:</strong> ${filteredLeaves.length}</p>
+          <p style="margin:5px 0;font-size:14px;"><strong>Total Employees:</strong> ${userSummaries.length}</p>
         </div>
       `;
       container.appendChild(meta);
 
-      // Style the table for PDF
-      const table = element.querySelector("table");
-      if (table) {
-        table.style.width = "100%";
-        table.style.borderCollapse = "collapse";
-        table.style.fontSize = "12px";
+      // Create a new table with the summary information
+      const summaryTable = document.createElement("table");
+      summaryTable.style.width = "100%";
+      summaryTable.style.borderCollapse = "collapse";
+      summaryTable.style.fontSize = "12px";
+      summaryTable.style.marginBottom = "20px";
 
-        // Style table headers
-        const headers = table.querySelectorAll("th");
-        headers.forEach((header) => {
-          header.style.backgroundColor = "#2d3748";
-          header.style.color = "white";
-          header.style.padding = "10px";
-          header.style.textAlign = "left";
-          header.style.fontWeight = "bold";
-          header.style.border = "1px solid #e2e8f0";
-        });
+      // Create table header
+      const thead = document.createElement("thead");
+      thead.innerHTML = `
+        <tr>
+          <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Name</th>
+          <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Email</th>
+          <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Phone</th>
+          <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Casual</th>
+          <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Sick</th>
+          <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Paternity</th>
+          <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Other</th>
+          <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Total</th>
+        </tr>
+      `;
+      summaryTable.appendChild(thead);
 
-        // Style table rows for zebra striping
-        const rows = table.querySelectorAll("tr:not(:first-child)");
-        rows.forEach((row, index) => {
-          row.style.backgroundColor = index % 2 === 0 ? "#f8fafc" : "white";
-        });
+      // Create table body with user summaries
+      const tbody = document.createElement("tbody");
+      userSummaries.forEach((user, index) => {
+        const row = document.createElement("tr");
+        row.style.backgroundColor = index % 2 === 0 ? "#f8fafc" : "white";
 
-        // Style table cells
-        const cells = table.querySelectorAll("td");
-        cells.forEach((cell) => {
-          cell.style.padding = "8px 10px";
-          cell.style.border = "1px solid #e2e8f0";
-        });
-
-        // Fix status cells with proper colors and styling
-        const statusCells = table.querySelectorAll("td:nth-child(9)");
-        statusCells.forEach((cell) => {
-          const status = cell.textContent.trim();
-          cell.innerHTML = ""; // Clear the cell content
-
-          // Create a styled status badge
-          const statusBadge = document.createElement("div");
-          statusBadge.textContent = status;
-          statusBadge.style.padding = "4px 8px";
-          statusBadge.style.borderRadius = "4px";
-          statusBadge.style.fontWeight = "600";
-          statusBadge.style.fontSize = "11px";
-          statusBadge.style.display = "inline-block";
-          statusBadge.style.textAlign = "center";
-
-          // Set the appropriate background and text color
-          if (status === "Pending") {
-            statusBadge.style.backgroundColor = "#fed7d7";
-            statusBadge.style.color = "#9b2c2c";
-          } else if (status === "Approved") {
-            statusBadge.style.backgroundColor = "#10b981";
-            statusBadge.style.color = "white";
-          } else if (status === "Rejected") {
-            statusBadge.style.backgroundColor = "#7f1d1d";
-            statusBadge.style.color = "white";
-          }
-
-          cell.appendChild(statusBadge);
-          cell.style.textAlign = "center";
-        });
-
-        // Remove the Actions column and any buttons/interactive elements
-        const actionCells = table.querySelectorAll(
-          "th:last-child, td:last-child"
-        );
-        actionCells.forEach((cell) => cell.remove());
-      }
-
-      container.appendChild(table);
+        row.innerHTML = `
+          <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.name}</td>
+          <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.email}</td>
+          <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.phone}</td>
+          <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.casual}</td>
+          <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.sick}</td>
+          <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.paternity}</td>
+          <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.other}</td>
+          <td style="padding: 8px 10px; border: 1px solid #e2e8f0; font-weight: bold;">${user.total}</td>
+        `;
+        tbody.appendChild(row);
+      });
+      summaryTable.appendChild(tbody);
+      container.appendChild(summaryTable);
 
       // Add footer with page number
       const footer = document.createElement("div");
@@ -209,7 +250,7 @@ const AdminNotifications: React.FC = () => {
       // PDF generation options
       const opt = {
         margin: [15, 15],
-        filename: `leave_requests_report_${new Date().toISOString().split("T")[0]}.pdf`,
+        filename: `leave_summary_report_${new Date().toISOString().split("T")[0]}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
@@ -353,7 +394,7 @@ const AdminNotifications: React.FC = () => {
         <!-- Footer -->
         <div style="background-color: #2d3748; color: white; padding: 15px; text-align: center; font-size: 12px;">
 
-          <p style="margin: 5px 0 0 0;">ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ. © ${new Date().getFullYear()}</p>
+          <p style="margin: 5px 0 0 0;">ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ. © ${new Date().getFullYear()}</p>
         </div>
       </div>
     `;
@@ -376,62 +417,6 @@ const AdminNotifications: React.FC = () => {
     setSearchTerm("");
   };
 
-  const sendApprovalEmail = async (
-    email: string,
-    name: string,
-    leaveType: string,
-    leaveDates: string
-  ) => {
-    try {
-      const response = await fetch("/api/emails", {
-        method: "POST",
-        body: JSON.stringify({
-          action: "leaveApproval",
-          email: "faysalmohammed.shah@gmail.com",
-          name,
-          leaveType,
-          leaveDates,
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!response.ok) {
-        console.error("Failed to send approval email");
-      }
-    } catch (error) {
-      console.error("Error sending approval email:", error);
-    }
-  };
-
-  const sendRejectionEmail = async (
-    email: string,
-    name: string,
-    leaveType: string,
-    leaveDates: string,
-    reason: string
-  ) => {
-    try {
-      const response = await fetch("/api/emails", {
-        method: "POST",
-        body: JSON.stringify({
-          action: "leaveRejection",
-          email: "faysalmohammed.shah@gmail.com",
-          name,
-          leaveType,
-          leaveDates,
-          reason,
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!response.ok) {
-        console.error("Failed to send rejection email");
-      }
-    } catch (error) {
-      console.error("Error sending rejection email:", error);
-    }
-  };
-
   const updateStatus = async (
     email: string,
     date: string,
@@ -452,21 +437,17 @@ const AdminNotifications: React.FC = () => {
 
       if (response.ok) {
         fetchNotifications();
-        const leaveDates = `${from} to ${to}`;
-        if (status === "Approved") {
-          sendApprovalEmail(email, name, leaveType, leaveDates);
-        } else if (status === "Rejected") {
-          sendRejectionEmail(email, name, leaveType, leaveDates, reason);
-        }
       }
     } catch (error) {
       console.error("Error updating status:", error);
     }
   };
 
+  const userSummaries = groupLeavesByUser(filteredLeaves);
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <h2 className="text-2xl font-semibold mb-4">ছুটির অনুমতি দিন</h2>
+      <h2 className="text-2xl font-semibold mb-4">ছুটির ব্যবস্থাপনা</h2>
 
       {/* Search and Download Section */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -495,8 +476,8 @@ const AdminNotifications: React.FC = () => {
           variant="outline"
           className="bg-green-800 flex items-center justify-center text-white hover:bg-green-700 hover:text-white"
         >
-          <Download className="h-4 w-4" />
-          Download All
+          <Download className="h-4 w-4 mr-2" />
+          Download Summary
         </Button>
       </div>
 
@@ -506,82 +487,172 @@ const AdminNotifications: React.FC = () => {
       >
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="bg-gray-100">
               <TableHead className="font-bold text-black">Name</TableHead>
               <TableHead className="font-bold text-black">Email</TableHead>
               <TableHead className="font-bold text-black">Phone</TableHead>
-              <TableHead className="font-bold text-black">Type</TableHead>
-              <TableHead className="font-bold text-black">From</TableHead>
-              <TableHead className="font-bold text-black">To</TableHead>
-              <TableHead className="font-bold text-black">Days</TableHead>
-              <TableHead className="font-bold text-black">Reason</TableHead>
-              <TableHead className="font-bold text-black">Status</TableHead>
-              <TableHead className="font-bold text-black">Actions</TableHead>
+              <TableHead className="font-bold text-black">
+                Casual Leave
+              </TableHead>
+              <TableHead className="font-bold text-black">Sick Leave</TableHead>
+              <TableHead className="font-bold text-black">
+                Paternity Leave
+              </TableHead>
+              <TableHead className="font-bold text-black">
+                Other Leave
+              </TableHead>
+              <TableHead className="font-bold text-black">Total</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredLeaves.length > 0 ? (
-              filteredLeaves.map((leave, index) => (
-                <TableRow key={index}>
-                  <TableCell>{leave.name || "N/A"}</TableCell>
-                  <TableCell>{leave.email}</TableCell>
-                  <TableCell>{leave.phone || "N/A"}</TableCell>
-                  <TableCell>{leave.leaveType}</TableCell>
-                  <TableCell>{leave.from}</TableCell>
-                  <TableCell>{leave.to}</TableCell>
-                  <TableCell>{leave.days}</TableCell>
-                  <TableCell>{leave.reason}</TableCell>
-                  <TableCell>
-                    <div
-                      className={`flex items-center justify-center rounded-md text-sm font-semibold ${
-                        leave.status === "Pending"
-                          ? "bg-red-200 text-red-700"
-                          : leave.status === "Approved"
-                            ? "bg-green-500 text-white"
-                            : "bg-red-800 text-white"
-                      }`}
-                    >
-                      <span>{leave.status}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <select
-                        value={leave.status}
-                        onChange={(e) =>
-                          updateStatus(
-                            leave.email,
-                            leave.date,
-                            leave.index,
-                            e.target.value,
-                            leave.leaveType,
-                            leave.name || "",
-                            leave.from,
-                            leave.to,
-                            leave.reason
-                          )
-                        }
-                        className="border rounded-md p-2"
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
-                      </select>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownloadSingle(leave)}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+            {userSummaries.length > 0 ? (
+              userSummaries.map((user, idx) => (
+                <React.Fragment key={`user-summary-${user.email}`}>
+                  <TableRow
+                    className="cursor-pointer hover:bg-gray-100"
+                    onClick={() => toggleUser(user.email)}
+                  >
+                    <TableCell className="font-medium flex items-center">
+                      {expandedUsers[user.email] ? (
+                        <ChevronDown className="h-4 w-4 mr-2" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 mr-2" />
+                      )}
+                      {user.name}
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.phone}</TableCell>
+                    <TableCell>{user.casual}</TableCell>
+                    <TableCell>{user.sick}</TableCell>
+                    <TableCell>{user.paternity}</TableCell>
+                    <TableCell>{user.other}</TableCell>
+                    <TableCell className="font-bold">{user.total}</TableCell>
+                  </TableRow>
+
+                  {expandedUsers[user.email] && (
+                    <TableRow>
+                      <TableCell colSpan={8} className="p-0">
+                        <div className="bg-gray-50 px-4 py-2 border-t border-b">
+                          <h3 className="text-sm font-medium text-gray-700 mb-2">
+                            Leave Details
+                          </h3>
+                          <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow className="bg-gray-200">
+                                  <TableHead className="text-xs">
+                                    Type
+                                  </TableHead>
+                                  <TableHead className="text-xs">
+                                    From
+                                  </TableHead>
+                                  <TableHead className="text-xs">To</TableHead>
+                                  <TableHead className="text-xs">
+                                    Days
+                                  </TableHead>
+                                  <TableHead className="text-xs">
+                                    Reason
+                                  </TableHead>
+                                  <TableHead className="text-xs">
+                                    Status
+                                  </TableHead>
+                                  <TableHead className="text-xs">
+                                    Actions
+                                  </TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {user.leaves.map((leave, i) => (
+                                  <TableRow
+                                    key={`${leave.email}-${leave.date}-${i}`}
+                                    className={
+                                      i % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                    }
+                                  >
+                                    <TableCell className="text-xs">
+                                      {leave.leaveType}
+                                    </TableCell>
+                                    <TableCell className="text-xs">
+                                      {leave.from}
+                                    </TableCell>
+                                    <TableCell className="text-xs">
+                                      {leave.to}
+                                    </TableCell>
+                                    <TableCell className="text-xs">
+                                      {leave.days}
+                                    </TableCell>
+                                    <TableCell className="text-xs max-w-xs truncate">
+                                      {leave.reason}
+                                    </TableCell>
+                                    <TableCell className="text-xs">
+                                      <div
+                                        className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
+                                          leave.status === "Pending"
+                                            ? "bg-yellow-100 text-yellow-800"
+                                            : leave.status === "Approved"
+                                              ? "bg-green-100 text-green-800"
+                                              : "bg-red-100 text-red-800"
+                                        }`}
+                                      >
+                                        {leave.status}
+                                      </div>
+                                    </TableCell>
+                                    <TableCell className="text-xs">
+                                      <div className="flex gap-1">
+                                        <select
+                                          value={leave.status}
+                                          onChange={(e) =>
+                                            updateStatus(
+                                              leave.email,
+                                              leave.date,
+                                              leave.index,
+                                              e.target.value,
+                                              leave.leaveType,
+                                              leave.name || "",
+                                              leave.from,
+                                              leave.to,
+                                              leave.reason
+                                            )
+                                          }
+                                          className="text-xs border rounded p-1"
+                                        >
+                                          <option value="Pending">
+                                            Pending
+                                          </option>
+                                          <option value="Approved">
+                                            Approved
+                                          </option>
+                                          <option value="Rejected">
+                                            Rejected
+                                          </option>
+                                        </select>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="h-7 w-7 p-0"
+                                          onClick={() =>
+                                            handleDownloadSingle(leave)
+                                          }
+                                        >
+                                          <Download className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={10} className="text-center text-gray-500">
-                  No leave requests found
+                <TableCell colSpan={8} className="text-center text-gray-500">
+                  No leave records found
                 </TableCell>
               </TableRow>
             )}
@@ -592,4 +663,4 @@ const AdminNotifications: React.FC = () => {
   );
 };
 
-export default AdminNotifications;
+export default AdminLeaveManagement;

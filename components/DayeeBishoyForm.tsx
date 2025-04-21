@@ -98,6 +98,7 @@ const DayeeBishoyForm: React.FC = () => {
       editorContent,
       assistants: assistantCount > 0 ? assistants : [],
       userInfo: {
+        dayeName: session?.user?.name || "",
         division: session?.user?.division || "",
         district: session?.user?.district || "",
         upazila: session?.user?.upazila || "",

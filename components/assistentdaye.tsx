@@ -4,65 +4,54 @@ import { useSession } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
 import { assistantDaeeData } from "@/app/data/assistantDaeeData";
 import { Button } from "@/components/ui/button";
-import html2pdf from "html2pdf.js";
 
 const AssistantDaeeList: React.FC = () => {
   const { data: session } = useSession();
   const email = session?.user?.email || "";
-  const [filteredAssistants, setFilteredAssistants] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const userName = session?.user?.name || "User";
   const userDivision = session?.user?.division || "";
   const userDistrict = session?.user?.district || "";
 
-  // Filter the assistants data based on the logged-in user's email
+  const [filteredAssistants, setFilteredAssistants] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isClient, setIsClient] = useState(false);
+
   useEffect(() => {
-    if (email) {
-      const assistants = Object.values(assistantDaeeData.records).filter(
-        (assistant) => assistant.mainDaeeEmail === email
-      );
-      setFilteredAssistants(assistants);
-    }
-  }, [email]);
+    setIsClient(true);
+    const assistants = Object.values(assistantDaeeData.records);
+    setFilteredAssistants(assistants);
+  }, []);
 
-  // Handle search query change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    filterAssistants(e.target.value);
-  };
+    const query = e.target.value;
+    setSearchQuery(query);
 
-  // Filter assistants based on search query
-  const filterAssistants = (query: string) => {
     if (!query) {
-      setFilteredAssistants(
-        Object.values(assistantDaeeData.records).filter(
-          (assistant) => assistant.mainDaeeEmail === email
-        )
-      );
+      setFilteredAssistants(Object.values(assistantDaeeData.records));
     } else {
-      const filtered = filteredAssistants.filter((assistant) => {
-        return (
+      const filtered = Object.values(assistantDaeeData.records).filter(
+        (assistant) =>
           assistant.name.toLowerCase().includes(query.toLowerCase()) ||
           assistant.phone.includes(query) ||
-          assistant.address.toLowerCase().includes(query.toLowerCase())
-        );
-      });
+          assistant.address.toLowerCase().includes(query.toLowerCase()) ||
+          assistant.dayeName?.toLowerCase().includes(query.toLowerCase())
+      );
       setFilteredAssistants(filtered);
     }
   };
 
-  // Generate and download the PDF using html2pdf.js with improved styling
-  const downloadPDF = () => {
-    // Create a new element for PDF that won't be shown on the page
+  const downloadPDF = async () => {
+    if (!isClient) return;
+
+    const html2pdf = (await import("html2pdf.js")).default;
+
     const pdfContent = document.createElement("div");
     pdfContent.style.padding = "20px";
     pdfContent.style.fontFamily = "Arial, sans-serif";
 
-    // Current date and time
     const now = new Date();
     const dateTimeString = now.toLocaleString();
 
-    // Header with logo placeholder and title
     const header = document.createElement("div");
     header.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #4a5568; padding-bottom: 10px;">
@@ -74,7 +63,6 @@ const AssistantDaeeList: React.FC = () => {
     `;
     pdfContent.appendChild(header);
 
-    // User info section
     const userInfo = document.createElement("div");
     userInfo.innerHTML = `
       <div style="background-color: #f7fafc; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
@@ -96,51 +84,50 @@ const AssistantDaeeList: React.FC = () => {
     `;
     pdfContent.appendChild(userInfo);
 
-    // Table section
     const tableSection = document.createElement("div");
     tableSection.innerHTML = `
-      <h3 style="margin: 0 0 10px 0; color: #2d3748; font-size: 18px;">সহযোগি দাঈদের বিস্তারিত তথ্য: ${filteredAssistants.length} </h3>
+      <h3 style="margin: 0 0 10px 0; color: #2d3748; font-size: 18px;">
+        সহযোগি দাঈদের বিস্তারিত তথ্য: ${filteredAssistants.length}
+      </h3>
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
         <thead>
           <tr style="background-color: #2c5282; color: white;">
-            <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">ক্রমিক</th>
-            <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">নাম</th>
-            <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">ফোন নম্বর</th>
-            <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">ঠিকানা</th>
-            <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">বিস্তারিত</th>
-            <th style="padding: 10px; border: 1px solid #e2e8f0; text-align: left;">তারিখ</th>
+            <th style="padding: 10px; border: 1px solid #e2e8f0;">ক্রমিক</th>
+            <th style="padding: 10px; border: 1px solid #e2e8f0;">নাম</th>
+            <th style="padding: 10px; border: 1px solid #e2e8f0;">ফোন</th>
+            <th style="padding: 10px; border: 1px solid #e2e8f0;">ঠিকানা</th>
+            <th style="padding: 10px; border: 1px solid #e2e8f0;">বিস্তারিত</th>
+            <th style="padding: 10px; border: 1px solid #e2e8f0;">তারিখ</th>
           </tr>
         </thead>
         <tbody>
-          ${filteredAssistants
-            .map(
-              (assistant, index) => `
-            <tr style="background-color: ${index % 2 === 0 ? "#f7fafc" : "white"};">
-              <td style="padding: 10px; border: 1px solid #e2e8f0;">${index + 1}</td>
-              <td style="padding: 10px; border: 1px solid #e2e8f0;">${assistant.name}</td>
-              <td style="padding: 10px; border: 1px solid #e2e8f0;">${assistant.phone}</td>
-              <td style="padding: 10px; border: 1px solid #e2e8f0;">${assistant.address}</td>
-              <td style="padding: 10px; border: 1px solid #e2e8f0;">${assistant.description || "-"}</td>
-              <td style="padding: 10px; border: 1px solid #e2e8f0;">${assistant.date}</td>
-            </tr>
-          `
-            )
-            .join("")}
           ${
-            filteredAssistants.length === 0
-              ? `
-            <tr>
-              <td colspan="6" style="padding: 20px; text-align: center; border: 1px solid #e2e8f0;">কোন সহযোগি দাঈ পাওয়া যায়নি</td>
-            </tr>
-          `
-              : ""
+            filteredAssistants.length > 0
+              ? filteredAssistants
+                  .map(
+                    (a, i) => `
+              <tr style="background-color: ${i % 2 === 0 ? "#f7fafc" : "white"};">
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">${i + 1}</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">${a.name}</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">${a.phone}</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">${a.address}</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">${a.description || "-"}</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">${a.date}</td>
+              </tr>
+            `
+                  )
+                  .join("")
+              : `
+              <tr>
+                <td colspan="6" style="text-align:center; padding:20px;">কোন সহযোগি দাঈ পাওয়া যায়নি</td>
+              </tr>
+            `
           }
         </tbody>
       </table>
     `;
     pdfContent.appendChild(tableSection);
 
-    // PDF Options
     const options = {
       margin: 10,
       filename: `সহযোগি_দাঈ_তালিকা_${now.toISOString().split("T")[0]}.pdf`,
@@ -149,18 +136,17 @@ const AssistantDaeeList: React.FC = () => {
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
     };
 
-    // Generate PDF
     html2pdf().from(pdfContent).set(options).save();
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 ">
       <div className="mb-4 flex justify-between items-center">
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder="Search by Name, Phone or Address"
+          placeholder="Search by Name, Phone, Address or Daye Name"
           className="w-1/2 p-2 border border-gray-300 rounded"
         />
         <Button
@@ -186,7 +172,10 @@ const AssistantDaeeList: React.FC = () => {
         </Button>
       </div>
 
-      <div id="assistants-table" className="overflow-x-auto">
+      <div
+        id="assistants-table"
+        className="overflow-x-auto h-[calc(80vh-200px)] overflow-y-auto border border-gray-700 rounded-xl p-4 shadow-lg"
+      >
         <table className="min-w-full border-collapse table-auto">
           <thead>
             <tr className="bg-[#155E75] text-white">
@@ -195,28 +184,28 @@ const AssistantDaeeList: React.FC = () => {
               <th className="border px-4 py-2 text-left">Address</th>
               <th className="border px-4 py-2 text-left">Description</th>
               <th className="border px-4 py-2 text-left">Date</th>
+              <th className="border px-4 py-2 text-left">Assign Dayee</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-red-500 ">
             {filteredAssistants.length > 0 ? (
-              filteredAssistants.map((assistant, index) => (
+              filteredAssistants.map((a, index) => (
                 <tr
                   key={index}
                   className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
                 >
-                  <td className="border px-4 py-2">{assistant.name}</td>
-                  <td className="border px-4 py-2">{assistant.phone}</td>
-                  <td className="border px-4 py-2">{assistant.address}</td>
-                  <td className="border px-4 py-2">
-                    {assistant.description || "-"}
-                  </td>
-                  <td className="border px-4 py-2">{assistant.date}</td>
+                  <td className="border px-4 py-2">{a.name}</td>
+                  <td className="border px-4 py-2">{a.phone}</td>
+                  <td className="border px-4 py-2">{a.address}</td>
+                  <td className="border px-4 py-2">{a.description || "-"}</td>
+                  <td className="border px-4 py-2">{a.date}</td>
+                  <td className="border px-4 py-2">{a.dayeName}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="text-center py-4 border">
-                  No assistants found
+                <td colSpan={5} className="text-center py-4 border rounded-xl ">
+                  কোন সহযোগী দায়ীঁ পাওয়া যায়নি!
                 </td>
               </tr>
             )}

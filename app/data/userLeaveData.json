@@ -4,25 +4,13 @@
       "2025-04-19": [
         {
           "id": "d792df3b-7cba-48f8-bff1-38dd1cb3f114",
-          "leaveType": "Casual Leave",
+          "leaveType": "Casual",
           "from": "2025-04-19T18:00:00.000Z",
           "to": "2025-04-19T18:00:00.000Z",
           "days": 1,
           "reason": "Sick",
           "approvedBy": "Estiak",
           "status": "Approved",
-          "phone": "01720151612",
-          "name": "Estiak Ahmed"
-        },
-        {
-          "id": "48697030-ed08-413f-8bed-bed245f2fe3a",
-          "leaveType": "Sick",
-          "from": "2025-04-16",
-          "to": "2025-04-17",
-          "days": 2,
-          "reason": "Sick",
-          "approvedBy": "Admin",
-          "status": "Pending",
           "phone": "01720151612",
           "name": "Estiak Ahmed"
         },
@@ -60,7 +48,21 @@
           "days": 2,
           "reason": "yjhj",
           "approvedBy": "Admin",
-          "status": "Pending",
+          "status": "Approved",
+          "phone": "01720151612",
+          "name": "Estiak Ahmed"
+        }
+      ],
+      "2025-04-21": [
+        {
+          "id": "0cd48105-39b9-4da1-990a-0f895938c1a3",
+          "leaveType": "Casual",
+          "from": "2025-04-26",
+          "to": "2025-04-28",
+          "days": 3,
+          "reason": "Gurte jabo",
+          "approvedBy": "Admin",
+          "status": "Rejected",
           "phone": "01720151612",
           "name": "Estiak Ahmed"
         }
@@ -79,6 +81,22 @@
           "status": "Approved",
           "phone": "01925161412",
           "name": "Mymensingh Markaz Admin"
+        }
+      ]
+    },
+    "adnan@gmail.com": {
+      "2025-04-21": [
+        {
+          "id": "24ef5779-4df1-47c8-a278-d0b0f2915c6e",
+          "leaveType": "Paternity",
+          "from": "2025-04-26",
+          "to": "2025-04-30",
+          "days": 5,
+          "reason": "Leave Type পিতৃত্বকালীন ছুটি",
+          "approvedBy": "Admin",
+          "status": "Approved",
+          "phone": "01720151616",
+          "name": "Adnan"
         }
       ]
     }

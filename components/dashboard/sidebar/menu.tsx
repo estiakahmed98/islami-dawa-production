@@ -189,7 +189,7 @@ const SidebarMenu = () => {
   ];
 
   return (
-    <nav className="grow space-y-2 overflow-y-auto p-6">
+    <nav className="grow space-y-2 overflow-y-auto p-6 font-tiro">
       {!isMobile && (
         <div className="mb-6">
           <Image
