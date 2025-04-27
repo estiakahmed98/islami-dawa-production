@@ -1,29 +1,25 @@
-"use client"; //Juwel
+"use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import type React from "react";
+import { useState, useEffect, useMemo } from "react";
 import fileDownload from "js-file-download";
 import { useSession } from "@/lib/auth-client";
 import DOMPurify from "dompurify";
-import "@fontsource/noto-sans-bengali"; // Import Bangla font
-// const html2pdf = dynamic(() => import("html2pdf.js"), { ssr: false });
+import "@fontsource/noto-sans-bengali";
+import { EditRequestModal } from "./edit-request-modal";
+import { createEditRequest, getEditRequestsByEmail } from "@/lib/edit-requests";
 
 interface AmoliTableProps {
   userData: any;
 }
 
-const isDateEditable = (
-  day: number,
-  selectedMonth: number,
-  selectedYear: number
-) => {
-  const currentDate = new Date();
-  const checkDate = new Date(selectedYear, selectedMonth, day);
-
-  const diffTime = currentDate.getTime() - checkDate.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-  return diffDays <= 1 && diffDays >= 0; // today and yesterday only
-};
+interface EditRequestStatus {
+  [date: string]: {
+    status: "pending" | "approved" | "rejected";
+    id?: string;
+    editedOnce?: boolean; // Track if data has been edited once
+  };
+}
 
 const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   const { data: session } = useSession();
@@ -43,6 +39,13 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   const [editPopup, setEditPopup] = useState<{ day: number; data: any } | null>(
     null
   );
+  const [editRequestModal, setEditRequestModal] = useState<{
+    day: number;
+  } | null>(null);
+  const [editRequestStatuses, setEditRequestStatuses] =
+    useState<EditRequestStatus>({});
+  const [tableData, setTableData] = useState<any>({});
+
   const months = [
     "January",
     "February",
@@ -65,8 +68,43 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     );
   }, [selectedMonth, selectedYear]);
 
+  // Check if a date is in the future
+  const isFutureDate = (day: number): boolean => {
+    const today = new Date();
+    const selectedDate = new Date(selectedYear, selectedMonth, day);
+    return selectedDate > today;
+  };
+
+  useEffect(() => {
+    const fetchEditRequestStatuses = async () => {
+      if (!userEmail) return;
+
+      try {
+        const requests = await getEditRequestsByEmail(userEmail);
+        const statuses: EditRequestStatus = {};
+
+        requests.forEach((request) => {
+          statuses[request.date] = {
+            status: request.status,
+            id: request.id,
+            editedOnce: request.editedOnce || false, // Track if it's been edited
+          };
+        });
+
+        setEditRequestStatuses(statuses);
+      } catch (error) {
+        console.error("Error fetching edit request statuses:", error);
+      }
+    };
+
+    fetchEditRequestStatuses();
+  }, [userEmail, selectedMonth, selectedYear]);
+
   useEffect(() => {
     if (!userData || !userData.records || !userEmail) return;
+
+    // Store the original data for reference and updates
+    setTableData(userData.records[userEmail] || {});
 
     const labels = userData.labelMap;
     const transposed = Object.keys(labels).map((label) => {
@@ -116,28 +154,80 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     };
 
     monthDays.forEach((day) => {
-      if (isDateEditable(day, selectedMonth, selectedYear)) {
+      const date = `${selectedYear}-${(selectedMonth + 1)
+        .toString()
+        .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+
+      const requestStatus = editRequestStatuses[date]?.status;
+      const editedOnce = editRequestStatuses[date]?.editedOnce;
+      const isFuture = isFutureDate(day);
+
+      if (isFuture) {
+        // Disabled button for future dates
         editRow[day] = (
           <button
-            className="text-sm bg-blue-500 text-white py-1 px-3 rounded"
-            onClick={() =>
-              setEditPopup({
-                day,
-                data: transposed.slice(0, -2).map((row) => row[day]),
-              })
-            }
+            className="text-sm bg-gray-300 text-white py-1 px-3 rounded cursor-not-allowed opacity-50"
+            disabled
+            title="Cannot request edit for future dates"
+          >
+            Unavailable
+          </button>
+        );
+      } else if (requestStatus === "approved" && !editedOnce) {
+        // Green button for approved requests - allows editing once
+        editRow[day] = (
+          <button
+            className="text-sm bg-green-500 text-white py-1 px-3 rounded"
+            onClick={() => handleEditClick(day, transposed)}
           >
             Edit
           </button>
         );
+      } else if (requestStatus === "approved" && editedOnce) {
+        editRow[day] = (
+          <button
+            className="text-sm bg-gray-400 text-white py-1 px-3 rounded cursor-not-allowed"
+            disabled
+            title="Already edited once"
+          >
+            Edited
+          </button>
+        );
+      } else if (requestStatus === "pending") {
+        editRow[day] = (
+          <button
+            className="text-sm bg-yellow-500 text-white py-1 px-3 rounded cursor-not-allowed"
+            disabled
+          >
+            Pending
+          </button>
+        );
+      } else if (requestStatus === "rejected") {
+        // Gray button for rejected requests - allows new request
+        editRow[day] = (
+          <button
+            className="text-sm bg-gray-500 text-white py-1 px-3 rounded"
+            onClick={() => setEditRequestModal({ day })}
+          >
+            Rejected
+          </button>
+        );
       } else {
-        editRow[day] = <span className="text-gray-400">Locked 🔒</span>;
+        // Red button for new requests
+        editRow[day] = (
+          <button
+            className="text-sm bg-red-500 text-white py-1 px-3 rounded"
+            onClick={() => setEditRequestModal({ day })}
+          >
+            Request Edit
+          </button>
+        );
       }
     });
 
     transposed.push(editRow);
     setTransposedData(transposed);
-  }, [selectedMonth, selectedYear, userData, userEmail]);
+  }, [selectedMonth, selectedYear, userData, userEmail, editRequestStatuses]);
 
   const filteredData = useMemo(() => {
     return transposedData.filter((row) => {
@@ -193,7 +283,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     const filteredData = transposedData.filter((row) => row.label !== "মতামত");
     const filteredData2 = filteredData.filter((row) => row.label !== "Edit");
 
-    let tableHTML = `
+    const tableHTML = `
       <html>
         <head>
           <meta charset="UTF-8">
@@ -333,20 +423,135 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     }
   };
 
-  const handleSaveEdit = (day: number, updatedData: any) => {
-    if (!isDateEditable(day, selectedMonth, selectedYear)) {
-      alert("You can only edit data from today and the previous two days");
+  // Handle edit button click - only for approved requests
+  const handleEditClick = (day: number, transposedData: any[]) => {
+    const date = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+
+    // Check if data has already been edited once
+    if (editRequestStatuses[date]?.editedOnce) {
+      alert("You can only edit data once after approval");
       return;
     }
 
-    const newData = [...transposedData];
-    updatedData.forEach((value: any, index: number) => {
-      if (newData[index]) {
-        newData[index][day] = value;
+    // Extract data for editing (excluding the last two rows - motamot and edit)
+    const dataToEdit = transposedData.slice(0, -2).map((row) => row[day]);
+    setEditPopup({ day, data: dataToEdit });
+  };
+
+  // Update this function to handle saving edits and marking as edited
+  const handleSaveEdit = async (day: number, updatedData: any) => {
+    const date = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+
+    // Check if edit is allowed (has approved status and not edited before)
+    if (editRequestStatuses[date]?.status !== "approved") {
+      alert("You can only edit data after your request has been approved");
+      return;
+    }
+
+    if (editRequestStatuses[date]?.editedOnce) {
+      alert("You can only edit data once after approval");
+      return;
+    }
+
+    try {
+      // Update the data in our state
+      const newData = [...transposedData];
+      const updatedTableData = { ...tableData };
+
+      // Create an updated record for this date if it doesn't exist
+      if (!updatedTableData[date]) {
+        updatedTableData[date] = {};
       }
-    });
-    setTransposedData(newData);
-    setEditPopup(null);
+
+      // Update each field in the table data
+      userData.labelMap &&
+        Object.keys(userData.labelMap).forEach((label, index) => {
+          if (index < updatedData.length) {
+            // Update the transposed data for the UI
+            if (newData[index]) {
+              newData[index][day] = updatedData[index];
+            }
+
+            // Update the actual data source
+            updatedTableData[date][label] = updatedData[index];
+          }
+        });
+
+      // Here you would typically make an API call to update the backend
+      // For example: await updateTableData(userEmail, date, updatedTableData[date]);
+
+      // Update the UI data
+      setTransposedData(newData);
+      setTableData(updatedTableData);
+
+      // Mark this date as edited once
+      setEditRequestStatuses((prev) => ({
+        ...prev,
+        [date]: {
+          ...prev[date],
+          editedOnce: true,
+        },
+      }));
+
+      // Also update this status in the backend
+      // For example: await updateEditRequestStatus(editRequestStatuses[date].id, { editedOnce: true });
+
+      setEditPopup(null);
+      alert("Data updated successfully. You cannot edit this date again.");
+    } catch (error) {
+      console.error("Error saving edit:", error);
+      alert("Failed to save edits. Please try again.");
+    }
+  };
+
+  const handleEditRequest = async (day: number, reason: string) => {
+    if (!userEmail || !user) return;
+
+    // Check if the day is in the future
+    if (isFutureDate(day)) {
+      alert("You cannot request edits for future dates");
+      return;
+    }
+
+    const date = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+
+    try {
+      const newRequest = await createEditRequest({
+        email: userEmail,
+        name: user.name || "",
+        phone: user.phone || "",
+        date,
+        reason,
+        location: {
+          division: user.division || "",
+          district: user.district || "",
+          upazila: user.upazila || "",
+          union: user.union || "",
+        },
+        role: user.role || "",
+        status: "pending",
+        editedOnce: false, // Initialize as not edited
+        createdAt: new Date().toISOString(),
+      });
+
+      // Update local state to show pending status
+      setEditRequestStatuses((prev) => ({
+        ...prev,
+        [date]: {
+          status: "pending",
+          id: newRequest.id,
+          editedOnce: false,
+        },
+      }));
+
+      alert(
+        "Edit request submitted successfully. Please wait for admin approval."
+      );
+      setEditRequestModal(null);
+    } catch (error) {
+      console.error("Failed to create edit request:", error);
+      alert("Failed to submit edit request. Please try again.");
+    }
   };
 
   return (
@@ -358,7 +563,9 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           <div className="relative">
             <select
               value={selectedMonth}
-              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+              onChange={(e) =>
+                setSelectedMonth(Number.parseInt(e.target.value))
+              }
               className="w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
             >
               {months.map((month, index) => (
@@ -373,7 +580,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           <div className="relative">
             <select
               value={selectedYear}
-              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              onChange={(e) => setSelectedYear(Number.parseInt(e.target.value))}
               className="w-24 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
             >
               {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
@@ -451,6 +658,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           </div>
         </div>
       )}
+
       {editPopup && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex justify-center items-center z-50">
           <div className="bg-white p-10 rounded-xl shadow-lg max-w-[85vw] lg:w-[50vw] max-h-[80vh] relative overflow-y-auto">
@@ -463,6 +671,9 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
             <h3 className="text-lg font-bold mb-4">
               Edit Data for Day: {editPopup.day}
             </h3>
+            <p className="text-amber-600 mb-4">
+              Note: You can only edit this data once after approval.
+            </p>
             {editPopup.data.map((value: any, index: number) => (
               <div key={index} className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">
@@ -496,6 +707,14 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {editRequestModal && (
+        <EditRequestModal
+          day={editRequestModal.day}
+          onSubmit={(reason) => handleEditRequest(editRequestModal.day, reason)}
+          onCancel={() => setEditRequestModal(null)}
+        />
       )}
     </div>
   );

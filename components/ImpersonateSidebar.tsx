@@ -15,6 +15,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import MuiTreeView from "./MuiTreeView";
 import { useSession } from "@/lib/auth-client";
+import { FiEdit3 } from "react-icons/fi";
 // import dynamic from "next/dynamic";
 // const MuiTreeView = dynamic(() => import("@/components/MuiTreeView"), {
 //   ssr: false,
@@ -63,26 +64,13 @@ const ImpersonateSidebar: React.FC = () => {
       href: "/admin/users",
       icon: <MdPeople className="size-6" />,
       label: "দায়ী দেখুন",
-      roles: [
-        "centraladmin",
-        "divisionadmin",
-        "districtadmin",
-        "areaadmin",
-        "upozilaadmin",
-        "user",
-      ],
+      roles: ["centraladmin"],
     },
     {
       href: "/admin/notification",
       icon: <FcAcceptDatabase className="size-6" />,
       label: "ছুটির বিষয়",
-      roles: [
-        "centraladmin",
-        "divisionadmin",
-        "districtadmin",
-        "areaadmin",
-        "upozilaadmin",
-      ],
+      roles: ["centraladmin"],
     },
     {
       href: "/admin/RealTree",
@@ -95,6 +83,12 @@ const ImpersonateSidebar: React.FC = () => {
         "areaadmin",
         "upozilaadmin",
       ],
+    },
+    {
+      href: "/admin/edit-request",
+      icon: <FiEdit3 className="size-5" />,
+      label: "এডিট রিকোয়েস্ট",
+      roles: ["centraladmin"],
     },
   ];
 
