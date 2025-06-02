@@ -66,6 +66,20 @@
           "phone": "01720151612",
           "name": "Estiak Ahmed"
         }
+      ],
+      "2025-06-02": [
+        {
+          "id": "c5e7eeef-1afb-43f9-b9f7-2d397e454b42",
+          "leaveType": "Sick",
+          "from": "2025-06-01",
+          "to": "2025-06-01",
+          "days": 1,
+          "reason": "Sick",
+          "approvedBy": "Admin",
+          "status": "Approved",
+          "phone": "01720151612",
+          "name": "Estiak Ahmed"
+        }
       ]
     },
     "mm2@gmail.com": {
