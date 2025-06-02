@@ -34,3 +34,5 @@ export const validationSchema = Yup.object().shape({
     "Jumar Mojlish Field is required"
   ),
 });
+
+type dataType = Yup.InferType<typeof validationSchema>;
