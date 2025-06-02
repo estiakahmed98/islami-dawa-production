@@ -170,7 +170,7 @@ const AdminLeaveManagement: React.FC = () => {
         header.style.paddingBottom = "15px";
 
         const title = document.createElement("h1");
-        title.textContent = "Leave Summary Report";
+        title.textContent = "ছুটি সম্পর্কিত তথ্য";
         title.style.color = "#2d3748";
         title.style.margin = "0";
         title.style.fontSize = "28px";
@@ -199,8 +199,8 @@ const AdminLeaveManagement: React.FC = () => {
 
         meta.innerHTML = `
           <div style="display:flex;justify-content:space-between">
-            <p style="margin:5px 0;font-size:14px;"><strong>Generated on:</strong> ${currentDate}</p>
-            <p style="margin:5px 0;font-size:14px;"><strong>Total Employees:</strong> ${userSummaries.length}</p>
+            <p style="margin:5px 0;font-size:14px;"><strong>ডাউনলোডের তারিখ ও সময়:</strong> ${currentDate}</p>
+            <p style="margin:5px 0;font-size:14px;"><strong>মোট দাঁয়ী:</strong> ${userSummaries.length}</p>
           </div>
         `;
         container.appendChild(meta);

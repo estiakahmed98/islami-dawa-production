@@ -39,8 +39,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const body = await req.json();
     const { email, assistants, userInfo, ...data } = body as FormData;
 
-    console.log("Received data:", body);
-
     // Basic validation
     if (!email || Object.keys(data).length === 0) {
       return new NextResponse("Email and data are required", { status: 400 });
@@ -127,7 +125,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    console.log("Data saved under date:", currentDate);
     return new NextResponse(
       JSON.stringify(userDayeData.records[email][currentDate]),
       {
@@ -170,127 +167,3 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return new NextResponse("Failed to fetch user data", { status: 500 });
   }
 }
-
-//---------------------------------Database------------------------------------------------------//
-
-// import { type NextRequest, NextResponse } from "next/server";
-// import { db } from "@/lib/db";
-
-// export async function POST(req: NextRequest): Promise<NextResponse> {
-//   try {
-//     // Verify request has body
-//     if (!req.body) {
-//       return NextResponse.json(
-//         { error: "Request body is required" },
-//         { status: 400 }
-//       );
-//     }
-
-//     const body = await req.json();
-
-//     // Validate required fields
-//     const requiredFields = ["email", "sohojogiDayeToiri"];
-//     const missingFields = requiredFields.filter((field) => !body[field]);
-
-//     if (missingFields.length > 0) {
-//       return NextResponse.json(
-//         { error: `Missing required fields: ${missingFields.join(", ")}` },
-//         { status: 400 }
-//       );
-//     }
-
-//     const {
-//       email,
-//       assistants = [],
-//       editorContent = "",
-//       sohojogiDayeToiri,
-//     } = body;
-
-//     // Validate assistant data if present
-//     if (assistants.length > 0) {
-//       const invalidAssistants = assistants.some(
-//         (a: any) => !a.name || !a.phone || !a.address
-//       );
-
-//       if (invalidAssistants) {
-//         return NextResponse.json(
-//           { error: "All assistants must have name, phone, and address" },
-//           { status: 400 }
-//         );
-//       }
-//     }
-
-//     const currentDate = new Date().toISOString().split("T")[0];
-
-//     // Check for existing submission
-//     const existingSubmission = await db.dayeeBishoy.findUnique({
-//       where: {
-//         email_date: {
-//           email,
-//           date: currentDate,
-//         },
-//       },
-//     });
-
-//     if (existingSubmission) {
-//       return NextResponse.json(
-//         { error: "You have already submitted today" },
-//         { status: 400 }
-//       );
-//     }
-
-//     // Create the record with transaction
-//     const result = await db.$transaction(async (tx) => {
-//       const dayeeBishoyRecord = await tx.dayeeBishoy.create({
-//         data: {
-//           email,
-//           date: currentDate,
-//           editorContent,
-//           sohojogiDayeToiri: Number(sohojogiDayeToiri) || 0,
-//         },
-//       });
-
-//       if (assistants.length > 0) {
-//         await tx.assistantDaee.createMany({
-//           data: assistants.map((assistant: any) => ({
-//             name: assistant.name,
-//             phone: assistant.phone,
-//             address: assistant.address,
-//             description: assistant.description || "",
-//             date: currentDate,
-//             mainDaeeEmail: email,
-//             division: body.userInfo?.division || "",
-//             district: body.userInfo?.district || "",
-//             upazila: body.userInfo?.upazila || "",
-//             union: body.userInfo?.union || "",
-//             dayeeBishoyId: dayeeBishoyRecord.id,
-//           })),
-//         });
-//       }
-
-//       return dayeeBishoyRecord;
-//     });
-
-//     return NextResponse.json(
-//       {
-//         success: true,
-//         data: {
-//           id: result.id,
-//           date: result.date,
-//           assistantCount: assistants.length,
-//         },
-//       },
-//       { status: 201 }
-//     );
-//   } catch (error: any) {
-//     console.error("Database error:", error);
-//     return NextResponse.json(
-//       {
-//         error: "Failed to save data",
-//         details:
-//           process.env.NODE_ENV === "development" ? error.message : undefined,
-//       },
-//       { status: 500 }
-//     );
-//   }
-// }

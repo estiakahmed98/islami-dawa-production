@@ -84,8 +84,6 @@ const SoforBishoyForm: React.FC = () => {
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
-          // console.log(values);
-          // return;
           if (isSubmittedToday) {
             toast.error("You have already submitted today.");
             setSubmitting(false);
@@ -108,8 +106,6 @@ const SoforBishoyForm: React.FC = () => {
                 "Content-Type": "application/json",
               },
             });
-            console.log(response);
-
             if (response.ok) {
               toast.success("Form submission successful!");
               resetForm();

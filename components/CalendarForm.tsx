@@ -161,7 +161,6 @@ const CalendarEventForm = ({
 
         if (!response.ok) throw new Error("Failed to create event");
         const data = await response.json();
-        console.log("Event created:", data);
       }
 
       onSubmitSuccess?.();

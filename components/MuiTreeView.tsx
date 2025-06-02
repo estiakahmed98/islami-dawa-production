@@ -52,8 +52,6 @@ const MuiTreeView: React.FC = () => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
 
-  console.log("Logged-in User:", userEmail);
-
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -146,7 +144,6 @@ const MuiTreeView: React.FC = () => {
       event.stopPropagation();
       const selectedUser = users.find((user) => user.id === nodeId);
       if (selectedUser) {
-        console.log("Selected User:", selectedUser);
         setSelectedUser(selectedUser.email);
         router.push("/admin");
       }

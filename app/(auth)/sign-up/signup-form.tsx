@@ -50,7 +50,6 @@ const SignupForm = () => {
   });
 
   const onSubmit = async (values) => {
-    console.log(values);
     await signUp.email(
       {
         name: values.name,

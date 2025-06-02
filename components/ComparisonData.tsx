@@ -94,8 +94,6 @@ const ComparisonDataComponent: React.FC = () => {
   const [to, setTo] = useState("");
   const [comparisonData, setComparisonData] = useState<any[]>([]);
 
-  console.log("Compare Email", emailList);
-
   useEffect(() => {
     const fetchUsers = async () => {
       try {

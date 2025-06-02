@@ -387,7 +387,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
 
     try {
       const html2pdf = await getHtml2Pdf(); // Load library dynamically
-      console.log("html2pdf Loaded:", html2pdf); // Debugging
 
       if (typeof html2pdf !== "function") {
         console.error("html2pdf is not a function, received:", html2pdf);

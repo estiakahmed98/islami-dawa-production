@@ -24,27 +24,12 @@ export async function POST(req: NextRequest) {
     const oAuthClient = await getAuthenticatedClient(req);
     const { calendarId = "primary", event } = await req.json();
 
-    console.log("Received event:", event); // Log the event data to check
-
     if (!event?.title || !event?.start || !event?.end) {
       return NextResponse.json(
         { error: "Invalid event data." },
         { status: 400 }
       );
     }
-
-    // Ensure attendees is an array of objects with 'email' field
-    // const attendees = event.attendees && event.attendees.length > 0
-    //   ? event.attendees.map((email: string) => email ) // Ensure it's in the correct format
-    //   : [];
-
-    // if (attendees.length === 0) {
-    //   return NextResponse.json({ error: "Missing attendee email." }, { status: 400 });
-    // }
-
-    console.log("Formatted attendees in backend:", event.attendees);
-    // Log attendees to check
-
     const calendar = google.calendar({ version: "v3", auth: oAuthClient });
     const response = await calendar.events.insert({
       calendarId,
@@ -62,8 +47,6 @@ export async function POST(req: NextRequest) {
         },
       },
     });
-
-    console.log("Event created:", response.data);
     return NextResponse.json(response.data);
   } catch (error) {
     console.error("Create Event Error:", error);
@@ -135,15 +118,6 @@ export async function PUT(req: NextRequest) {
         end: { dateTime: new Date(event.end).toISOString(), timeZone: "UTC" },
         attendees: event.attendees,
       },
-      // requestBody: {
-      //   summary: event.title,
-      //   description: event.description || "",
-      //   start: {
-      //     dateTime: new Date(event.start).toISOString(),
-      //     timeZone: "UTC",
-      //   },
-      //   end: { dateTime: new Date(event.end).toISOString(), timeZone: "UTC" },
-      // },
     });
 
     return NextResponse.json(response.data);

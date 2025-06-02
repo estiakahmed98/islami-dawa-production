@@ -28,7 +28,6 @@
 
 //     console.log("✅ User seeding was successful!");
 //   } else {
-//     console.log("✅ Users already exist. Skipping seeding.");
 //   }
 // }
 

@@ -17,8 +17,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const body = await req.json();
     const { email, ...data } = body as UserDineFeraData & { email: string };
 
-    console.log("Received data:", body);
-
     // Basic validation
     if (!email || Object.keys(data).length === 0) {
       return new NextResponse("Email and data are required", { status: 400 });
@@ -86,7 +84,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     )};`;
     fs.writeFileSync(userDataPath, updatedFileContent, "utf-8");
 
-    console.log("Data saved under date:", currentDate);
     return NextResponse.json(
       {
         message: "Submission successful",

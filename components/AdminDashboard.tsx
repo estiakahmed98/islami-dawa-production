@@ -243,10 +243,7 @@ const AdminDashboard: React.FC = () => {
     }
   }, [selectedUser, users, userEmail]);
 
-  console.log("Email List:", emailList);
-
   const filteredAmoliData = filterChartAndTallyData(userAmoliData);
-  console.log("Filtered Amoli Data:", filteredAmoliData);
 
   return (
     <div className="space-y-4">

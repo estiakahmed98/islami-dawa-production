@@ -39,7 +39,6 @@ const TallyAdmin: React.FC<TallyAdminProps> = ({
 
       // Skip this email if no data exists for it
       if (!userRecords) {
-        console.warn(`No data found for email: ${email}`);
         return; // Skip to the next email
       }
 

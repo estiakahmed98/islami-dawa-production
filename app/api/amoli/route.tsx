@@ -65,8 +65,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const body = await req.json();
     const { email, ...data } = body as UserAmoliData & { email: string };
 
-    console.log("Received data:", body);
-
     // Basic validation
     if (!email || Object.keys(data).length === 0) {
       return NextResponse.json(
@@ -100,7 +98,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Write the updated data back to the TypeScript file
     writeTsFile(userDataPath, userAmoliData);
 
-    console.log("Data saved under date:", currentDate);
     return NextResponse.json(
       {
         message: "Submission successful",

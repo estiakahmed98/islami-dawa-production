@@ -156,9 +156,6 @@ export default function GoogleCalendar() {
             start: eventData.start,
             end: eventData.end,
             attendees: eventData.attendees,
-            // attendees: eventData.attendees.split(",").map((email: string) => ({
-            //   email: email.trim(),
-            // })),
           },
         }),
       });
