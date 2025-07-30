@@ -39,7 +39,7 @@ const SignupForm = () => {
       name: "",
       email: "",
       password: "",
-      role: "centraladmin",
+      role: "",
       division: "Dhaka",
       district: "Dhaka",
       area: "Dhanmondi",
@@ -49,27 +49,27 @@ const SignupForm = () => {
     },
   });
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values: any) => {
     await signUp.email(
       {
         name: values.name,
         password: values.password,
         email: values.email,
-        role: "centraladmin",
-        division: "Dhaka",
-        district: "Dhaka",
-        area: "Dhanmondi",
-        upazila: "Dhaka",
-        union: "Dhaka",
-        phone: "01736486851",
+        role: values.role,
+        division: values.division,
+        district: values.district,
+        area: values.area,
+        upazila: values.upazila,
+        union: values.union,
+        phone: values.phone,
       },
       {
         onRequest: () => {
           setFormError("");
-          toast.loading;
+          toast.loading("Signing up...");
         },
         onSuccess: () => {
-          toast.success("Login Successful");
+          toast.success("Sign up successful!");
           router.push("/admin");
         },
         onError: (ctx) => {
@@ -98,6 +98,19 @@ const SignupForm = () => {
                     <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter your name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter centraladmin" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
