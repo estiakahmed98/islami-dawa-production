@@ -682,6 +682,7 @@ export default function UsersTable() {
                       className="w-full p-2 border rounded-md"
                       required
                     >
+                      <option value="centraladmin">Central Admin</option>
                       <option value="divisionadmin">Division Admin</option>
                       <option value="districtadmin">District Admin</option>
                       <option value="markaz">

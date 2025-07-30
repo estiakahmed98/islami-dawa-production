@@ -40,7 +40,7 @@ const Register = () => {
   });
 
   const roleHierarchy = {
-    centraladmin: ["divisionadmin", "markazadmin", "daye"],
+    centraladmin: ["centraladmin", "divisionadmin", "markazadmin", "daye"],
     divisionadmin: ["markazadmin", "daye"],
     markazadmin: ["daye"],
   };
@@ -50,6 +50,17 @@ const Register = () => {
 
   const roleOptions = useMemo(() => {
     if (!loggedInUserRole) return [];
+
+    // If current user is centraladmin, show all roles including centraladmin
+    if (loggedInUserRole === 'centraladmin') {
+      return [
+        { value: 'centraladmin', title: getRoleTitle('centraladmin') },
+        { value: 'divisionadmin', title: getRoleTitle('divisionadmin') },
+        { value: 'markazadmin', title: getRoleTitle('markazadmin') },
+        { value: 'daye', title: getRoleTitle('daye') },
+      ];
+    }
+
     return (
       roleHierarchy[loggedInUserRole as keyof typeof roleHierarchy]?.map(
         (r) => ({
@@ -62,6 +73,7 @@ const Register = () => {
 
   function getRoleTitle(role: string) {
     const roleTitles: Record<string, string> = {
+      superadmin: "সুপার এডমিন",
       centraladmin: "কেন্দ্রীয় এডমিন",
       divisionadmin: "বিভাগীয় এডমিন",
       markazadmin: "মার্কায এডমিন",
@@ -147,13 +159,13 @@ const Register = () => {
   );
 
   const { role } = formData;
+  const hideDivision = role === "centraladmin";
   const hideDistrict = role === "divisionadmin";
   const hideUpazila = role === "divisionadmin" || role === "districtadmin";
   const hideUnion =
     role === "divisionadmin" ||
     role === "districtadmin" ||
     role === "upozilaadmin";
-  const hideMarkaz = hideUnion || role === "unionadmin";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -229,14 +241,14 @@ const Register = () => {
             options={roleOptions}
             required
           />
-          <SelectField
+          {!hideDivision && <SelectField
             label="Division"
             name="divisionId"
             value={formData.divisionId}
             onChange={handleChange}
             options={divisions}
             required
-          />
+          />}
           {!hideDistrict && (
             <SelectField
               label="District"
@@ -271,7 +283,7 @@ const Register = () => {
             />
           )}
 
-          <SelectField
+          {!hideDivision && <SelectField
             label="Markaz"
             name="markaz"
             value={formData.markaz}
@@ -281,7 +293,7 @@ const Register = () => {
               title: name,
             }))}
             required
-          />
+          />}
 
           <InputField
             label="Mobile Number"
