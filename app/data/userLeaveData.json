@@ -113,6 +113,22 @@
           "name": "Adnan"
         }
       ]
+    },
+    "mdmonirulzm57@gmail.com": {
+      "2025-08-03": [
+        {
+          "id": "3946782f-ff8c-43a9-a45a-40224191d071",
+          "leaveType": "Sick",
+          "from": "2025-08-02",
+          "to": "2025-08-05",
+          "days": 4,
+          "reason": "Osustho Chilo ",
+          "approvedBy": "Admin",
+          "status": "Approved",
+          "phone": "01720151612",
+          "name": "Monirul Islam"
+        }
+      ]
     }
   }
 }

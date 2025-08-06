@@ -2048,6 +2048,12 @@ export const userDayeData = {
         "sohojogiDayeToiri": "10",
         "editorContent": ""
       }
+    },
+    "mdmonirulzm57@gmail.com": {
+      "2025-08-03": {
+        "sohojogiDayeToiri": "2",
+        "editorContent": "<p><br></p>"
+      }
     }
   }
 };

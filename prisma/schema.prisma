@@ -31,6 +31,20 @@ model users {
   sessions      sessions[]
   accounts      accounts[]
   CalendarEvent CalendarEvent[]
+  
+  // Relations with new data models
+  amoliData        AmoliMuhasaba[]
+  dawatiBisoyData  DawatiBisoyRecord[]
+  dawatiMojlishData DawatiMojlishRecord[]
+  jamatBisoyData   JamatBisoyRecord[]
+  dineFeraData     DineFeraRecord[]
+  soforBisoyData   SoforBisoyRecord[]
+  talimBisoyData   TalimBisoyRecord[]
+  dayeRecords      DayeeBishoyRecord[]
+  moktobBisoyData  MoktobBisoyRecord[]
+  leaveRequests    LeaveRequest[]
+  tasks            Task[]
+  editRequests     EditRequest[]
 }
 
 model sessions {
@@ -90,169 +104,277 @@ model verifications {
   updatedAt  DateTime?
 }
 
-model MasterTableDawa {
-  id                         Int     @id @default(autoincrement())
-  fullName                   String
-  role                       String
-  division                   String
-  district                   String
-  upazila                    String
-  tunion                     String
-  markaz                     String
-  phoneNumber                String
-  email                      String  @unique
-  password                   String
-  tahajjud                   String?
-  ayat                       String?
-  zikir                      String?
-  ishraq                     String?
-  jamat                      String?
-  sirat                      String?
-  Dua                        String?
-  ilm                        String?
-  tasbih                     String?
-  dayeeAmol                  String?
-  amoliSura                  String?
-  ayamroja                   String?
-  hijbulBahar                String?
-  nonMuslimDawat             Int?
-  murtadDawat                Int?
-  alemderSatheyMojlish       Int?
-  publicSatheyMojlish        Int?
-  nonMuslimSaptahikGasht     Int?
-  dawatterGuruttoMojlish     Int?
-  mojlisheOnshogrohon        Int?
-  prosikkhonKormoshalaAyojon Int?
-  prosikkhonOnshogrohon      Int?
-  jummahAlochona             Int?
-  dhormoSova                 Int?
-  mashwaraPoint              Int?
-  jamatBerHoise              Int?
-  jamatSathi                 Int?
-  madrasaVisit               Int?
-  moktobVisit                Int?
-  schoolCollegeVisit         Int?
-  sohojogiDayeToiri          Int?
-  nonMuslimMuslimHoise       Int?
-  murtadIslamFireche         Int?
-  notunMoktobChalu           Int?
-  totalMoktob                Int?
-  totalStudent               Int?
-  obhibhabokConference       Int?
-  moktoThekeMadrasaAdmission Int?
-  notunBoyoskoShikkha        Int?
-  totalBoyoskoShikkha        Int?
-  boyoskoShikkhaOnshogrohon  Int?
-  newMuslimeDinerFikir       Int?
-  mohilaTalim                Int?
-  mohilaOnshogrohon          Int?
+// ============== AMOLI MUHASABA ==============
+model AmoliMuhasaba {
+  id          String   @id @default(cuid())
+  userId      String
+  user        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime
+  tahajjud    Int?     // Number value for tahajjud prayers
+  surah       String?  // Surah name for tilawat
+  ayat        String?  // Number of ayats read (can be range like "10-20")
+  zikir       String?  // Morning/evening zikir status
+  ishraq      String?  // Ishraq-Awwabin-Chasht prayers
+  jamat       Int?     // Number of prayers in jamat
+  sirat       String?  // Sirat book reading
+  Dua         String?  // Dua Anas ibn Malik
+  ilm         String?  // Islamic knowledge book reading
+  tasbih      String?  // Three tasbih (morning-evening)
+  dayeeAmol   String?  // Daee's practical book reading
+  amoliSura   String?  // Daily practical surah reading
+  ayamroja    String?  // Ayame Beej fasting
+  hijbulBahar String?  // Daily Hijbul Bahar reading
+  percentage  String?  // Overall percentage
+  editorContent String? @db.Text // Rich text content for opinions/notes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
 }
 
-model DayeeBishoy {
-  id                Int             @id @default(autoincrement())
-  email             String
-  date              String
-  editorContent     String
-  sohojogiDayeToiri Int
-  assistants        AssistantDaee[]
+// ============== DAWATI BISOY ==============
+model DawatiBisoyRecord {
+  id                     String   @id @default(cuid())
+  userId                 String
+  user                   users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date                   DateTime
+  nonMuslimDawat         Int      @default(0)
+  murtadDawat            Int      @default(0)
+  alemderSatheyMojlish   Int      @default(0)
+  publicSatheyMojlish    Int      @default(0)
+  nonMuslimSaptahikGasht Int      @default(0)
+  editorContent          String?  @db.Text
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
-  @@unique([email, date], name: "email_date")
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+}
+
+// ============== DAWATI MOJLISH ==============
+model DawatiMojlishRecord {
+  id                         String   @id @default(cuid())
+  userId                     String
+  user                       users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date                       DateTime
+  dawatterGuruttoMojlish     Int      @default(0)
+  mojlisheOnshogrohon        Int      @default(0)
+  prosikkhonKormoshalaAyojon Int      @default(0)
+  prosikkhonOnshogrohon      Int      @default(0)
+  jummahAlochona             Int      @default(0)
+  dhormoSova                 Int      @default(0)
+  mashwaraPoint              Int      @default(0)
+  editorContent              String?  @db.Text
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+}
+
+// ============== JAMAT BISOY ==============
+model JamatBisoyRecord {
+  id            String   @id @default(cuid())
+  userId        String
+  user          users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date          DateTime
+  jamatBerHoise Int      @default(0)
+  jamatSathi    Int      @default(0)
+  editorContent String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+}
+
+// ============== DINE FERA ==============
+model DineFeraRecord {
+  id                   String   @id @default(cuid())
+  userId               String
+  user                 users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date                 DateTime
+  nonMuslimMuslimHoise Int      @default(0)
+  murtadIslamFireche   Int      @default(0)
+  editorContent        String?  @db.Text
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+}
+
+// ============== SOFOR BISOY ==============
+model SoforBisoyRecord {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date               DateTime
+  madrasaVisit       Int      @default(0)
+  moktobVisit        Int      @default(0)
+  schoolCollegeVisit Int      @default(0)
+  editorContent      String?  @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+}
+
+// ============== TALIM BISOY ==============
+model TalimBisoyRecord {
+  id                String   @id @default(cuid())
+  userId            String
+  user              users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date              DateTime
+  mohilaTalim       Int      @default(0)
+  mohilaOnshogrohon Int      @default(0)
+  editorContent     String?  @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+}
+
+// ============== DAYEE BISOY ==============
+model DayeeBishoyRecord {
+  id                String          @id @default(cuid())
+  userId            String
+  user              users           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date              DateTime
+  sohojogiDayeToiri Int             @default(0)
+  editorContent     String?         @db.Text
+  assistants        AssistantDaee[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
 }
 
 model AssistantDaee {
-  id            Int         @id @default(autoincrement())
-  name          String
-  phone         String
-  address       String
-  description   String?
-  date          String
-  mainDaeeEmail String
-  division      String
-  district      String
-  upazila       String
-  union         String
-  dayeeBishoy   DayeeBishoy @relation(fields: [dayeeBishoyId], references: [id], onDelete: Cascade)
-  dayeeBishoyId Int
+  id                  String            @id @default(cuid())
+  name                String
+  phone               String
+  address             String
+  email               String?
+  description         String?
+  division            String
+  district            String
+  upazila             String
+  union               String
+  dayeeBishoyRecord   DayeeBishoyRecord @relation(fields: [dayeeBishoyId], references: [id], onDelete: Cascade)
+  dayeeBishoyId       String
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 
-  @@index([mainDaeeEmail])
+  @@index([dayeeBishoyId])
 }
 
-model AmoliMuhasabaData {
-  id          Int    @id @default(autoincrement())
-  tahajjud    String
-  ayat        String
-  zikir       String
-  ishraq      String
-  jamat       String
-  sirat       String
-  Dua         String
-  ilm         String
-  tasbih      String
-  dayeeAmol   String
-  amoliSura   String
-  ayamroja    String
-  hijbulBahar String
+// ============== MOKTOB BISOY ==============
+model MoktobBisoyRecord {
+  id                         String   @id @default(cuid())
+  userId                     String
+  user                       users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date                       DateTime
+  notunMoktobChalu           Int      @default(0) // MoktobChalu
+  totalMoktob                Int      @default(0) // NewMoktob
+  totalStudent               Int      @default(0) // TotalStudent
+  obhibhabokConference       Int      @default(0) // GurdianMeeting
+  moktoThekeMadrasaAdmission Int      @default(0) // MoktobAdmit/MadrasahAdmit
+  notunBoyoskoShikkha        Int      @default(0) // Sikkha
+  totalBoyoskoShikkha        Int      @default(0) // TotalSikkha
+  boyoskoShikkhaOnshogrohon  Int      @default(0) // TotalAgeSikkha
+  newMuslimeDinerFikir       Int      @default(0) // NewMuslim
+  editorContent              String?  @db.Text
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
 }
 
-model DawatiBisoy {
-  id                     Int @id @default(autoincrement())
-  nonMuslimDawat         Int
-  murtadDawat            Int
-  alemderSatheyMojlish   Int
-  publicSatheyMojlish    Int
-  nonMuslimSaptahikGasht Int
+// ============== LEAVE MANAGEMENT ==============
+model LeaveRequest {
+  id          String   @id @default(cuid())
+  userId      String
+  user        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leaveType   String   // Casual, Sick, Maternity, etc.
+  fromDate    DateTime
+  toDate      DateTime
+  days        Int
+  reason      String   @db.Text
+  approvedBy  String?
+  status      String   @default("pending") // pending, approved, rejected
+  phone       String?
+  name        String?
+  requestDate DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([requestDate])
 }
 
-model DawatiMojlish {
-  id                         Int @id @default(autoincrement())
-  dawatterGuruttoMojlish     Int
-  mojlisheOnshogrohon        Int
-  prosikkhonKormoshalaAyojon Int
-  prosikkhonOnshogrohon      Int
-  jummahAlochona             Int
-  dhormoSova                 Int
-  mashwaraPoint              Int
+// ============== TASK MANAGEMENT ==============
+model Task {
+  id          String   @id @default(cuid())
+  userId      String
+  user        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?  @db.Text
+  date        DateTime
+  time        String?
+  visibility  String   @default("private") // private, public
+  division    String?
+  district    String?
+  upazila     String?
+  union       String?
+  creatorRole String?
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([date])
+  @@index([visibility])
+  @@index([division, district, upazila, union])
 }
 
-model JamatBisoy {
-  id            Int @id @default(autoincrement())
-  jamatBerHoise Int
-  jamatSathi    Int
-}
+// ============== EDIT REQUEST MANAGEMENT ==============
+model EditRequest {
+  id        String   @id @default(cuid())
+  userId    String
+  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email     String
+  name      String
+  phone     String
+  date      DateTime // The date for which edit is requested
+  reason    String   @db.Text
+  division  String
+  district  String
+  upazila   String
+  union     String
+  role      String
+  status    String   @default("pending") // pending, approved, rejected, completed
+  editedOnce Boolean @default(false) // Track if data has been edited once after approval
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-model SoforBisoy {
-  id                 Int @id @default(autoincrement())
-  madrasaVisit       Int
-  moktobVisit        Int
-  schoolCollegeVisit Int
-}
-
-model DayeBisoy {
-  id                Int @id @default(autoincrement())
-  sohojogiDayeToiri Int
-}
-
-model DinerDikeFireche {
-  id                   Int @id @default(autoincrement())
-  nonMuslimMuslimHoise Int
-  murtadIslamFireche   Int
-}
-
-model MoktobBisoy {
-  id                         Int @id @default(autoincrement())
-  notunMoktobChalu           Int
-  totalMoktob                Int
-  totalStudent               Int
-  obhibhabokConference       Int
-  moktoThekeMadrasaAdmission Int
-  notunBoyoskoShikkha        Int
-  totalBoyoskoShikkha        Int
-  boyoskoShikkhaOnshogrohon  Int
-  newMuslimeDinerFikir       Int
-}
-
-model TalimBisoy {
-  id                Int @id @default(autoincrement())
-  mohilaTalim       Int
-  mohilaOnshogrohon Int
+  @@index([userId])
+  @@index([email])
+  @@index([status])
+  @@index([date])
 }

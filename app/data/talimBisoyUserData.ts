@@ -2433,6 +2433,13 @@ export const userTalimBisoyData = {
         "TalimOngshoGrohon": 10,
         "editorContent": ""
       }
+    },
+    "mdmonirulzm57@gmail.com": {
+      "2025-08-03": {
+        "mohilaTalim": 12,
+        "TalimOngshoGrohon": 155,
+        "editorContent": "<p><br></p>"
+      }
     }
   }
 };
