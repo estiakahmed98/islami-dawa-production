@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import fileDownload from "js-file-download";
 import { useSession } from "@/lib/auth-client";
 import DOMPurify from "dompurify";
@@ -11,54 +10,43 @@ import { createEditRequest, getEditRequestsByEmail } from "@/lib/edit-requests";
 
 interface AmoliTableProps {
   userData: any;
+  selectedMonth: number;
+  selectedYear: number;
+  onMonthChange: (month: number) => void;
+  onYearChange: (year: number) => void;
 }
 
 interface EditRequestStatus {
   [date: string]: {
     status: "pending" | "approved" | "rejected";
     id?: string;
-    editedOnce?: boolean; // Track if data has been edited once
+    editedOnce?: boolean;
   };
 }
 
-const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
+const UniversalTableShow: React.FC<AmoliTableProps> = ({ 
+  userData, 
+  selectedMonth, 
+  selectedYear,
+  onMonthChange,
+  onYearChange
+}) => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
   const user = session?.user || null;
 
-  const [selectedMonth, setSelectedMonth] = useState<number>(
-    new Date().getMonth()
-  );
-  const [selectedYear, setSelectedYear] = useState<number>(
-    new Date().getFullYear()
-  );
   const [transposedData, setTransposedData] = useState<any[]>([]);
   const [motamotPopup, setMotamotPopup] = useState<string | null>(null);
   const [filterLabel, setFilterLabel] = useState<string>("");
   const [filterValue, setFilterValue] = useState<string>("");
-  const [editPopup, setEditPopup] = useState<{ day: number; data: any } | null>(
-    null
-  );
-  const [editRequestModal, setEditRequestModal] = useState<{
-    day: number;
-  } | null>(null);
-  const [editRequestStatuses, setEditRequestStatuses] =
-    useState<EditRequestStatus>({});
+  const [editPopup, setEditPopup] = useState<{ day: number; data: any } | null>(null);
+  const [editRequestModal, setEditRequestModal] = useState<{ day: number } | null>(null);
+  const [editRequestStatuses, setEditRequestStatuses] = useState<EditRequestStatus>({});
   const [tableData, setTableData] = useState<any>({});
 
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
   ];
 
   const monthDays = useMemo(() => {
@@ -68,7 +56,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     );
   }, [selectedMonth, selectedYear]);
 
-  // Check if a date is in the future
   const isFutureDate = (day: number): boolean => {
     const today = new Date();
     const selectedDate = new Date(selectedYear, selectedMonth, day);
@@ -87,7 +74,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           statuses[request.date] = {
             status: request.status,
             id: request.id,
-            editedOnce: request.editedOnce || false, // Track if it's been edited
+            editedOnce: request.editedOnce || false,
           };
         });
 
@@ -103,7 +90,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   useEffect(() => {
     if (!userData || !userData.records || !userEmail) return;
 
-    // Store the original data for reference and updates
     setTableData(userData.records[userEmail] || {});
 
     const labels = userData.labelMap;
@@ -116,10 +102,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
         const date = `${selectedYear}-${(selectedMonth + 1)
           .toString()
           .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-        const visitData =
-          userData.records[userEmail]?.[date]?.[label] ||
-          userData.records[userEmail]?.[date]?.[`${label}s`] ||
-          "- -";
+        const visitData = userData.records[userEmail]?.[date]?.[label] || "- -";
         row[day] = visitData;
       });
 
@@ -133,8 +116,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       const date = `${selectedYear}-${(selectedMonth + 1)
         .toString()
         .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-      const motamotHtml =
-        userData.records[userEmail]?.[date]?.editorContent || "- -";
+      const motamotHtml = userData.records[userEmail]?.[date]?.editorContent || "- -";
       const motamotText = DOMPurify.sanitize(motamotHtml, {
         ALLOWED_TAGS: [],
       });
@@ -163,7 +145,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       const isFuture = isFutureDate(day);
 
       if (isFuture) {
-        // Disabled button for future dates
         editRow[day] = (
           <button
             className="text-sm bg-gray-300 text-white py-1 px-3 rounded cursor-not-allowed opacity-50"
@@ -174,7 +155,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           </button>
         );
       } else if (requestStatus === "approved" && !editedOnce) {
-        // Green button for approved requests - allows editing once
         editRow[day] = (
           <button
             className="text-sm bg-green-500 text-white py-1 px-3 rounded"
@@ -203,7 +183,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           </button>
         );
       } else if (requestStatus === "rejected") {
-        // Gray button for rejected requests - allows new request
         editRow[day] = (
           <button
             className="text-sm bg-gray-500 text-white py-1 px-3 rounded"
@@ -213,7 +192,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           </button>
         );
       } else {
-        // Red button for new requests
         editRow[day] = (
           <button
             className="text-sm bg-red-500 text-white py-1 px-3 rounded"
@@ -243,45 +221,34 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
 
   const convertToCSV = () => {
     const BOM = "\uFEFF";
-
-    const headers = ["${monthName}", ...monthDays.map((day) => `${day}`)];
-
+    const headers = ["Label", ...monthDays.map((day) => `${day}`)];
     const rows = filteredData.map((row) => [
       row.label,
       ...monthDays.map((day) => row[day] || "-"),
     ]);
-
     const csvContent =
       BOM + [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
-
-    const filename = `"report_of" ${session?.user.name}).csv`;
-
+    const filename = `report_of_${session?.user.name}.csv`;
     fileDownload(csvContent, filename);
   };
 
   const getHtml2Pdf = async () => {
     const html2pdfModule = await import("html2pdf.js");
-    return html2pdfModule.default || html2pdfModule; // Ensure correct function access
+    return html2pdfModule.default || html2pdfModule;
   };
 
   const convertToPDF = async () => {
     const monthName = months[selectedMonth];
     const year = selectedYear;
 
-    if (
-      !monthName ||
-      !year ||
-      !userEmail ||
-      !Array.isArray(transposedData) ||
-      !Array.isArray(monthDays)
-    ) {
+    if (!monthName || !year || !userEmail || !Array.isArray(transposedData)) {
       console.error("Invalid data for PDF generation");
       return;
     }
 
-    // Filter out unwanted rows
-    const filteredData = transposedData.filter((row) => row.label !== "মতামত");
-    const filteredData2 = filteredData.filter((row) => row.label !== "Edit");
+    const filteredData = transposedData.filter(
+      (row) => row.label !== "মতামত" && row.label !== "Edit"
+    );
 
     const tableHTML = `
       <html>
@@ -336,7 +303,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
         </head>
         <body>
           <div style="font-size: 14px; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px;">
-            <!-- Left Column -->
             <div style="text-align: left;">
               <span>Name: ${user?.name || "Name"}</span><br>
               <span>Phone: ${user?.phone || "Phone"}</span><br>
@@ -344,13 +310,11 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
               <span>Role: ${user?.role || "Role"}</span>
             </div>
 
-            <!-- Middle Column -->
             <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
               <span>${monthName} ${year} - ${user?.name}</span>
               <span>Markaz: ${user?.markaz || "N/A"}</span>
             </div>
 
-            <!-- Right Column -->
             <div style="text-align: right;">
               <span>Division: ${user?.division || "N/A"}</span><br>
               <span>District: ${user?.district || "N/A"}</span><br>
@@ -363,7 +327,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
             <thead>
               <tr>
                 <th>${monthName}</th>
-                ${filteredData2.map((row) => `<th>${row.label}</th>`).join("")}
+                ${filteredData.map((row) => `<th>${row.label}</th>`).join("")}
               </tr>
             </thead>
             <tbody>
@@ -372,7 +336,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
                   (day) => `
                 <tr>
                   <td class="row-label">${day}</td>
-                  ${filteredData2.map((row) => `<td>${row[day] || "-"}</td>`).join("")}
+                  ${filteredData.map((row) => `<td>${row[day] || "-"}</td>`).join("")}
                 </tr>
               `
                 )
@@ -386,8 +350,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     element.innerHTML = tableHTML;
 
     try {
-      const html2pdf = await getHtml2Pdf(); // Load library dynamically
-
+      const html2pdf = await getHtml2Pdf();
       if (typeof html2pdf !== "function") {
         console.error("html2pdf is not a function, received:", html2pdf);
         return;
@@ -396,7 +359,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       html2pdf()
         .set({
           margin: 10,
-          filename: ` ${user?.name} ${monthName}_${year} .pdf`,
+          filename: `${user?.name} ${monthName}_${year}.pdf`,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2 },
           jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
@@ -422,26 +385,21 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     }
   };
 
-  // Handle edit button click - only for approved requests
   const handleEditClick = (day: number, transposedData: any[]) => {
     const date = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
 
-    // Check if data has already been edited once
     if (editRequestStatuses[date]?.editedOnce) {
       alert("You can only edit data once after approval");
       return;
     }
 
-    // Extract data for editing (excluding the last two rows - motamot and edit)
     const dataToEdit = transposedData.slice(0, -2).map((row) => row[day]);
     setEditPopup({ day, data: dataToEdit });
   };
 
-  // Update this function to handle saving edits and marking as edited
   const handleSaveEdit = async (day: number, updatedData: any) => {
     const date = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
 
-    // Check if edit is allowed (has approved status and not edited before)
     if (editRequestStatuses[date]?.status !== "approved") {
       alert("You can only edit data after your request has been approved");
       return;
@@ -453,37 +411,25 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
     }
 
     try {
-      // Update the data in our state
       const newData = [...transposedData];
       const updatedTableData = { ...tableData };
 
-      // Create an updated record for this date if it doesn't exist
       if (!updatedTableData[date]) {
         updatedTableData[date] = {};
       }
 
-      // Update each field in the table data
-      userData.labelMap &&
-        Object.keys(userData.labelMap).forEach((label, index) => {
-          if (index < updatedData.length) {
-            // Update the transposed data for the UI
-            if (newData[index]) {
-              newData[index][day] = updatedData[index];
-            }
-
-            // Update the actual data source
-            updatedTableData[date][label] = updatedData[index];
+      Object.keys(userData.labelMap).forEach((label, index) => {
+        if (index < updatedData.length) {
+          if (newData[index]) {
+            newData[index][day] = updatedData[index];
           }
-        });
+          updatedTableData[date][label] = updatedData[index];
+        }
+      });
 
-      // Here you would typically make an API call to update the backend
-      // For example: await updateTableData(userEmail, date, updatedTableData[date]);
-
-      // Update the UI data
       setTransposedData(newData);
       setTableData(updatedTableData);
 
-      // Mark this date as edited once
       setEditRequestStatuses((prev) => ({
         ...prev,
         [date]: {
@@ -491,9 +437,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           editedOnce: true,
         },
       }));
-
-      // Also update this status in the backend
-      // For example: await updateEditRequestStatus(editRequestStatuses[date].id, { editedOnce: true });
 
       setEditPopup(null);
       alert("Data updated successfully. You cannot edit this date again.");
@@ -506,7 +449,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   const handleEditRequest = async (day: number, reason: string) => {
     if (!userEmail || !user) return;
 
-    // Check if the day is in the future
     if (isFutureDate(day)) {
       alert("You cannot request edits for future dates");
       return;
@@ -529,11 +471,10 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
         },
         role: user.role || "",
         status: "pending",
-        editedOnce: false, // Initialize as not edited
+        editedOnce: false,
         createdAt: new Date().toISOString(),
       });
 
-      // Update local state to show pending status
       setEditRequestStatuses((prev) => ({
         ...prev,
         [date]: {
@@ -543,9 +484,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
         },
       }));
 
-      alert(
-        "Edit request submitted successfully. Please wait for admin approval."
-      );
+      alert("Edit request submitted successfully. Please wait for admin approval.");
       setEditRequestModal(null);
     } catch (error) {
       console.error("Failed to create edit request:", error);
@@ -556,15 +495,11 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   return (
     <div>
       <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl">
-        {/* Dropdown Selectors */}
         <div className="flex items-center gap-4">
-          {/* Month Selection Dropdown */}
           <div className="relative">
             <select
               value={selectedMonth}
-              onChange={(e) =>
-                setSelectedMonth(Number.parseInt(e.target.value))
-              }
+              onChange={(e) => onMonthChange(Number.parseInt(e.target.value))}
               className="w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
             >
               {months.map((month, index) => (
@@ -575,11 +510,10 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
             </select>
           </div>
 
-          {/* Year Selection Dropdown */}
           <div className="relative">
             <select
               value={selectedYear}
-              onChange={(e) => setSelectedYear(Number.parseInt(e.target.value))}
+              onChange={(e) => onYearChange(Number.parseInt(e.target.value))}
               className="w-24 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
             >
               {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
@@ -591,7 +525,6 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex gap-4 mt-4 lg:mt-0">
           <button
             className="flex items-center gap-2 text-xs lg:text-lg px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-md transition duration-300"
@@ -600,7 +533,7 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
             📥 Download CSV
           </button>
           <button
-            className="flex items-center gap-2 text-xs  lg:text-lg px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition duration-300"
+            className="flex items-center gap-2 text-xs lg:text-lg px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition duration-300"
             onClick={convertToPDF}
           >
             📄 Download PDF
@@ -719,4 +652,4 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
   );
 };
 
-export default AmoliTableShow;
+export default UniversalTableShow;

@@ -35,6 +35,7 @@ interface AmoliMuhasabaFormValues {
   ayamroja: string;
   hijbulBahar: string;
   ayat: string;
+  editorContent: string; // ✅ Added
 }
 
 const initialFormData: AmoliMuhasabaFormValues = {
@@ -52,6 +53,7 @@ const initialFormData: AmoliMuhasabaFormValues = {
   ayamroja: "",
   hijbulBahar: "",
   ayat: "", // New field
+  editorContent: "", // ✅ Added
 };
 
 const validationSchema = Yup.object({
@@ -72,6 +74,7 @@ const validationSchema = Yup.object({
   ayamroja: Yup.string().optional(),
   hijbulBahar: Yup.string().optional(),
   ayat: Yup.string().optional(),
+  editorContent: Yup.string().optional(), // ✅ Added
 });
 
 const AmoliMuhasabaForm = () => {
@@ -620,14 +623,14 @@ const AmoliMuhasabaForm = () => {
               </label>
               <Field
                 as="textarea"
-                name="showCause"
+                name="editorContent"
                 placeholder="আপনার কারণ লিখুন..."
                 rows={6}
                 className="w-full rounded border border-gray-300 px-4 py-2"
                 disabled={isSubmittedToday}
               />
               <ErrorMessage
-                name="showCause"
+                name="editorContent"
                 component="div"
                 className="text-red-500 mt-1"
               />
