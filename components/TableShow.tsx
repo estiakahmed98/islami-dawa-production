@@ -463,15 +463,15 @@ const AmoliTableShow: React.FC<AmoliTableProps> = ({ userData }) => {
       }
 
       // Update each field in the table data
-      userData.labelMap &&
+      userData?.labelMap &&
         Object.keys(userData.labelMap).forEach((label, index) => {
           if (index < updatedData.length) {
-            // Update the transposed data for the UI
+            // Update UI Table data
             if (newData[index]) {
               newData[index][day] = updatedData[index];
             }
 
-            // Update the actual data source
+            // Update actual data source
             updatedTableData[date][label] = updatedData[index];
           }
         });
