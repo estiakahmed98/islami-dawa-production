@@ -1,3 +1,4 @@
+//api/amoli
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -128,32 +129,5 @@ export async function PUT(req: NextRequest) {
   } catch (error) {
     console.error("PUT error:", error);
     return NextResponse.json({ error: "Update failed. Possibly not submitted yet." }, { status: 500 });
-  }
-}
-
-export async function DELETE(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const email = searchParams.get("email");
-
-    if (!email) return NextResponse.json({ error: "Email is required." }, { status: 400 });
-
-    const user = await prisma.users.findUnique({ where: { email } });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-
-    const today = new Date();
-    await prisma.amoliMuhasaba.delete({
-      where: {
-        userId_date: {
-          userId: user.id,
-          date: today,
-        },
-      },
-    });
-
-    return NextResponse.json({ message: "Record deleted successfully." }, { status: 200 });
-  } catch (error) {
-    console.error("DELETE error:", error);
-    return NextResponse.json({ error: "Delete failed. Possibly not submitted yet." }, { status: 500 });
   }
 }

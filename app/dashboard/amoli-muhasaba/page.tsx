@@ -1,3 +1,4 @@
+//app/dashboard/amoli-muhasaba/page.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -69,7 +70,6 @@ const AmoliMuhasabaPage: React.FC = () => {
             ayamroja: "আয়ামে বীজ",
             hijbulBahar: "হিজবুল বাহার",
             percentage: "শতকরা হার",
-            editorContent: "মন্তব্য / নোট"
           }
         };
         

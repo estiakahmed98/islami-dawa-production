@@ -1,55 +1,13 @@
-//Juwel
-
-import fs from "fs";
-import path from "path";
+// /app/api/moktob/route.ts
+import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-// Path to the TypeScript data file
-const userDataPath = path.join(
-  process.cwd(),
-  "app/data/moktobBisoyUserData.ts"
-);
-
-// Type definitions
-interface MoktobBisoyData {
-  [key: string]: string | number;
-}
-
-// Helper function to parse the TypeScript data file
-const parseTsFile = (
-  filePath: string
-): { records: Record<string, Record<string, MoktobBisoyData>> } => {
-  if (!fs.existsSync(filePath)) {
-    return { records: {} };
-  }
-  const fileContent = fs.readFileSync(filePath, "utf-8");
-  const startIndex = fileContent.indexOf("{");
-  const endIndex = fileContent.lastIndexOf("}");
-  if (startIndex !== -1 && endIndex !== -1) {
-    const jsonString = fileContent.slice(startIndex, endIndex + 1);
-    return eval(`(${jsonString})`);
-  }
-  return { records: {} };
-};
-
-// Helper function to write data back to the TypeScript file
-const writeTsFile = (
-  filePath: string,
-  data: { records: Record<string, Record<string, MoktobBisoyData>> }
-) => {
-  const tsContent = `export const userMoktobBisoyData = ${JSON.stringify(
-    data,
-    null,
-    2
-  )};`;
-  fs.writeFileSync(filePath, tsContent, "utf-8");
-};
-
+// POST: Submit MoktobBisoy Data
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
-    const { email, ...data } = body as MoktobBisoyData & { email: string };
-    // Basic validation
+    const { email, editorContent = "", ...data } = body;
+
     if (!email || Object.keys(data).length === 0) {
       return NextResponse.json(
         { error: "Email and data are required." },
@@ -57,71 +15,77 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Get the current date in YYYY-MM-DD format
-    const currentDate = new Date().toISOString().split("T")[0];
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-    // Parse the existing data from the TypeScript file
-    const userMoktobBisoyData = parseTsFile(userDataPath);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize date
 
-    // Check if the user has already submitted data today
-    if (userMoktobBisoyData.records[email]?.[currentDate]) {
+    const existing = await prisma.moktobBisoyRecord.findUnique({
+      where: {
+        userId_date: {
+          userId: user.id,
+          date: today,
+        },
+      },
+    });
+
+    if (existing) {
       return NextResponse.json(
         { error: "You have already submitted data today." },
         { status: 400 }
       );
     }
 
-    // Ensure data is organized by email
-    if (!userMoktobBisoyData.records[email]) {
-      userMoktobBisoyData.records[email] = {};
-    }
-
-    // Add form data under the current date
-    userMoktobBisoyData.records[email][currentDate] = data;
-
-    // Write the updated data back to the TypeScript file
-    writeTsFile(userDataPath, userMoktobBisoyData);
+    const created = await prisma.moktobBisoyRecord.create({
+      data: {
+        userId: user.id,
+        date: today,
+        editorContent,
+        ...data,
+      },
+    });
 
     return NextResponse.json(
-      {
-        message: "Data saved successfully.",
-        data: userMoktobBisoyData.records[email][currentDate],
-      },
+      { message: "Submitted successfully", data: created },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error saving data:", error);
+    console.error("POST /api/moktob error:", error);
     return NextResponse.json(
-      { error: "Failed to save user data." },
+      { error: "Failed to submit data", details: error },
       { status: 500 }
     );
   }
 }
 
+// GET: Return all Moktob records for the user
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(req.url);
     const email = searchParams.get("email");
-    const today = new Date().toISOString().split("T")[0];
 
     if (!email) {
-      return NextResponse.json(
-        { error: "Email is required." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    // Parse the existing data from the TypeScript file
-    const userMoktobBisoyData = parseTsFile(userDataPath);
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-    // Check if the user has submitted data today
-    const isSubmittedToday = !!userMoktobBisoyData.records[email]?.[today];
+    const records = await prisma.moktobBisoyRecord.findMany({
+      where: { userId: user.id },
+      orderBy: { date: "asc" },
+    });
 
-    return NextResponse.json({ isSubmittedToday }, { status: 200 });
+    return NextResponse.json({ records }, { status: 200 });
   } catch (error) {
-    console.error("Error checking submission status:", error);
+    console.error("GET /api/moktob error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch submission status." },
+      { error: "Failed to fetch Moktob records", details: error },
       { status: 500 }
     );
   }
