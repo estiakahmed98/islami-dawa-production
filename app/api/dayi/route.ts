@@ -1,169 +1,147 @@
-import fs from "fs";
-import path from "path";
+// app/api/dayi/route.ts
+import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-
-// Path to the user data file
-const userDataPath = path.join(process.cwd(), "app/data/dayiUserData.ts");
-const assistantDataPath = path.join(
-  process.cwd(),
-  "app/data/assistantDaeeData.ts"
-);
-
-// Type definitions
-interface UserDayeData {
-  [key: string]: string | number;
-}
-
-interface AssistantDaee {
-  name: string;
-  phone: string;
-  address: string;
-}
-
-interface FormData {
-  email: string;
-  editorContent?: string;
-  assistants?: AssistantDaee[];
-  userInfo?: {
-    email: string;
-    division: string;
-    district: string;
-    upazila: string;
-    union: string;
-  };
-  [key: string]: string | number | boolean | object | undefined;
-}
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
-    const { email, assistants, userInfo, ...data } = body as FormData;
+    console.log("Received data:", body); // Add logging
+    
+    const {
+      email,
+      sohojogiDayeToiri = 0,
+      editorContent = "",
+      assistants = [],
+      userInfo = {},
+    } = body;
 
-    // Basic validation
-    if (!email || Object.keys(data).length === 0) {
-      return new NextResponse("Email and data are required", { status: 400 });
-    }
-
-    // Get the current date in YYYY-MM-DD format
-    const currentDate = new Date().toISOString().split("T")[0];
-
-    // Check if the data file exists; if not, create it
-    if (!fs.existsSync(userDataPath)) {
-      fs.writeFileSync(
-        userDataPath,
-        `export const userDayeData = { records: {} };`,
-        "utf-8"
-      );
-    }
-
-    // Read the existing data file
-    const fileContent = fs.readFileSync(userDataPath, "utf-8");
-    const userDayeData = eval(
-      `(${fileContent.slice(
-        fileContent.indexOf("{"),
-        fileContent.lastIndexOf("}") + 1
-      )})`
-    );
-
-    // Ensure data is organized by email
-    if (!userDayeData.records[email]) {
-      userDayeData.records[email] = {};
-    }
-
-    // Check if the user has already submitted today
-    if (userDayeData.records[email][currentDate]) {
+    if (!email) {
       return NextResponse.json(
-        { error: "You have already submitted data today." },
+        { error: "Email is required" },
         { status: 400 }
       );
     }
 
-    // Add form data under the current date
-    userDayeData.records[email][currentDate] = { ...data };
-
-    // Write the updated data back to the file
-    fs.writeFileSync(
-      userDataPath,
-      `export const userDayeData = ${JSON.stringify(userDayeData, null, 2)};`,
-      "utf-8"
-    );
-
-    // Save assistant daee data if exists
-    if (assistants && assistants.length > 0 && userInfo) {
-      let assistantDaeeData = { records: {} };
-
-      // Check if assistant data file exists
-      if (fs.existsSync(assistantDataPath)) {
-        const assistantFileContent = fs.readFileSync(
-          assistantDataPath,
-          "utf-8"
-        );
-        assistantDaeeData = eval(
-          `(${assistantFileContent.slice(
-            assistantFileContent.indexOf("{"),
-            assistantFileContent.lastIndexOf("}") + 1
-          )})`
-        );
-      }
-
-      // Add assistant data with user info
-      assistants.forEach((assistant, index) => {
-        const assistantKey = `${email}_${currentDate}_${index}`;
-        assistantDaeeData.records[assistantKey] = {
-          ...assistant,
-          ...userInfo,
-          date: currentDate,
-          mainDaeeEmail: email,
-        };
-      });
-
-      // Write assistant data back to file
-      fs.writeFileSync(
-        assistantDataPath,
-        `export const assistantDaeeData = ${JSON.stringify(assistantDaeeData, null, 2)};`,
-        "utf-8"
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
       );
     }
 
-    return new NextResponse(
-      JSON.stringify(userDayeData.records[email][currentDate]),
-      {
-        status: 201,
-        headers: { "Content-Type": "application/json" },
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    // Check for existing submission
+    const existing = await prisma.dayeeBishoyRecord.findFirst({
+      where: {
+        userId: user.id,
+        date: {
+          gte: new Date(today.setUTCHours(0, 0, 0, 0)),
+          lt: new Date(today.setUTCHours(23, 59, 59, 999)),
+        },
+      },
+    });
+
+    if (existing) {
+      return NextResponse.json(
+        { error: "Already submitted today" },
+        { status: 400 }
+      );
+    }
+
+    // Create record with transaction
+    const result = await prisma.$transaction(async (prisma) => {
+      const newRecord = await prisma.dayeeBishoyRecord.create({
+        data: {
+          userId: user.id,
+          date: today,
+          sohojogiDayeToiri,
+          editorContent,
+        },
+      });
+
+      if (assistants.length > 0) {
+        await prisma.assistantDaee.createMany({
+          data: assistants.map((assistant: any) => ({
+            name: assistant.name,
+            phone: assistant.phone,
+            address: assistant.address,
+            email: assistant.email || null,
+            description: assistant.description || null,
+            division: userInfo.division || "",
+            district: userInfo.district || "",
+            upazila: userInfo.upazila || "",
+            union: userInfo.union || "",
+            dayeeBishoyId: newRecord.id,
+          })),
+        });
       }
+
+      return await prisma.dayeeBishoyRecord.findUnique({
+        where: { id: newRecord.id },
+        include: { assistants: true },
+      });
+    });
+
+    return NextResponse.json(
+      { success: true, data: result },
+      { status: 201 }
     );
+
   } catch (error) {
-    console.error("Error saving data:", error);
-    return new NextResponse("Failed to save user data", { status: 500 });
+    console.error("POST error:", error);
+    return NextResponse.json(
+      { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
   }
 }
 
+// =============== GET ===============
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const { searchParams } = new URL(req.url);
-  const email = searchParams.get("email");
-  const today = new Date().toISOString().split("T")[0];
-
-  if (!email) {
-    return NextResponse.json({ error: "Email is required" }, { status: 400 });
-  }
-
   try {
-    if (!fs.existsSync(userDataPath)) {
-      return NextResponse.json({ isSubmittedToday: false }, { status: 200 });
+    const { searchParams } = new URL(req.url);
+    const email = searchParams.get("email");
+
+    if (!email) {
+      return NextResponse.json({ error: "Email is required." }, { status: 400 });
     }
 
-    const fileContent = fs.readFileSync(userDataPath, "utf-8");
-    const userDayeData = eval(
-      `(${fileContent.slice(
-        fileContent.indexOf("{"),
-        fileContent.lastIndexOf("}") + 1
-      )})`
-    );
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found." }, { status: 404 });
+    }
 
-    const isSubmittedToday = !!userDayeData.records[email]?.[today];
-    return NextResponse.json({ isSubmittedToday }, { status: 200 });
+    const records = await prisma.dayeeBishoyRecord.findMany({
+      where: { userId: user.id },
+      orderBy: { date: "asc" },
+      include: { assistants: true },
+    });
+
+    return NextResponse.json({ records }, { status: 200 });
   } catch (error) {
-    console.error("Error fetching data:", error);
-    return new NextResponse("Failed to fetch user data", { status: 500 });
+    console.error("GET /api/dayi error:", error);
+    let errorMessage = "Failed to fetch records";
+    let errorDetails: string | object = "Unknown error";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails = error.stack || error.message;
+    } else if (typeof error === 'object' && error !== null) {
+      try {
+        errorDetails = JSON.stringify(error);
+      } catch (e) {
+        errorDetails = String(error);
+      }
+    } else {
+      errorDetails = String(error);
+    }
+
+    return NextResponse.json(
+      { error: errorMessage, details: errorDetails },
+      { status: 500 }
+    );
   }
 }

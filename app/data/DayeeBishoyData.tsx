@@ -1,20 +1,17 @@
+// app/data/DayeeBishoyData.ts
 import * as Yup from "yup";
 
-// Define the shape of the initial form data
 export interface DayeeBishoyFormValues {
-  sohojogiDayeToiri: number | "";
-  editorContent: string;
+  sohojogiDayeToiri: number;
 }
 
-// Initial form data
 export const initialFormData: DayeeBishoyFormValues = {
-  sohojogiDayeToiri: "",
-  editorContent: "",
+  sohojogiDayeToiri: 0,
 };
 
-// Validation schema using Yup
-export const validationSchema = Yup.object().shape({
+export const validationSchema = Yup.object({
   sohojogiDayeToiri: Yup.number()
-    .typeError("Sohojogi Dayee Field must be a number")
-    .required("Sohojogi Dayee Field is required"),
+    .min(0, "Value cannot be negative")
+    .integer("Must be a whole number")
+    .required("This field is required"),
 });
