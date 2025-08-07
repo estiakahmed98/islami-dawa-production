@@ -1,4 +1,4 @@
-"use client"; // Updated by Estiak
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Formik, Form } from "formik";
@@ -22,13 +22,21 @@ const MoktobBishoyForm = () => {
 
   useEffect(() => {
     const checkSubmission = async () => {
-      if (!email) return;
+      if (!email) {
+        setLoading(false);
+        return;
+      }
 
       try {
         const res = await fetch(`/api/moktob?email=${email}`);
         if (res.ok) {
           const data = await res.json();
-          setIsSubmittedToday(data.isSubmittedToday);
+          const today = new Date().toDateString();
+          const hasTodaySubmission = data.records.some((record: any) => {
+            const recordDate = new Date(record.date).toDateString();
+            return recordDate === today;
+          });
+          setIsSubmittedToday(hasTodaySubmission);
         } else {
           toast.error("Failed to check today's submission.");
         }
@@ -44,6 +52,11 @@ const MoktobBishoyForm = () => {
   }, [email]);
 
   const handleSubmit = async (values: typeof initialFormData) => {
+    if (isSubmittedToday) {
+      toast.error("You have already submitted today.");
+      return;
+    }
+
     const formData = {
       ...values,
       email,
@@ -79,7 +92,7 @@ const MoktobBishoyForm = () => {
     <div className="w-full mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
-          You already submitted today.
+          You have already submitted today.
         </div>
       )}
       <h2 className="mb-6 text-2xl">মক্তব বিষয়</h2>
@@ -127,6 +140,7 @@ const MoktobBishoyForm = () => {
                 onContentChange={handleContentChange}
                 height="300px"
                 width="100%"
+                disabled={isSubmittedToday}
               />
             </div>
 
