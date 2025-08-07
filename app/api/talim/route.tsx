@@ -1,114 +1,124 @@
-//Faysal Updated by //Juwel
+// Faysal Updated by Juwel
 
-import fs from "fs";
-import path from "path";
 import { NextRequest, NextResponse } from "next/server";
-
-// Path to the user data file
-const userDataPath = path.join(process.cwd(), "app/data/talimBisoyUserData.ts");
-
-// Type definitions
-interface TalimBisoyData {
-  [key: string]: string | number;
-}
+import { prisma } from "@/lib/prisma"; // ✅ Make sure this is your Prisma client file
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
-    const { email, ...data } = body as TalimBisoyData & { email: string };
+    const { email, ...data } = body as {
+      email: string;
+      mohilaTalim?: number;
+      mohilaOnshogrohon?: number;
+      editorContent?: string;
+    };
 
-    // Basic validation
-    if (!email || Object.keys(data).length === 0) {
-      return new NextResponse("Email and data are required", { status: 400 });
+    if (!email) {
+      return new NextResponse("Email is required", { status: 400 });
     }
 
-    // Get the current date in YYYY-MM-DD format
-    const currentDate = new Date().toISOString().split("T")[0];
+    // 🔍 Find user by email
+    const user = await prisma.users.findUnique({
+      where: { email },
+    });
 
-    // Check if the data file exists; if not, create it
-    if (!fs.existsSync(userDataPath)) {
-      fs.writeFileSync(
-        userDataPath,
-        `export const userTalimBisoyData = { records: {} };`,
-        "utf-8"
-      );
+    if (!user) {
+      return new NextResponse("User not found", { status: 404 });
     }
 
-    // Read the existing data file
-    const fileContent = fs.readFileSync(userDataPath, "utf-8");
-    const userTalimBisoyData = eval(
-      `(${fileContent.slice(
-        fileContent.indexOf("{"),
-        fileContent.lastIndexOf("}") + 1
-      )})`
-    );
+    const userId = user.id;
 
-    // Ensure data is organized by email
-    if (!userTalimBisoyData.records[email]) {
-      userTalimBisoyData.records[email] = {};
-    }
+    // 📅 Get today's date (YYYY-MM-DD only)
+    const today = new Date();
+    const todayStart = new Date(today.setHours(0, 0, 0, 0));
+    const todayEnd = new Date(today.setHours(23, 59, 59, 999));
 
-    // Check if the user has already submitted today
-    if (userTalimBisoyData.records[email][currentDate]) {
+    // ❌ Check if already submitted today
+    const existing = await prisma.talimBisoyRecord.findFirst({
+      where: {
+        userId,
+        date: {
+          gte: todayStart,
+          lte: todayEnd,
+        },
+      },
+    });
+
+    if (existing) {
       return NextResponse.json(
         { error: "You have already submitted data today." },
         { status: 400 }
       );
     }
 
-    // Add form data under the current date
-    userTalimBisoyData.records[email][currentDate] = { ...data };
+    // ✅ Create new TalimBisoyRecord
+    const newRecord = await prisma.talimBisoyRecord.create({
+      data: {
+        userId,
+        date: new Date(),
+        mohilaTalim: data.mohilaTalim ?? 0,
+        mohilaOnshogrohon: data.mohilaOnshogrohon ?? 0,
+        editorContent: data.editorContent ?? "",
+      },
+    });
 
-    // Write the updated data back to the file
-    fs.writeFileSync(
-      userDataPath,
-      `export const userTalimBisoyData = ${JSON.stringify(
-        userTalimBisoyData,
-        null,
-        2
-      )};`,
-      "utf-8"
-    );
-
-    return new NextResponse(
-      JSON.stringify(userTalimBisoyData.records[email][currentDate]),
-      {
-        status: 201,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return NextResponse.json(newRecord, {
+      status: 201,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error("Error saving data:", error);
-    return new NextResponse("Failed to save user data", { status: 500 });
+    console.error("Error saving TalimBisoyRecord:", error);
+    return new NextResponse("Failed to save TalimBisoyRecord", { status: 500 });
   }
 }
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const { searchParams } = new URL(req.url);
-  const email = searchParams.get("email");
-  const today = new Date().toISOString().split("T")[0];
-
-  if (!email) {
-    return NextResponse.json({ error: "Email is required" }, { status: 400 });
-  }
-
   try {
-    if (!fs.existsSync(userDataPath)) {
-      return NextResponse.json({ isSubmittedToday: false }, { status: 200 });
+    const { searchParams } = new URL(req.url);
+    const email = searchParams.get("email");
+
+    if (!email) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const fileContent = fs.readFileSync(userDataPath, "utf-8");
-    const userTalimBisoyData = eval(
-      `(${fileContent.slice(
-        fileContent.indexOf("{"),
-        fileContent.lastIndexOf("}") + 1
-      )})`
-    );
+    const user = await prisma.users.findUnique({
+      where: { email },
+    });
 
-    const isSubmittedToday = !!userTalimBisoyData.records[email]?.[today];
-    return NextResponse.json({ isSubmittedToday }, { status: 200 });
+    if (!user) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
+    const userId = user.id;
+
+    const now = new Date();
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date(now);
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const record = await prisma.talimBisoyRecord.findFirst({
+      where: {
+        userId,
+        date: {
+          gte: todayStart,
+          lte: todayEnd,
+        },
+      },
+    });
+
+    const isSubmittedToday = !!record;
+
+    return NextResponse.json(
+      {
+        isSubmittedToday,
+        data: record ?? null, // ✅ send the actual record (null if not found)
+      },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("Error fetching data:", error);
-    return new NextResponse("Failed to fetch user data", { status: 500 });
+    console.error("Error in GET /api/talim:", error);
+    return new NextResponse("Failed to fetch data", { status: 500 });
   }
 }
