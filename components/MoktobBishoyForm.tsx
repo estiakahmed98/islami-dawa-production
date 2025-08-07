@@ -1,14 +1,14 @@
-"use client"; //Faysal Updated by //Estiak
+"use client"; // Updated by Estiak
 
 import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Formik, Form } from "formik";
-import { initialFormData, validationSchema } from "@/app/data/MoktobBishoyData";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
-import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
+import JoditEditorComponent from "./richTextEditor";
 import Loading from "@/app/dashboard/loading";
+import { initialFormData, validationSchema } from "@/app/data/MoktobBishoyData";
 
 const MoktobBishoyForm = () => {
   const router = useRouter();
@@ -18,266 +18,109 @@ const MoktobBishoyForm = () => {
   const [loading, setLoading] = useState(true);
   const [editorContent, setEditorContent] = useState("");
 
-  const handleContentChange = (content: string) => {
-    setEditorContent(content);
-  };
+  const handleContentChange = (content: string) => setEditorContent(content);
 
-  // Check if the user has already submitted today
   useEffect(() => {
-    const checkSubmissionStatus = async () => {
+    const checkSubmission = async () => {
       if (!email) return;
 
       try {
-        const response = await fetch(`/api/moktob?email=${email}`);
-        if (response.ok) {
-          const data = await response.json();
+        const res = await fetch(`/api/moktob?email=${email}`);
+        if (res.ok) {
+          const data = await res.json();
           setIsSubmittedToday(data.isSubmittedToday);
         } else {
-          toast.error("Failed to check submission status.");
+          toast.error("Failed to check today's submission.");
         }
-      } catch (error) {
-        console.error("Error checking submission status:", error);
-        toast.error("Error checking submission status.");
+      } catch (err) {
+        console.error(err);
+        toast.error("Error checking today's submission.");
       } finally {
         setLoading(false);
       }
     };
 
-    checkSubmissionStatus();
+    checkSubmission();
   }, [email]);
 
-  // Handle form submission
   const handleSubmit = async (values: typeof initialFormData) => {
-    const formData = { ...values, email, editorContent };
-
-    if (isSubmittedToday) {
-      toast.error("You have already submitted today. Try again tomorrow.");
-      return;
-    }
+    const formData = {
+      ...values,
+      email,
+      editorContent,
+    };
 
     try {
-      const response = await fetch("/api/moktob", {
+      const res = await fetch("/api/moktob", {
         method: "POST",
         body: JSON.stringify(formData),
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
-      if (response.ok) {
+      if (res.ok) {
+        toast.success("Submitted successfully!");
         setIsSubmittedToday(true);
-        toast.success("Form submitted successfully!");
         router.push("/dashboard");
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.error || "Submission failed. Try again.");
+        const err = await res.json();
+        toast.error(err.error || "Submission failed.");
       }
     } catch (error) {
-      console.error("Error during submission:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      console.error("Submit error:", error);
+      toast.error("Unexpected error during submission.");
     }
   };
 
-  // Render loading state
   if (loading) return <Loading />;
 
   return (
     <div className="w-full mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
-          You already have submitted today.
+          You already submitted today.
         </div>
       )}
       <h2 className="mb-6 text-2xl">মক্তব বিষয়</h2>
+
       <Formik
         initialValues={{ ...initialFormData, editorContent: "" }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ setFieldValue, isSubmitting }) => (
-          <Form>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  এক মাসে নতুন মক্তব চালু হয়েছে
-                </label>
+        {({ isSubmitting }) => (
+          <Form className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {[
+              { name: "notunMoktobChalu", label: "নতুন মক্তব চালু হয়েছে" },
+              { name: "totalMoktob", label: "মোট মক্তব চালু আছে" },
+              { name: "totalStudent", label: "মোট শিক্ষার্থী" },
+              { name: "obhibhabokConference", label: "অভিভাবক সম্মেলন" },
+              { name: "moktoThekeMadrasaAdmission", label: "মাদরাসায় ভর্তি" },
+              { name: "notunBoyoskoShikkha", label: "নতুন বয়স্ক শিক্ষা" },
+              { name: "totalBoyoskoShikkha", label: "মোট বয়স্ক শিক্ষা" },
+              { name: "boyoskoShikkhaOnshogrohon", label: "অংশগ্রহণ সংখ্যা" },
+              { name: "newMuslimeDinerFikir", label: "নব মুসলিমের দীন ফিকির" },
+            ].map((field) => (
+              <div key={field.name}>
+                <label className="mb-2 block text-gray-700">{field.label}</label>
                 <Field
-                  name="MoktobChalu"
+                  name={field.name}
+                  type="number"
                   placeholder="Enter value"
-                  type="number"
                   disabled={isSubmittedToday}
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                  className="w-full rounded border border-gray-300 px-4 py-2 mb-2"
                 />
                 <ErrorMessage
-                  name="MoktobChalu"
+                  name={field.name}
                   component="div"
                   className="text-red-500"
                 />
               </div>
+            ))}
 
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  মক্তব থেকে ছাত্রছাত্রী মাদ্রাসায় ভর্তি হয়েছে
-                </label>
-                <Field
-                  name="MoktobAdmit"
-                  placeholder="Enter Value"
-                  type="number"
-                  disabled={isSubmittedToday}
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                />
-                <ErrorMessage
-                  name="MoktobAdmit"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  নতুন পুরাতন মোট মক্তব চালু আছে
-                </label>
-                <Field
-                  name="NewMoktob"
-                  placeholder="Enter Value"
-                  type="number"
-                  disabled={isSubmittedToday}
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                />
-                <ErrorMessage
-                  name="NewMoktob"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  এই মাসে বয়স্ক কোরআন শিক্ষা চালু হয়েছে
-                </label>
-                <Field
-                  name="Sikkha"
-                  placeholder="Enter Value"
-                  type="number"
-                  disabled={isSubmittedToday}
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                />
-                <ErrorMessage
-                  name="Sikkha"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  মক্তবের মোট ছাত্র-ছাত্রীর সংখ্যা
-                </label>
-                <Field
-                  name="TotalStudent"
-                  placeholder="Enter Value"
-                  type="number"
-                  disabled={isSubmittedToday}
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                />
-                <ErrorMessage
-                  name="TotalStudent"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  নতুন পুরাতন মোট বয়স্ক কোরআন চালু আছে
-                </label>
-                <Field
-                  name="TotalSikkha"
-                  placeholder="Enter Value"
-                  type="number"
-                  disabled={isSubmittedToday}
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                />
-                <ErrorMessage
-                  name="TotalSikkha"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  মক্তবের অভিভাবক সম্মেলন হয়েছে
-                </label>
-                <Field
-                  name="GurdianMeeting"
-                  placeholder="Enter Value"
-                  type="number"
-                  disabled={isSubmittedToday}
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                />
-                <ErrorMessage
-                  name="GurdianMeeting"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  বয়স্ক কোরআন শিক্ষা মোট অংশগ্রহণ করেছে
-                </label>
-                <Field
-                  name="TotalAgeSikkha"
-                  placeholder="Enter Value"
-                  type="number"
-                  disabled={isSubmittedToday}
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                />
-                <ErrorMessage
-                  name="TotalAgeSikkha"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  মক্তব থেকে ছাত্রছাত্রী মাদ্রাসায় ভর্তি হয়েছে
-                </label>
-                <Field
-                  name="MadrasahAdmit"
-                  placeholder="Enter Value"
-                  type="number"
-                  disabled={isSubmittedToday}
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                />
-                <ErrorMessage
-                  name="MadrasahAdmit"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  নব মুসলিমদের দ্বীন শিক্ষার ফিকির করা হয়েছে
-                </label>
-                <Field
-                  name="NewMuslim"
-                  placeholder="Enter Value"
-                  type="number"
-                  disabled={isSubmittedToday}
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                />
-                <ErrorMessage
-                  name="NewMuslim"
-                  component="div"
-                  className="text-red-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <h1 className=" pb-3">মতামত লিখুন</h1>
+            <div className="col-span-full">
+              <label className="block text-gray-700 mb-2">মতামত</label>
               <JoditEditorComponent
                 placeholder="আপনার মতামত লিখুন..."
                 initialValue=""
@@ -287,10 +130,8 @@ const MoktobBishoyForm = () => {
               />
             </div>
 
-            <div className="flex justify-end mt-4">
+            <div className="col-span-full flex justify-end mt-4">
               <Button
-                variant="ghost"
-                size="default"
                 type="submit"
                 disabled={isSubmitting || isSubmittedToday}
               >
