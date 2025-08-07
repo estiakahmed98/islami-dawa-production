@@ -1,47 +1,71 @@
 "use client";
 
-import TalimForm from "@/components/TalimForm";
 import React, { useEffect, useState } from "react";
+import TalimForm from "@/components/TalimForm";
+import UniversalTableShow from "@/components/TableShow";
+import { useSession } from "@/lib/auth-client";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/TabButton";
-import AmoliTableShow from "@/components/TableShow";
-import { useSession } from "@/lib/auth-client"; // BetterAuth client hook
 
 const TalimPage: React.FC = () => {
-  const [userData, setUserData] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
-  const email = session?.user?.email || "";
-  console.log("Session email:", email);
+  const [userData, setUserData] = useState<any>({ records: [] });
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [isSubmittedToday, setIsSubmittedToday] = useState<boolean>(false);
+
+  const userEmail = session?.user?.email;
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (!email) return;
-
-      setLoading(true); // Just in case re-fetching
+    const fetchTalimData = async () => {
+      if (!userEmail) return;
 
       try {
-        const res = await fetch(`/api/talim?email=${email}`);
+        const res = await fetch(`/api/talim?email=${userEmail}`);
         const json = await res.json();
-        console.log("Fetched Talim Data:", json);
+        
+        setIsSubmittedToday(json.isSubmittedToday);
 
-        setUserData(json?.data || []);
+        // If there's data, transform it to match the expected format
+        if (json.data) {
+          const transformedData = {
+            records: {
+              [userEmail]: {
+                [new Date(json.data.date).toISOString().split('T')[0]]: {
+                  mohilaTalim: json.data.mohilaTalim,
+                  mohilaOnshogrohon: json.data.mohilaOnshogrohon,
+                  editorContent: json.data.editorContent
+                }
+              }
+            },
+            labelMap: {
+              mohilaTalim: "মহিলা তালিম",
+              mohilaOnshogrohon: "মহিলা অংশগ্রহণ",
+              editorContent: "মন্তব্য / নোট"
+            }
+          };
+          setUserData(transformedData);
+        } else {
+          setUserData({
+            records: { [userEmail]: {} },
+            labelMap: {
+              mohilaTalim: "মহিলা তালিম",
+              mohilaOnshogrohon: "মহিলা অংশগ্রহণ",
+              editorContent: "মন্তব্য / নোট"
+            }
+          });
+        }
       } catch (error) {
-        console.error("Failed to fetch talim data:", error);
-      } finally {
-        setLoading(false);
+        console.error("Failed to fetch Talim data:", error);
       }
     };
 
-    // Only fetch when session is loaded and email is available
-    if (email) {
-      fetchUserData();
-    }
-  }, [email]); // depend on email/status
+    fetchTalimData();
+  }, [userEmail]);
 
   return (
     <div>
@@ -55,23 +79,22 @@ const TalimPage: React.FC = () => {
 
         <TabsContent value="dataForm">
           <div className="bg-gray-50 lg:rounded lg:shadow">
-            <TalimForm />
+            <TalimForm 
+              isSubmittedToday={isSubmittedToday} 
+              setIsSubmittedToday={setIsSubmittedToday}
+            />
           </div>
         </TabsContent>
 
         <TabsContent value="report">
-          <div className="bg-gray-50 rounded shadow p-2">
-            {loading ? (
-              <p>লোড হচ্ছে...</p>
-            ) : (
-              <>
-                {userData ? (
-                  <AmoliTableShow userData={userData} />
-                ) : (
-                  <p>কোনো তথ্য পাওয়া যায়নি।</p>
-                )}
-              </>
-            )}
+          <div className="bg-gray-50 rounded shadow">
+            <UniversalTableShow 
+              userData={userData}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              onMonthChange={setSelectedMonth}
+              onYearChange={setSelectedYear}
+            />
           </div>
         </TabsContent>
       </Tabs>

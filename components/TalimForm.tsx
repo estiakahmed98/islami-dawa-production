@@ -24,9 +24,12 @@ const TalimForm: React.FC = () => {
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editorContent, setEditorContent] = useState("");
+  const [editorHtml, setEditorHtml] = useState("");
 
-  const handleContentChange = (content: string) => {
-    setEditorContent(content);
+  const handleContentChange = (newContent: string) => {
+     setEditorHtml(newContent); // For rendering if needed
+  const plainText = newContent.replace(/<[^>]*>/g, "").trim();
+  setEditorContent(plainText); // For saving in DB
   };
 
   // Check if the user has already submitted today
@@ -55,33 +58,39 @@ const TalimForm: React.FC = () => {
 
   // Handle form submission
   const handleSubmit = async (values: TalimFormValues) => {
-    const formData = { ...values, email, editorContent };
-
-    if (isSubmittedToday) {
-      toast.error("You have already submitted today. Try again tomorrow.");
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/talim", {
-        method: "POST",
-        body: JSON.stringify(formData),
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (response.ok) {
-        setIsSubmittedToday(true);
-        toast.success("Form submitted successfully!");
-        router.push("/dashboard");
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.error || "Submission failed. Try again.");
-      }
-    } catch (error) {
-      console.error("Error during submission:", error);
-      toast.error("An unexpected error occurred. Please try again.");
-    }
+  const formData = {
+    email,
+    mohilaTalim: Number(values.mohilaTalim),
+    mohilaOnshogrohon: Number(values.TalimOngshoGrohon), // ✅ mapping corrected
+    editorContent,
   };
+
+  if (isSubmittedToday) {
+    toast.error("You have already submitted today. Try again tomorrow.");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/talim", {
+      method: "POST",
+      body: JSON.stringify(formData),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (response.ok) {
+      setIsSubmittedToday(true);
+      toast.success("Form submitted successfully!");
+      router.push("/dashboard");
+    } else {
+      const errorData = await response.json();
+      toast.error(errorData.error || "Submission failed. Try again.");
+    }
+  } catch (error) {
+    console.error("Error during submission:", error);
+    toast.error("An unexpected error occurred. Please try again.");
+  }
+};
+
 
   // Render loading state
   if (loading) return <Loading />;
