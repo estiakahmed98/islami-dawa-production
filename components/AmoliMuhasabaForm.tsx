@@ -1,5 +1,4 @@
-"use client"; //Juwel //Faysal
-
+"use client"; //Estiak
 import { useState, useEffect, ChangeEvent } from "react";
 import { Formik, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -19,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import moment from "moment-hijri";
 import { toast } from "sonner";
+import Loading from "@/app/dashboard/loading"; // Assuming this path is correct
 
 interface AmoliMuhasabaFormValues {
   tahajjud: number;
@@ -35,7 +35,7 @@ interface AmoliMuhasabaFormValues {
   ayamroja: string;
   hijbulBahar: string;
   ayat: string;
-  editorContent: string; // ✅ Added
+  editorContent: string;
 }
 
 const initialFormData: AmoliMuhasabaFormValues = {
@@ -52,8 +52,8 @@ const initialFormData: AmoliMuhasabaFormValues = {
   amoliSura: "",
   ayamroja: "",
   hijbulBahar: "",
-  ayat: "", // New field
-  editorContent: "", // ✅ Added
+  ayat: "",
+  editorContent: "",
 };
 
 const validationSchema = Yup.object({
@@ -74,7 +74,7 @@ const validationSchema = Yup.object({
   ayamroja: Yup.string().optional(),
   hijbulBahar: Yup.string().optional(),
   ayat: Yup.string().optional(),
-  editorContent: Yup.string().optional(), // ✅ Added
+  editorContent: Yup.string().optional(),
 });
 
 const AmoliMuhasabaForm = () => {
@@ -82,6 +82,7 @@ const AmoliMuhasabaForm = () => {
   const { data: session } = useSession();
   const email = session?.user?.email || "";
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
+  const [loading, setLoading] = useState(true); // Added loading state
   const [points, setPoints] = useState({
     tahajjud: 0,
     surah: 0,
@@ -101,7 +102,6 @@ const AmoliMuhasabaForm = () => {
 
   moment.locale("en");
   const hijriDate = moment().format("iD");
-
   const showAyamRojaSection =
     hijriDate === "14" || hijriDate === "15" || hijriDate === "16";
 
@@ -152,9 +152,7 @@ const AmoliMuhasabaForm = () => {
       event.target.type === "number"
         ? parseInt(event.target.value, 10) || 0
         : event.target.value;
-
     setFieldValue(fieldName, value);
-
     const updatedPoints = {
       ...points,
       [fieldName]: calculatePoints(value, fieldName),
@@ -166,23 +164,34 @@ const AmoliMuhasabaForm = () => {
   const maxPoints = showAyamRojaSection ? 70 : 65; // Dynamically set max points
   const percentage = ((totalPoints / maxPoints) * 100).toFixed(2);
 
+  // Consolidated useEffect for checking submission status and managing loading state
   useEffect(() => {
     const checkSubmissionStatus = async () => {
-      if (!email) return;
+      if (!email) {
+        setLoading(false); // If no email, stop loading and assume not submitted
+        return;
+      }
       try {
         const response = await fetch(`/api/amoli?email=${email}`);
         if (response.ok) {
           const data = await response.json();
-          setIsSubmittedToday(data.isSubmittedToday);
+          const records = data.records || [];
+          const today = new Date().toDateString();
+          const hasTodaySubmission = records.some((record: any) => {
+            const recordDate = new Date(record.date).toDateString();
+            return recordDate === today;
+          });
+          setIsSubmittedToday(hasTodaySubmission);
         } else {
           toast.error("Failed to check submission status.");
         }
       } catch (error) {
         console.error("Error checking submission status:", error);
         toast.error("Error checking submission status.");
+      } finally {
+        setLoading(false); // Always set loading to false after check
       }
     };
-
     checkSubmissionStatus();
   }, [email]);
 
@@ -191,17 +200,43 @@ const AmoliMuhasabaForm = () => {
     { setSubmitting }: FormikHelpers<AmoliMuhasabaFormValues>
   ) => {
     if (!email) {
-      alert("User email is not set. Please log in.");
+      toast.error("User email is not set. Please log in.");
       setSubmitting(false);
       return;
     }
 
-    if (isSubmittedToday) {
-      toast.error("You have already submitted today. Try again tomorrow.");
+    // Double-check today's submission before posting
+    try {
+      const res = await fetch(`/api/amoli?email=${email}`);
+      if (res.ok) {
+        const data = await res.json();
+        const records = data.records || [];
+        const today = new Date().toDateString();
+
+        const alreadySubmitted = records.some((record: any) => {
+          const recordDate = new Date(record.date).toDateString();
+          return recordDate === today;
+        });
+
+        if (alreadySubmitted) {
+          toast.error("You have already submitted today. Try again tomorrow.");
+          setIsSubmittedToday(true); // update UI immediately
+          setSubmitting(false);
+          return;
+        }
+      } else {
+        toast.error("Failed to validate existing submissions.");
+        setSubmitting(false);
+        return;
+      }
+    } catch (error) {
+      console.error("Error validating existing records:", error);
+      toast.error("An error occurred while checking for existing submissions.");
       setSubmitting(false);
       return;
     }
 
+    // If passed check, submit form
     const formData = { ...values, email, percentage };
 
     try {
@@ -215,6 +250,7 @@ const AmoliMuhasabaForm = () => {
 
       if (response.ok) {
         toast.success("Submitted successfully!");
+        setIsSubmittedToday(true); // update UI state
         router.push("/dashboard");
       } else {
         toast.error("Form submission failed! Try again.");
@@ -226,6 +262,9 @@ const AmoliMuhasabaForm = () => {
 
     setSubmitting(false);
   };
+
+  // Render loading state
+  if (loading) return <Loading />;
 
   return (
     <div className="mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
@@ -317,7 +356,6 @@ const AmoliMuhasabaForm = () => {
                 />
                 <div className="text-gray-600">Points: {points.surah}</div>
               </div>
-
               <div className="mb-2">
                 <label className="mb-2 block text-gray-700">আয়াত প্রদান</label>
                 <Field
@@ -339,7 +377,6 @@ const AmoliMuhasabaForm = () => {
                 />
                 <div className="text-gray-600">Points: {points.ayat}</div>
               </div>
-
               <div className="mb-2">
                 <label className="mb-2 block text-gray-700">
                   সকাল-সন্ধ্যা দোয়া ও জিকির
@@ -635,7 +672,6 @@ const AmoliMuhasabaForm = () => {
                 className="text-red-500 mt-1"
               />
             </div>
-
             <div className="mt-6 flex items-center justify-between">
               <div className="text-gray-600 text-lg">
                 Total Points:{" "}
