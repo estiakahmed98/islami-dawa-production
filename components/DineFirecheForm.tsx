@@ -1,4 +1,4 @@
-//Faysal Updated by //Estiak
+// Faysal Updated by Estiak — aligned with Prisma/API fields & Dhaka-day check
 
 "use client";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,9 @@ import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
 import Loading from "@/app/dashboard/loading";
 
-// Define form values type
 interface FormValues {
-  omuslimKalemaPoreche: string;
-  murtadDineFireasa: string;
+  omuslimKalemaPoreche: string | number; // maps -> nonMuslimMuslimHoise
+  murtadDineFireasa: string | number;     // maps -> murtadIslamFireche
   editorContent: string;
 }
 
@@ -25,59 +24,98 @@ const DineFirecheForm: React.FC = () => {
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check if the user has already submitted today
+  // Check if the user has already submitted today (server uses Dhaka day)
   useEffect(() => {
-    const checkSubmissionStatus = async () => {
-      const response = await fetch(`/api/dinefera?email=${email}`);
-      if (response.ok) {
-        const data = await response.json();
-        setIsSubmittedToday(data.isSubmittedToday);
-      }
+    if (!email) {
+      setIsSubmittedToday(false);
       setLoading(false);
-    };
-    if (email) checkSubmissionStatus();
+      return;
+    }
+    const ac = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/dinefera?email=${encodeURIComponent(email)}&mode=today`,
+          { cache: "no-store", signal: ac.signal }
+        );
+        if (!res.ok) throw new Error("Failed to check today's status");
+        const json = await res.json();
+        setIsSubmittedToday(!!json.isSubmittedToday);
+      } catch (err: any) {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
+          console.error("Submission status error:", err);
+          toast.error("আজকের সাবমিশন স্ট্যাটাস চেক করা যায়নি।");
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
+    return () => ac.abort();
   }, [email]);
 
-  // Handle form submission
-  const handleSubmit = async (values: FormValues) => {
-    const formData = { ...values, email };
+  const handleSubmit = async (values: FormValues, { setSubmitting }: any) => {
+    if (!email) {
+      toast.error("You are not logged in.");
+      return;
+    }
     if (isSubmittedToday) {
-      toast.error("You Already Submited Today...");
+      toast.error("You already submitted today.");
       return;
     }
 
-    const response = await fetch("/api/dinefera", {
-      method: "POST",
-      body: JSON.stringify(formData),
-      headers: { "Content-Type": "application/json" },
-    });
+    // Map form fields to API/schema fields
+    const payload = {
+      email,
+      nonMuslimMuslimHoise: Number(values.omuslimKalemaPoreche) || 0,
+      murtadIslamFireche: Number(values.murtadDineFireasa) || 0,
+      editorContent: values.editorContent || "",
+    };
 
-    if (response.ok) {
+    try {
+      const res = await fetch("/api/dinefera", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        // 409 from API means already submitted (Dhaka day)
+        const msg = data?.error || "Submission failed. Please try again.";
+        toast.error(msg);
+        return;
+      }
+
+      toast.success("Submitted successfully!");
       setIsSubmittedToday(true);
-      toast.success("Submited Succesfully...");
       router.push("/dashboard");
-    } else {
-      toast.error("You Already Submited Today...");
+    } catch (error) {
+      console.error("Submit error:", error);
+      toast.error("Unexpected error during submission.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Render loading state
   if (loading) return <Loading />;
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-4 lg:p-10 shadow-lg">
       {isSubmittedToday && (
-        <div className="bg-red-50   text-red-500 p-4 rounded-lg mb-8 z-30">
-          You already have submitted today
+        <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
+          You already submitted today.
         </div>
       )}
+
       <h2 className="mb-6 text-2xl">দ্বীনে ফিরে এসেছে</h2>
-      <Formik
-        initialValues={{ ...initialFormData, editorContent: "" }}
+
+      <Formik<FormValues>
+        initialValues={{ ...(initialFormData as any), editorContent: "" }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ setFieldValue }) => (
+        {({ setFieldValue, isSubmitting }) => (
           <Form>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
               <div>
@@ -89,7 +127,7 @@ const DineFirecheForm: React.FC = () => {
                   type="number"
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                 />
                 <ErrorMessage
                   name="omuslimKalemaPoreche"
@@ -97,6 +135,7 @@ const DineFirecheForm: React.FC = () => {
                   className="text-red-500"
                 />
               </div>
+
               <div>
                 <label className="mb-2 block text-gray-700">
                   মুরতাদ কালেমা পড়ে ইসলামে ফিরে এসেছে
@@ -106,7 +145,7 @@ const DineFirecheForm: React.FC = () => {
                   type="number"
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                 />
                 <ErrorMessage
                   name="murtadDineFireasa"
@@ -114,27 +153,28 @@ const DineFirecheForm: React.FC = () => {
                   className="text-red-500"
                 />
               </div>
+
               <div className="lg:col-span-2">
                 <h1 className="pb-3">মতামত লিখুন</h1>
                 <JoditEditorComponent
                   placeholder="আপনার মতামত লিখুন"
                   initialValue=""
-                  onContentChange={(content) =>
-                    setFieldValue("editorContent", content)
-                  }
+                  onContentChange={(content) => setFieldValue("editorContent", content)}
                   height="300px"
                   width="100%"
+                  disabled={isSubmittedToday || isSubmitting}
                 />
               </div>
             </div>
+
             <div className="flex justify-end pt-4">
               <Button
                 variant="ghost"
                 size="default"
                 type="submit"
-                disabled={isSubmittedToday}
+                disabled={isSubmittedToday || isSubmitting}
               >
-                Submit
+                {isSubmitting ? "Submitting..." : "Submit"}
               </Button>
             </div>
           </Form>

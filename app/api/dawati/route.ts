@@ -1,23 +1,28 @@
-// app/api/dawati-bisoy/route.ts
+// app/api/dawati/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-const DHAKA_OFFSET_MS = 6 * 60 * 60 * 1000; // UTC+6, no DST
-
-function dhakaDayBounds(base = new Date()) {
-  const dhakaNow = new Date(base.getTime() + DHAKA_OFFSET_MS);
-  const startDhakaUTC = Date.UTC(
-    dhakaNow.getUTCFullYear(),
-    dhakaNow.getUTCMonth(),
-    dhakaNow.getUTCDate(), 0, 0, 0, 0
-  );
-  const startUTC = new Date(startDhakaUTC - DHAKA_OFFSET_MS);
-  const endUTC = new Date(startUTC.getTime() + 24 * 60 * 60 * 1000); // exclusive
-  return { startUTC, endUTC };
+/** Start/end of a Dhaka (Asia/Dhaka) calendar day for the provided instant */
+function getDhakaDayRange(now = new Date()) {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const [y, m, d] = fmt.format(now).split("-"); // "YYYY-MM-DD"
+  // Dhaka is UTC+06:00 year-round (no DST)
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`); // exclusive
+  return { start, end };
 }
 
-function dhakaDayKey(base = new Date()) {
-  return dhakaDayBounds(base).startUTC; // we store this in `date`
+/** Convert "YYYY-MM-DD" (interpreted in Asia/Dhaka) into [start,end) UTC range */
+function dhakaDayRangeFromISODate(yyyyMmDd: string) {
+  const [y, m, d] = yyyyMmDd.split("-");
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`);
+  return { start, end };
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -42,35 +47,39 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const dayKey = dhakaDayKey();
+    // Enforce one submission per Dhaka calendar day
+    const { start, end } = getDhakaDayRange();
+    const exists = await prisma.dawatiBisoyRecord.findFirst({
+      where: { userId: user.id, date: { gte: start, lt: end } },
+      select: { id: true },
+    });
 
-    try {
-      const created = await prisma.dawatiBisoyRecord.create({
-        data: {
-          userId: user.id,
-          date: dayKey,
-          nonMuslimDawat,
-          murtadDawat,
-          alemderSatheyMojlish,
-          publicSatheyMojlish,
-          nonMuslimSaptahikGasht,
-          editorContent,
-        },
-      });
-
-      return NextResponse.json({ success: true, data: created }, { status: 201 });
-    } catch (err: any) {
-      // Unique constraint (one per user/day)
-      if (err?.code === "P2002" || /unique/i.test(String(err?.message))) {
-        return NextResponse.json(
-          { error: "Already submitted for today (Asia/Dhaka).", code: "ALREADY_SUBMITTED" },
-          { status: 409 }
-        );
-      }
-      throw err;
+    if (exists) {
+      return NextResponse.json(
+        { error: "Already submitted for today (Asia/Dhaka).", code: "ALREADY_SUBMITTED" },
+        { status: 409 }
+      );
     }
+
+    // Save the real submission instant for BOTH createdAt and date
+    const now = new Date();
+    const created = await prisma.dawatiBisoyRecord.create({
+      data: {
+        userId: user.id,
+        createdAt: now,    // mirror
+        date: now,         // EXACT same timestamp as createdAt
+        nonMuslimDawat,
+        murtadDawat,
+        alemderSatheyMojlish,
+        publicSatheyMojlish,
+        nonMuslimSaptahikGasht,
+        editorContent,
+      },
+    });
+
+    return NextResponse.json({ success: true, data: created }, { status: 201 });
   } catch (error) {
-    console.error("POST /api/dawati-bisoy error:", error);
+    console.error("POST /api/dawati error:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
@@ -84,8 +93,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const email = searchParams.get("email");
     const mode = searchParams.get("mode"); // "today" or null
     const sort = (searchParams.get("sort") ?? "desc") as "asc" | "desc";
-    const from = searchParams.get("from");
-    const to = searchParams.get("to");
+    const from = searchParams.get("from"); // YYYY-MM-DD (Dhaka)
+    const to = searchParams.get("to");     // YYYY-MM-DD (Dhaka)
 
     if (!email) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
@@ -97,41 +106,40 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     if (mode === "today") {
-      const { startUTC, endUTC } = dhakaDayBounds();
+      const { start, end } = getDhakaDayRange();
       const existing = await prisma.dawatiBisoyRecord.findFirst({
-        where: {
-          userId: user.id,
-          date: { gte: startUTC, lt: endUTC },
-        },
+        where: { userId: user.id, date: { gte: start, lt: end } },
         select: { id: true },
       });
       return NextResponse.json({ isSubmittedToday: Boolean(existing) }, { status: 200 });
     }
 
-    // Optional range filter (interpreted in Dhaka timezone)
+    // Optional range filter interpreted in Dhaka timezone
     let dateFilter: { gte?: Date; lt?: Date } | undefined;
     if (from || to) {
-      const fromKey = from ? dhakaDayKey(new Date(from)) : undefined;
-      const toKeyExclusive = to
-        ? dhakaDayBounds(new Date(to)).endUTC
-        : undefined;
+      const fromRange = from ? dhakaDayRangeFromISODate(from) : undefined;
+      const toRange = to ? dhakaDayRangeFromISODate(to) : undefined;
       dateFilter = {
-        ...(fromKey ? { gte: fromKey } : {}),
-        ...(toKeyExclusive ? { lt: toKeyExclusive } : {}),
+        ...(fromRange ? { gte: fromRange.start } : {}),
+        ...(toRange ? { lt: toRange.end } : {}),
       };
     }
 
     const records = await prisma.dawatiBisoyRecord.findMany({
-      where: {
-        userId: user.id,
-        ...(dateFilter ? { date: dateFilter } : {}),
-      },
+      where: { userId: user.id, ...(dateFilter ? { date: dateFilter } : {}) },
       orderBy: { date: sort },
     });
 
-    return NextResponse.json({ records }, { status: 200 });
+    // Also compute today's submission flag for convenience
+    const { start, end } = getDhakaDayRange();
+    const todayRecord = records.find((r) => r.date >= start && r.date < end);
+
+    return NextResponse.json(
+      { isSubmittedToday: !!todayRecord, today: todayRecord ?? null, records },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("GET /api/dawati-bisoy error:", error);
+    console.error("GET /api/dawati error:", error);
     return NextResponse.json(
       { error: "Failed to fetch records", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
@@ -152,28 +160,24 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    let targetId = id as string | undefined;
+    let targetId: string | undefined = id;
 
     if (!targetId) {
       if (!date) {
         return NextResponse.json(
-          { error: "Provide either 'id' or 'date' (YYYY-MM-DD)" },
+          { error: "Provide either 'id' or 'date' (YYYY-MM-DD in Dhaka)" },
           { status: 400 }
         );
       }
-      const dayKey = dhakaDayKey(new Date(date));
-      const found = await prisma.dawatiBisoyRecord.findUnique({
-        where: { userId_date: { userId: user.id, date: dayKey } }, // requires named unique in schema
-      }).catch(async () => {
-        // fallback if the named constraint wasn't set: emulate with findFirst
-        return prisma.dawatiBisoyRecord.findFirst({
-          where: { userId: user.id, date: dayKey },
-        });
+      // Find by Dhaka-day range since `date` now stores real timestamps
+      const { start, end } = dhakaDayRangeFromISODate(date);
+      const found = await prisma.dawatiBisoyRecord.findFirst({
+        where: { userId: user.id, date: { gte: start, lt: end } },
+        orderBy: { date: "desc" },
       });
-
       if (!found) {
         return NextResponse.json(
-          { error: "Record not found for given date" },
+          { error: "Record not found for the given Dhaka date" },
           { status: 404 }
         );
       }
@@ -194,7 +198,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ success: true, data: updated }, { status: 200 });
   } catch (error) {
-    console.error("PUT /api/dawati-bisoy error:", error);
+    console.error("PUT /api/dawati error:", error);
     return NextResponse.json(
       { error: "Failed to update record", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }

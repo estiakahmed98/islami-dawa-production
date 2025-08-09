@@ -1,136 +1,137 @@
-//Faysal Updated by //Juwel
+// app/api/jamat/route.ts
+// Estiak Ahmed
 
-import fs from "fs";
-import path from "path";
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-// Path to the user data file
-const userDataPath = path.join(process.cwd(), "app/data/jamatBisoyUserData.ts");
+/** Start/end of a Dhaka (Asia/Dhaka) calendar day for the provided instant */
+function getDhakaDayRange(now = new Date()) {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const [y, m, d] = fmt.format(now).split("-"); // "YYYY-MM-DD"
+  // Dhaka is UTC+06:00 year-round
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`); // exclusive
+  return { start, end };
+}
 
-// Type definitions
-interface JamatBisoyData {
-  [key: string]: string | number;
+/** Convert "YYYY-MM-DD" (interpreted in Asia/Dhaka) into [start,end) UTC range */
+function dhakaDayRangeFromISODate(yyyyMmDd: string) {
+  const [y, m, d] = yyyyMmDd.split("-");
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`);
+  return { start, end };
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
-    const { email, ...data } = body as JamatBisoyData & { email: string };
+    const {
+      email,
+      jamatBerHoise = 0,
+      jamatSathi = 0,
+      editorContent = "",
+    } = body ?? {};
 
-    // Basic validation
-    if (!email || Object.keys(data).length === 0) {
-      return new NextResponse("Email and data are required", { status: 400 });
+    if (!email) {
+      return NextResponse.json({ error: "Email and data are required" }, { status: 400 });
     }
 
-    // Get the current date in YYYY-MM-DD format
-    const currentDate = new Date().toISOString().split("T")[0];
-
-    // Check if the data file exists; if not, create it
-    if (!fs.existsSync(userDataPath)) {
-      fs.writeFileSync(
-        userDataPath,
-        `export const userJamatBisoyData = { labelMap: {}, records: {} };`,
-        "utf-8"
-      );
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Read the existing data file
-    const fileContent = fs.readFileSync(userDataPath, "utf-8");
-
-    // Parse existing data
-    let userJamatBisoyData: {
-      labelMap: object;
-      records: Record<string, Record<string, JamatBisoyData>>;
-    } = {
-      labelMap: {},
-      records: {},
-    };
-
-    const startIndex = fileContent.indexOf("{");
-    const endIndex = fileContent.lastIndexOf("}");
-    if (startIndex !== -1 && endIndex !== -1) {
-      const jsonString = fileContent.slice(startIndex, endIndex + 1);
-      userJamatBisoyData = eval(`(${jsonString})`);
-    }
-
-    // Ensure `records` key exists
-    if (!userJamatBisoyData.records) {
-      userJamatBisoyData.records = {};
-    }
-
-    // Check if the user has already submitted today
-    if (userJamatBisoyData.records[email]?.[currentDate]) {
+    // Enforce one submission per Dhaka day
+    const { start, end } = getDhakaDayRange();
+    const exists = await prisma.jamatBisoyRecord.findFirst({
+      where: { userId: user.id, date: { gte: start, lt: end } },
+      select: { id: true },
+    });
+    if (exists) {
       return NextResponse.json(
-        { error: "You have already submitted data today." },
-        { status: 400 }
+        { error: "You have already submitted data today (Asia/Dhaka)." },
+        { status: 409 }
       );
     }
 
-    // Ensure data is organized by email
-    if (!userJamatBisoyData.records[email]) {
-      userJamatBisoyData.records[email] = {};
-    }
-
-    // Add form data under the current date
-    userJamatBisoyData.records[email][currentDate] = {
-      ...data,
-    };
-
-    // Write the updated data back to the file
-    const updatedFileContent = `export const userJamatBisoyData = ${JSON.stringify(
-      userJamatBisoyData,
-      null,
-      2
-    )};`;
-    fs.writeFileSync(userDataPath, updatedFileContent, "utf-8");
-
-    return NextResponse.json(
-      {
-        message: "Submission successful",
-        data: userJamatBisoyData.records[email][currentDate],
+    // Save real submission instant for BOTH createdAt and date
+    const now = new Date();
+    const created = await prisma.jamatBisoyRecord.create({
+      data: {
+        userId: user.id,
+        createdAt: now,   // mirror
+        date: now,        // EXACT same timestamp as createdAt
+        jamatBerHoise,
+        jamatSathi,
+        editorContent,
       },
-      {
-        status: 201,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    });
+
+    return NextResponse.json({ message: "Submitted successfully", data: created }, { status: 201 });
   } catch (error) {
-    console.error("Error saving data:", error);
-    return new NextResponse("Failed to save user data", { status: 500 });
+    console.error("POST /api/jamat error:", error);
+    return NextResponse.json({ error: "Failed to submit data" }, { status: 500 });
   }
 }
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const { searchParams } = new URL(req.url);
-  const email = searchParams.get("email");
-  const today = new Date().toISOString().split("T")[0];
-
-  if (!email) {
-    return NextResponse.json({ error: "Email is required" }, { status: 400 });
-  }
-
   try {
-    if (!fs.existsSync(userDataPath)) {
-      fs.writeFileSync(
-        userDataPath,
-        `export const userJamatBisoyData = { labelMap: {}, records: {} };`,
-        "utf-8"
-      );
+    const { searchParams } = new URL(req.url);
+    const email = searchParams.get("email");
+    const mode = searchParams.get("mode"); // "today" or null
+    const sort = (searchParams.get("sort") ?? "desc") as "asc" | "desc";
+    const from = searchParams.get("from"); // YYYY-MM-DD (Dhaka)
+    const to = searchParams.get("to");     // YYYY-MM-DD (Dhaka)
+
+    if (!email) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const fileContent = fs.readFileSync(userDataPath, "utf-8");
-    const startIndex = fileContent.indexOf("{");
-    const endIndex = fileContent.lastIndexOf("}");
-    const jsonString = fileContent.slice(startIndex, endIndex + 1);
-    const userJamatBisoyData = eval(`(${jsonString})`);
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-    const isSubmittedToday = !!userJamatBisoyData.records[email]?.[today];
-    return NextResponse.json({ isSubmittedToday }, { status: 200 });
-  } catch (error) {
-    console.error("Error reading submission status:", error);
+    if (mode === "today") {
+      const { start, end } = getDhakaDayRange();
+      const existing = await prisma.jamatBisoyRecord.findFirst({
+        where: { userId: user.id, date: { gte: start, lt: end } },
+        select: { id: true },
+      });
+      return NextResponse.json({ isSubmittedToday: Boolean(existing) }, { status: 200 });
+    }
+
+    // Optional date range interpreted in Dhaka timezone
+    let dateFilter: { gte?: Date; lt?: Date } | undefined;
+    if (from || to) {
+      const fromRange = from ? dhakaDayRangeFromISODate(from) : undefined;
+      const toRange = to ? dhakaDayRangeFromISODate(to) : undefined;
+      dateFilter = {
+        ...(fromRange ? { gte: fromRange.start } : {}),
+        ...(toRange ? { lt: toRange.end } : {}),
+      };
+    }
+
+    const records = await prisma.jamatBisoyRecord.findMany({
+      where: { userId: user.id, ...(dateFilter ? { date: dateFilter } : {}) },
+      orderBy: { date: sort },
+    });
+
+    // Convenience: compute today's submission flag too
+    const { start, end } = getDhakaDayRange();
+    const todayRecord = records.find((r) => r.date >= start && r.date < end);
+
     return NextResponse.json(
-      { error: "Failed to fetch submission status" },
-      { status: 500 }
+      { isSubmittedToday: !!todayRecord, today: todayRecord ?? null, records },
+      { status: 200 }
     );
+  } catch (error) {
+    console.error("GET /api/jamat error:", error);
+    return NextResponse.json({ error: "Failed to fetch records" }, { status: 500 });
   }
 }
