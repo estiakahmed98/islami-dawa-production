@@ -27,24 +27,46 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Validate number type
     const sohojogiDayeToiriNum = Number(sohojogiDayeToiri ?? 0);
     if (!Number.isFinite(sohojogiDayeToiriNum)) {
-      return NextResponse.json({ error: "Invalid sohojogiDayeToiri" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid sohojogiDayeToiri" },
+        { status: 400 }
+      );
     }
 
     // Build UTC day window
     const now = new Date();
-    const start = new Date(Date.UTC(
-      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0
-    ));
-    const end = new Date(Date.UTC(
-      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999
-    ));
+    const start = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        0,
+        0,
+        0,
+        0
+      )
+    );
+    const end = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        23,
+        59,
+        59,
+        999
+      )
+    );
 
     // Check for existing submission
     const existing = await prisma.dayeeBishoyRecord.findFirst({
       where: { userId: user.id, date: { gte: start, lt: end } },
     });
     if (existing) {
-      return NextResponse.json({ error: "Already submitted today" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Already submitted today" },
+        { status: 400 }
+      );
     }
 
     // Extra tracing: find potential jwt/jose usage in hooks/middleware
@@ -54,28 +76,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       const newRecord = await tx.dayeeBishoyRecord.create({
         data: {
           userId: user.id,
-          date: start,              // store normalized start-of-day if desired
+          date: start, // store normalized start-of-day if desired
           sohojogiDayeToiri: sohojogiDayeToiriNum,
           editorContent: String(editorContent ?? ""),
         },
       });
 
       if (Array.isArray(assistants) && assistants.length > 0) {
-        const div = String(userInfo?.division ?? "");
-        const dis = String(userInfo?.district ?? "");
-        const upa = String(userInfo?.upazila ?? "");
-        const uni = String(userInfo?.union ?? "");
-
         const rows = assistants.map((a: any) => ({
           name: String(a?.name ?? ""),
           phone: String(a?.phone ?? ""),
           address: String(a?.address ?? ""),
-          email: a?.email ? String(a.email) : null,            // make sure schema allows null
+          email: a?.email ? String(a.email) : null,
           description: a?.description ? String(a.description) : null,
-          division: div,
-          district: dis,
-          upazila: upa,
-          union: uni,
+          division: String(a?.division ?? ""), // ← from assistant
+          district: String(a?.district ?? ""), // ← from assistant
+          upazila: String(a?.upazila ?? ""), // ← from assistant
+          union: String(a?.union ?? ""), // ← from assistant
           dayeeBishoyId: newRecord.id,
         }));
 
@@ -91,12 +108,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
 
     return NextResponse.json({ success: true, data: result }, { status: 201 });
-
   } catch (error: any) {
     // Print full details, not only message
     console.error("POST /api/dayi error stack:", error?.stack || error);
     return NextResponse.json(
-      { error: "Internal server error", details: error?.message || String(error) },
+      {
+        error: "Internal server error",
+        details: error?.message || String(error),
+      },
       { status: 500 }
     );
   }
@@ -108,7 +127,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const email = searchParams.get("email");
 
     if (!email) {
-      return NextResponse.json({ error: "Email is required." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email is required." },
+        { status: 400 }
+      );
     }
 
     const user = await prisma.users.findUnique({ where: { email } });
@@ -126,7 +148,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   } catch (error: any) {
     console.error("GET /api/dayi error stack:", error?.stack || error);
     return NextResponse.json(
-      { error: error?.message || "Failed to fetch records", details: error?.stack || String(error) },
+      {
+        error: error?.message || "Failed to fetch records",
+        details: error?.stack || String(error),
+      },
       { status: 500 }
     );
   }
