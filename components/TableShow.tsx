@@ -1,148 +1,167 @@
-"use client";
+"use client"
+import type React from "react"
+import { useState, useEffect, useMemo } from "react"
+import fileDownload from "js-file-download"
+import { useSession } from "@/lib/auth-client"
+import DOMPurify from "dompurify"
+import "@fontsource/noto-sans-bengali"
+import { EditRequestModal } from "./edit-request-modal"
+import { createEditRequest, getEditRequestsByEmail } from "@/lib/edit-requests"
 
-import React, { useState, useEffect, useMemo } from "react";
-import fileDownload from "js-file-download";
-import { useSession } from "@/lib/auth-client";
-import DOMPurify from "dompurify";
-import "@fontsource/noto-sans-bengali";
-import { EditRequestModal } from "./edit-request-modal";
-import { createEditRequest, getEditRequestsByEmail } from "@/lib/edit-requests";
-
-interface AmoliTableProps {
-  userData: any;
-  selectedMonth: number;
-  selectedYear: number;
-  onMonthChange: (month: number) => void;
-  onYearChange: (year: number) => void;
-}
+type EditStatus = "pending" | "approved" | "rejected"
 
 interface EditRequestStatus {
   [date: string]: {
-    status: "pending" | "approved" | "rejected";
-    id?: string;
-    editedOnce?: boolean;
-  };
+    status: EditStatus
+    id?: string
+    editedOnce?: boolean
+  }
 }
 
-const UniversalTableShow: React.FC<AmoliTableProps> = ({
+type Props = {
+  userData: {
+    // { [email]: { [YYYY-MM-DD]: { [rowKey]: value, editorContent?: string } } }
+    records: Record<string, Record<string, any>>
+    // { [rowKey]: "Label in Bangla/English" }
+    labelMap: Record<string, string>
+    // optional helpers (e.g., raw detail maps)
+    [k: string]: any
+  }
+  selectedMonth: number
+  selectedYear: number
+  onMonthChange: (m: number) => void
+  onYearChange: (y: number) => void
+  // Optional enhancements:
+  htmlFields?: string[] // row keys that should render with innerHTML (e.g., lists with <br/>)
+  clickableFields?: string[] // row keys that are clickable
+  onCellClick?: (info: { email: string; dateKey: string; rowKey: string }) => void
+}
+
+const UniversalTableShow: React.FC<Props> = ({
   userData,
   selectedMonth,
   selectedYear,
   onMonthChange,
-  onYearChange
+  onYearChange,
+  htmlFields = [],
+  clickableFields = [],
+  onCellClick,
 }) => {
-  const { data: session } = useSession();
-  const userEmail = session?.user?.email || "";
-  const user = session?.user || null;
+  const { data: session } = useSession()
+  const userEmail = session?.user?.email || ""
+  const user = session?.user || null
 
-  const [transposedData, setTransposedData] = useState<any[]>([]);
-  const [motamotPopup, setMotamotPopup] = useState<string | null>(null);
-  const [filterLabel, setFilterLabel] = useState<string>("");
-  const [filterValue, setFilterValue] = useState<string>("");
-  const [editPopup, setEditPopup] = useState<{ day: number; data: any } | null>(null);
-  const [editRequestModal, setEditRequestModal] = useState<{ day: number } | null>(null);
-  const [editRequestStatuses, setEditRequestStatuses] = useState<EditRequestStatus>({});
-  const [tableData, setTableData] = useState<any>({});
+  const [transposedData, setTransposedData] = useState<any[]>([])
+  const [motamotPopup, setMotamotPopup] = useState<string | null>(null)
+  const [filterLabel, setFilterLabel] = useState<string>("")
+  const [filterValue, setFilterValue] = useState<string>("")
+  const [editPopup, setEditPopup] = useState<{ day: number; data: any } | null>(null)
+  const [editRequestModal, setEditRequestModal] = useState<{ day: number } | null>(null)
+  const [editRequestStatuses, setEditRequestStatuses] = useState<EditRequestStatus>({})
+  const [tableData, setTableData] = useState<any>({})
 
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+  const months = useMemo(
+    () => [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ],
+    [],
+  )
 
   const monthDays = useMemo(() => {
-    return Array.from(
-      { length: new Date(selectedYear, selectedMonth + 1, 0).getDate() },
-      (_, i) => i + 1
-    );
-  }, [selectedMonth, selectedYear]);
+    return Array.from({ length: new Date(selectedYear, selectedMonth + 1, 0).getDate() }, (_, i) => i + 1)
+  }, [selectedMonth, selectedYear])
 
   const isFutureDate = (day: number): boolean => {
-    const today = new Date();
-    const selectedDate = new Date(selectedYear, selectedMonth, day);
-    return selectedDate > today;
-  };
+    // Compare against *local* today to block future edits
+    const now = new Date()
+    const selected = new Date(selectedYear, selectedMonth, day, 23, 59, 59, 999)
+    return selected > now
+  }
 
+  // Fetch edit-request statuses (by email)
   useEffect(() => {
     const fetchEditRequestStatuses = async () => {
-      if (!userEmail) return;
-
+      if (!userEmail) return
       try {
-        const requests = await getEditRequestsByEmail(userEmail);
-        const statuses: EditRequestStatus = {};
-
-        requests.forEach((request) => {
+        const requests = await getEditRequestsByEmail(userEmail)
+        const statuses: EditRequestStatus = {}
+        requests.forEach((request: any) => {
           statuses[request.date] = {
             status: request.status,
             id: request.id,
             editedOnce: request.editedOnce || false,
-          };
-        });
-
-        setEditRequestStatuses(statuses);
+          }
+        })
+        setEditRequestStatuses(statuses)
       } catch (error) {
-        console.error("Error fetching edit request statuses:", error);
+        console.error("Error fetching edit request statuses:", error)
       }
-    };
+    }
+    fetchEditRequestStatuses()
+  }, [userEmail, selectedMonth, selectedYear])
 
-    fetchEditRequestStatuses();
-  }, [userEmail, selectedMonth, selectedYear]);
-
+  // Build table data
   useEffect(() => {
-    if (!userData || !userData.records || !userEmail) return;
+    if (!userData || !userData.records || !userEmail) return
 
-    setTableData(userData.records[userEmail] || {});
+    setTableData(userData.records[userEmail] || {})
 
-    const labels = userData.labelMap;
-    const transposed = Object.keys(labels).map((label) => {
-      const row: { label: string;[key: number]: any } = {
-        label: labels[label],
-      };
-
+    const labels = userData.labelMap || {}
+    // rows by labelMap key order
+    const transposed = Object.keys(labels).map((rowKey) => {
+      const row: { label: string; key: string; [key: number]: any } = {
+        label: labels[rowKey],
+        key: rowKey, // keep stable key for field targeting
+      }
       monthDays.forEach((day) => {
-        const date = `${selectedYear}-${(selectedMonth + 1)
-          .toString()
-          .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-        const visitData = userData.records[userEmail]?.[date]?.[label] || "- -";
-        row[day] = visitData;
-      });
+        const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+        const cellValue = userData.records[userEmail]?.[date]?.[rowKey] ?? "- -"
+        row[day] = cellValue
+      })
+      return row
+    })
 
-      return row;
-    });
-
-    const motamotRow: { label: string;[key: number]: any } = {
+    // মতামত row (eye button)
+    const motamotRow: { label: string; key: string; [key: number]: any } = {
       label: "মতামত",
-    };
+      key: "editorContent",
+    }
     monthDays.forEach((day) => {
-      const date = `${selectedYear}-${(selectedMonth + 1)
-        .toString()
-        .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-      const motamotHtml = userData.records[userEmail]?.[date]?.editorContent || "- -";
-      const motamotText = DOMPurify.sanitize(motamotHtml, {
-        ALLOWED_TAGS: [],
-      });
-
+      const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+      const motamotHtml: string = userData.records[userEmail]?.[date]?.editorContent || "- -"
+      const motamotText = DOMPurify.sanitize(motamotHtml, { ALLOWED_TAGS: [] })
       motamotRow[day] =
         motamotText !== "- -" ? (
-          <button onClick={() => setMotamotPopup(motamotText)}>👁️</button>
+          <button onClick={() => setMotamotPopup(motamotText)} title="See note">
+            👁️
+          </button>
         ) : (
           "- -"
-        );
-    });
+        )
+    })
+    transposed.push(motamotRow)
 
-    transposed.push(motamotRow);
-
-    const editRow: { label: string;[key: number]: any } = {
+    // Edit row (buttons per day)
+    const editRow: { label: string; key: string; [key: number]: any } = {
       label: "Edit",
-    };
-
+      key: "editActions",
+    }
     monthDays.forEach((day) => {
-      const date = `${selectedYear}-${(selectedMonth + 1)
-        .toString()
-        .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-
-      const requestStatus = editRequestStatuses[date]?.status;
-      const editedOnce = editRequestStatuses[date]?.editedOnce;
-      const isFuture = isFutureDate(day);
+      const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+      const requestStatus = editRequestStatuses[date]?.status
+      const editedOnce = editRequestStatuses[date]?.editedOnce
+      const isFuture = isFutureDate(day)
 
       if (isFuture) {
         editRow[day] = (
@@ -153,16 +172,16 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
           >
             Unavailable
           </button>
-        );
+        )
       } else if (requestStatus === "approved" && !editedOnce) {
         editRow[day] = (
           <button
-            className="text-sm bg-green-500 text-white py-1 px-3 rounded"
+            className="text-sm bg-green-600 text-white py-1 px-3 rounded"
             onClick={() => handleEditClick(day, transposed)}
           >
             Edit
           </button>
-        );
+        )
       } else if (requestStatus === "approved" && editedOnce) {
         editRow[day] = (
           <button
@@ -172,194 +191,191 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
           >
             Edited
           </button>
-        );
+        )
       } else if (requestStatus === "pending") {
         editRow[day] = (
-          <button
-            className="text-sm bg-yellow-500 text-white py-1 px-3 rounded cursor-not-allowed"
-            disabled
-          >
+          <button className="text-sm bg-yellow-500 text-white py-1 px-3 rounded cursor-not-allowed" disabled>
             Pending
           </button>
-        );
+        )
       } else if (requestStatus === "rejected") {
         editRow[day] = (
           <button
-            className="text-sm bg-gray-500 text-white py-1 px-3 rounded"
+            className="text-sm bg-gray-600 text-white py-1 px-3 rounded"
             onClick={() => setEditRequestModal({ day })}
           >
             Rejected
           </button>
-        );
+        )
       } else {
         editRow[day] = (
           <button
-            className="text-sm bg-red-500 text-white py-1 px-3 rounded"
+            className="text-sm bg-rose-600 text-white py-1 px-3 rounded"
             onClick={() => setEditRequestModal({ day })}
           >
             Request Edit
           </button>
-        );
+        )
       }
-    });
+    })
+    transposed.push(editRow)
 
-    transposed.push(editRow);
-    setTransposedData(transposed);
-  }, [selectedMonth, selectedYear, userData, userEmail, editRequestStatuses]);
+    setTransposedData(transposed)
+  }, [selectedMonth, selectedYear, userData, userEmail, editRequestStatuses, monthDays])
 
+  // Filtering (optional UI left out; hooks kept)
   const filteredData = useMemo(() => {
     return transposedData.filter((row) => {
-      const matchesLabel = filterLabel ? row.label.includes(filterLabel) : true;
+      const matchesLabel = filterLabel ? String(row.label).includes(filterLabel) : true
       const matchesValue = filterValue
-        ? Object.values(row).some(
-          (val) => typeof val === "string" && val.includes(filterValue)
-        )
-        : true;
-      return matchesLabel && matchesValue;
-    });
-  }, [transposedData, filterLabel, filterValue]);
+        ? Object.values(row).some((val) => typeof val === "string" && val.includes(filterValue))
+        : true
+      return matchesLabel && matchesValue
+    })
+  }, [transposedData, filterLabel, filterValue])
+
+  // CSV helpers (strip HTML safely)
+  const stripHtmlForCSV = (val: any) => {
+    if (typeof val !== "string") return val
+    // convert <br> to " | ", drop other tags
+    return val.replace(/<br\s*\/?>/gi, " | ").replace(/<[^>]*>/g, "")
+  }
 
   const convertToCSV = () => {
-    const BOM = "\uFEFF";
-    const headers = ["Label", ...monthDays.map((day) => `${day}`)];
-    const rows = filteredData.map((row) => [
-      row.label,
-      ...monthDays.map((day) => row[day] || "-"),
-    ]);
-    const csvContent =
-      BOM + [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
-    const filename = `report_of_${session?.user.name}.csv`;
-    fileDownload(csvContent, filename);
-  };
+    const BOM = "\uFEFF"
+    const headers = ["Label", ...monthDays.map((day) => `Day ${day}`)]
+    const rows = filteredData.map((row) => [row.label, ...monthDays.map((day) => stripHtmlForCSV(row[day] ?? "-"))])
+    const csvContent = BOM + [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
+    const filename = `report_of_${session?.user?.name || "user"}.csv`
+    fileDownload(csvContent, filename)
+  }
 
+  // PDF export (kept your existing layout)
   const getHtml2Pdf = async () => {
-    const html2pdfModule = await import("html2pdf.js");
-    return html2pdfModule.default || html2pdfModule;
-  };
+    const html2pdfModule = await import("html2pdf.js")
+    return html2pdfModule.default || html2pdfModule
+  }
 
   const convertToPDF = async () => {
-    const monthName = months[selectedMonth];
-    const year = selectedYear;
+    const monthName = months[selectedMonth]
+    const year = selectedYear
 
     if (!monthName || !year || !userEmail || !Array.isArray(transposedData)) {
-      console.error("Invalid data for PDF generation");
-      return;
+      console.error("Invalid data for PDF generation")
+      return
     }
 
-    const filteredData = transposedData.filter(
-      (row) => row.label !== "মতামত" && row.label !== "Edit"
-    );
+    // Exclude মতামত & Edit rows from PDF
+    const printableRows = transposedData.filter((row) => row.label !== "মতামত" && row.label !== "Edit")
 
     const tableHTML = `
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
-            body {
-              font-family: 'Noto Sans Bengali', sans-serif;
-              padding: 0px;
-              text-align: center;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 20px;
-            }
-            thead {
-              display: table-header-group;
-            }
-            tbody {
-              display: table-row-group;
-            }
-            tr {
-              page-break-inside: avoid;
-            }
-            th, td {
-              border: 1px solid #000;
-              padding: 8px;
-              font-size: 12px;
-              text-align: center;
-            }
-            th {
-              background-color: #ffffff;
-              color: black;
-              font-size: 14px;
-              position: sticky;
-              top: 0;
-              z-index: 2;
-            }
-            .row-label {
-              background-color: #ffffff;
-              color: black;
-              font-weight: bold;
-              position: sticky;
-              left: 0;
-              z-index: 1;
-              text-align: left;
-              padding-left: 10px;
-            }
-          </style>
-        </head>
-        <body>
-          <div style="font-size: 14px; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px;">
-            <div style="text-align: left;">
-              <span>Name: ${user?.name || "Name"}</span><br>
-              <span>Phone: ${user?.phone || "Phone"}</span><br>
-              <span>Email: ${user?.email || "Email"}</span><br>
-              <span>Role: ${user?.role || "Role"}</span>
-            </div>
-
-            <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
-              <span>${monthName} ${year} - ${user?.name}</span>
-              <span>Markaz: ${user?.markaz || "N/A"}</span>
-            </div>
-
-            <div style="text-align: right;">
-              <span>Division: ${user?.division || "N/A"}</span><br>
-              <span>District: ${user?.district || "N/A"}</span><br>
-              <span>Upazila: ${user?.upazila || "N/A"}</span><br>
-              <span>Union: ${user?.union || "N/A"}</span><br>
-            </div>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
+          body {
+            font-family: 'Noto Sans Bengali', sans-serif;
+            padding: 0px;
+            text-align: center;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          thead { display: table-header-group; }
+          tbody { display: table-row-group; }
+          tr { page-break-inside: avoid; }
+          th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            font-size: 12px;
+            text-align: center;
+            vertical-align: top;
+          }
+          th {
+            background-color: #ffffff;
+            color: black;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+          }
+          .row-label {
+            background-color: #ffffff;
+            color: black;
+            font-weight: bold;
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            text-align: left;
+            padding-left: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <div style="font-size: 14px; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px;">
+          <div style="text-align: left;">
+            <span>Name: ${user?.name || "Name"}</span><br>
+            <span>Phone: ${user?.phone || "Phone"}</span><br>
+            <span>Email: ${user?.email || "Email"}</span><br>
+            <span>Role: ${user?.role || "Role"}</span>
           </div>
+          <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+            <span>${monthName} ${year} - ${user?.name || ""}</span>
+            <span>Markaz: ${user?.markaz || "N/A"}</span>
+          </div>
+          <div style="text-align: right;">
+            <span>Division: ${user?.division || "N/A"}</span><br>
+            <span>District: ${user?.district || "N/A"}</span><br>
+            <span>Upazila: ${user?.upazila || "N/A"}</span><br>
+            <span>Union: ${user?.union || "N/A"}</span><br>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>${monthName}</th>
+              ${printableRows.map((row) => `<th>${row.label}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>
+            ${monthDays
+              .map((day) => {
+                const dayCells = printableRows
+                  .map((row) => {
+                    const val = row[day] ?? "-"
+                    return `<td>${typeof val === "string" ? val : String(val)}</td>`
+                  })
+                  .join("")
+                return `
+                  <tr>
+                    <td class="row-label">${day}</td>
+                    ${dayCells}
+                  </tr>
+                `
+              })
+              .join("")}
+          </tbody>
+        </table>
+      </body>
+    </html>`
 
-          <table>
-            <thead>
-              <tr>
-                <th>${monthName}</th>
-                ${filteredData.map((row) => `<th>${row.label}</th>`).join("")}
-              </tr>
-            </thead>
-            <tbody>
-              ${monthDays
-        .map(
-          (day) => `
-                <tr>
-                  <td class="row-label">${day}</td>
-                  ${filteredData.map((row) => `<td>${row[day] || "-"}</td>`).join("")}
-                </tr>
-              `
-        )
-        .join("")}
-            </tbody>
-          </table>
-        </body>
-      </html>`;
-
-    const element = document.createElement("div");
-    element.innerHTML = tableHTML;
+    const element = document.createElement("div")
+    element.innerHTML = tableHTML
 
     try {
-      const html2pdf = await getHtml2Pdf();
+      const html2pdf = await getHtml2Pdf()
       if (typeof html2pdf !== "function") {
-        console.error("html2pdf is not a function, received:", html2pdf);
-        return;
+        console.error("html2pdf is not a function, received:", html2pdf)
+        return
       }
 
       html2pdf()
         .set({
           margin: 10,
-          filename: `${user?.name} ${monthName}_${year}.pdf`,
+          filename: `${user?.name || "user"} ${monthName}_${year}.pdf`,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2 },
           jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
@@ -367,94 +383,96 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
         .from(element)
         .toPdf()
         .get("pdf")
-        .then((pdf) => {
-          const totalPages = pdf.internal.getNumberOfPages();
+        .then((pdf: any) => {
+          const totalPages = pdf.internal.getNumberOfPages()
           for (let i = 1; i <= totalPages; i++) {
-            pdf.setPage(i);
-            pdf.setFontSize(10);
+            pdf.setPage(i)
+            pdf.setFontSize(10)
             pdf.text(
               `Page ${i} of ${totalPages}`,
               pdf.internal.pageSize.getWidth() - 20,
-              pdf.internal.pageSize.getHeight() - 10
-            );
+              pdf.internal.pageSize.getHeight() - 10,
+            )
           }
         })
-        .save();
+        .save()
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("Error generating PDF:", error)
     }
-  };
+  }
 
-  const handleEditClick = (day: number, transposedData: any[]) => {
-    const date = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-
+  // Inline edit flow
+  const handleEditClick = (day: number, currentTransposed: any[]) => {
+    const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
     if (editRequestStatuses[date]?.editedOnce) {
-      alert("You can only edit data once after approval");
-      return;
+      alert("You can only edit data once after approval")
+      return
     }
-
-    const dataToEdit = transposedData.slice(0, -2).map((row) => row[day]);
-    setEditPopup({ day, data: dataToEdit });
-  };
+    // All row values except last two (মতামত + Edit actions)
+    const dataToEdit = currentTransposed.slice(0, -2).map((row) => row[day])
+    setEditPopup({ day, data: dataToEdit })
+  }
 
   const handleSaveEdit = async (day: number, updatedData: any) => {
-    const date = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+    const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
 
     if (editRequestStatuses[date]?.status !== "approved") {
-      alert("You can only edit data after your request has been approved");
-      return;
+      alert("You can only edit data after your request has been approved")
+      return
     }
-
     if (editRequestStatuses[date]?.editedOnce) {
-      alert("You can only edit data once after approval");
-      return;
+      alert("You can only edit data once after approval")
+      return
     }
 
     try {
-      const newData = [...transposedData];
-      const updatedTableData = { ...tableData };
-
+      const newData = [...transposedData]
+      const updatedTableData = { ...tableData }
       if (!updatedTableData[date]) {
-        updatedTableData[date] = {};
+        updatedTableData[date] = {}
       }
 
-      Object.keys(userData.labelMap).forEach((label, index) => {
-        if (index < updatedData.length) {
-          if (newData[index]) {
-            newData[index][day] = updatedData[index];
+      // Map by labelMap key order
+      const rowKeys = Object.keys(userData.labelMap)
+      rowKeys.forEach((rowKey, idx) => {
+        if (idx < updatedData.length) {
+          // Update transposedData visible cell
+          if (newData[idx]) {
+            newData[idx][day] = updatedData[idx]
           }
-          updatedTableData[date][label] = updatedData[index];
+          // Update underlying table data (records)
+          updatedTableData[date][rowKey] = updatedData[idx]
         }
-      });
+      })
 
-      setTransposedData(newData);
-      setTableData(updatedTableData);
+      setTransposedData(newData)
+      setTableData(updatedTableData)
 
+      // mark edited once
       setEditRequestStatuses((prev) => ({
         ...prev,
         [date]: {
           ...prev[date],
           editedOnce: true,
         },
-      }));
+      }))
 
-      setEditPopup(null);
-      alert("Data updated successfully. You cannot edit this date again.");
+      setEditPopup(null)
+      alert("Data updated successfully. You cannot edit this date again.")
     } catch (error) {
-      console.error("Error saving edit:", error);
-      alert("Failed to save edits. Please try again.");
+      console.error("Error saving edit:", error)
+      alert("Failed to save edits. Please try again.")
     }
-  };
+  }
 
   const handleEditRequest = async (day: number, reason: string) => {
-    if (!userEmail || !user) return;
-
+    if (!userEmail || !user) return
     if (isFutureDate(day)) {
-      alert("You cannot request edits for future dates");
-      return;
+      alert("You cannot request edits for future dates")
+      return
     }
 
-    const date = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+    const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
 
     try {
       const newRequest = await createEditRequest({
@@ -473,7 +491,7 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
         status: "pending",
         editedOnce: false,
         createdAt: new Date().toISOString(),
-      });
+      })
 
       setEditRequestStatuses((prev) => ({
         ...prev,
@@ -482,15 +500,18 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
           id: newRequest.id,
           editedOnce: false,
         },
-      }));
-
-      alert("Edit request submitted successfully. Please wait for admin approval.");
-      setEditRequestModal(null);
+      }))
+      alert("Edit request submitted successfully. Please wait for admin approval.")
+      setEditRequestModal(null)
     } catch (error) {
-      console.error("Failed to create edit request:", error);
-      alert("Failed to submit edit request. Please try again.");
+      console.error("Failed to create edit request:", error)
+      alert("Failed to submit edit request. Please try again.")
     }
-  };
+  }
+
+  // Helpers for cell rendering
+  const dayToDateKey = (day: number) =>
+    `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
 
   return (
     <div>
@@ -509,7 +530,6 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
               ))}
             </select>
           </div>
-
           <div className="relative">
             <select
               value={selectedYear}
@@ -524,7 +544,6 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
             </select>
           </div>
         </div>
-
         <div className="flex gap-4 mt-4 lg:mt-0">
           <button
             className="flex items-center gap-2 text-xs lg:text-lg px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-md transition duration-300"
@@ -540,17 +559,13 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
           </button>
         </div>
       </div>
-
       <div className="overflow-auto">
         <table className="border-collapse border border-gray-300 w-full table-auto text-sm md:text-base">
           <thead>
             <tr className="bg-gray-200">
               <th className="border border-gray-300 px-4 py-2">Label</th>
               {monthDays.map((day) => (
-                <th
-                  key={day}
-                  className="border border-gray-300 px-6 py-2 text-center text-nowrap"
-                >
+                <th key={day} className="border border-gray-300 px-6 py-2 text-center text-nowrap">
                   Day {day}
                 </th>
               ))}
@@ -559,29 +574,48 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
           <tbody>
             {filteredData.map((row, rowIndex) => (
               <tr key={rowIndex} className="hover:bg-gray-100">
-                <td className="border border-gray-300 px-6 py-2 text-nowrap">
-                  {row.label}
-                </td>
+                <td className="border border-gray-300 px-6 py-2 text-nowrap">{row.label}</td>
                 {monthDays.map((day) => {
-                  const cellValue = row[day];
-                  const isHTML = typeof cellValue === "string" && cellValue.includes("<br");
+                  const value = row[day]
+                  const rowKey = row.key || row.label // stable row key
+                  const dateKey = dayToDateKey(day)
+                  const shouldRenderHTML =
+                    (htmlFields?.includes(rowKey) &&
+                      typeof value === "string" &&
+                      (value.includes("<br") || value.includes("</"))) ||
+                    // fallback: render html if the content looks like html
+                    (typeof value === "string" && (value.includes("<br") || value.includes("</")))
+                  const clickable = clickableFields?.includes(rowKey)
+                  const commonProps: any = {
+                    className:
+                      "border border-gray-300 px-6 py-2 text-center align-top " +
+                      (clickable ? "cursor-pointer hover:bg-gray-50" : "text-nowrap"),
+                    onClick:
+                      clickable && onCellClick ? () => onCellClick({ email: userEmail, dateKey, rowKey }) : undefined,
+                  }
+                  if (shouldRenderHTML) {
+                    return (
+                      <td
+                        key={day} // Key passed directly
+                        {...commonProps}
+                        // allow line-breaks inside cell
+                        style={{ whiteSpace: "normal" }}
+                        dangerouslySetInnerHTML={{ __html: (value as string) || "" }}
+                      />
+                    )
+                  }
                   return (
-                    <td
-                      key={day}
-                      className="border border-gray-300 px-6 py-2 text-center text-nowrap"
-                      {...(isHTML
-                        ? { dangerouslySetInnerHTML: { __html: cellValue } }
-                        : { children: cellValue })}
-                    />
-                  );
+                    <td key={day} {...commonProps}>
+                      {value ?? ""}
+                    </td>
+                  ) // Key passed directly
                 })}
               </tr>
             ))}
           </tbody>
-
         </table>
       </div>
-
+      {/* মতামত popup */}
       {motamotPopup && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-10 rounded-xl shadow-lg max-w-[85vw] lg:max-w-[60vw] max-h-[70vh] relative overflow-y-auto">
@@ -596,7 +630,7 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
           </div>
         </div>
       )}
-
+      {/* Inline edit popup */}
       {editPopup && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex justify-center items-center z-50">
           <div className="bg-white p-10 rounded-xl shadow-lg max-w-[85vw] lg:w-[50vw] max-h-[80vh] relative overflow-y-auto">
@@ -606,25 +640,19 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
             >
               ✖
             </button>
-            <h3 className="text-lg font-bold mb-4">
-              Edit Data for Day: {editPopup.day}
-            </h3>
-            <p className="text-amber-600 mb-4">
-              Note: You can only edit this data once after approval.
-            </p>
+            <h3 className="text-lg font-bold mb-4">Edit Data for Day: {editPopup.day}</h3>
+            <p className="text-amber-600 mb-4">Note: You can only edit this data once after approval.</p>
             {editPopup.data.map((value: any, index: number) => (
               <div key={index} className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  {transposedData[index]?.label || ""}
-                </label>
+                <label className="block text-sm font-medium text-gray-700">{transposedData[index]?.label || ""}</label>
                 <input
                   type="text"
                   className="border px-3 py-2 rounded w-full"
-                  value={value}
+                  value={typeof value === "string" ? value.replace(/<br\s*\/?>/gi, " | ") : value}
                   onChange={(e) => {
-                    const updatedData = [...editPopup.data];
-                    updatedData[index] = e.target.value;
-                    setEditPopup({ ...editPopup, data: updatedData });
+                    const updatedData = [...editPopup.data]
+                    updatedData[index] = e.target.value
+                    setEditPopup({ ...editPopup, data: updatedData })
                   }}
                 />
               </div>
@@ -646,7 +674,7 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
           </div>
         </div>
       )}
-
+      {/* Edit-request modal */}
       {editRequestModal && (
         <EditRequestModal
           day={editRequestModal.day}
@@ -655,7 +683,7 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default UniversalTableShow;
+export default UniversalTableShow
