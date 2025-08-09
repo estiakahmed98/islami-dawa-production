@@ -129,6 +129,22 @@
           "name": "Monirul Islam"
         }
       ]
+    },
+    "jewel@gmail.com": {
+      "2025-08-09": [
+        {
+          "id": "900ff2c4-9987-4013-84c1-907362095e19",
+          "leaveType": "Casual",
+          "from": "2025-08-09",
+          "to": "2025-08-09",
+          "days": 1,
+          "reason": "personal need.",
+          "approvedBy": "Admin",
+          "status": "Approved",
+          "phone": "01773097310",
+          "name": "Jewel Rana"
+        }
+      ]
     }
   }
 }
