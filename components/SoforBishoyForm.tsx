@@ -1,7 +1,9 @@
-"use client"; //Faysal Updated by //Estiak
+// Estiak — StrictMode-safe: remove useFormikContext, resize lists via effects in render
 
-import React, { useEffect, useState } from "react";
-import { Formik, Form, Field, FieldArray, ErrorMessage } from "formik";
+"use client";
+
+import React from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -10,237 +12,313 @@ import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
 import Loading from "@/app/dashboard/loading";
 
-interface FormValues {
-  moktobVisit: string;
-  madrasaVisits: string[];
-  schoolCollegeVisits: string[];
-}
+type FormValues = {
+  moktobVisit: number | string;
+  madrasaVisit: number | string;               // count
+  madrasaVisitList: string[];                  // list
+  schoolCollegeVisit: number | string;         // count
+  schoolCollegeVisitList: string[];            // list
+  editorContent: string;
+};
 
 const initialValues: FormValues = {
   moktobVisit: "",
-  madrasaVisits: [""],
-  schoolCollegeVisits: [""],
+  madrasaVisit: 0,
+  madrasaVisitList: [],
+  schoolCollegeVisit: 0,
+  schoolCollegeVisitList: [],
+  editorContent: "",
 };
 
 const validationSchema = Yup.object({
-  moktobVisit: Yup.string().required("This field is required"),
-  madrasaVisits: Yup.array()
-    .of(Yup.string().required("This field is required"))
-    .required("At least one madrasa visit is required"),
-  schoolCollegeVisits: Yup.array()
-    .of(Yup.string().required("This field is required"))
-    .required("At least one school/college visit is required"),
+  moktobVisit: Yup.number().typeError("সংখ্যা লিখুন").min(0).required("required"),
+  madrasaVisit: Yup.number().typeError("সংখ্যা লিখুন").min(0).required("required"),
+  madrasaVisitList: Yup.array()
+    .of(Yup.string().trim().required("required"))
+    .test("match-length", "মোট সংখ্যার সমান নাম লিখুন", function (arr) {
+      const count = Number(this.parent.madrasaVisit || 0);
+      return Array.isArray(arr) && arr.length === count;
+    }),
+  schoolCollegeVisit: Yup.number().typeError("সংখ্যা লিখুন").min(0).required("required"),
+  schoolCollegeVisitList: Yup.array()
+    .of(Yup.string().trim().required("required"))
+    .test("match-length", "মোট সংখ্যার সমান নাম লিখুন", function (arr) {
+      const count = Number(this.parent.schoolCollegeVisit || 0);
+      return Array.isArray(arr) && arr.length === count;
+    }),
+  editorContent: Yup.string().nullable(),
 });
 
-const SoforBishoyForm: React.FC = () => {
+type Props = {
+  isSubmittedToday?: boolean;
+  setIsSubmittedToday?: (v: boolean) => void;
+};
+
+const SoforBishoyForm: React.FC<Props> = ({ isSubmittedToday: propSubmitted, setIsSubmittedToday: setPropSubmitted }) => {
   const router = useRouter();
   const { data: session } = useSession();
   const email = session?.user?.email || "";
 
-  const [isSubmittedToday, setIsSubmittedToday] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [editorContent, setEditorContent] = useState("");
+  const [isSubmittedTodayLocal, setIsSubmittedTodayLocal] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
 
-  const handleContentChange = (content: string) => {
-    setEditorContent(content);
-  };
+  const effectiveSubmitted = propSubmitted ?? isSubmittedTodayLocal;
+  const setEffectiveSubmitted = setPropSubmitted ?? setIsSubmittedTodayLocal;
 
-  useEffect(() => {
-    const checkSubmissionStatus = async () => {
-      if (!email) return;
-
+  // Only fetch if parent didn't pass isSubmittedToday
+  React.useEffect(() => {
+    if (propSubmitted !== undefined) {
+      setLoading(false);
+      return;
+    }
+    if (!email) {
+      setIsSubmittedTodayLocal(false);
+      setLoading(false);
+      return;
+    }
+    const ac = new AbortController();
+    (async () => {
       try {
-        const response = await fetch(`/api/soforbisoy?email=${email}`);
-        if (response.ok) {
-          const data = await response.json();
-          setIsSubmittedToday(data.isSubmittedToday);
-        } else {
-          toast.error("Failed to check submission status.");
+        const res = await fetch(
+          `/api/soforbisoy?email=${encodeURIComponent(email)}&mode=today`,
+          { cache: "no-store", signal: ac.signal }
+        );
+        if (!res.ok) throw new Error("Failed to check submission status");
+        const data = await res.json();
+        setIsSubmittedTodayLocal(!!data.isSubmittedToday);
+      } catch (err: any) {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
+          console.error("Submission status check failed:", err);
+          toast.error("Submission status check failed.");
         }
-      } catch (error) {
-        console.error("Error checking submission status:", error);
-        toast.error("Error checking submission status.");
       } finally {
         setLoading(false);
       }
-    };
-
-    checkSubmissionStatus();
-  }, [email]);
+    })();
+    return () => ac.abort();
+  }, [email, propSubmitted]);
 
   if (loading) return <Loading />;
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-4 lg:p-10 shadow-lg">
-      {isSubmittedToday && (
+      {effectiveSubmitted && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
           You have already submitted today.
         </div>
       )}
 
-      <h2 className="mb-6 text-2xl">সফর বিষয়</h2>
+      <h2 className="mb-6 text-2xl">সফর বিষয়</h2>
 
-      <Formik
+      <Formik<FormValues>
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
-          if (isSubmittedToday) {
+          if (effectiveSubmitted) {
             toast.error("You have already submitted today.");
             setSubmitting(false);
             return;
           }
-
           if (!email) {
-            toast.error("User email is not set. Please log in.");
+            toast.error("User email not found. Please login.");
             setSubmitting(false);
             return;
           }
 
-          const formData = { ...values, email, editorContent };
+          const payload = {
+            email,
+            moktobVisit: Number(values.moktobVisit) || 0,
+            madrasaVisit: Number(values.madrasaVisit) || 0,
+            madrasaVisitList: values.madrasaVisitList.map((s) => s.trim()).filter(Boolean),
+            schoolCollegeVisit: Number(values.schoolCollegeVisit) || 0,
+            schoolCollegeVisitList: values.schoolCollegeVisitList.map((s) => s.trim()).filter(Boolean),
+            editorContent: values.editorContent || "",
+          };
 
           try {
-            const response = await fetch("/api/soforbisoy", {
+            const res = await fetch("/api/soforbisoy", {
               method: "POST",
-              body: JSON.stringify(formData),
-              headers: {
-                "Content-Type": "application/json",
-              },
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
             });
-            if (response.ok) {
-              toast.success("Form submission successful!");
-              resetForm();
-              router.push("/dashboard");
-            } else {
-              toast.error("Form submission failed! Try again.");
+            const json = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+              toast.error(json?.error || "Submission failed, please try again.");
+              return;
             }
-          } catch (error) {
-            console.error("Error during form submission:", error);
-            toast.error("An unexpected error occurred. Please try again.");
+
+            toast.success("Submitted successfully!");
+            resetForm();
+            setEffectiveSubmitted(true);
+            router.push("/dashboard");
+          } catch (err) {
+            console.error("Submit error:", err);
+            toast.error("Unexpected error during submission.");
           } finally {
             setSubmitting(false);
           }
         }}
       >
-        {({ values }) => (
-          <Form>
-            <div>
-              <label htmlFor="moktobVisit" className="mb-2 block text-gray-700">
-                চলমান মক্তব পরিদর্শন হয়েছে
-              </label>
-              <Field
-                id="moktobVisit"
-                type="number"
-                name="moktobVisit"
-                placeholder="Enter Value"
-                className="w-full rounded border border-gray-300 px-4 py-2 mb-6"
-              />
-              <ErrorMessage
-                name="moktobVisit"
-                component="div"
-                className="text-red-500"
-              />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  মাদ্রাসা সফর হয়েছে
-                </label>
-                <FieldArray
-                  name="madrasaVisits"
-                  render={(arrayHelpers) => (
-                    <div>
-                      {values.madrasaVisits.map((_, index) => (
-                        <div key={index} className="flex items-center mb-3">
-                          <Field
-                            name={`madrasaVisits.${index}`}
-                            placeholder={`Name of Madrasa ${index + 1}`}
+        {({ values, setFieldValue, isSubmitting }) => {
+          // Resize lists whenever counts change (no useFormikContext)
+          React.useEffect(() => {
+            const count = Math.max(0, Number(values.madrasaVisit || 0));
+            let list = Array.isArray(values.madrasaVisitList)
+              ? [...values.madrasaVisitList]
+              : [];
+            if (list.length !== count) {
+              if (list.length < count) list.push(...Array(count - list.length).fill(""));
+              else list = list.slice(0, count);
+              setFieldValue("madrasaVisitList", list, false);
+            }
+          }, [values.madrasaVisit]); // eslint-disable-line react-hooks/exhaustive-deps
+
+          React.useEffect(() => {
+            const count = Math.max(0, Number(values.schoolCollegeVisit || 0));
+            let list = Array.isArray(values.schoolCollegeVisitList)
+              ? [...values.schoolCollegeVisitList]
+              : [];
+            if (list.length !== count) {
+              if (list.length < count) list.push(...Array(count - list.length).fill(""));
+              else list = list.slice(0, count);
+              setFieldValue("schoolCollegeVisitList", list, false);
+            }
+          }, [values.schoolCollegeVisit]); // eslint-disable-line react-hooks/exhaustive-deps
+
+          return (
+            <Form>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                {/* Moktob visit count */}
+                <div className="lg:col-span-2">
+                  <label htmlFor="moktobVisit" className="mb-2 block text-gray-700">
+                    চলমান মক্তব পরিদর্শন হয়েছে
+                  </label>
+                  <Field
+                    id="moktobVisit"
+                    name="moktobVisit"
+                    type="number"
+                    min={0}
+                    placeholder="সংখ্যা লিখুন"
+                    className="w-full rounded border border-gray-300 px-4 py-2 mb-2"
+                    disabled={effectiveSubmitted || isSubmitting}
+                  />
+                  <ErrorMessage name="moktobVisit" component="div" className="text-red-500" />
+                </div>
+
+                {/* Madrasa: count -> N inputs */}
+                <div>
+                  <label className="mb-2 block text-gray-700">মাদ্রাসা সফর হয়েছে (সংখ্যা)</label>
+                  <Field
+                    name="madrasaVisit"
+                    type="number"
+                    min={0}
+                    placeholder="কতটি?"
+                    className="w-full rounded border border-gray-300 px-4 py-2 mb-2"
+                    disabled={effectiveSubmitted || isSubmitting}
+                  />
+                  <ErrorMessage name="madrasaVisit" component="div" className="text-red-500" />
+
+                  {Number(values.madrasaVisit || 0) > 0 && (
+                    <div className="mt-3 space-y-3">
+                      {values.madrasaVisitList.map((val, idx) => (
+                        <div key={`madrasa-${idx}`}>
+                          <input
+                            type="text"
+                            value={val}
+                            onChange={(e) => {
+                              const next = [...values.madrasaVisitList];
+                              next[idx] = e.target.value;
+                              setFieldValue("madrasaVisitList", next, false);
+                            }}
+                            placeholder={`মাদ্রাসার নাম #${idx + 1}`}
                             className="w-full rounded border border-gray-300 px-4 py-2"
+                            disabled={effectiveSubmitted || isSubmitting}
                           />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => arrayHelpers.remove(index)}
-                            className="ml-2"
-                          >
-                            -
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => arrayHelpers.insert(index + 1, "")}
-                            className="ml-2"
-                          >
-                            +
-                          </Button>
                         </div>
                       ))}
+                      <ErrorMessage
+                        name="madrasaVisitList"
+                        component="div"
+                        className="text-red-500"
+                      />
                     </div>
                   )}
+                </div>
+
+                {/* School/College/University: count -> N inputs */}
+                <div>
+                  <label className="mb-2 block text-gray-700">
+                    স্কুল/কলেজ/ভার্সিটি দাওয়াতী সফর হয়েছে (সংখ্যা)
+                  </label>
+                  <Field
+                    name="schoolCollegeVisit"
+                    type="number"
+                    min={0}
+                    placeholder="কতটি?"
+                    className="w-full rounded border border-gray-300 px-4 py-2 mb-2"
+                    disabled={effectiveSubmitted || isSubmitting}
+                  />
+                  <ErrorMessage
+                    name="schoolCollegeVisit"
+                    component="div"
+                    className="text-red-500"
+                  />
+
+                  {Number(values.schoolCollegeVisit || 0) > 0 && (
+                    <div className="mt-3 space-y-3">
+                      {values.schoolCollegeVisitList.map((val, idx) => (
+                        <div key={`scu-${idx}`}>
+                          <input
+                            type="text"
+                            value={val}
+                            onChange={(e) => {
+                              const next = [...values.schoolCollegeVisitList];
+                              next[idx] = e.target.value;
+                              setFieldValue("schoolCollegeVisitList", next, false);
+                            }}
+                            placeholder={`স্কুল/কলেজ/ভার্সিটি নাম #${idx + 1}`}
+                            className="w-full rounded border border-gray-300 px-4 py-2"
+                            disabled={effectiveSubmitted || isSubmitting}
+                          />
+                        </div>
+                      ))}
+                      <ErrorMessage
+                        name="schoolCollegeVisitList"
+                        component="div"
+                        className="text-red-500"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Editor */}
+              <div className="col-span-2 mt-6">
+                <h1 className="pb-3">মতামত লিখুন</h1>
+                <JoditEditorComponent
+                  placeholder="আপনার মতামত লিখুন..."
+                  initialValue={initialValues.editorContent}
+                  onContentChange={(content) => setFieldValue("editorContent", content)}
+                  height="300px"
+                  width="100%"
+                  disabled={effectiveSubmitted || isSubmitting}
                 />
               </div>
 
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  স্কুল/কলেজ/ভার্সিটি দাওয়াতী সফর হয়েছে
-                </label>
-                <FieldArray
-                  name="schoolCollegeVisits"
-                  render={(arrayHelpers) => (
-                    <div>
-                      {values.schoolCollegeVisits.map((_, index) => (
-                        <div key={index} className="mb-3 flex items-center">
-                          <Field
-                            name={`schoolCollegeVisits.${index}`}
-                            placeholder={`Name of School/College ${index + 1}`}
-                            className="w-full rounded border border-gray-300 px-4 py-2"
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => arrayHelpers.remove(index)}
-                            className="ml-2"
-                          >
-                            -
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => arrayHelpers.insert(index + 1, "")}
-                            className="ml-2"
-                          >
-                            +
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                />
+              <div className="flex justify-end mt-6">
+                <Button
+                  variant="ghost"
+                  size="default"
+                  type="submit"
+                  disabled={effectiveSubmitted || isSubmitting}
+                >
+                  {isSubmitting ? "Submitting..." : "Submit"}
+                </Button>
               </div>
-            </div>
-
-            <div className="col-span-2">
-              <h1 className="pb-3">মতামত লিখুন</h1>
-              <JoditEditorComponent
-                placeholder="আপনার মতামত লিখুন..."
-                initialValue={editorContent}
-                onContentChange={handleContentChange}
-                height="300px"
-                width="100%"
-              />
-            </div>
-
-            <div className="flex justify-end mt-6">
-              <Button
-                variant="ghost"
-                size="default"
-                type="submit"
-                disabled={isSubmittedToday}
-              >
-                Submit
-              </Button>
-            </div>
-          </Form>
-        )}
+            </Form>
+          );
+        }}
       </Formik>
     </div>
   );

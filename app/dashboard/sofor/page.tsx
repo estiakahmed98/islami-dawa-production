@@ -1,72 +1,100 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/TabButton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton";
 import SoforBishoyForm from "@/components/SoforBishoyForm";
 import AmoliTableShow from "@/components/TableShow";
 import { useSession } from "@/lib/auth-client";
+import { toast } from "sonner";
+
+function dhakaYMD(d: Date) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
+function toNumberedHTML(arr: unknown): string {
+  const list = Array.isArray(arr) ? arr.filter(Boolean).map(String) : [];
+  if (list.length === 0) return "";
+  return list.map((item, idx) => `${idx + 1}. ${item}`).join("<br/>");
+}
 
 const SoforPage: React.FC = () => {
   const { data: session } = useSession();
-  const [userData, setUserData] = useState<any>({ records: [] });
+  const userEmail = session?.user?.email;
+  const [userData, setUserData] = useState<any>({ records: {} });
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [isSubmittedToday, setIsSubmittedToday] = useState<boolean>(false);
 
-  const userEmail = session?.user?.email;
-
   useEffect(() => {
-    const fetchSoforData = async () => {
+    const ac = new AbortController();
+
+    const fetchToday = async () => {
       if (!userEmail) return;
-
       try {
-        const res = await fetch(`/api/soforbisoy?email=${userEmail}`);
+        const res = await fetch(
+          `/api/soforbisoy?email=${encodeURIComponent(userEmail)}&mode=today`,
+          { cache: "no-store", signal: ac.signal }
+        );
+        if (!res.ok) throw new Error("Failed to check today");
         const json = await res.json();
-
-        setIsSubmittedToday(json.isSubmittedToday);
-
-        if (json.data) {
-          const transformedData = {
-            records: {
-              [userEmail]: {
-                [new Date(json.data.date).toISOString().split('T')[0]]: {
-                  moktobVisit: json.data.moktobVisit,
-                  madrasaVisit: json.data.madrasaVisit,
-                  schoolCollegeVisit: json.data.schoolCollegeVisit,
-                  editorContent: json.data.editorContent
-                }
-              }
-            },
-            labelMap: {
-              moktobVisit: "চলমান মক্তব পরিদর্শন হয়েছে",
-              madrasaVisit: "মাদ্রাসা সফর হয়েছে",
-              schoolCollegeVisit: "স্কুল/কলেজ সফর হয়েছে",
-             
-            }
-          };
-          setUserData(transformedData);
-        } else {
-          setUserData({
-            records: { [userEmail]: {} },
-            labelMap: {
-              moktobVisit: "চলমান মক্তব পরিদর্শন হয়েছে",
-              madrasaVisit: "মাদ্রাসা সফর হয়েছে",
-              schoolCollegeVisit: "স্কুল/কলেজ সফর হয়েছে",
-              editorContent: "মতামত"
-            }
-          });
+        setIsSubmittedToday(!!json.isSubmittedToday);
+      } catch (e) {
+        if (!(e instanceof DOMException && e.name === "AbortError")) {
+          console.error(e);
         }
-      } catch (error) {
-        console.error("Failed to fetch Sofor data:", error);
       }
     };
 
-    fetchSoforData();
+    const fetchAll = async () => {
+      if (!userEmail) return;
+      try {
+        const res = await fetch(
+          `/api/soforbisoy?email=${encodeURIComponent(userEmail)}`,
+          { cache: "no-store", signal: ac.signal }
+        );
+        if (!res.ok) throw new Error("Failed to fetch records");
+        const json = await res.json();
+
+        const all: Array<any> = Array.isArray(json.records) ? json.records : [];
+        const transformed: Record<string, Record<string, any>> = { [userEmail]: {} };
+
+        all.forEach((rec) => {
+          const dateKey = dhakaYMD(new Date(rec.date));
+          transformed[userEmail][dateKey] = {
+            moktobVisit: rec.moktobVisit ?? 0,
+            madrasaVisit: rec.madrasaVisit ?? 0,
+            schoolCollegeVisit: rec.schoolCollegeVisit ?? 0,
+            madrasaVisitList: toNumberedHTML(rec.madrasaVisitList),
+            schoolCollegeVisitList: toNumberedHTML(rec.schoolCollegeVisitList),
+            editorContent: rec.editorContent ?? "",
+          };
+        });
+        setUserData({
+          records: transformed,
+          labelMap: {
+            moktobVisit: "চলমান মক্তব পরিদর্শন হয়েছে",
+            madrasaVisit: "মাদ্রাসা সফর হয়েছে (সংখ্যা)",
+            madrasaVisitList: "মাদ্রাসার তালিকা",
+            schoolCollegeVisit: "স্কুল/কলেজ/ভার্সিটি সফর হয়েছে (সংখ্যা)",
+            schoolCollegeVisitList: "স্কুল/কলেজ/ভার্সিটির তালিকা",
+          },
+        });
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          console.error("Failed to fetch Sofor data:", error);
+          toast.error("সফর তথ্য আনা যায়নি।");
+        }
+      }
+    };
+
+    fetchToday();
+    fetchAll();
+    return () => ac.abort();
   }, [userEmail]);
 
   return (

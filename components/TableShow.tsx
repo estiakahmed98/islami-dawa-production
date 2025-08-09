@@ -24,9 +24,9 @@ interface EditRequestStatus {
   };
 }
 
-const UniversalTableShow: React.FC<AmoliTableProps> = ({ 
-  userData, 
-  selectedMonth, 
+const UniversalTableShow: React.FC<AmoliTableProps> = ({
+  userData,
+  selectedMonth,
   selectedYear,
   onMonthChange,
   onYearChange
@@ -94,7 +94,7 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
 
     const labels = userData.labelMap;
     const transposed = Object.keys(labels).map((label) => {
-      const row: { label: string; [key: number]: any } = {
+      const row: { label: string;[key: number]: any } = {
         label: labels[label],
       };
 
@@ -109,7 +109,7 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
       return row;
     });
 
-    const motamotRow: { label: string; [key: number]: any } = {
+    const motamotRow: { label: string;[key: number]: any } = {
       label: "মতামত",
     };
     monthDays.forEach((day) => {
@@ -131,7 +131,7 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
 
     transposed.push(motamotRow);
 
-    const editRow: { label: string; [key: number]: any } = {
+    const editRow: { label: string;[key: number]: any } = {
       label: "Edit",
     };
 
@@ -212,8 +212,8 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
       const matchesLabel = filterLabel ? row.label.includes(filterLabel) : true;
       const matchesValue = filterValue
         ? Object.values(row).some(
-            (val) => typeof val === "string" && val.includes(filterValue)
-          )
+          (val) => typeof val === "string" && val.includes(filterValue)
+        )
         : true;
       return matchesLabel && matchesValue;
     });
@@ -332,15 +332,15 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
             </thead>
             <tbody>
               ${monthDays
-                .map(
-                  (day) => `
+        .map(
+          (day) => `
                 <tr>
                   <td class="row-label">${day}</td>
                   ${filteredData.map((row) => `<td>${row[day] || "-"}</td>`).join("")}
                 </tr>
               `
-                )
-                .join("")}
+        )
+        .join("")}
             </tbody>
           </table>
         </body>
@@ -562,17 +562,23 @@ const UniversalTableShow: React.FC<AmoliTableProps> = ({
                 <td className="border border-gray-300 px-6 py-2 text-nowrap">
                   {row.label}
                 </td>
-                {monthDays.map((day) => (
-                  <td
-                    key={day}
-                    className="border border-gray-300 px-6 py-2 text-center text-nowrap"
-                  >
-                    {row[day]}
-                  </td>
-                ))}
+                {monthDays.map((day) => {
+                  const cellValue = row[day];
+                  const isHTML = typeof cellValue === "string" && cellValue.includes("<br");
+                  return (
+                    <td
+                      key={day}
+                      className="border border-gray-300 px-6 py-2 text-center text-nowrap"
+                      {...(isHTML
+                        ? { dangerouslySetInnerHTML: { __html: cellValue } }
+                        : { children: cellValue })}
+                    />
+                  );
+                })}
               </tr>
             ))}
           </tbody>
+
         </table>
       </div>
 
