@@ -1,17 +1,16 @@
-//Faysal //Estiak
-
+// Faysal // Estiak
 "use client";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/DawatiData";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
 import Loading from "@/app/dashboard/loading";
 
-// Define the type for form values
+// Form values
 interface DawatiFormData {
   nonMuslimDawat: string;
   murtadDawat: string;
@@ -28,63 +27,81 @@ const DawatiForm: React.FC = () => {
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check if the user has already submitted today
+  // Check if the user has already submitted today (Asia/Dhaka day)
   useEffect(() => {
-    const checkSubmissionStatus = async () => {
-      if (!email) return;
-
+    const checkToday = async () => {
+      if (!email) {
+        setLoading(false);
+        return;
+      }
       try {
-        const response = await fetch(`/api/dawati?email=${email}`);
-        if (response.ok) {
-          const data = await response.json();
-          setIsSubmittedToday(data.isSubmittedToday);
-        } else {
-          toast.error("Failed to check submission status.");
-        }
-      } catch (error) {
-        console.error("Error checking submission status:", error);
-        toast.error("Error checking submission status.");
+        const res = await fetch(
+          `/api/dawati?email=${encodeURIComponent(email)}&mode=today`
+        );
+        if (!res.ok) throw new Error("Failed to check submission status");
+        const data = await res.json();
+        setIsSubmittedToday(Boolean(data?.isSubmittedToday));
+      } catch (err) {
+        console.error("Submission check error:", err);
+        toast.error("Could not verify today's submission.");
       } finally {
         setLoading(false);
       }
     };
-
-    checkSubmissionStatus();
+    checkToday();
   }, [email]);
 
-  // Handle form submission
   const handleSubmit = async (values: DawatiFormData) => {
-    const formData = { ...values, email };
+    if (!email) {
+      toast.error("You are not logged in.");
+      return;
+    }
 
     if (isSubmittedToday) {
       toast.error("You have already submitted today. Try again tomorrow.");
       return;
     }
 
+    const body = {
+      email,
+      nonMuslimDawat: Number(values.nonMuslimDawat) || 0,
+      murtadDawat: Number(values.murtadDawat) || 0,
+      alemderSatheyMojlish: Number(values.alemderSatheyMojlish) || 0,
+      publicSatheyMojlish: Number(values.publicSatheyMojlish) || 0,
+      nonMuslimSaptahikGasht: Number(values.nonMuslimSaptahikGasht) || 0,
+      editorContent: values.editorContent || "",
+    };
+
     try {
-      const response = await fetch("/api/dawati", {
+      const res = await fetch("/api/dawati", {
         method: "POST",
-        body: JSON.stringify(formData),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
 
-      if (response.ok) {
-        setIsSubmittedToday(true);
+      const json = await res.json().catch(() => ({}));
+
+      if (res.status === 201) {
         toast.success("Submitted successfully!");
+        setIsSubmittedToday(true);
         router.push("/dashboard");
-      } else if (response.status === 400) {
-        const data = await response.json();
-        toast.error(data.error || "Submission failed. Try again.");
-      } else {
-        toast.error("Submission failed. Try again.");
+        return;
       }
-    } catch (error) {
-      console.error("Error during submission:", error);
-      toast.error("Error during submission.");
+
+      if (res.status === 409) {
+        // unique violation (already submitted today)
+        setIsSubmittedToday(true);
+        toast.error(json?.error || "Already submitted for today.");
+        return;
+      }
+
+      toast.error(json?.error || "Submission failed. Try again.");
+    } catch (err) {
+      console.error("Submission error:", err);
+      toast.error("Unexpected error during submission.");
     }
   };
 
-  // Render loading state
   if (loading) return <Loading />;
 
   return (
@@ -94,13 +111,15 @@ const DawatiForm: React.FC = () => {
           You already have submitted today.
         </div>
       )}
+
       <h2 className="mb-6 text-2xl">দাওয়াতি বিষয়</h2>
+
       <Formik
         initialValues={{ ...initialFormData, editorContent: "" }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ setFieldValue }) => (
+        {({ setFieldValue, isSubmitting }) => (
           <Form>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               <div>
@@ -110,7 +129,7 @@ const DawatiForm: React.FC = () => {
                 <Field
                   name="nonMuslimDawat"
                   type="number"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                   placeholder="Enter value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -128,7 +147,7 @@ const DawatiForm: React.FC = () => {
                 <Field
                   name="murtadDawat"
                   type="number"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -146,7 +165,7 @@ const DawatiForm: React.FC = () => {
                 <Field
                   name="alemderSatheyMojlish"
                   type="number"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -164,7 +183,7 @@ const DawatiForm: React.FC = () => {
                 <Field
                   name="publicSatheyMojlish"
                   type="number"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -182,7 +201,7 @@ const DawatiForm: React.FC = () => {
                 <Field
                   name="nonMuslimSaptahikGasht"
                   type="number"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -195,7 +214,7 @@ const DawatiForm: React.FC = () => {
             </div>
 
             <div>
-              <h1 className=" pb-3">মতামত লিখুন</h1>
+              <h1 className="pb-3">মতামত লিখুন</h1>
               <JoditEditorComponent
                 placeholder="আপনার মতামত লিখুন..."
                 initialValue=""
@@ -212,9 +231,9 @@ const DawatiForm: React.FC = () => {
                 variant="ghost"
                 size="default"
                 type="submit"
-                disabled={isSubmittedToday}
+                disabled={isSubmittedToday || isSubmitting}
               >
-                Submit
+                {isSubmitting ? "Submitting..." : "Submit"}
               </Button>
             </div>
           </Form>

@@ -131,7 +131,7 @@ const SidebarMenu = () => {
     {
       title: "দাওয়াতি মজলিশ",
       icon: <FaUsers className="size-5" />,
-      url: "/dashboard/dawati-mojlis",
+      url: "/dashboard/dawati-mojlish",
     },
     {
       title: "জামাত বিষয়",

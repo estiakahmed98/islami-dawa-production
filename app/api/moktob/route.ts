@@ -1,6 +1,20 @@
-// /app/api/moktob/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+
+/** Start/end of the current Dhaka day for duplicate checks */
+function getDhakaDayRange(now = new Date()) {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const [y, m, d] = fmt.format(now).split("-"); // "YYYY-MM-DD"
+  // Dhaka is UTC+06:00 year-round (no DST)
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`);
+  return { start, end };
+}
 
 // POST: Submit MoktobBisoy Data
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -20,16 +34,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize date
-
-    const existing = await prisma.moktobBisoyRecord.findUnique({
+    // ✅ Dhaka-day duplicate check (don’t save normalized midnight)
+    const { start, end } = getDhakaDayRange();
+    const existing = await prisma.moktobBisoyRecord.findFirst({
       where: {
-        userId_date: {
-          userId: user.id,
-          date: today,
-        },
+        userId: user.id,
+        date: { gte: start, lt: end },
       },
+      select: { id: true },
     });
 
     if (existing) {
@@ -39,10 +51,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
+    // ✅ Make date EXACTLY the same as createdAt (same instant)
+    const now = new Date();
+
     const created = await prisma.moktobBisoyRecord.create({
       data: {
         userId: user.id,
-        date: today,
+        createdAt: now,  // mirror createdAt
+        date: now,       // EXACT same timestamp
         editorContent,
         ...data,
       },
@@ -55,7 +71,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   } catch (error) {
     console.error("POST /api/moktob error:", error);
     return NextResponse.json(
-      { error: "Failed to submit data", details: error },
+      { error: "Failed to submit data", details: `${error}` },
       { status: 500 }
     );
   }
@@ -85,7 +101,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   } catch (error) {
     console.error("GET /api/moktob error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch Moktob records", details: error },
+      { error: "Failed to fetch Moktob records", details: `${error}` },
       { status: 500 }
     );
   }

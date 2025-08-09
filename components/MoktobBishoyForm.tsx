@@ -1,256 +1,190 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ErrorMessage, Field, Form, Formik } from "formik";
-import { initialFormData, validationSchema } from "@/app/data/DayeeBishoyData";
+import { ErrorMessage, Field, Formik, Form } from "formik";
+import { initialFormData, validationSchema } from "@/app/data/MoktobBishoyData";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
 import Loading from "@/app/dashboard/loading";
 
-interface AssistantDaee {
-  name: string;
-  phone: string;
-  address: string;
-  description?: string;
+type FormValues = typeof initialFormData & { editorContent: string };
+
+const FIELDS: { name: keyof FormValues; label: string }[] = [
+  { name: "notunMoktobChalu", label: "নতুন মক্তব চালু হয়েছে" },
+  { name: "totalMoktob", label: "মোট মক্তব চালু আছে" },
+  { name: "totalStudent", label: "মোট শিক্ষার্থী" },
+  { name: "obhibhabokConference", label: "অভিভাবক সম্মেলন" },
+  { name: "moktoThekeMadrasaAdmission", label: "মক্তব থেকে মাদরাসায় ভর্তি" },
+  { name: "notunBoyoskoShikkha", label: "নতুন বয়স্ক কোরআন শিক্ষা" },
+  { name: "totalBoyoskoShikkha", label: "মোট বয়স্ক কোরআন শিক্ষা" },
+  { name: "boyoskoShikkhaOnshogrohon", label: "বয়স্ক শিক্ষায় অংশগ্রহণ" },
+  { name: "newMuslimeDinerFikir", label: "নব মুসলিমের দীন ফিকির" },
+];
+
+/** Format a date to YYYY-MM-DD in Dhaka time */
+function dhakaYMD(d: Date) {
+  if (!(d instanceof Date) || isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
 }
 
-const DayeeBishoyForm: React.FC = () => {
+/** Compare two dates based on Dhaka calendar date */
+function isSameDhakaDay(recordDateISO: string | Date, now = new Date()) {
+  const left = dhakaYMD(new Date(recordDateISO));
+  const right = dhakaYMD(now);
+  return left !== "" && right !== "" && left === right;
+}
+
+const MoktobBishoyForm = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const email = session?.user?.email || "";
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [editorContent, setEditorContent] = useState("");
-  const [assistantCount, setAssistantCount] = useState(0);
-  const [assistants, setAssistants] = useState<AssistantDaee[]>([]);
 
-  const handleContentChange = (content: string) => setEditorContent(content);
-
-  // ✅ Submission check just like Moktob
+  // Check if user already submitted today
   useEffect(() => {
-    const checkSubmission = async () => {
-      if (!email) {
-        setLoading(false);
-        return;
-      }
+    if (!email) {
+      setIsSubmittedToday(false);
+      setLoading(false);
+      return;
+    }
 
+    const ac = new AbortController();
+    (async () => {
       try {
-        const res = await fetch(`/api/dayi?email=${email}`);
-        if (res.ok) {
-          const data = await res.json();
-          const records = data.records || [];
-          const today = new Date().toDateString();
-
-          const hasTodaySubmission = records.some((record: any) => {
-            const recordDate = new Date(record.date).toDateString();
-            return recordDate === today;
-          });
-
-          setIsSubmittedToday(hasTodaySubmission);
-        } else {
-          toast.error("Failed to check today's submission.");
+        const res = await fetch(
+          `/api/moktob?email=${encodeURIComponent(email)}`,
+          { cache: "no-store", signal: ac.signal }
+        );
+        if (!res.ok) throw new Error("Failed to fetch records");
+        const json = await res.json();
+        const records: Array<{ date: string | Date }> = Array.isArray(json)
+          ? json
+          : json.records ?? [];
+        const todaySubmitted = records.some((r) => isSameDhakaDay(r.date));
+        setIsSubmittedToday(todaySubmitted);
+      } catch (err: any) {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
+          console.error("Today check error:", err);
+          toast.error("আজকের সাবমিশন স্ট্যাটাস চেক করা যায়নি।");
         }
-      } catch (err) {
-        console.error(err);
-        toast.error("Error checking today's submission.");
       } finally {
         setLoading(false);
       }
-    };
+    })();
 
-    checkSubmission();
+    return () => ac.abort();
   }, [email]);
 
-  const handleAssistantCountChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const count = parseInt(e.target.value) || 0;
-    setAssistantCount(count);
-
-    const newAssistants = [...assistants];
-    while (newAssistants.length < count) {
-      newAssistants.push({ name: "", phone: "", address: "", description: "" });
+  const handleSubmit = async (values: FormValues) => {
+    if (!email) {
+      toast.error("You are not logged in.");
+      return;
     }
-    setAssistants(newAssistants.slice(0, count));
-  };
 
-  const handleAssistantChange = (
-    index: number,
-    field: keyof AssistantDaee,
-    value: string
-  ) => {
-    const updated = [...assistants];
-    updated[index][field] = value;
-    setAssistants(updated);
-  };
-
-  const handleSubmit = async (values: typeof initialFormData) => {
     if (isSubmittedToday) {
       toast.error("You have already submitted today.");
       return;
     }
 
-    const formData = {
-      ...values,
+    const payload = {
       email,
-      editorContent,
-      assistants: assistantCount > 0 ? assistants : [],
-      userInfo: {
-        dayeName: session?.user?.name || "",
-        division: session?.user?.division || "",
-        district: session?.user?.district || "",
-        upazila: session?.user?.upazila || "",
-        union: session?.user?.union || "",
-      },
+      editorContent: values.editorContent || "",
+      notunMoktobChalu: Number(values.notunMoktobChalu) || 0,
+      totalMoktob: Number(values.totalMoktob) || 0,
+      totalStudent: Number(values.totalStudent) || 0,
+      obhibhabokConference: Number(values.obhibhabokConference) || 0,
+      moktoThekeMadrasaAdmission: Number(values.moktoThekeMadrasaAdmission) || 0,
+      notunBoyoskoShikkha: Number(values.notunBoyoskoShikkha) || 0,
+      totalBoyoskoShikkha: Number(values.totalBoyoskoShikkha) || 0,
+      boyoskoShikkhaOnshogrohon: Number(values.boyoskoShikkhaOnshogrohon) || 0,
+      newMuslimeDinerFikir: Number(values.newMuslimeDinerFikir) || 0,
     };
 
     try {
-      const res = await fetch("/api/dayi", {
+      const res = await fetch("/api/moktob", {
         method: "POST",
-        body: JSON.stringify(formData),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
-      if (res.ok) {
-        toast.success("Submitted successfully!");
-        setIsSubmittedToday(true);
-        router.push("/dashboard");
-      } else {
-        const err = await res.json();
-        toast.error(err.error || "Submission failed.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Submission failed");
       }
-    } catch (error) {
+
+      toast.success("Submitted successfully...");
+      setIsSubmittedToday(true);
+      router.push("/dashboard");
+    } catch (error: any) {
       console.error("Submit error:", error);
-      toast.error("Unexpected error during submission.");
+      toast.error(error.message || "Submission failed");
     }
   };
 
   if (loading) return <Loading />;
 
   return (
-    <div className="mx-auto mt-8 w-full rounded bg-white p-4 lg:p-10 shadow-lg">
+    <div className="w-full mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
           You have already submitted today.
         </div>
       )}
-      <h2 className="mb-6 text-2xl font-semibold text-gray-800">
-        সহযোগী দায়ী বিষয়
-      </h2>
-
-      <Formik
-        initialValues={initialFormData}
+      <h2 className="mb-6 text-2xl">মক্তব বিষয়</h2>
+      <Formik<FormValues>
+        initialValues={{ ...initialFormData, editorContent: "" }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
         {({ setFieldValue, isSubmitting }) => (
-          <Form className="space-y-6">
-            <div>
-              <label htmlFor="sohojogiDayeToiri" className="block mb-1">
-                সহযোগী দাঈ তৈরি হয়েছে
-              </label>
-              <Field
-                id="sohojogiDayeToiri"
-                name="sohojogiDayeToiri"
-                type="number"
-                placeholder="Enter value"
-                disabled={isSubmittedToday}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setFieldValue("sohojogiDayeToiri", e.target.value);
-                  handleAssistantCountChange(e);
-                }}
-                className="w-full rounded border border-gray-300 px-4 py-2"
-              />
-              <ErrorMessage
-                name="sohojogiDayeToiri"
-                component="div"
-                className="text-red-500 text-sm mt-1"
-              />
-            </div>
-
-            {assistantCount > 0 && (
-              <div className="border-t pt-6 space-y-6">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  সহযোগী দাঈদের তথ্য
-                </h3>
-                {assistants.map((assistant, index) => (
-                  <div key={index} className="border p-4 rounded-lg space-y-4">
-                    <h4 className="font-bold text-[#155E75]">
-                      সহযোগী দাঈ #{index + 1}
-                    </h4>
-                    <div>
-                      <label className="block text-gray-700 mb-1">নাম</label>
-                      <input
-                        type="text"
-                        value={assistant.name}
-                        onChange={(e) =>
-                          handleAssistantChange(index, "name", e.target.value)
-                        }
-                        disabled={isSubmittedToday}
-                        className="w-full rounded border border-gray-300 px-4 py-2"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 mb-1">ফোন</label>
-                      <input
-                        type="text"
-                        value={assistant.phone}
-                        onChange={(e) =>
-                          handleAssistantChange(index, "phone", e.target.value)
-                        }
-                        disabled={isSubmittedToday}
-                        className="w-full rounded border border-gray-300 px-4 py-2"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 mb-1">ঠিকানা</label>
-                      <textarea
-                        value={assistant.address}
-                        onChange={(e) =>
-                          handleAssistantChange(index, "address", e.target.value)
-                        }
-                        disabled={isSubmittedToday}
-                        className="w-full rounded border border-gray-300 px-4 py-2"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 mb-1">বিস্তারিত</label>
-                      <textarea
-                        value={assistant.description}
-                        onChange={(e) =>
-                          handleAssistantChange(index, "description", e.target.value)
-                        }
-                        disabled={isSubmittedToday}
-                        className="w-full rounded border border-gray-300 px-4 py-2"
-                      />
-                    </div>
-                  </div>
-                ))}
+          <Form className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {FIELDS.map((f) => (
+              <div key={f.name as string}>
+                <label className="mb-2 block text-gray-700">{f.label}</label>
+                <Field
+                  name={f.name as string}
+                  type="number"
+                  placeholder="Enter value"
+                  disabled={isSubmittedToday || isSubmitting}
+                  className="w-full rounded border border-gray-300 px-4 py-2 mb-2"
+                />
+                <ErrorMessage
+                  name={f.name as string}
+                  component="div"
+                  className="text-red-500"
+                />
               </div>
-            )}
+            ))}
 
-            <div className="border-t pt-6">
-              <h3 className="mb-3 font-medium">মতামত লিখুন</h3>
+            <div className="col-span-full">
+              <label className="block text-gray-700 mb-2">মতামত</label>
               <JoditEditorComponent
                 placeholder="আপনার মতামত লিখুন..."
                 initialValue=""
-                onContentChange={handleContentChange}
+                onContentChange={(content) =>
+                  setFieldValue("editorContent", content)
+                }
                 height="300px"
                 width="100%"
-                disabled={isSubmittedToday}
+                disabled={isSubmittedToday || isSubmitting}
               />
             </div>
 
-            <div className="flex justify-end mt-6">
+            <div className="col-span-full flex justify-end mt-4">
               <Button
                 type="submit"
-                disabled={isSubmitting || isSubmittedToday}
+                disabled={isSubmittedToday || isSubmitting}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {isSubmitting ? "Submitting..." : "Submit"}
               </Button>
@@ -262,4 +196,4 @@ const DayeeBishoyForm: React.FC = () => {
   );
 };
 
-export default DayeeBishoyForm;
+export default MoktobBishoyForm;
