@@ -1,71 +1,86 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import TalimForm from "@/components/TalimForm";
 import UniversalTableShow from "@/components/TableShow";
 import { useSession } from "@/lib/auth-client";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/TabButton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton";
+import { toast } from "sonner";
+
+/** Format a date to YYYY-MM-DD in Dhaka time (safe) */
+function dhakaYMD(d: Date) {
+  if (!(d instanceof Date) || isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
 
 const TalimPage: React.FC = () => {
   const { data: session } = useSession();
-  const [userData, setUserData] = useState<any>({ records: [] });
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [isSubmittedToday, setIsSubmittedToday] = useState<boolean>(false);
+  const userEmail = session?.user?.email ?? "";
 
-  const userEmail = session?.user?.email;
+  const [userData, setUserData] = React.useState<any>({ records: {} });
+  const [selectedMonth, setSelectedMonth] = React.useState<number>(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = React.useState<number>(new Date().getFullYear());
+  const [isSubmittedToday, setIsSubmittedToday] = React.useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchTalimData = async () => {
-      if (!userEmail) return;
+  const labelMap = React.useMemo(
+    () => ({
+      mohilaTalim: "মহিলা তালিম",
+      mohilaOnshogrohon: "মহিলা অংশগ্রহণ",
+    }),
+    []
+  );
 
+  React.useEffect(() => {
+    if (!userEmail) {
+      setUserData({ records: {}, labelMap });
+      setIsSubmittedToday(false);
+      return;
+    }
+
+    const ac = new AbortController();
+
+    (async () => {
       try {
-        const res = await fetch(`/api/talim?email=${userEmail}`);
+        const res = await fetch(`/api/talim?email=${encodeURIComponent(userEmail)}`, {
+          cache: "no-store",
+          signal: ac.signal,
+        });
+        if (!res.ok) throw new Error("Failed to fetch talim records");
+
+        // Expected shape: { isSubmittedToday, today, records }
         const json = await res.json();
-        
-        setIsSubmittedToday(json.isSubmittedToday);
 
-        // If there's data, transform it to match the expected format
-        if (json.data) {
-          const transformedData = {
-            records: {
-              [userEmail]: {
-                [new Date(json.data.date).toISOString().split('T')[0]]: {
-                  mohilaTalim: json.data.mohilaTalim,
-                  mohilaOnshogrohon: json.data.mohilaOnshogrohon,
-                  editorContent: json.data.editorContent
-                }
-              }
-            },
-            labelMap: {
-              mohilaTalim: "মহিলা তালিম",
-              mohilaOnshogrohon: "মহিলা অংশগ্রহণ",
-              editorContent: "মন্তব্য / নোট"
-            }
+        setIsSubmittedToday(!!json.isSubmittedToday);
+
+        const all: Array<any> = Array.isArray(json.records) ? json.records : [];
+        const transformed: Record<string, Record<string, any>> = { [userEmail]: {} };
+
+        all.forEach((rec) => {
+          const dateKey = dhakaYMD(new Date(rec.date));
+          if (!dateKey) return;
+          transformed[userEmail][dateKey] = {
+            mohilaTalim: rec.mohilaTalim,
+            mohilaOnshogrohon: rec.mohilaOnshogrohon,
+            editorContent: rec.editorContent,
           };
-          setUserData(transformedData);
-        } else {
-          setUserData({
-            records: { [userEmail]: {} },
-            labelMap: {
-              mohilaTalim: "মহিলা তালিম",
-              mohilaOnshogrohon: "মহিলা অংশগ্রহণ",
-              editorContent: "মন্তব্য / নোট"
-            }
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch Talim data:", error);
-      }
-    };
+        });
 
-    fetchTalimData();
-  }, [userEmail]);
+        setUserData({ records: transformed, labelMap });
+      } catch (err: any) {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
+          console.error("Failed to fetch Talim data:", err);
+          toast.error("তালিম তথ্য আনা যায়নি।");
+        }
+      }
+    })();
+
+    return () => ac.abort();
+  }, [userEmail, labelMap]);
 
   return (
     <div>
@@ -79,8 +94,8 @@ const TalimPage: React.FC = () => {
 
         <TabsContent value="dataForm">
           <div className="bg-gray-50 lg:rounded lg:shadow">
-            <TalimForm 
-              isSubmittedToday={isSubmittedToday} 
+            <TalimForm
+              isSubmittedToday={isSubmittedToday}
               setIsSubmittedToday={setIsSubmittedToday}
             />
           </div>
@@ -88,7 +103,7 @@ const TalimPage: React.FC = () => {
 
         <TabsContent value="report">
           <div className="bg-gray-50 rounded shadow">
-            <UniversalTableShow 
+            <UniversalTableShow
               userData={userData}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}

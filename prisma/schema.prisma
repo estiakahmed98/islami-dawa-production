@@ -217,8 +217,10 @@ model SoforBisoyRecord {
   user               users    @relation(fields: [userId], references: [id], onDelete: Cascade)
   date               DateTime
   madrasaVisit       Int      @default(0)
+  madrasaVisitList   String[] @default([])
   moktobVisit        Int      @default(0)
   schoolCollegeVisit Int      @default(0)
+  schoolCollegeVisitList String[] @default([])
   editorContent      String?  @db.Text
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt

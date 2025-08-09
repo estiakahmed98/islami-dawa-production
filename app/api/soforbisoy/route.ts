@@ -1,259 +1,189 @@
-// // app/api/soforbisoy/route.ts
-// import { NextRequest, NextResponse } from "next/server";
-// import fs from "fs";
-// import path from "path";
-
-// // Path to the user data file
-// const userDataPath = path.join(
-//   process.cwd(),
-//   "app/data/soforBishoyUserData.ts"
-// );
-
-// interface SoforBishoyData {
-//   moktobVisit: string;
-//   madrasaVisits: string[];
-//   schoolCollegeVisits: string[];
-//   editorContent?: string;
-//   [key: string]: string | string[] | undefined;
-// }
-
-// export async function POST(req: NextRequest): Promise<NextResponse> {
-//   try {
-//     const body = await req.json();
-//     const { email, ...restData } = body as SoforBishoyData & { email: string };
-
-//     // Basic validation
-//     if (!email || Object.keys(restData).length === 0) {
-//       return NextResponse.json(
-//         { error: "Email and data are required." },
-//         { status: 400 }
-//       );
-//     }
-
-//     // Get the current date in YYYY-MM-DD format
-//     const currentDate = new Date().toISOString().split("T")[0];
-
-//     // Check if the data file exists; if not, create it
-//     if (!fs.existsSync(userDataPath)) {
-//       fs.writeFileSync(
-//         userDataPath,
-//         `export const userSoforBishoyData = { labelMap: {}, records: {} };`,
-//         "utf-8"
-//       );
-//     }
-
-//     // Read the existing data file
-//     const fileContent = fs.readFileSync(userDataPath, "utf-8");
-
-//     // Parse existing data
-//     let userSoforBishoyData: {
-//       labelMap: object;
-//       records: Record<string, Record<string, any>>;
-//     } = {
-//       labelMap: {},
-//       records: {},
-//     };
-
-//     const startIndex = fileContent.indexOf("{");
-//     const endIndex = fileContent.lastIndexOf("}");
-//     if (startIndex !== -1 && endIndex !== -1) {
-//       const jsonString = fileContent.slice(startIndex, endIndex + 1);
-//       userSoforBishoyData = eval(`(${jsonString})`);
-//     }
-
-//     // Ensure `records` key exists
-//     if (!userSoforBishoyData.records) {
-//       userSoforBishoyData.records = {};
-//     }
-
-//     // Check if the user has already submitted today
-//     if (userSoforBishoyData.records[email]?.[currentDate]) {
-//       return NextResponse.json(
-//         { error: "You have already submitted data today." },
-//         { status: 400 }
-//       );
-//     }
-
-//     // Ensure data is organized by email
-//     if (!userSoforBishoyData.records[email]) {
-//       userSoforBishoyData.records[email] = {};
-//     }
-
-//     // Convert arrays to newline-separated strings
-//     const processedData = {
-//       ...restData,
-//       madrasaVisits: Array.isArray(restData.madrasaVisits)
-//         ? restData.madrasaVisits.join("\n")
-//         : restData.madrasaVisits,
-//       schoolCollegeVisits: Array.isArray(restData.schoolCollegeVisits)
-//         ? restData.schoolCollegeVisits.join("\n")
-//         : restData.schoolCollegeVisits,
-//     };
-
-//     // Add form data under the current date
-//     userSoforBishoyData.records[email][currentDate] = processedData;
-
-//     // Write the updated data back to the file
-//     const updatedFileContent = `export const userSoforBishoyData = ${JSON.stringify(
-//       userSoforBishoyData,
-//       null,
-//       2
-//     )};`;
-//     fs.writeFileSync(userDataPath, updatedFileContent, "utf-8");
-
-//     return NextResponse.json(
-//       {
-//         message: "Submission successful",
-//         data: userSoforBishoyData.records[email][currentDate],
-//       },
-//       {
-//         status: 201,
-//         headers: { "Content-Type": "application/json" },
-//       }
-//     );
-//   } catch (error) {
-//     console.error("Error saving data:", error);
-//     return NextResponse.json(
-//       { error: "Failed to save user data." },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-// export async function GET(req: NextRequest): Promise<NextResponse> {
-//   try {
-//     const { searchParams } = new URL(req.url);
-//     const email = searchParams.get("email");
-//     const today = new Date().toISOString().split("T")[0];
-
-//     if (!email) {
-//       return NextResponse.json(
-//         { error: "Email is required." },
-//         { status: 400 }
-//       );
-//     }
-
-//     // Check if the data file exists
-//     if (!fs.existsSync(userDataPath)) {
-//       fs.writeFileSync(
-//         userDataPath,
-//         `export const userSoforBishoyData = { labelMap: {}, records: {} };`,
-//         "utf-8"
-//       );
-//     }
-
-//     const fileContent = fs.readFileSync(userDataPath, "utf-8");
-
-//     const startIndex = fileContent.indexOf("{");
-//     const endIndex = fileContent.lastIndexOf("}");
-//     const jsonString = fileContent.slice(startIndex, endIndex + 1);
-//     const userSoforBishoyData = eval(`(${jsonString})`);
-
-//     // Check if the user has submitted data today
-//     const isSubmittedToday = !!userSoforBishoyData.records[email]?.[today];
-
-//     return NextResponse.json({ isSubmittedToday }, { status: 200 });
-//   } catch (error) {
-//     console.error("Error checking submission status:", error);
-//     return NextResponse.json(
-//       { error: "Failed to fetch submission status." },
-//       { status: 500 }
-//     );
-//   }
-// }
-
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; // Ensure you have this path right
+import { prisma } from "@/lib/prisma";
 
-// POST: Create SoforBisoyRecord
+/** Start/end of a Dhaka (Asia/Dhaka) calendar day */
+function getDhakaDayRange(now = new Date()) {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const [y, m, d] = fmt.format(now).split("-"); // "YYYY-MM-DD"
+  // Dhaka is UTC+06 year-round
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`); // exclusive
+  return { start, end };
+}
+
+/** Convert "YYYY-MM-DD" (Dhaka) to [start,end) UTC range */
+function dhakaDayRangeFromISODate(yyyyMmDd: string) {
+  const [y, m, d] = yyyyMmDd.split("-");
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`);
+  return { start, end };
+}
+
+// ========== POST: Create SoforBisoyRecord ==========
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
-    const { email, editorContent, madrasaVisits, moktobVisit, schoolCollegeVisits } = body;
+
+    // Accept both old and new payload shapes
+    const {
+      email,
+      editorContent = "",
+
+      // counts (optional if lists are provided)
+      madrasaVisit,                 // number (optional)
+      schoolCollegeVisit,           // number (optional)
+      moktobVisit,                  // number or string
+
+      // new names (recommended)
+      madrasaVisitList,             // string[]
+      schoolCollegeVisitList,       // string[]
+
+      // legacy names (from your current FE)
+      madrasaVisits,                // string[]
+      schoolCollegeVisits,          // string[]
+    } = body ?? {};
 
     if (!email) {
       return NextResponse.json({ error: "Email is required." }, { status: 400 });
     }
 
-    // Get user by email
-    const user = await prisma.users.findUnique({
-      where: { email },
-    });
-
+    const user = await prisma.users.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json({ error: "User not found." }, { status: 404 });
     }
 
-    const currentDate = new Date().toISOString().split("T")[0];
-    const date = new Date(currentDate);
+    // Normalize arrays (prefer explicit *List fields; fall back to legacy arrays)
+    const madrasaList: string[] = Array.isArray(madrasaVisitList)
+      ? madrasaVisitList
+      : Array.isArray(madrasaVisits)
+      ? madrasaVisits
+      : [];
 
-    // Check if already submitted
-    const existing = await prisma.soforBisoyRecord.findFirst({
-      where: {
-        userId: user.id,
-        date,
-      },
+    const schoolList: string[] = Array.isArray(schoolCollegeVisitList)
+      ? schoolCollegeVisitList
+      : Array.isArray(schoolCollegeVisits)
+      ? schoolCollegeVisits
+      : [];
+
+    // Normalize counts: explicit count wins; else derive from list length
+    const madrasaCount =
+      typeof madrasaVisit === "number"
+        ? madrasaVisit
+        : Number.isFinite(Number(madrasaVisit))
+        ? Number(madrasaVisit)
+        : madrasaList.length;
+
+    const schoolCount =
+      typeof schoolCollegeVisit === "number"
+        ? schoolCollegeVisit
+        : Number.isFinite(Number(schoolCollegeVisit))
+        ? Number(schoolCollegeVisit)
+        : schoolList.length;
+
+    const moktobCount = Number(moktobVisit) || 0;
+
+    // Enforce one submission per Dhaka calendar day
+    const { start, end } = getDhakaDayRange();
+    const exists = await prisma.soforBisoyRecord.findFirst({
+      where: { userId: user.id, date: { gte: start, lt: end } },
+      select: { id: true },
     });
-
-    if (existing) {
+    if (exists) {
       return NextResponse.json(
-        { error: "You have already submitted data today." },
-        { status: 400 }
+        { error: "You have already submitted data today (Asia/Dhaka)." },
+        { status: 409 }
       );
     }
 
-    // Save new SoforBisoyRecord
-    const newRecord = await prisma.soforBisoyRecord.create({
+    // Save exact submission instant to BOTH date and createdAt
+    const now = new Date();
+    const created = await prisma.soforBisoyRecord.create({
       data: {
         userId: user.id,
-        date,
-        madrasaVisit: madrasaVisits?.length || 0,
-        moktobVisit: parseInt(moktobVisit || "0"),
-        schoolCollegeVisit: schoolCollegeVisits?.length || 0,
-        editorContent: editorContent || "",
+        createdAt: now,
+        date: now, // EXACT same timestamp as createdAt
+
+        madrasaVisit: madrasaCount,
+        madrasaVisitList: madrasaList.map((s) => String(s).trim()).filter(Boolean),
+
+        moktobVisit: moktobCount,
+
+        schoolCollegeVisit: schoolCount,
+        schoolCollegeVisitList: schoolList.map((s) => String(s).trim()).filter(Boolean),
+
+        editorContent: String(editorContent ?? ""),
       },
     });
 
-    return NextResponse.json({ message: "Submission successful", data: newRecord }, { status: 201 });
+    return NextResponse.json(
+      { message: "Submission successful", data: created },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error("Error saving SoforBisoyRecord:", error);
+    console.error("POST /api/soforbisoy error:", error);
     return NextResponse.json({ error: "Failed to save record." }, { status: 500 });
   }
 }
 
-// GET: Check if SoforBisoyRecord exists for today
+// ========== GET: History + today flag ==========
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(req.url);
     const email = searchParams.get("email");
+    const mode = searchParams.get("mode"); // "today" or null
+    const sort = (searchParams.get("sort") ?? "desc") as "asc" | "desc";
+    const from = searchParams.get("from"); // YYYY-MM-DD (Dhaka)
+    const to = searchParams.get("to");     // YYYY-MM-DD (Dhaka)
 
     if (!email) {
       return NextResponse.json({ error: "Email is required." }, { status: 400 });
     }
 
-    const user = await prisma.users.findUnique({
-      where: { email },
-    });
-
+    const user = await prisma.users.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json({ error: "User not found." }, { status: 404 });
     }
 
-    const currentDate = new Date().toISOString().split("T")[0];
-    const date = new Date(currentDate);
+    if (mode === "today") {
+      const { start, end } = getDhakaDayRange();
+      const existing = await prisma.soforBisoyRecord.findFirst({
+        where: { userId: user.id, date: { gte: start, lt: end } },
+        select: { id: true },
+      });
+      return NextResponse.json({ isSubmittedToday: Boolean(existing) }, { status: 200 });
+    }
 
-    const record = await prisma.soforBisoyRecord.findFirst({
-      where: {
-        userId: user.id,
-        date,
-      },
+    // Optional date range filter (interpreted in Dhaka time)
+    let dateFilter: { gte?: Date; lt?: Date } | undefined;
+    if (from || to) {
+      const fromRange = from ? dhakaDayRangeFromISODate(from) : undefined;
+      const toRange = to ? dhakaDayRangeFromISODate(to) : undefined;
+      dateFilter = {
+        ...(fromRange ? { gte: fromRange.start } : {}),
+        ...(toRange ? { lt: toRange.end } : {}),
+      };
+    }
+
+    const records = await prisma.soforBisoyRecord.findMany({
+      where: { userId: user.id, ...(dateFilter ? { date: dateFilter } : {}) },
+      orderBy: { date: sort },
     });
 
-    const isSubmittedToday = !!record;
+    // Convenience: compute today's flag + record
+    const { start, end } = getDhakaDayRange();
+    const todayRecord = records.find((r) => r.date >= start && r.date < end);
 
-    return NextResponse.json({ isSubmittedToday , data: record ?? null}, { status: 200 });
+    return NextResponse.json(
+      { isSubmittedToday: !!todayRecord, today: todayRecord ?? null, records },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("Error checking SoforBisoyRecord:", error);
-    return NextResponse.json({ error: "Failed to check submission status." }, { status: 500 });
+    console.error("GET /api/soforbisoy error:", error);
+    return NextResponse.json({ error: "Failed to fetch records." }, { status: 500 });
   }
 }

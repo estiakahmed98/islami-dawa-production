@@ -1,5 +1,4 @@
-//Estiak //Faysal
-
+// Estiak // Faysal
 "use client";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Form, Formik } from "formik";
@@ -9,12 +8,11 @@ import {
 } from "@/app/data/DawatiMojlishData";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
 import Loading from "@/app/dashboard/loading";
 
-// Define form values type
 interface FormValues {
   dawatterGuruttoMojlish: string;
   mojlisheOnshogrohon: string;
@@ -33,63 +31,81 @@ const DawatiMojlishForm: React.FC = () => {
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check if the user has already submitted today
+  // Check if already submitted today (Asia/Dhaka day)
   useEffect(() => {
     const checkSubmissionStatus = async () => {
-      if (!email) return;
-
+      if (!email) {
+        setLoading(false);
+        return;
+      }
       try {
-        const response = await fetch(`/api/dawatimojlish?email=${email}`);
-        if (response.ok) {
-          const data = await response.json();
-          setIsSubmittedToday(data.isSubmittedToday);
-        } else {
-          toast.error("Failed to check submission status.");
-        }
+        const res = await fetch(
+          `/api/dawatimojlish?email=${encodeURIComponent(email)}&mode=today`
+        );
+        if (!res.ok) throw new Error("Failed to check submission status");
+        const data = await res.json();
+        setIsSubmittedToday(Boolean(data?.isSubmittedToday));
       } catch (error) {
         console.error("Error checking submission status:", error);
-        toast.error("Error checking submission status.");
+        toast.error("Error checking today's submission.");
       } finally {
         setLoading(false);
       }
     };
-
     checkSubmissionStatus();
   }, [email]);
 
-  // Handle form submission
-  const handleSubmit = async (values: FormValues) => {
-    const formData = { ...values, email };
-
+  const handleSubmit = async (values: FormValues, { setSubmitting }: any) => {
+    if (!email) {
+      toast.error("You are not logged in.");
+      return;
+    }
     if (isSubmittedToday) {
       toast.error("You have already submitted today. Try again tomorrow.");
       return;
     }
 
+    const payload = {
+      email,
+      dawatterGuruttoMojlish: Number(values.dawatterGuruttoMojlish) || 0,
+      mojlisheOnshogrohon: Number(values.mojlisheOnshogrohon) || 0,
+      prosikkhonKormoshalaAyojon: Number(values.prosikkhonKormoshalaAyojon) || 0,
+      prosikkhonOnshogrohon: Number(values.prosikkhonOnshogrohon) || 0,
+      jummahAlochona: Number(values.jummahAlochona) || 0,
+      dhormoSova: Number(values.dhormoSova) || 0,
+      mashwaraPoint: Number(values.mashwaraPoint) || 0,
+      editorContent: values.editorContent || "",
+    };
+
     try {
-      const response = await fetch("/api/dawatimojlish", {
+      const res = await fetch("/api/dawatimojlish", {
         method: "POST",
-        body: JSON.stringify(formData),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        setIsSubmittedToday(true);
+      const json = await res.json().catch(() => ({}));
+
+      if (res.status === 201) {
         toast.success("Submitted successfully!");
+        setIsSubmittedToday(true);
         router.push("/dashboard");
-      } else if (response.status === 400) {
-        const data = await response.json();
-        toast.error(data.error || "Submission failed. Try again.");
-      } else {
-        toast.error("Submission failed. Try again.");
+        return;
       }
+      if (res.status === 409) {
+        setIsSubmittedToday(true);
+        toast.error(json?.error || "Already submitted for today.");
+        return;
+      }
+      toast.error(json?.error || "Submission failed. Try again.");
     } catch (error) {
       console.error("Error during submission:", error);
-      toast.error("Error during submission.");
+      toast.error("Unexpected error during submission.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Render loading state
   if (loading) return <Loading />;
 
   return (
@@ -99,13 +115,15 @@ const DawatiMojlishForm: React.FC = () => {
           You already have submitted today.
         </div>
       )}
+
       <h2 className="mb-6 text-2xl">দাওয়াতি মজলিশ</h2>
+
       <Formik
         initialValues={{ ...initialFormData, editorContent: "" }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ setFieldValue }) => (
+        {({ setFieldValue, isSubmitting }) => (
           <Form>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               <div>
@@ -115,7 +133,7 @@ const DawatiMojlishForm: React.FC = () => {
                 <Field
                   name="dawatterGuruttoMojlish"
                   type="number"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -125,6 +143,7 @@ const DawatiMojlishForm: React.FC = () => {
                   className="text-red-500"
                 />
               </div>
+
               <div>
                 <label className="mb-2 block text-gray-700">
                   দাওয়াতের গুরুত্ব ও প্রয়োজনীয়তা মজলিসে মোট অংশগ্রহণ
@@ -132,7 +151,7 @@ const DawatiMojlishForm: React.FC = () => {
                 <Field
                   name="mojlisheOnshogrohon"
                   type="number"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -142,6 +161,7 @@ const DawatiMojlishForm: React.FC = () => {
                   className="text-red-500"
                 />
               </div>
+
               <div>
                 <label className="mb-2 block text-gray-700">
                   দাওয়াত প্রশিক্ষণ কর্মশালার আয়োজন হয়েছে
@@ -149,7 +169,7 @@ const DawatiMojlishForm: React.FC = () => {
                 <Field
                   name="prosikkhonKormoshalaAyojon"
                   type="number"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -159,6 +179,7 @@ const DawatiMojlishForm: React.FC = () => {
                   className="text-red-500"
                 />
               </div>
+
               <div>
                 <label className="mb-2 block text-gray-700">
                   দাওয়াত প্রশিক্ষণ কর্মশালায় মোট অংশগ্রহণ
@@ -166,7 +187,7 @@ const DawatiMojlishForm: React.FC = () => {
                 <Field
                   name="prosikkhonOnshogrohon"
                   type="number"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -176,6 +197,7 @@ const DawatiMojlishForm: React.FC = () => {
                   className="text-red-500"
                 />
               </div>
+
               <div>
                 <label className="mb-2 block text-gray-700">
                   জুমার মজলিসে আলোচনা হয়েছে
@@ -183,7 +205,7 @@ const DawatiMojlishForm: React.FC = () => {
                 <Field
                   name="jummahAlochona"
                   type="number"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -193,14 +215,15 @@ const DawatiMojlishForm: React.FC = () => {
                   className="text-red-500"
                 />
               </div>
+
               <div>
                 <label className="mb-2 block text-gray-700">
-                  ধর্ম সবার আয়োজন হয়েছে
+                  ধর্মীয় সভা আয়োজন হয়েছে
                 </label>
                 <Field
                   name="dhormoSova"
                   type="number"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -210,6 +233,7 @@ const DawatiMojlishForm: React.FC = () => {
                   className="text-red-500"
                 />
               </div>
+
               <div>
                 <label className="mb-2 block text-gray-700">
                   দাওয়াতের মাশওয়ারা পয়েন্ট চালু হয়েছে
@@ -217,7 +241,7 @@ const DawatiMojlishForm: React.FC = () => {
                 <Field
                   name="mashwaraPoint"
                   type="number"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedToday || isSubmitting}
                   placeholder="Enter Value"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
@@ -227,7 +251,7 @@ const DawatiMojlishForm: React.FC = () => {
                   className="text-red-500"
                 />
               </div>
-              {/* Repeat similar blocks for other fields */}
+
               <div className="lg:col-span-2">
                 <h1 className="pb-3">মতামত লিখুন</h1>
                 <JoditEditorComponent
@@ -241,14 +265,15 @@ const DawatiMojlishForm: React.FC = () => {
                 />
               </div>
             </div>
+
             <div className="flex justify-end pt-4">
               <Button
                 variant="ghost"
                 size="default"
                 type="submit"
-                disabled={isSubmittedToday}
+                disabled={isSubmittedToday || isSubmitting}
               >
-                Submit
+                {isSubmitting ? "Submitting..." : "Submit"}
               </Button>
             </div>
           </Form>

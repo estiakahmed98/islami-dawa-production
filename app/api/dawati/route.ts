@@ -1,114 +1,207 @@
-//Juwel
-
-import fs from "fs";
-import path from "path";
+// app/api/dawati/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-// Path to the user data file
-const userDataPath = path.join(
-  process.cwd(),
-  "app/data/dawatiBisoyUserData.ts"
-);
+/** Start/end of a Dhaka (Asia/Dhaka) calendar day for the provided instant */
+function getDhakaDayRange(now = new Date()) {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const [y, m, d] = fmt.format(now).split("-"); // "YYYY-MM-DD"
+  // Dhaka is UTC+06:00 year-round (no DST)
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`); // exclusive
+  return { start, end };
+}
 
-// Type definitions
-interface DawatiBisoyData {
-  [key: string]: string | number;
+/** Convert "YYYY-MM-DD" (interpreted in Asia/Dhaka) into [start,end) UTC range */
+function dhakaDayRangeFromISODate(yyyyMmDd: string) {
+  const [y, m, d] = yyyyMmDd.split("-");
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`);
+  return { start, end };
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
-    const { email, ...data } = body as DawatiBisoyData & { email: string };
+    const {
+      email,
+      nonMuslimDawat = 0,
+      murtadDawat = 0,
+      alemderSatheyMojlish = 0,
+      publicSatheyMojlish = 0,
+      nonMuslimSaptahikGasht = 0,
+      editorContent = "",
+    } = body ?? {};
 
-    // Basic validation
-    if (!email || Object.keys(data).length === 0) {
-      return new NextResponse("Email and data are required", { status: 400 });
+    if (!email) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    // Get the current date in YYYY-MM-DD format
-    const currentDate = new Date().toISOString().split("T")[0];
-
-    // Check if the data file exists; if not, create it
-    if (!fs.existsSync(userDataPath)) {
-      fs.writeFileSync(
-        userDataPath,
-        `export const userDawatiBisoyData = { records: {} };`,
-        "utf-8"
-      );
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Read the existing data file
-    const fileContent = fs.readFileSync(userDataPath, "utf-8");
-    const userDawatiBisoyData = eval(
-      `(${fileContent.slice(
-        fileContent.indexOf("{"),
-        fileContent.lastIndexOf("}") + 1
-      )})`
-    );
+    // Enforce one submission per Dhaka calendar day
+    const { start, end } = getDhakaDayRange();
+    const exists = await prisma.dawatiBisoyRecord.findFirst({
+      where: { userId: user.id, date: { gte: start, lt: end } },
+      select: { id: true },
+    });
 
-    // Ensure data is organized by email
-    if (!userDawatiBisoyData.records[email]) {
-      userDawatiBisoyData.records[email] = {};
-    }
-
-    // Check if the user has already submitted today
-    if (userDawatiBisoyData.records[email][currentDate]) {
+    if (exists) {
       return NextResponse.json(
-        { error: "You have already submitted data today." },
-        { status: 400 }
+        { error: "Already submitted for today (Asia/Dhaka).", code: "ALREADY_SUBMITTED" },
+        { status: 409 }
       );
     }
 
-    // Add form data under the current date
-    userDawatiBisoyData.records[email][currentDate] = { ...data };
+    // Save the real submission instant for BOTH createdAt and date
+    const now = new Date();
+    const created = await prisma.dawatiBisoyRecord.create({
+      data: {
+        userId: user.id,
+        createdAt: now,    // mirror
+        date: now,         // EXACT same timestamp as createdAt
+        nonMuslimDawat,
+        murtadDawat,
+        alemderSatheyMojlish,
+        publicSatheyMojlish,
+        nonMuslimSaptahikGasht,
+        editorContent,
+      },
+    });
 
-    // Write the updated data back to the file
-    fs.writeFileSync(
-      userDataPath,
-      `export const userDawatiBisoyData = ${JSON.stringify(
-        userDawatiBisoyData,
-        null,
-        2
-      )};`,
-      "utf-8"
-    );
-
-    return NextResponse.json(
-      { message: "Submission successful" },
-      { status: 201 }
-    );
+    return NextResponse.json({ success: true, data: created }, { status: 201 });
   } catch (error) {
-    console.error("Error saving data:", error);
-    return new NextResponse("Failed to save user data", { status: 500 });
+    console.error("POST /api/dawati error:", error);
+    return NextResponse.json(
+      { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const { searchParams } = new URL(req.url);
-  const email = searchParams.get("email");
-  const today = new Date().toISOString().split("T")[0];
-
-  if (!email) {
-    return NextResponse.json({ error: "Email is required" }, { status: 400 });
-  }
-
   try {
-    if (!fs.existsSync(userDataPath)) {
-      return NextResponse.json({ isSubmittedToday: false }, { status: 200 });
+    const { searchParams } = new URL(req.url);
+    const email = searchParams.get("email");
+    const mode = searchParams.get("mode"); // "today" or null
+    const sort = (searchParams.get("sort") ?? "desc") as "asc" | "desc";
+    const from = searchParams.get("from"); // YYYY-MM-DD (Dhaka)
+    const to = searchParams.get("to");     // YYYY-MM-DD (Dhaka)
+
+    if (!email) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const fileContent = fs.readFileSync(userDataPath, "utf-8");
-    const userDawatiBisoyData = eval(
-      `(${fileContent.slice(
-        fileContent.indexOf("{"),
-        fileContent.lastIndexOf("}") + 1
-      )})`
-    );
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-    const isSubmittedToday = !!userDawatiBisoyData.records[email]?.[today];
-    return NextResponse.json({ isSubmittedToday }, { status: 200 });
+    if (mode === "today") {
+      const { start, end } = getDhakaDayRange();
+      const existing = await prisma.dawatiBisoyRecord.findFirst({
+        where: { userId: user.id, date: { gte: start, lt: end } },
+        select: { id: true },
+      });
+      return NextResponse.json({ isSubmittedToday: Boolean(existing) }, { status: 200 });
+    }
+
+    // Optional range filter interpreted in Dhaka timezone
+    let dateFilter: { gte?: Date; lt?: Date } | undefined;
+    if (from || to) {
+      const fromRange = from ? dhakaDayRangeFromISODate(from) : undefined;
+      const toRange = to ? dhakaDayRangeFromISODate(to) : undefined;
+      dateFilter = {
+        ...(fromRange ? { gte: fromRange.start } : {}),
+        ...(toRange ? { lt: toRange.end } : {}),
+      };
+    }
+
+    const records = await prisma.dawatiBisoyRecord.findMany({
+      where: { userId: user.id, ...(dateFilter ? { date: dateFilter } : {}) },
+      orderBy: { date: sort },
+    });
+
+    // Also compute today's submission flag for convenience
+    const { start, end } = getDhakaDayRange();
+    const todayRecord = records.find((r) => r.date >= start && r.date < end);
+
+    return NextResponse.json(
+      { isSubmittedToday: !!todayRecord, today: todayRecord ?? null, records },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("Error fetching data:", error);
-    return new NextResponse("Failed to fetch data", { status: 500 });
+    console.error("GET /api/dawati error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch records", details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: NextRequest): Promise<NextResponse> {
+  try {
+    const body = await req.json();
+    const { email, id, date, patch = {} } = body ?? {};
+
+    if (!email) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    }
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    let targetId: string | undefined = id;
+
+    if (!targetId) {
+      if (!date) {
+        return NextResponse.json(
+          { error: "Provide either 'id' or 'date' (YYYY-MM-DD in Dhaka)" },
+          { status: 400 }
+        );
+      }
+      // Find by Dhaka-day range since `date` now stores real timestamps
+      const { start, end } = dhakaDayRangeFromISODate(date);
+      const found = await prisma.dawatiBisoyRecord.findFirst({
+        where: { userId: user.id, date: { gte: start, lt: end } },
+        orderBy: { date: "desc" },
+      });
+      if (!found) {
+        return NextResponse.json(
+          { error: "Record not found for the given Dhaka date" },
+          { status: 404 }
+        );
+      }
+      targetId = found.id;
+    }
+
+    const updated = await prisma.dawatiBisoyRecord.update({
+      where: { id: targetId },
+      data: {
+        ...(typeof patch.nonMuslimDawat === "number" ? { nonMuslimDawat: patch.nonMuslimDawat } : {}),
+        ...(typeof patch.murtadDawat === "number" ? { murtadDawat: patch.murtadDawat } : {}),
+        ...(typeof patch.alemderSatheyMojlish === "number" ? { alemderSatheyMojlish: patch.alemderSatheyMojlish } : {}),
+        ...(typeof patch.publicSatheyMojlish === "number" ? { publicSatheyMojlish: patch.publicSatheyMojlish } : {}),
+        ...(typeof patch.nonMuslimSaptahikGasht === "number" ? { nonMuslimSaptahikGasht: patch.nonMuslimSaptahikGasht } : {}),
+        ...(typeof patch.editorContent === "string" ? { editorContent: patch.editorContent } : {}),
+      },
+    });
+
+    return NextResponse.json({ success: true, data: updated }, { status: 200 });
+  } catch (error) {
+    console.error("PUT /api/dawati error:", error);
+    return NextResponse.json(
+      { error: "Failed to update record", details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
   }
 }
