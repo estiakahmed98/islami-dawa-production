@@ -45,7 +45,7 @@ const TalimPage: React.FC = () => {
             labelMap: {
               mohilaTalim: "মহিলা তালিম",
               mohilaOnshogrohon: "মহিলা অংশগ্রহণ",
-              editorContent: "মন্তব্য / নোট"
+              editorContent: "মন্তব্য / নোট",
             }
           };
           setUserData(transformedData);

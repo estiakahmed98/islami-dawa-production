@@ -1,73 +1,104 @@
-"use client";
+"use client"
 
-import React, { useEffect, useState } from "react";
-import MoktobBishoyForm from "@/components/MoktobBishoyForm";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/TabButton";
-import { useSession } from "@/lib/auth-client";
-import UniversalTableShow from "@/components/TableShow";
+import React from "react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton"
+import { useSession } from "@/lib/auth-client"
+import UniversalTableShow from "@/components/TableShow"
+import MoktobBishoyForm from "@/components/MoktobBishoyForm"
+import { toast } from "sonner"
+
+type RecordsByUserAndDate = {
+  [email: string]: { [dateKey: string]: any }
+}
+
+/** Format a date to YYYY-MM-DD in Dhaka time (safe) */
+function dhakaYMD(d: Date) {
+  if (!(d instanceof Date) || isNaN(d.getTime())) return ""
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d)
+}
 
 const MoktobPage: React.FC = () => {
-  const { data: session } = useSession();
-  const [userData, setUserData] = useState<any>({ records: {} });
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const { data: session } = useSession()
+  const userEmail = session?.user?.email ?? ""
 
-  const userEmail = session?.user?.email;
+  const [userData, setUserData] = React.useState<{ records: RecordsByUserAndDate; labelMap?: any }>({
+    records: {},
+  })
+  const [selectedMonth, setSelectedMonth] = React.useState<number>(new Date().getMonth())
+  const [selectedYear, setSelectedYear] = React.useState<number>(new Date().getFullYear())
 
-  useEffect(() => {
-    const fetchMoktobData = async () => {
-      if (!userEmail) return;
+  const labelMap = React.useMemo(
+    () => ({
+      notunMoktobChalu: "নতুন মক্তব চালু",
+      totalMoktob: "মোট মক্তব",
+      totalStudent: "মোট শিক্ষার্থী",
+      obhibhabokConference: "অভিভাবক সম্মেলন",
+      moktoThekeMadrasaAdmission: "মক্তব থেকে মাদরাসা ভর্তি",
+      notunBoyoskoShikkha: "নতুন বয়স্ক শিক্ষা",
+      totalBoyoskoShikkha: "মোট বয়স্ক শিক্ষা",
+      boyoskoShikkhaOnshogrohon: "বয়স্ক শিক্ষা অংশগ্রহণ",
+      newMuslimeDinerFikir: "নতুন মুসলিমের দীন চিন্তা",
+    }),
+    []
+  )
 
+  React.useEffect(() => {
+    if (!userEmail) {
+      setUserData({ records: {}, labelMap })
+      return
+    }
+
+    const ac = new AbortController()
+
+    ;(async () => {
       try {
-        const res = await fetch(`/api/moktob?email=${userEmail}`);
-        const json = await res.json();
-        const records = json.records || [];
+        const res = await fetch(`/api/moktob?email=${encodeURIComponent(userEmail)}`, {
+          cache: "no-store",
+          signal: ac.signal,
+        })
+        if (!res.ok) throw new Error("Failed to fetch records")
 
-        const transformedData = {
-          records: {
-            [userEmail]: records.reduce((acc: any, record: any) => {
-              const date = new Date(record.date).toISOString().split("T")[0];
-              acc[date] = {
-                notunMoktobChalu: record.notunMoktobChalu,
-                totalMoktob: record.totalMoktob,
-                totalStudent: record.totalStudent,
-                obhibhabokConference: record.obhibhabokConference,
-                moktoThekeMadrasaAdmission: record.moktoThekeMadrasaAdmission,
-                notunBoyoskoShikkha: record.notunBoyoskoShikkha,
-                totalBoyoskoShikkha: record.totalBoyoskoShikkha,
-                boyoskoShikkhaOnshogrohon: record.boyoskoShikkhaOnshogrohon,
-                newMuslimeDinerFikir: record.newMuslimeDinerFikir,
-                editorContent: record.editorContent,
-              };
-              return acc;
-            }, {}),
-          },
-          labelMap: {
-            notunMoktobChalu: "নতুন মক্তব চালু",
-            totalMoktob: "মোট মক্তব",
-            totalStudent: "মোট শিক্ষার্থী",
-            obhibhabokConference: "অভিভাবক সম্মেলন",
-            moktoThekeMadrasaAdmission: "মক্তব থেকে মাদরাসা ভর্তি",
-            notunBoyoskoShikkha: "নতুন বয়স্ক শিক্ষা",
-            totalBoyoskoShikkha: "মোট বয়স্ক শিক্ষা",
-            boyoskoShikkhaOnshogrohon: "বয়স্ক শিক্ষা অংশগ্রহণ",
-            newMuslimeDinerFikir: "নতুন মুসলিমের দীন চিন্তা",
-          },
-        };
+        const json = await res.json()
+        const recordsArray: Array<any> = json.records || []
 
-        setUserData(transformedData);
-      } catch (error) {
-        console.error("Failed to fetch Moktob data:", error);
+        const transformed: RecordsByUserAndDate = { [userEmail]: {} }
+
+        recordsArray.forEach((record) => {
+          // API now saves date === createdAt (same instant).
+          // We still display by Dhaka calendar date.
+          const dateKey = dhakaYMD(new Date(record.date))
+          if (!dateKey) return
+
+          transformed[userEmail][dateKey] = {
+            notunMoktobChalu: record.notunMoktobChalu,
+            totalMoktob: record.totalMoktob,
+            totalStudent: record.totalStudent,
+            obhibhabokConference: record.obhibhabokConference,
+            moktoThekeMadrasaAdmission: record.moktoThekeMadrasaAdmission,
+            notunBoyoskoShikkha: record.notunBoyoskoShikkha,
+            totalBoyoskoShikkha: record.totalBoyoskoShikkha,
+            boyoskoShikkhaOnshogrohon: record.boyoskoShikkhaOnshogrohon,
+            newMuslimeDinerFikir: record.newMuslimeDinerFikir,
+            editorContent: record.editorContent,
+          }
+        })
+
+        setUserData({ records: transformed, labelMap })
+      } catch (err: any) {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
+          console.error("Failed to fetch Moktob data:", err)
+          toast.error("মক্তব তথ্য আনা যায়নি।")
+        }
       }
-    };
+    })()
 
-    fetchMoktobData();
-  }, [userEmail]);
+    return () => ac.abort()
+  }, [userEmail, labelMap])
 
   return (
     <div>
@@ -98,7 +129,7 @@ const MoktobPage: React.FC = () => {
         </TabsContent>
       </Tabs>
     </div>
-  );
-};
+  )
+}
 
-export default MoktobPage;
+export default MoktobPage
