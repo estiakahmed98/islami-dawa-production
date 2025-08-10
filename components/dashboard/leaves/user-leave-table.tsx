@@ -200,29 +200,29 @@ export function UserLeaveTable({ userEmail, refetch }: UserLeaveTableProps) {
           <div className="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200">
             <Table>
               <TableHeader>
-                <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
-                  <TableHead className="font-bold text-gray-800 py-4 px-6">
+                <TableRow className="bg-gradient-to-r from-cyan-600 to-teal-700 text-white border-b-2 border-gray-200">
+                  <TableHead className="font-bold text-white py-4 px-6">
                     Leave Type
                   </TableHead>
-                  <TableHead className="font-bold text-gray-800 py-4 px-6">
+                  <TableHead className="font-bold text-white py-4 px-6">
                     From Date
                   </TableHead>
-                  <TableHead className="font-bold text-gray-800 py-4 px-6">
+                  <TableHead className="font-bold text-white py-4 px-6">
                     To Date
                   </TableHead>
-                  <TableHead className="font-bold text-gray-800 py-4 px-6">
+                  <TableHead className="font-bold text-white py-4 px-6">
                     Days
                   </TableHead>
-                  <TableHead className="font-bold text-gray-800 py-4 px-6">
+                  <TableHead className="font-bold text-white py-4 px-6">
                     Reason
                   </TableHead>
-                  <TableHead className="font-bold text-gray-800 py-4 px-6">
+                  <TableHead className="font-bold text-white py-4 px-6">
                     Status
                   </TableHead>
-                  <TableHead className="font-bold text-gray-800 py-4 px-6">
+                  <TableHead className="font-bold text-white py-4 px-6">
                     Requested On
                   </TableHead>
-                  <TableHead className="font-bold text-gray-800 py-4 px-6">
+                  <TableHead className="font-bold text-white py-4 px-6">
                     Approved By
                   </TableHead>
                 </TableRow>
