@@ -1,10 +1,11 @@
-// Component/UserDashboard.tsx
 "use client";
+
 import React, { useState, useEffect } from "react";
 import AmoliChart from "@/components/AmoliCharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton";
 import { useSession } from "@/lib/auth-client";
 import AmoliTableShow from "@/components/TableShow";
+import UniversalTableShow from "@/components/TableShow"; // Added UniversalTableShow
 import TallyAdmin from "@/components/TallyAdmin";
 import ComparisonTallyCard from "@/components/ComparisonTallyCard";
 import { toast } from "sonner";
@@ -42,6 +43,12 @@ const Dashboard: React.FC<TallyProps> = () => {
   const [userDayeData, setUserDayeData] = useState<any>({ records: {} });
   const [loading, setLoading] = useState(true);
 
+  // Shared detail modal state
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [detailModalTitle, setDetailModalTitle] = useState("");
+  const [detailModalDate, setDetailModalDate] = useState("");
+  const [detailModalItems, setDetailModalItems] = useState<any[]>([]);
+
   // Handler for month change
   const onMonthChange = (month: number) => {
     setSelectedMonth(month);
@@ -74,10 +81,41 @@ const Dashboard: React.FC<TallyProps> = () => {
     return list.map((item, idx) => `${idx + 1}. ${item}`).join("<br/>");
   }
 
+  // Click handler coming from UniversalTableShow (for Daye & Sofor tabs)
+  const handleUserCellClick = (info: { email: string; dateKey: string; rowKey: string }) => {
+    const { dateKey, rowKey } = info;
+
+    // DAYE: assistants list
+    if (rowKey === "assistantsList") {
+      const items = userDayeData?._assistantsByDate?.[dateKey] || [];
+      setDetailModalTitle("সহযোগী দায়ীর তথ্য");
+      setDetailModalDate(dateKey);
+      setDetailModalItems(items);
+      if (items.length) setDetailModalOpen(true);
+      return;
+    }
+
+    // SOFOR: madrasa / school lists
+    if (rowKey === "madrasaVisitList") {
+      const items = userSoforBishoyData?._madrasaByDate?.[dateKey] || [];
+      setDetailModalTitle("মাদ্রাসার তালিকা");
+      setDetailModalDate(dateKey);
+      setDetailModalItems(items);
+      if (items.length) setDetailModalOpen(true);
+      return;
+    }
+    if (rowKey === "schoolCollegeVisitList") {
+      const items = userSoforBishoyData?._schoolByDate?.[dateKey] || [];
+      setDetailModalTitle("স্কুল/কলেজ তালিকা");
+      setDetailModalDate(dateKey);
+      setDetailModalItems(items);
+      if (items.length) setDetailModalOpen(true);
+    }
+  };
+
   // Fetch all data from API
   useEffect(() => {
     if (!userEmail) return;
-
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -121,8 +159,12 @@ const Dashboard: React.FC<TallyProps> = () => {
             }
           },
           {
-            url: `/api/dayi?email=${encodeURIComponent(userEmail)}`, setter: setUserDayeData, labelMap: {
+            url: `/api/dayi?email=${encodeURIComponent(userEmail)}`,
+            setter: setUserDayeData,
+            labelMap: {
               sohojogiDayeToiri: "সহযোগী দায়ী তৈরি হয়েছে",
+              // ADD THIS so the table shows the clickable row:
+              assistantsList: "সহযোগী দায়ীর তালিকা",
             }
           },
           {
@@ -158,7 +200,9 @@ const Dashboard: React.FC<TallyProps> = () => {
             }
           },
           {
-            url: `/api/soforbisoy?email=${encodeURIComponent(userEmail)}`, setter: setUserSoforBishoyData, labelMap: {
+            url: `/api/soforbisoy?email=${encodeURIComponent(userEmail)}`,
+            setter: setUserSoforBishoyData,
+            labelMap: {
               moktobVisit: "চলমান মক্তব পরিদর্শন হয়েছে",
               madrasaVisit: "মাদ্রাসা সফর হয়েছে",
               schoolCollegeVisit: "স্কুল/কলেজ সফর হয়েছে",
@@ -173,38 +217,55 @@ const Dashboard: React.FC<TallyProps> = () => {
             const res = await fetch(url, { cache: "no-store" });
             if (!res.ok) throw new Error(`Failed to fetch ${url}`);
             const json = await res.json();
-
             const records = Array.isArray(json.records) ? json.records : [];
             const transformed: Record<string, Record<string, any>> = { [userEmail]: {} };
+
+            // NEW: detail maps (attach to dataset object later)
+            const assistantsByDate: Record<string, any[]> = {};
+            const madrasaByDate: Record<string, string[]> = {};
+            const schoolByDate: Record<string, string[]> = {};
 
             records.forEach((rec) => {
               const dateKey = dhakaYMD(new Date(rec.date));
               transformed[userEmail][dateKey] = { ...rec };
 
-              // Handle array fields
-              if (rec.madrasaVisitList) {
+              // --- Keep raw arrays for modals ---
+              if (Array.isArray(rec.assistants)) {
+                assistantsByDate[dateKey] = rec.assistants; // raw array for Daye modal
+                transformed[userEmail][dateKey].assistantsList = toNumberedHTML(
+                  rec.assistants.map((a: any) => `${a.name} (${a.phone || ""})`)
+                );
+              }
+
+              if (Array.isArray(rec.madrasaVisitList)) {
+                madrasaByDate[dateKey] = rec.madrasaVisitList; // raw array for Sofor modal
                 transformed[userEmail][dateKey].madrasaVisitList = toNumberedHTML(rec.madrasaVisitList);
               }
-              if (rec.schoolCollegeVisitList) {
+              if (Array.isArray(rec.schoolCollegeVisitList)) {
+                schoolByDate[dateKey] = rec.schoolCollegeVisitList; // raw array for Sofor modal
                 transformed[userEmail][dateKey].schoolCollegeVisitList = toNumberedHTML(rec.schoolCollegeVisitList);
               }
-              if (rec.assistants) {
+              // Existing handling for other array fields if they are not for modals
+              if (rec.assistants && !Array.isArray(rec.assistants)) { // Ensure not to overwrite if already handled for modal
                 transformed[userEmail][dateKey].assistants = toNumberedHTML(
                   rec.assistants.map((a: any) => `${a.name} (${a.phone})`)
                 );
               }
             });
 
+            // set into state WITH detail maps (they'll only exist where relevant)
             setter({
               records: transformed,
-              labelMap
+              labelMap,
+              _assistantsByDate: assistantsByDate,
+              _madrasaByDate: madrasaByDate,
+              _schoolByDate: schoolByDate,
             });
           } catch (error) {
             console.error(`Error fetching ${url}:`, error);
             toast.error(`ডেটা লোড করতে সমস্যা হয়েছে: ${url}`);
           }
         });
-
         await Promise.all(fetchPromises);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -213,14 +274,12 @@ const Dashboard: React.FC<TallyProps> = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [userEmail]);
 
   // Filter data by selected month and year
   const filterChartAndTallyData = (userData: any) => {
     if (!userData || !userData.records) return userData;
-
     const filteredRecords = Object.keys(userData.records).reduce<Record<string, any>>(
       (filtered, email) => {
         const emailData = userData.records[email];
@@ -234,7 +293,6 @@ const Dashboard: React.FC<TallyProps> = () => {
           },
           {}
         );
-
         if (Object.keys(filteredDates).length > 0) {
           filtered[email] = filteredDates;
         }
@@ -242,7 +300,6 @@ const Dashboard: React.FC<TallyProps> = () => {
       },
       {}
     );
-
     return { ...userData, records: filteredRecords };
   };
 
@@ -294,11 +351,9 @@ const Dashboard: React.FC<TallyProps> = () => {
   ) => {
     if (!userData?.records) return [];
     const userRecords = userData.records[userEmail] || {};
-
     return Object.keys(userData.labelMap).map((metric) => {
       let totalFrom = 0;
       let totalTo = 0;
-
       if (comparisonType === "day") {
         totalFrom += convertToPoints(userRecords[from]?.[metric], metric);
         totalTo += convertToPoints(userRecords[to]?.[metric], metric);
@@ -308,7 +363,6 @@ const Dashboard: React.FC<TallyProps> = () => {
           const dateStr = comparisonType === "month"
             ? `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`
             : String(dateObj.getFullYear());
-
           if (dateStr === from) {
             totalFrom += convertToPoints(userRecords[date]?.[metric], metric);
           }
@@ -317,7 +371,6 @@ const Dashboard: React.FC<TallyProps> = () => {
           }
         });
       }
-
       let change = "0%";
       if (totalFrom === 0 && totalTo > 0) {
         change = "∞% ↑";
@@ -329,7 +382,6 @@ const Dashboard: React.FC<TallyProps> = () => {
         let percentageChange;
         totalFrom = isNaN(totalFrom) ? 0 : totalFrom;
         totalTo = isNaN(totalTo) ? 0 : totalTo;
-
         if (totalTo - totalFrom > 0) {
           percentageChange =
             ((Math.max(totalTo, totalFrom) - Math.min(totalTo, totalFrom)) /
@@ -342,10 +394,8 @@ const Dashboard: React.FC<TallyProps> = () => {
               Math.min(totalTo, totalFrom)
             ) * 100;
         }
-
         change = `${percentageChange.toFixed(2)}% ${percentageChange > 0 ? "↑" : "↓"}`;
       }
-
       return {
         label: userData.labelMap[metric],
         from: totalFrom,
@@ -362,7 +412,6 @@ const Dashboard: React.FC<TallyProps> = () => {
       alert("Please select both 'From' and 'To' values.");
       return;
     }
-
     const allData = [
       userAmoliData,
       userMoktobBisoyData,
@@ -374,11 +423,9 @@ const Dashboard: React.FC<TallyProps> = () => {
       userSoforBishoyData,
       userDayeData,
     ];
-
     const combinedData = allData.flatMap((data) =>
       fetchUserComparisonData(data, comparisonType, from, to)
     );
-
     setComparisonData(combinedData);
   };
 
@@ -392,7 +439,6 @@ const Dashboard: React.FC<TallyProps> = () => {
       console.error("No data available for PDF generation");
       return;
     }
-
     const element = document.createElement("div");
     let tableHTML = `
       <html>
@@ -457,7 +503,6 @@ const Dashboard: React.FC<TallyProps> = () => {
           </table>
         </body>
       </html>`;
-
     element.innerHTML = tableHTML;
     try {
       const html2pdf = await getHtml2Pdf();
@@ -506,7 +551,6 @@ const Dashboard: React.FC<TallyProps> = () => {
           স্বাগতম,{" "}
           <span className="text-emerald-600">{session?.user?.name}</span>
         </h1>
-
         {/* Action Buttons */}
         <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto justify-center lg:justify-end">
           <button
@@ -515,7 +559,6 @@ const Dashboard: React.FC<TallyProps> = () => {
           >
             {showComparison ? "ড্যাশবোর্ডে ফিরে জান" : "📊 তুলনা দেখুন"}
           </button>
-
           {!showComparison && (
             <div className="flex gap-3 items-center w-full md:w-auto">
               <select
@@ -544,7 +587,6 @@ const Dashboard: React.FC<TallyProps> = () => {
           )}
         </div>
       </div>
-
       {showComparison ? (
         <div className="bg-white p-2 lg:p-6 rounded-lg shadow-md space-y-4">
           <div className="grid lg:flex lg:flex-wrap gap-4 items-center">
@@ -557,7 +599,6 @@ const Dashboard: React.FC<TallyProps> = () => {
               <option value="month">মাস অনুযায়ী</option>
               <option value="year">বছর অনুযায়ী</option>
             </select>
-
             {comparisonType === "day" && (
               <>
                 <input
@@ -574,7 +615,6 @@ const Dashboard: React.FC<TallyProps> = () => {
                 />
               </>
             )}
-
             {comparisonType === "month" && (
               <div className="grid lg:flex gap-2">
                 <input
@@ -592,7 +632,6 @@ const Dashboard: React.FC<TallyProps> = () => {
                 />
               </div>
             )}
-
             {comparisonType === "year" && (
               <div className="grid max-w-sm:w-full lg:flex lg:gap-2">
                 <select
@@ -624,7 +663,6 @@ const Dashboard: React.FC<TallyProps> = () => {
                 </select>
               </div>
             )}
-
             <button
               onClick={handleCompare}
               className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
@@ -632,7 +670,6 @@ const Dashboard: React.FC<TallyProps> = () => {
               তুলনা করুন
             </button>
           </div>
-
           <div className="bg-gray-100 p-2 lg:p-4 rounded-lg shadow overflow-x-auto">
             {comparisonData.length > 0 ? (
               <table className="w-full border-collapse border border-gray-300 text-sm lg:text-base">
@@ -678,7 +715,6 @@ const Dashboard: React.FC<TallyProps> = () => {
                 Select values and click "Compare" to see results.
               </p>
             )}
-
             {comparisonData.length > 0 && (
               <div className="mt-4 flex justify-end">
                 <button
@@ -690,7 +726,6 @@ const Dashboard: React.FC<TallyProps> = () => {
               </div>
             )}
           </div>
-
           {comparisonData.length > 0 && (
             <ComparisonTallyCard
               currentData={comparisonData.map((item) => ({
@@ -752,7 +787,6 @@ const Dashboard: React.FC<TallyProps> = () => {
               title="সহযোগী দায়ী বিষয"
             />
           </div>
-
           <div className="border border-[#155E75] p-2 lg:p-6 mt-10 rounded-xl overflow-y-auto">
             <Tabs defaultValue="Amolimusahaba" className="w-full lg:p-4">
               <TabsList className="mx-10 grid grid-cols-2 md:grid-cols-4 my-6">
@@ -766,64 +800,144 @@ const Dashboard: React.FC<TallyProps> = () => {
                 <TabsTrigger value="dinefera">দ্বীনে ফিরে এসেছে</TabsTrigger>
                 <TabsTrigger value="sofor">সফর বিষয়</TabsTrigger>
               </TabsList>
-
               {/* Tab Content */}
               <TabsContent value="Amolimusahaba">
                 <div className="bg-gray-50 rounded shadow">
                   <AmoliTableShow userData={userAmoliData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
-
               <TabsContent value="moktob">
                 <div className="bg-gray-50 rounded shadow">
                   <AmoliTableShow userData={userMoktobBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
-
               <TabsContent value="talim">
                 <div className="bg-gray-50 rounded shadow">
                   <AmoliTableShow userData={userTalimBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
-
               <TabsContent value="daye">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userDayeData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
+                  <UniversalTableShow
+                    userData={userDayeData}
+                    selectedMonth={selectedMonth}
+                    selectedYear={selectedYear}
+                    onMonthChange={onMonthChange}
+                    onYearChange={onYearChange}
+                    htmlFields={["assistantsList"]}          // render <br/> lists nicely
+                    clickableFields={["assistantsList"]}     // make cells clickable
+                    onCellClick={handleUserCellClick}        // open modal
+                  />
                 </div>
               </TabsContent>
-
               <TabsContent value="dawati">
                 <div className="bg-gray-50 rounded shadow">
                   <AmoliTableShow userData={userDawatiBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
-
               <TabsContent value="dawatimojlish">
                 <div className="bg-gray-50 rounded shadow">
                   <AmoliTableShow userData={userDawatiMojlishData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
-
               <TabsContent value="jamat">
                 <div className="bg-gray-50 rounded shadow">
                   <AmoliTableShow userData={userJamatBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
-
               <TabsContent value="dinefera">
                 <div className="bg-gray-50 rounded shadow">
                   <AmoliTableShow userData={userDineFeraData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
-
               <TabsContent value="sofor">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userSoforBishoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
+                  <UniversalTableShow
+                    userData={userSoforBishoyData}
+                    selectedMonth={selectedMonth}
+                    selectedYear={selectedYear}
+                    onMonthChange={onMonthChange}
+                    onYearChange={onYearChange}
+                    htmlFields={["madrasaVisitList", "schoolCollegeVisitList"]}
+                    clickableFields={["madrasaVisitList", "schoolCollegeVisitList"]}
+                    onCellClick={handleUserCellClick}
+                  />
                 </div>
               </TabsContent>
             </Tabs>
           </div>
         </>
+      )}
+      {detailModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-3xl rounded-lg bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b px-6 py-4">
+              <h3 className="text-lg font-semibold">
+                {detailModalTitle} — {detailModalDate}
+              </h3>
+              <button
+                onClick={() => setDetailModalOpen(false)}
+                className="rounded p-1 hover:bg-gray-100"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="max-h-[70vh] overflow-auto p-6 space-y-3">
+              {/* Assistants: full cards */}
+              {detailModalTitle === "সহযোগী দায়ীর তথ্য" ? (
+                detailModalItems.length ? (
+                  detailModalItems.map((a: any, idx: number) => (
+                    <div key={a.id || idx} className="rounded-xl border p-4 shadow-sm hover:shadow">
+                      <div className="flex items-start justify-between">
+                        <div className="text-base font-semibold">{idx + 1}. {a?.name || "-"}</div>
+                        {a?.email ? (
+                          <a className="text-sm underline hover:text-blue-700" href={`mailto:${a.email}`}>
+                            {a.email}
+                          </a>
+                        ) : null}
+                      </div>
+                      <div className="mt-2 grid gap-1 text-sm text-gray-700">
+                        <div><span className="font-medium">ফোন:</span> {a?.phone || "-"}</div>
+                        <div><span className="font-medium">ঠিকানা:</span> {a?.address || "-"}</div>
+                        <div><span className="font-medium">বিভাগ:</span> {a?.division || "-"}</div>
+                        <div><span className="font-medium">জেলা:</span> {a?.district || "-"}</div>
+                        <div><span className="font-medium">উপজেলা:</span> {a?.upazila || "-"}</div>
+                        <div><span className="font-medium">ইউনিয়ন:</span> {a?.union || "-"}</div>
+                        {a?.description ? (
+                          <div className="mt-1"><span className="font-medium">বিবরণ:</span> {a.description}</div>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-gray-600">কোনো সহযোগী দায়ীর তথ্য পাওয়া যায়নি</div>
+                )
+              ) : (
+                // Madrasa / School lists as simple lines
+                <div className="space-y-2">
+                  {detailModalItems.length ? (
+                    detailModalItems.map((t: string, idx: number) => (
+                      <div key={idx} className="rounded border p-3">{idx + 1}. {t}</div>
+                    ))
+                  ) : (
+                    <div className="text-gray-600">কোনো তথ্য পাওয়া যায়নি</div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 border-t px-6 py-3">
+              <button
+                onClick={() => setDetailModalOpen(false)}
+                className="rounded-lg border px-4 py-2 hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
