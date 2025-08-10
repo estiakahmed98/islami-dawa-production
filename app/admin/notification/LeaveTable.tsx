@@ -4,13 +4,11 @@ import React from "react"
 import { useEffect, useRef, useState, useCallback } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge, ChevronDown, ChevronRight, Download, Loader2, Search, X } from "lucide-react"
-import dynamic from "next/dynamic"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { toast } from "sonner"
 
-const html2pdf = dynamic(() => import("html2pdf.js").then((module) => module.default), { ssr: false })
 
 interface LeaveRecord {
   id: string
@@ -44,6 +42,29 @@ interface LeaveUserSummary {
   leaves: LeaveRecord[] // full list of their leaves
 }
 
+// Helpers (place these near the top of your component file)
+const safeFilename = (s: string) =>
+  (s ?? "user")
+    .toString()
+    .normalize("NFKD")
+    .replace(/[^\w\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .toLowerCase()
+    .slice(0, 60) || "user";
+
+const ymd = (d: string) => {
+  const dt = new Date(d);
+  if (!Number.isNaN(dt.getTime())) {
+    const yyyy = dt.getFullYear();
+    const mm = String(dt.getMonth() + 1).padStart(2, "0");
+    const dd = String(dt.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  return String(d).replace(/[^\d-]/g, "_").slice(0, 10) || "date";
+};
+
+
 const AdminLeaveManagement: React.FC = () => {
   const [leaveRequests, setLeaveRequests] = useState<LeaveRecord[]>([])
   const [filteredLeaves, setFilteredLeaves] = useState<LeaveRecord[]>([])
@@ -51,6 +72,16 @@ const AdminLeaveManagement: React.FC = () => {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
   const [expandedUsers, setExpandedUsers] = useState<Record<string, boolean>>({})
   const tableRef = useRef<HTMLDivElement>(null)
+
+  // inside AdminLeaveManagement component body
+const html2pdfRef = useRef<any | null>(null);
+const ensureHtml2Pdf = useCallback(async () => {
+  if (html2pdfRef.current) return html2pdfRef.current;
+  const mod = await import("html2pdf.js/dist/html2pdf.bundle.min.js");
+  html2pdfRef.current = (mod as any).default || mod;
+  return html2pdfRef.current;
+}, []);
+
 
   const fetchLeaveRequestsForAdmin = useCallback(async () => {
     try {
@@ -134,283 +165,232 @@ const AdminLeaveManagement: React.FC = () => {
     }))
   }
 
-  const handleDownloadAll = async () => {
-    if (tableRef.current) {
-      setIsGeneratingPdf(true)
-      try {
-        const element = tableRef.current.cloneNode(true) as HTMLElement
-        const container = document.createElement("div")
-        container.style.padding = "30px"
-        container.style.fontFamily = "Arial, sans-serif"
+ const handleDownloadAll = async () => {
+  setIsGeneratingPdf(true);
+  try {
+    const html2pdf = await ensureHtml2Pdf();
 
-        const header = document.createElement("div")
-        header.style.display = "flex"
-        header.style.justifyContent = "space-between"
-        header.style.alignItems = "center"
-        header.style.marginBottom = "30px"
-        header.style.borderBottom = "2px solid #333"
-        header.style.paddingBottom = "15px"
-        const title = document.createElement("h1")
-        title.textContent = "ছুটি সম্পর্কিত তথ্য"
-        title.style.color = "#2d3748"
-        title.style.margin = "0"
-        title.style.fontSize = "28px"
-        title.style.fontWeight = "bold"
-        header.appendChild(title)
-        container.appendChild(header)
+    // build a clean container (don’t clone Tailwind DOM)
+    const container = document.createElement("div");
+    container.style.padding = "24px";
+    container.style.fontFamily = "Arial, sans-serif";
 
-        const meta = document.createElement("div")
-        meta.style.marginBottom = "25px"
-        meta.style.padding = "15px"
-        meta.style.backgroundColor = "#f9fafb"
-        meta.style.borderRadius = "6px"
-        meta.style.border = "1px solid #e5e7eb"
-        const currentDate = new Date().toLocaleString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-        const userSummaries = groupLeavesByUser(filteredLeaves)
-        meta.innerHTML = `
-          <div style="display:flex;justify-content:space-between">
-            <p style="margin:5px 0;font-size:14px;"><strong>ডাউনলোডের তারিখ ও সময়:</strong> ${currentDate}</p>
-            <p style="margin:5px 0;font-size:14px;"><strong>মোট দাঁয়ী:</strong> ${userSummaries.length}</p>
-          </div>
-        `
-        container.appendChild(meta)
-
-        const summaryTable = document.createElement("table")
-        summaryTable.style.width = "100%"
-        summaryTable.style.borderCollapse = "collapse"
-        summaryTable.style.fontSize = "12px"
-        summaryTable.style.marginBottom = "20px"
-
-        const thead = document.createElement("thead")
-        thead.innerHTML = `
-          <tr>
-            <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Name</th>
-            <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Email</th>
-            <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Phone</th>
-            <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Casual</th>
-            <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Sick</th>
-            <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Maternity</th>
-            <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Paternity</th>
-            <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Annual</th>
-            <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Other</th>
-            <th style="background-color: #2d3748; color: white; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0;">Total</th>
-          </tr>
-        `
-        summaryTable.appendChild(thead)
-
-        const tbody = document.createElement("tbody")
-        userSummaries.forEach((user, index) => {
-          const row = document.createElement("tr")
-          row.style.backgroundColor = index % 2 === 0 ? "#f8fafc" : "white"
-          row.innerHTML = `
-            <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.name}</td>
-            <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.email}</td>
-            <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.phone}</td>
-            <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.casual}</td>
-            <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.sick}</td>
-            <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.maternity}</td>
-            <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.paternity}</td>
-            <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.annual}</td>
-            <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${user.other}</td>
-            <td style="padding: 8px 10px; border: 1px solid #e2e8f0; font-weight: bold;">${user.total}</td>
-          `
-          tbody.appendChild(row)
-        })
-        summaryTable.appendChild(tbody)
-        container.appendChild(summaryTable)
-
-        const footer = document.createElement("div")
-        footer.style.marginTop = "20px"
-        footer.style.borderTop = "1px solid #e2e8f0"
-        footer.style.paddingTop = "10px"
-        footer.style.fontSize = "10px"
-        footer.style.color = "#6b7280"
-        footer.style.textAlign = "center"
-        footer.innerHTML = `<p>Confidential - For Internal Use Only | Page 1</p>`
-        container.appendChild(footer)
-
-        const opt = {
-          margin: [15, 15],
-          filename: `leave_summary_report_${new Date().toISOString().split("T")[0]}.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
-          pagebreak: { mode: "avoid-all" },
-        }
-
-        await html2pdf().set(opt).from(container).save()
-        toast.success("Summary PDF generated successfully!")
-      } catch (error) {
-        console.error("Error generating PDF:", error)
-        toast.error("Failed to generate PDF. Please try again.")
-      } finally {
-        setIsGeneratingPdf(false)
-      }
-    }
-  }
-
-  const handleDownloadSingle = async (leave: LeaveRecord) => {
-    setIsGeneratingPdf(true) // Use the same loading state for single download
-    try {
-      const container = document.createElement("div")
-      container.style.padding = "40px"
-      container.style.fontFamily = "Arial, sans-serif"
-      container.style.maxWidth = "800px"
-      container.style.margin = "0 auto"
-
-      const formatDate = (dateString: string) => {
-        try {
-          const date = new Date(dateString)
-          return date.toLocaleDateString("en-US", {
+    const header = document.createElement("div");
+    header.style.display = "flex";
+    header.style.justifyContent = "space-between";
+    header.style.alignItems = "center";
+    header.style.marginBottom = "30px";
+    header.style.borderBottom = "2px solid #333";
+    header.style.paddingBottom = "12px";
+    header.innerHTML = `
+      <div>
+        <h1 style="margin:0;font-size:22px;color:#2d3748">ছুটি সম্পর্কিত তথ্য</h1>
+        <p style="margin:6px 0 0 0;font-size:12px;color:#475569">
+          ডাউনলোডের সময়: ${new Date().toLocaleString("en-US", {
             year: "numeric",
             month: "long",
             day: "numeric",
-          })
-        } catch (e) {
-          return dateString
-        }
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </p>
+      </div>
+      <div style="font-size:12px;color:#334155">
+        মোট ব্যক্তি: <strong>${groupLeavesByUser(filteredLeaves).length}</strong>
+      </div>
+    `;
+    container.appendChild(header);
+
+    const summaryTable = document.createElement("table");
+    summaryTable.style.width = "100%";
+    summaryTable.style.borderCollapse = "collapse";
+    summaryTable.style.fontSize = "12px";
+
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+      <tr>
+        ${[
+          "Name","Email","Phone","Casual","Sick","Maternity",
+          "Paternity","Annual","Other","Total",
+        ]
+          .map(
+            (h) =>
+              `<th style="background:#2d3748;color:#fff;padding:10px;text-align:left;border:1px solid #e2e8f0">${h}</th>`
+          )
+          .join("")}
+      </tr>
+    `;
+    summaryTable.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    const userSummaries = groupLeavesByUser(filteredLeaves);
+    userSummaries.forEach((user, index) => {
+      const row = document.createElement("tr");
+      row.style.background = index % 2 === 0 ? "#f8fafc" : "#ffffff";
+      row.innerHTML = `
+        <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.name}</td>
+        <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.email}</td>
+        <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.phone}</td>
+        <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.casual}</td>
+        <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.sick}</td>
+        <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.maternity}</td>
+        <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.paternity}</td>
+        <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.annual}</td>
+        <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.other}</td>
+        <td style="padding:8px 10px;border:1px solid #e2e8f0;font-weight:700">${user.total}</td>
+      `;
+      tbody.appendChild(row);
+    });
+    summaryTable.appendChild(tbody);
+    container.appendChild(summaryTable);
+
+    await html2pdf()
+      .set({
+        margin: [15, 15],
+        filename: `leave_summary_report_${new Date().toISOString().split("T")[0]}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+        // ✅ let big tables flow across pages instead of cutting off
+        pagebreak: { mode: ["css", "legacy"] },
+      })
+      .from(container)
+      .save();
+
+    toast.success("Summary PDF generated successfully!");
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    toast.error("Failed to generate PDF. Please try again.");
+  } finally {
+    setIsGeneratingPdf(false);
+  }
+};
+
+// Full, updated single-download method
+const handleDownloadSingle = async (leave: LeaveRecord) => {
+  setIsGeneratingPdf(true);
+  try {
+    const html2pdf = await ensureHtml2Pdf();
+
+    const formatDate = (dateString: string) => {
+      const dt = new Date(dateString);
+      if (!Number.isNaN(dt.getTime())) {
+        return dt.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
       }
+      return dateString;
+    };
 
-      const fromDate = formatDate(leave.fromDate)
-      const toDate = formatDate(leave.toDate)
+    const fromDate = formatDate(leave.fromDate);
+    const toDate = formatDate(leave.toDate);
 
-      let statusStyle = ""
-      let statusBgColor = ""
-      let statusTextColor = ""
-      if (leave.status.toLowerCase() === "pending") {
-        statusBgColor = "#fed7d7"
-        statusTextColor = "#9b2c2c"
-      } else if (leave.status.toLowerCase() === "approved") {
-        statusBgColor = "#10b981"
-        statusTextColor = "white"
-      } else if (leave.status.toLowerCase() === "rejected") {
-        statusBgColor = "#7f1d1d"
-        statusTextColor = "white"
-      }
-      statusStyle = `
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-weight: bold;
-        background-color: ${statusBgColor};
-        color: ${statusTextColor};
-      `
+    let statusBgColor = "#fde68a"; // pending
+    let statusTextColor = "#7c2d12";
+    const st = leave.status?.toLowerCase?.() || "pending";
+    if (st === "approved") {
+      statusBgColor = "#10b981";
+      statusTextColor = "#ffffff";
+    } else if (st === "rejected") {
+      statusBgColor = "#ef4444";
+      statusTextColor = "#ffffff";
+    }
 
-      const content = `
-        <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-           Header 
-          <div style="background-color: #2d3748; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <h1 style="margin: 0; font-size: 24px;">ছুটির আবেদন</h1>
-              <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.8;">Generated on ${new Date().toLocaleDateString(
-                "en-US",
-                {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                },
-              )}</p>
+    const container = document.createElement("div");
+    container.style.padding = "40px";
+    container.style.fontFamily = "Arial, sans-serif";
+    container.style.maxWidth = "800px";
+    container.style.margin = "0 auto";
+    container.innerHTML = `
+      <div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,.1)">
+        <div style="background:#2d3748;color:#fff;padding:20px">
+          <h1 style="margin:0;font-size:24px">ছুটির আবেদন</h1>
+          <p style="margin:6px 0 0 0;font-size:12px;opacity:.85">
+            Generated on ${new Date().toLocaleString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </p>
+        </div>
+
+        <div style="padding:24px;background:#f8fafc;border-bottom:1px solid #e2e8f0">
+          <h2 style="margin:0 0 12px 0;color:#334155;font-size:16px;border-bottom:2px solid #cbd5e0;padding-bottom:8px">কর্মী তথ্য</h2>
+          <div style="display:flex;gap:24px;flex-wrap:wrap">
+            <div style="min-width:240px">
+              <p style="margin:4px 0"><strong>নাম:</strong> ${leave.user.name || "N/A"}</p>
+              <p style="margin:4px 0"><strong>ইমেইল:</strong> ${leave.user.email}</p>
             </div>
-          </div>
-           Employee Information 
-          <div style="padding: 25px; background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-            <h2 style="margin: 0 0 15px 0; color: #4a5568; font-size: 18px; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px;">দায়ী তথ্য</h2>
-            <div style="display: flex; flex-wrap: wrap;">
-              <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
-                <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">নাম:</strong> ${
-                  leave.user.name || "N/A"
-                }</p>
-                <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">ইমেইল:</strong> ${
-                  leave.user.email
-                }</p>
-              </div>
-              <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
-                <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">মোবাইল:</strong> ${
-                  leave.user.phone || "N/A"
-                }</p>
-                <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">স্ট্যাটাস:</strong> <span style="${statusStyle}">${
-                  leave.status
-                }</span></p>
-              </div>
+            <div style="min-width:240px">
+              <p style="margin:4px 0"><strong>মোবাইল:</strong> ${leave.user.phone || "N/A"}</p>
+              <p style="margin:4px 0"><strong>স্ট্যাটাস:</strong>
+                <span style="display:inline-block;padding:4px 10px;border-radius:6px;background:${statusBgColor};color:${statusTextColor};font-weight:700">
+                  ${leave.status}
+                </span>
+              </p>
             </div>
-          </div>
-           Leave Details 
-          <div style="padding: 25px;">
-            <h2 style="margin: 0 0 15px 0; color: #4a5568; font-size: 18px; border-bottom: 2px solid #cbd5e0; padding-bottom: 10px;">ছুটির বিবরন</h2>
-            <div style="display: flex; flex-wrap: wrap;">
-              <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
-                <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">ছুটির ধরন:</strong> ${
-                  leave.leaveType
-                }</p>
-                <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">শুরুর তারিখ:</strong> ${fromDate}</p>
-                <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">শেষ তারিখ:</strong> ${toDate}</p>
-              </div>
-              <div style="flex: 1; min-width: 250px; margin-bottom: 10px;">
-                <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">মোট দিন:</strong> ${
-                  leave.days
-                }</p>
-                <p style="margin: 5px 0; font-size: 15px;"><strong style="color: #4a5568; display: inline-block; width: 100px;">অনুমুদন করেছে:</strong> ${
-                  leave.approvedBy || "Pending"
-                }</p>
-              </div>
-            </div>
-            <div style="margin-top: 20px;">
-              <h3 style="margin: 0 0 10px 0; color: #4a5568; font-size: 16px;">ছুটির বিবরন:</h3>
-              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 15px; font-size: 15px;">
-                ${leave.reason}
-              </div>
-            </div>
-          </div>
-           Note & Signature Section 
-          <div style="padding: 25px; background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
-            <div style="margin-bottom: 30px;">
-              <h3 style="margin: 0 0 10px 0; color: #4a5568; font-size: 16px;">বিশেষ দ্রষ্টব্য:</h3>
-              <p style="font-size: 14px; color: #4a5568; margin: 0;"> ছুটির আবেদনের একটি আনুষ্ঠানিক রেকর্ড এবং এর বর্তমান অবস্থার প্রতিনিধিত্ব করে। অনুগ্রহ করে এটি আপনার রেকর্ডের জন্য সংরক্ষণ করুন।</p>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-top: 40px;">
-              <div style="text-align: center; flex: 1;">
-                <div style="border-top: 1px solid #718096; width: 80%; margin: 0 auto;"></div>
-                <p style="font-size: 14px; margin: 5px 0 0 0;">দায়ী স্বাক্ষর</p>
-              </div>
-              <div style="text-align: center; flex: 1;">
-                <div style="border-top: 1px solid #718096; width: 80%; margin: 0 auto;"></div>
-                <p style="font-size: 14px; margin: 5px 0 0 0;">এডমিন স্বাক্ষর</p>
-              </div>
-            </div>
-          </div>
-           Footer 
-          <div style="background-color: #2d3748; color: white; padding: 15px; text-align: center; font-size: 12px;">
-            <p style="margin: 5px 0 0 0;">ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ. © ${new Date().getFullYear()}</p>
           </div>
         </div>
-      `
-      container.innerHTML = content
 
-      const opt = {
+        <div style="padding:24px">
+          <h2 style="margin:0 0 12px 0;color:#334155;font-size:16px;border-bottom:2px solid #cbd5e0;padding-bottom:8px">ছুটির বিবরণ</h2>
+          <div style="display:flex;gap:24px;flex-wrap:wrap">
+            <div style="min-width:240px">
+              <p style="margin:4px 0"><strong>ছুটির ধরন:</strong> ${leave.leaveType}</p>
+              <p style="margin:4px 0"><strong>শুরুর তারিখ:</strong> ${fromDate}</p>
+              <p style="margin:4px 0"><strong>শেষ তারিখ:</strong> ${toDate}</p>
+            </div>
+            <div style="min-width:240px">
+              <p style="margin:4px 0"><strong>মোট দিন:</strong> ${leave.days}</p>
+              <p style="margin:4px 0"><strong>অনুমোদনকারী:</strong> ${leave.approvedBy || "Pending"}</p>
+            </div>
+          </div>
+
+          <div style="margin-top:14px">
+            <h3 style="margin:0 0 8px 0;color:#334155;font-size:14px">কারণ</h3>
+            <div style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:12px;font-size:13px;line-height:1.6">
+              ${leave.reason}
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:20px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;gap:24px;justify-content:space-between">
+          <div style="text-align:center;flex:1">
+            <div style="border-top:1px solid #94a3b8;margin:0 32px"></div>
+            <p style="margin:6px 0 0 0;font-size:12px;color:#334155">কর্মীর স্বাক্ষর</p>
+          </div>
+          <div style="text-align:center;flex:1">
+            <div style="border-top:1px solid #94a3b8;margin:0 32px"></div>
+            <p style="margin:6px 0 0 0;font-size:12px;color:#334155">এডমিনের স্বাক্ষর</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    await html2pdf()
+      .set({
         margin: 10,
-        filename: `leave_request_${leave.user.name || "user"}_${leave.fromDate.split("T")[0]}.pdf`,
+        filename: `leave_request_${safeFilename(leave.user.name || "user")}_${ymd(leave.fromDate)}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      }
+      })
+      .from(container)
+      .save();
 
-      await html2pdf().set(opt).from(container).save()
-      toast.success("Leave request PDF generated successfully!")
-    } catch (error) {
-      console.error("Error generating PDF:", error)
-      toast.error("Failed to generate PDF. Please try again.")
-    } finally {
-      setIsGeneratingPdf(false)
-    }
+    toast.success("Leave request PDF generated successfully!");
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    toast.error("Failed to generate PDF. Please try again.");
+  } finally {
+    setIsGeneratingPdf(false);
   }
+};
+
 
   const clearSearch = () => {
     setSearchTerm("")
