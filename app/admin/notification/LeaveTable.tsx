@@ -41,7 +41,6 @@ interface LeaveUserSummary {
   annual: number // Added annual
   other: number
   total: number
-  pendingCount: number // Added pending count
   leaves: LeaveRecord[] // full list of their leaves
 }
 
@@ -108,17 +107,10 @@ const AdminLeaveManagement: React.FC = () => {
           annual: 0,
           other: 0,
           total: 0,
-          pendingCount: 0,
           leaves: [],
         }
       }
       grouped[email].leaves.push(leave)
-      
-      // Count pending requests
-      if (leave.status.toLowerCase() === "pending") {
-        grouped[email].pendingCount += 1
-      }
-      
       // Only count approved leaves in the summary totals
       if (leave.status.toLowerCase() === "approved") {
         const type = leave.leaveType.toLowerCase()
@@ -184,7 +176,7 @@ const AdminLeaveManagement: React.FC = () => {
         meta.innerHTML = `
           <div style="display:flex;justify-content:space-between">
             <p style="margin:5px 0;font-size:14px;"><strong>ডাউনলোডের তারিখ ও সময়:</strong> ${currentDate}</p>
-            <p style="margin:5px 0;font-size:14px;"><strong>মোট দাঁয়ী:</strong> ${userSummaries.length}</p>
+            <p style="margin:5px 0;font-size:14px;"><strong>মোট দাঁয়ী:</strong> ${userSummaries.length}</p>
           </div>
         `
         container.appendChild(meta)
@@ -457,9 +449,9 @@ const AdminLeaveManagement: React.FC = () => {
   const userSummaries = groupLeavesByUser(filteredLeaves)
 
   return (
-    <div>
+    <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
       <Card className="w-full mx-auto shadow-xl rounded-lg overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-[#155E75] via-[#196d87] to-[#1d90b4] text-white p-6">
+        <CardHeader className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white p-6">
           <CardTitle className="text-3xl font-extrabold">Leave Management Dashboard</CardTitle>
           <CardDescription className="text-blue-100 mt-2">
             Overview and management of all submitted leave requests.
@@ -523,11 +515,7 @@ const AdminLeaveManagement: React.FC = () => {
                   userSummaries.map((user, idx) => (
                     <React.Fragment key={`user-summary-${user.email}`}>
                       <TableRow
-                        className={`cursor-pointer hover:bg-blue-50 transition-colors ${
-                          user.pendingCount > 0 
-                            ? "bg-yellow-50 hover:bg-yellow-100 border-l-4 border-l-yellow-400" 
-                            : ""
-                        }`}
+                        className="cursor-pointer hover:bg-blue-50 transition-colors"
                         onClick={() => toggleUser(user.email)}
                       >
                         <TableCell className="font-medium flex items-center text-blue-900">
@@ -536,14 +524,7 @@ const AdminLeaveManagement: React.FC = () => {
                           ) : (
                             <ChevronRight className="h-4 w-4 mr-2 text-blue-600" />
                           )}
-                          <span>
-                            {user.name}
-                            {user.pendingCount > 0 && (
-                              <span className="ml-2 inline-flex items-center px-2 py-1 text-xs font-semibold text-orange-800 bg-orange-100 rounded-full">
-                                {user.pendingCount}
-                              </span>
-                            )}
-                          </span>
+                          {user.name}
                         </TableCell>
                         <TableCell className="text-gray-700">{user.email}</TableCell>
                         <TableCell className="text-gray-700">{user.phone}</TableCell>
@@ -577,14 +558,7 @@ const AdminLeaveManagement: React.FC = () => {
                                   </TableHeader>
                                   <TableBody>
                                     {user.leaves.map((leave, i) => (
-                                      <TableRow 
-                                        key={`${leave.id}`} 
-                                        className={
-                                          leave.status.toLowerCase() === "pending"
-                                            ? "bg-yellow-50 border-l-2 border-l-orange-300"
-                                            : i % 2 === 0 ? "bg-white" : "bg-blue-50"
-                                        }
-                                      >
+                                      <TableRow key={`${leave.id}`} className={i % 2 === 0 ? "bg-white" : "bg-blue-50"}>
                                         <TableCell className="text-xs capitalize">{leave.leaveType}</TableCell>
                                         <TableCell className="text-xs">
                                           {new Date(leave.fromDate).toLocaleDateString()}
