@@ -457,9 +457,9 @@ const AdminLeaveManagement: React.FC = () => {
   const userSummaries = groupLeavesByUser(filteredLeaves)
 
   return (
-    <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div>
       <Card className="w-full mx-auto shadow-xl rounded-lg overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white p-6">
+        <CardHeader className="bg-gradient-to-r from-[#155E75] via-[#196d87] to-[#1d90b4] text-white p-6">
           <CardTitle className="text-3xl font-extrabold">Leave Management Dashboard</CardTitle>
           <CardDescription className="text-blue-100 mt-2">
             Overview and management of all submitted leave requests.

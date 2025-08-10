@@ -98,7 +98,7 @@ export function UserLeaveTable({ userEmail, refetch }: UserLeaveTableProps) {
   if (loading) {
     return (
       <Card className="w-full mx-auto shadow-xl border-0 overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
+        <CardHeader className="bg-gradient-to-r from-[#1d90b4] via-[#196d87] to-[#155E75] text-white p-6">
           <CardTitle className="text-3xl font-bold">
             Your Leave Applications
           </CardTitle>
@@ -121,7 +121,7 @@ export function UserLeaveTable({ userEmail, refetch }: UserLeaveTableProps) {
   if (error) {
     return (
       <Card className="w-full mx-auto shadow-xl border-0 overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-red-600 to-pink-600 text-white p-6">
+        <CardHeader className="bg-gradient-to-r from-[#1d90b4] via-[#196d87] to-[#155E75] text-white p-6">
           <CardTitle className="text-3xl font-bold">
             Your Leave Applications
           </CardTitle>
@@ -142,7 +142,7 @@ export function UserLeaveTable({ userEmail, refetch }: UserLeaveTableProps) {
 
   return (
     <Card className="w-full mx-auto shadow-xl border-0 overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white sm:p-2 md:p-6">
+      <CardHeader className="bg-gradient-to-r from-[#1d90b4] via-[#196d87] to-[#155E75] text-white sm:p-2 md:p-6">
         <CardTitle className="text-3xl font-bold">
           Your Leave Applications
         </CardTitle>
