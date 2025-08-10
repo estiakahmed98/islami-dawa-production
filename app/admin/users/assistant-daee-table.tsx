@@ -290,8 +290,8 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
           সহযোগী দায়ী তালিকা — মোট <b>{rows.length}</b> জন (Parent Daye: {grouped.size})
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={exportPDF}>Pdf</Button>
-          <Button variant="outline" onClick={exportCSV}>Export CSV</Button>
+          <Button className="bg-[#155E75] hover:bg-[#1d809e] text-white" onClick={exportPDF}>Export PDF</Button>
+          <Button className="bg-[#155E75] hover:bg-[#1d809e] text-white" onClick={exportCSV}>Export CSV</Button>
         </div>
       </div>
 
