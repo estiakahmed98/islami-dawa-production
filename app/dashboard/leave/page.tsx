@@ -44,15 +44,15 @@ export default function LeavesPage() {
   }
 
   return (
-    <main className="flex flex-col items-center p-4 md:p-6 lg:p-8 space-y-8 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-950 dark:to-gray-900 min-h-screen">
-      <h1 className="text-4xl font-extrabold text-center text-gray-900 dark:text-gray-100 mb-6 drop-shadow-md">
+    <main className="flex flex-col items-center sm:p-2 md:p-4 space-y-8 dark:from-gray-950 dark:to-gray-900 min-h-screen">
+      <h1 className="text-4xl font-extrabold text-center text-gray-900 dark:text-gray-100 mb-2 drop-shadow-md">
         Your Leave Dashboard
       </h1>
 
       <div className="w-full flex justify-end mb-4">
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-sky-700 hover:bg-purple-800 text-white shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <Button className="bg-sky-600 hover:bg-sky-800 text-white shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
               <PlusIcon className="mr-2 h-5 w-5" />
               Apply for Leave
             </Button>

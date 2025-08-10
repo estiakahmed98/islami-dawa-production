@@ -1,54 +1,76 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react" // Import useEffect
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "sonner"
+import type React from "react";
+import { useState, useEffect } from "react"; // Import useEffect
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { useSession } from "@/lib/auth-client";
 
 interface LeaveRequestFormProps {
-  userEmail: string
-  onSubmissionSuccess: () => void
-  onClose: () => void
+  userEmail: string;
+  onSubmissionSuccess: () => void;
+  onClose: () => void;
 }
 
-export function LeaveRequestForm({ userEmail, onSubmissionSuccess, onClose }: LeaveRequestFormProps) {
-  const [leaveType, setLeaveType] = useState("")
-  const [fromDate, setFromDate] = useState("")
-  const [toDate, setToDate] = useState("")
-  const [calculatedDays, setCalculatedDays] = useState<number | null>(null) // State for calculated days
-  const [reason, setReason] = useState("")
-  const [phone, setPhone] = useState("")
-  const [name, setName] = useState("")
-  const [loading, setLoading] = useState(false)
+export function LeaveRequestForm({
+  userEmail,
+  onSubmissionSuccess,
+  onClose,
+}: LeaveRequestFormProps) {
+  const [leaveType, setLeaveType] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [calculatedDays, setCalculatedDays] = useState<number | null>(null); // State for calculated days
+  const [reason, setReason] = useState("");
+  const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const { data } = useSession();
+  const user = data?.user;
+
+  // ✅ Prefill name/phone from session when it becomes available
+  useEffect(() => {
+    if (user) {
+      setName((prev) => (prev?.trim() ? prev : (user.name ?? "")));
+      setPhone((prev) => (prev?.trim() ? prev : ((user as any).phone ?? "")));
+    }
+  }, [user]);
 
   // Effect to calculate days when fromDate or toDate changes
   useEffect(() => {
     if (fromDate && toDate) {
-      const start = new Date(fromDate)
-      const end = new Date(toDate)
+      const start = new Date(fromDate);
+      const end = new Date(toDate);
       // Set both dates to UTC midnight to avoid timezone issues affecting day count
-      start.setUTCHours(0, 0, 0, 0)
-      end.setUTCHours(0, 0, 0, 0)
+      start.setUTCHours(0, 0, 0, 0);
+      end.setUTCHours(0, 0, 0, 0);
 
       if (start <= end) {
-        const timeDiff = Math.abs(end.getTime() - start.getTime())
-        const days = Math.round(timeDiff / (1000 * 60 * 60 * 24)) + 1 // +1 for inclusive days
-        setCalculatedDays(days)
+        const timeDiff = Math.abs(end.getTime() - start.getTime());
+        const days = Math.round(timeDiff / (1000 * 60 * 60 * 24)) + 1; // +1 for inclusive days
+        setCalculatedDays(days);
       } else {
-        setCalculatedDays(null) // Invalid date range
+        setCalculatedDays(null); // Invalid date range
       }
     } else {
-      setCalculatedDays(null)
+      setCalculatedDays(null);
     }
-  }, [fromDate, toDate])
+  }, [fromDate, toDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
     try {
       const response = await fetch("/api/leaves", {
         method: "POST",
@@ -64,34 +86,38 @@ export function LeaveRequestForm({ userEmail, onSubmissionSuccess, onClose }: Le
           to: toDate,
           reason,
         }),
-      })
-      const data = await response.json()
+      });
+      const data = await response.json();
       if (!response.ok) {
         // If validation errors are returned, display them
         if (data.errors) {
-          Object.values(data.errors).forEach((msg) => toast.error(msg as string))
+          Object.values(data.errors).forEach((msg) =>
+            toast.error(msg as string)
+          );
         } else {
-          throw new Error(data.error || "Failed to submit leave request.")
+          throw new Error(data.error || "Failed to submit leave request.");
         }
       } else {
-        toast.success("Leave request submitted successfully!")
+        toast.success("Leave request submitted successfully!");
         // Clear form
-        setLeaveType("")
-        setFromDate("")
-        setToDate("")
-        setCalculatedDays(null)
-        setReason("")
-        setPhone("")
-        setName("")
-        onSubmissionSuccess() // Notify parent to refresh table
-        onClose() // Close the dialog
+        setLeaveType("");
+        setFromDate("");
+        setToDate("");
+        setCalculatedDays(null);
+        setReason("");
+        setPhone("");
+        setName("");
+        onSubmissionSuccess(); // Notify parent to refresh table
+        onClose(); // Close the dialog
       }
     } catch (error: any) {
-      toast.error(`Error submitting leave request: ${error.message || "An unexpected error occurred."}`)
+      toast.error(
+        `Error submitting leave request: ${error.message || "An unexpected error occurred."}`
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-6 p-4">
@@ -101,9 +127,8 @@ export function LeaveRequestForm({ userEmail, onSubmissionSuccess, onClose }: Le
           <Input
             id="name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your name"
             required
+            readOnly
           />
         </div>
         <div className="space-y-2">
@@ -111,9 +136,8 @@ export function LeaveRequestForm({ userEmail, onSubmissionSuccess, onClose }: Le
           <Input
             id="phone"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="e.g., 01712345678"
             required
+            readOnly
           />
         </div>
       </div>
@@ -136,17 +160,35 @@ export function LeaveRequestForm({ userEmail, onSubmissionSuccess, onClose }: Le
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="fromDate">From Date</Label>
-          <Input id="fromDate" type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} required />
+          <Input
+            id="fromDate"
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            required
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="toDate">To Date</Label>
-          <Input id="toDate" type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} required />
+          <Input
+            id="toDate"
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            required
+          />
         </div>
       </div>
       {calculatedDays !== null && (
         <div className="space-y-2">
           <Label htmlFor="calculatedDays">Calculated Days</Label>
-          <Input id="calculatedDays" type="text" value={calculatedDays} readOnly className="font-bold" />
+          <Input
+            id="calculatedDays"
+            type="text"
+            value={calculatedDays}
+            readOnly
+            className="font-bold"
+          />
         </div>
       )}
       <div className="space-y-2">
@@ -173,5 +215,5 @@ export function LeaveRequestForm({ userEmail, onSubmissionSuccess, onClose }: Le
         </Button>
       </div>
     </form>
-  )
+  );
 }
