@@ -78,9 +78,16 @@ const UniversalTableShow: React.FC<Props> = ({
     [],
   )
 
+  // Ensure selectedMonth and selectedYear are valid numbers
+  const safeSelectedMonth = Number.isInteger(selectedMonth) ? selectedMonth : new Date().getMonth();
+  const safeSelectedYear = Number.isInteger(selectedYear) ? selectedYear : new Date().getFullYear();
+
   const monthDays = useMemo(() => {
-    return Array.from({ length: new Date(selectedYear, selectedMonth + 1, 0).getDate() }, (_, i) => i + 1)
-  }, [selectedMonth, selectedYear])
+    return Array.from(
+      { length: new Date(safeSelectedYear, safeSelectedMonth + 1, 0).getDate() },
+      (_, i) => i + 1
+    )
+  }, [safeSelectedMonth, safeSelectedYear])
 
   const isFutureDate = (day: number): boolean => {
     // Compare against *local* today to block future edits
@@ -511,7 +518,7 @@ const UniversalTableShow: React.FC<Props> = ({
 
   // Helpers for cell rendering
   const dayToDateKey = (day: number) =>
-    `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    `${safeSelectedYear}-${String(safeSelectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
 
   return (
     <div>
@@ -519,8 +526,13 @@ const UniversalTableShow: React.FC<Props> = ({
         <div className="flex items-center gap-4">
           <div className="relative">
             <select
-              value={selectedMonth}
-              onChange={(e) => onMonthChange(Number.parseInt(e.target.value))}
+              value={safeSelectedMonth}
+              onChange={(e) => {
+                const month = Number.parseInt(e.target.value, 10);
+                if (!isNaN(month)) {
+                  onMonthChange(month);
+                }
+              }}
               className="w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
             >
               {months.map((month, index) => (
@@ -532,8 +544,13 @@ const UniversalTableShow: React.FC<Props> = ({
           </div>
           <div className="relative">
             <select
-              value={selectedYear}
-              onChange={(e) => onYearChange(Number.parseInt(e.target.value))}
+              value={safeSelectedYear}
+              onChange={(e) => {
+                const year = Number.parseInt(e.target.value, 10);
+                if (!isNaN(year)) {
+                  onYearChange(year);
+                }
+              }}
               className="w-24 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
             >
               {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
