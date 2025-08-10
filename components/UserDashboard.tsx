@@ -1,26 +1,13 @@
-"use client"; //Juwel
-
-import React, { useState } from "react";
+// Component/UserDashboard.tsx
+"use client";
+import React, { useState, useEffect } from "react";
 import AmoliChart from "@/components/AmoliCharts";
-import { userAmoliData } from "@/app/data/amoliMuhasabaUserData";
-import { userMoktobBisoyData } from "@/app/data/moktobBisoyUserData";
-import { userDawatiMojlishData } from "@/app/data/dawatiMojlishUserData";
-import { userTalimBisoyData } from "@/app/data/talimBisoyUserData";
-import { userDayeData } from "@/app/data/dayiUserData";
-import { userDawatiBisoyData } from "@/app/data/dawatiBisoyUserData";
-import { userJamatBisoyData } from "@/app/data/jamatBisoyUserData";
-import { userDineFeraData } from "@/app/data/dineferaUserData";
-import { userSoforBishoyData } from "@/app/data/soforBishoyUserData";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/TabButton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton";
 import { useSession } from "@/lib/auth-client";
 import AmoliTableShow from "@/components/TableShow";
 import TallyAdmin from "@/components/TallyAdmin";
 import ComparisonTallyCard from "@/components/ComparisonTallyCard";
+import { toast } from "sonner";
 
 interface TallyProps {
   userData: Record<string, any>;
@@ -33,12 +20,8 @@ const Dashboard: React.FC<TallyProps> = () => {
   const userEmail = session?.user?.email || "";
 
   // State for main dashboard
-  const [selectedMonth, setSelectedMonth] = useState<number>(
-    new Date().getMonth()
-  );
-  const [selectedYear, setSelectedYear] = useState<number>(
-    new Date().getFullYear()
-  );
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
   // State for comparison feature
   const [showComparison, setShowComparison] = useState(false);
@@ -47,45 +30,218 @@ const Dashboard: React.FC<TallyProps> = () => {
   const [to, setTo] = useState("");
   const [comparisonData, setComparisonData] = useState<any[]>([]);
 
+  // State for data from API
+  const [userAmoliData, setUserAmoliData] = useState<any>({ records: {} });
+  const [userMoktobBisoyData, setUserMoktobBisoyData] = useState<any>({ records: {} });
+  const [userDawatiBisoyData, setUserDawatiBisoyData] = useState<any>({ records: {} });
+  const [userDawatiMojlishData, setUserDawatiMojlishData] = useState<any>({ records: {} });
+  const [userJamatBisoyData, setUserJamatBisoyData] = useState<any>({ records: {} });
+  const [userDineFeraData, setUserDineFeraData] = useState<any>({ records: {} });
+  const [userTalimBisoyData, setUserTalimBisoyData] = useState<any>({ records: {} });
+  const [userSoforBishoyData, setUserSoforBishoyData] = useState<any>({ records: {} });
+  const [userDayeData, setUserDayeData] = useState<any>({ records: {} });
+  const [loading, setLoading] = useState(true);
+
+  // Handler for month change
+  const onMonthChange = (month: number) => {
+    setSelectedMonth(month);
+  };
+
+  // Handler for year change
+  const onYearChange = (year: number) => {
+    setSelectedYear(year);
+  };
+
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
   ];
+
+  // Helper function to format date as YYYY-MM-DD (Dhaka timezone)
+  function dhakaYMD(d: Date) {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Dhaka",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d);
+  }
+
+  // Helper function to convert array to numbered HTML list
+  function toNumberedHTML(arr: unknown): string {
+    const list = Array.isArray(arr) ? arr.filter(Boolean).map(String) : [];
+    if (list.length === 0) return "";
+    return list.map((item, idx) => `${idx + 1}. ${item}`).join("<br/>");
+  }
+
+  // Fetch all data from API
+  useEffect(() => {
+    if (!userEmail) return;
+
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch all data in parallel
+        const endpoints = [
+          {
+            url: `/api/amoli?email=${encodeURIComponent(userEmail)}`, setter: setUserAmoliData, labelMap: {
+              tahajjud: "তাহাজ্জুদ",
+              surah: "সুরা",
+              ayat: "আয়াত",
+              zikir: "যিকির",
+              ishraq: "ইশরাক/আওয়াবীন/চাশ্ত",
+              jamat: "জামাত",
+              sirat: "সিরাত",
+              Dua: "দোয়া",
+              ilm: "ইলম",
+              tasbih: "তাসবীহ",
+              dayeeAmol: "দায়ী আমল",
+              amoliSura: "আমলি সুরা",
+              ayamroja: "আইয়ামে রোজা",
+              hijbulBahar: "হিজবুল বাহার",
+            }
+          },
+          {
+            url: `/api/moktob?email=${encodeURIComponent(userEmail)}`, setter: setUserMoktobBisoyData, labelMap: {
+              notunMoktobChalu: "নতুন মক্তব চালু হয়েছে",
+              totalMoktob: "মোট মক্তব",
+              totalStudent: "মোট ছাত্র-ছাত্রী",
+              obhibhabokConference: "অভিভাবক কনফারেন্স হয়েছে",
+              moktoThekeMadrasaAdmission: "মক্তব থেকে মাদ্রাসায় ভর্তি হয়েছে",
+              notunBoyoskoShikkha: "নতুন বয়স্ক শিক্ষা",
+              totalBoyoskoShikkha: "মোট বয়স্ক শিক্ষা",
+              boyoskoShikkhaOnshogrohon: "বয়স্ক শিক্ষায় অংশগ্রহণ",
+              newMuslimeDinerFikir: "নতুন মুসলিমদের ফিকির",
+            }
+          },
+          {
+            url: `/api/talim?email=${encodeURIComponent(userEmail)}`, setter: setUserTalimBisoyData, labelMap: {
+              mohilaTalim: "মহিলাদের তালিম হয়েছে",
+              mohilaOnshogrohon: "মহিলাদের অংশগ্রহণ",
+            }
+          },
+          {
+            url: `/api/dayi?email=${encodeURIComponent(userEmail)}`, setter: setUserDayeData, labelMap: {
+              sohojogiDayeToiri: "সহযোগী দায়ী তৈরি হয়েছে",
+            }
+          },
+          {
+            url: `/api/dawati?email=${encodeURIComponent(userEmail)}`, setter: setUserDawatiBisoyData, labelMap: {
+              nonMuslimDawat: "অমুসলিমদের দাওয়াত",
+              murtadDawat: "মুরতাদদের দাওয়াত",
+              alemderSatheyMojlish: "আলেমদের সাথে মজলিশ",
+              publicSatheyMojlish: "পাবলিকের সাথে মজলিশ",
+              nonMuslimSaptahikGasht: "অমুসলিমদের সাথে সাপ্তাহিক গাশ্ত",
+            }
+          },
+          {
+            url: `/api/dawatimojlish?email=${encodeURIComponent(userEmail)}`, setter: setUserDawatiMojlishData, labelMap: {
+              dawatterGuruttoMojlish: "দাওয়াতের গুরুত্ব মজলিশ",
+              mojlisheOnshogrohon: "মজলিশে অংশগ্রহণ",
+              prosikkhonKormoshalaAyojon: "প্রশিক্ষণ কর্মশালা আয়োজন",
+              prosikkhonOnshogrohon: "প্রশিক্ষণে অংশগ্রহণ",
+              jummahAlochona: "জুম্মার আলোচনা",
+              dhormoSova: "ধর্ম সংসভা",
+              mashwaraPoint: "মাশওয়ারা পয়েন্ট",
+            }
+          },
+          {
+            url: `/api/jamat?email=${encodeURIComponent(userEmail)}`, setter: setUserJamatBisoyData, labelMap: {
+              jamatBerHoise: "জামাত বের হয়েছে",
+              jamatSathi: "জামাত সাথী",
+            }
+          },
+          {
+            url: `/api/dinefera?email=${encodeURIComponent(userEmail)}`, setter: setUserDineFeraData, labelMap: {
+              nonMuslimMuslimHoise: "অমুসলিম মুসলিম হয়েছে",
+              murtadIslamFireche: "মুরতাদ ইসলামে ফিরেছে",
+            }
+          },
+          {
+            url: `/api/soforbisoy?email=${encodeURIComponent(userEmail)}`, setter: setUserSoforBishoyData, labelMap: {
+              moktobVisit: "চলমান মক্তব পরিদর্শন হয়েছে",
+              madrasaVisit: "মাদ্রাসা সফর হয়েছে",
+              schoolCollegeVisit: "স্কুল/কলেজ সফর হয়েছে",
+              madrasaVisitList: "মাদ্রাসার তালিকা",
+              schoolCollegeVisitList: "স্কুল/কলেজ তালিকা",
+            }
+          },
+        ];
+
+        const fetchPromises = endpoints.map(async ({ url, setter, labelMap }) => {
+          try {
+            const res = await fetch(url, { cache: "no-store" });
+            if (!res.ok) throw new Error(`Failed to fetch ${url}`);
+            const json = await res.json();
+
+            const records = Array.isArray(json.records) ? json.records : [];
+            const transformed: Record<string, Record<string, any>> = { [userEmail]: {} };
+
+            records.forEach((rec) => {
+              const dateKey = dhakaYMD(new Date(rec.date));
+              transformed[userEmail][dateKey] = { ...rec };
+
+              // Handle array fields
+              if (rec.madrasaVisitList) {
+                transformed[userEmail][dateKey].madrasaVisitList = toNumberedHTML(rec.madrasaVisitList);
+              }
+              if (rec.schoolCollegeVisitList) {
+                transformed[userEmail][dateKey].schoolCollegeVisitList = toNumberedHTML(rec.schoolCollegeVisitList);
+              }
+              if (rec.assistants) {
+                transformed[userEmail][dateKey].assistants = toNumberedHTML(
+                  rec.assistants.map((a: any) => `${a.name} (${a.phone})`)
+                );
+              }
+            });
+
+            setter({
+              records: transformed,
+              labelMap
+            });
+          } catch (error) {
+            console.error(`Error fetching ${url}:`, error);
+            toast.error(`ডেটা লোড করতে সমস্যা হয়েছে: ${url}`);
+          }
+        });
+
+        await Promise.all(fetchPromises);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        toast.error("ড্যাশবোর্ড ডেটা লোড করতে সমস্যা হয়েছে");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userEmail]);
 
   // Filter data by selected month and year
   const filterChartAndTallyData = (userData: any) => {
     if (!userData || !userData.records) return userData;
 
-    const filteredRecords = Object.keys(userData.records).reduce<
-      Record<string, any>
-    >((filtered, email) => {
-      const emailData = userData.records[email];
-      const filteredDates = Object.keys(emailData).reduce<Record<string, any>>(
-        (acc, date) => {
-          const [year, month] = date.split("-").map(Number);
-          if (year === selectedYear && month === selectedMonth + 1) {
-            acc[date] = emailData[date];
-          }
-          return acc;
-        },
-        {}
-      );
+    const filteredRecords = Object.keys(userData.records).reduce<Record<string, any>>(
+      (filtered, email) => {
+        const emailData = userData.records[email];
+        const filteredDates = Object.keys(emailData).reduce<Record<string, any>>(
+          (acc, date) => {
+            const dateObj = new Date(date);
+            if (dateObj.getFullYear() === selectedYear && dateObj.getMonth() === selectedMonth) {
+              acc[date] = emailData[date];
+            }
+            return acc;
+          },
+          {}
+        );
 
-      if (Object.keys(filteredDates).length > 0) {
-        filtered[email] = filteredDates;
-      }
-      return filtered;
-    }, {});
+        if (Object.keys(filteredDates).length > 0) {
+          filtered[email] = filteredDates;
+        }
+        return filtered;
+      },
+      {}
+    );
 
     return { ...userData, records: filteredRecords };
   };
@@ -93,10 +249,8 @@ const Dashboard: React.FC<TallyProps> = () => {
   // Convert values to points for comparison
   const convertToPoints = (value: any, field: string): number => {
     if (typeof value === "number" && !isNaN(value)) return value;
-
     if (typeof value === "string") {
       value = value.trim();
-
       if (field === "zikir") {
         if (value === "সকাল-সন্ধ্যা") return 2;
         if (value === "সকাল" || value === "সন্ধ্যা") return 1;
@@ -128,7 +282,6 @@ const Dashboard: React.FC<TallyProps> = () => {
         return value === "হ্যাঁ" ? 1 : 0;
       }
     }
-
     return 0;
   };
 
@@ -151,14 +304,17 @@ const Dashboard: React.FC<TallyProps> = () => {
         totalTo += convertToPoints(userRecords[to]?.[metric], metric);
       } else {
         Object.keys(userRecords).forEach((date) => {
-          if (comparisonType === "month" && date.startsWith(from))
+          const dateObj = new Date(date);
+          const dateStr = comparisonType === "month"
+            ? `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`
+            : String(dateObj.getFullYear());
+
+          if (dateStr === from) {
             totalFrom += convertToPoints(userRecords[date]?.[metric], metric);
-          if (comparisonType === "month" && date.startsWith(to))
+          }
+          if (dateStr === to) {
             totalTo += convertToPoints(userRecords[date]?.[metric], metric);
-          else if (comparisonType === "year" && date.startsWith(from))
-            totalFrom += convertToPoints(userRecords[date]?.[metric], metric);
-          if (comparisonType === "year" && date.startsWith(to))
-            totalTo += convertToPoints(userRecords[date]?.[metric], metric);
+          }
         });
       }
 
@@ -173,6 +329,7 @@ const Dashboard: React.FC<TallyProps> = () => {
         let percentageChange;
         totalFrom = isNaN(totalFrom) ? 0 : totalFrom;
         totalTo = isNaN(totalTo) ? 0 : totalTo;
+
         if (totalTo - totalFrom > 0) {
           percentageChange =
             ((Math.max(totalTo, totalFrom) - Math.min(totalTo, totalFrom)) /
@@ -186,15 +343,7 @@ const Dashboard: React.FC<TallyProps> = () => {
             ) * 100;
         }
 
-        if (totalFrom === 0 && totalTo > 0) {
-          change = "∞% ↑"; // Infinite increase
-        } else if (totalFrom > 0 && totalTo === 0) {
-          change = "-∞% ↓"; // Infinite decrease
-        } else if (totalFrom === totalTo) {
-          change = "0%";
-        } else {
-          change = `${percentageChange.toFixed(2)}% ${percentageChange > 0 ? "↑" : "↓"}`;
-        }
+        change = `${percentageChange.toFixed(2)}% ${percentageChange > 0 ? "↑" : "↓"}`;
       }
 
       return {
@@ -235,7 +384,7 @@ const Dashboard: React.FC<TallyProps> = () => {
 
   const getHtml2Pdf = async () => {
     const html2pdfModule = await import("html2pdf.js");
-    return html2pdfModule.default || html2pdfModule; // Ensure correct function access
+    return html2pdfModule.default || html2pdfModule;
   };
 
   const convertToPDF = async () => {
@@ -245,7 +394,6 @@ const Dashboard: React.FC<TallyProps> = () => {
     }
 
     const element = document.createElement("div");
-
     let tableHTML = `
       <html>
         <head>
@@ -272,7 +420,7 @@ const Dashboard: React.FC<TallyProps> = () => {
               color: white;
             }
             thead {
-              display: table-header-group; 
+              display: table-header-group;
             }
             tr {
               page-break-inside: avoid;
@@ -293,8 +441,8 @@ const Dashboard: React.FC<TallyProps> = () => {
             </thead>
             <tbody>
               ${comparisonData
-                .map(
-                  (item) => `
+        .map(
+          (item) => `
                     <tr>
                       <td>${item.label}</td>
                       <td>${item.from}</td>
@@ -303,18 +451,16 @@ const Dashboard: React.FC<TallyProps> = () => {
                       <td style="color: ${item.isIncrease ? "green" : "red"};">${item.change}</td>
                     </tr>
                   `
-                )
-                .join("")}
+        )
+        .join("")}
             </tbody>
           </table>
         </body>
       </html>`;
 
     element.innerHTML = tableHTML;
-
     try {
       const html2pdf = await getHtml2Pdf();
-
       html2pdf()
         .set({
           margin: 10,
@@ -343,6 +489,14 @@ const Dashboard: React.FC<TallyProps> = () => {
       console.error("Error generating PDF:", error);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-emerald-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -602,7 +756,7 @@ const Dashboard: React.FC<TallyProps> = () => {
           <div className="border border-[#155E75] p-2 lg:p-6 mt-10 rounded-xl overflow-y-auto">
             <Tabs defaultValue="Amolimusahaba" className="w-full lg:p-4">
               <TabsList className="mx-10 grid grid-cols-2 md:grid-cols-4 my-6">
-                <TabsTrigger value="Amolimusahaba">আ’মলি মুহাসাবা</TabsTrigger>
+                <TabsTrigger value="Amolimusahaba">আ'মলি মুহাসাবা</TabsTrigger>
                 <TabsTrigger value="moktob">মক্তব বিষয়</TabsTrigger>
                 <TabsTrigger value="talim">মহিলাদের তালিম বিষয়</TabsTrigger>
                 <TabsTrigger value="daye">সহযোগী দায়ী বিষয</TabsTrigger>
@@ -616,47 +770,55 @@ const Dashboard: React.FC<TallyProps> = () => {
               {/* Tab Content */}
               <TabsContent value="Amolimusahaba">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userAmoliData} />
+                  <AmoliTableShow userData={userAmoliData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
+
               <TabsContent value="moktob">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userMoktobBisoyData} />
+                  <AmoliTableShow userData={userMoktobBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
+
               <TabsContent value="talim">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userTalimBisoyData} />
+                  <AmoliTableShow userData={userTalimBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
+
               <TabsContent value="daye">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userDayeData} />
+                  <AmoliTableShow userData={userDayeData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
+
               <TabsContent value="dawati">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userDawatiBisoyData} />
+                  <AmoliTableShow userData={userDawatiBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
+
               <TabsContent value="dawatimojlish">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userDawatiMojlishData} />
+                  <AmoliTableShow userData={userDawatiMojlishData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
+
               <TabsContent value="jamat">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userJamatBisoyData} />
+                  <AmoliTableShow userData={userJamatBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
+
               <TabsContent value="dinefera">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userDineFeraData} />
+                  <AmoliTableShow userData={userDineFeraData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
+
               <TabsContent value="sofor">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userSoforBishoyData} />
+                  <AmoliTableShow userData={userSoforBishoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
                 </div>
               </TabsContent>
             </Tabs>
