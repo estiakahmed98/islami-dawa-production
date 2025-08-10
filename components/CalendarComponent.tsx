@@ -1,4 +1,5 @@
-"use client"; //Estiak
+//Component/CalendarComponent.tsx
+"use client"; 
 
 import { useEffect, useState } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
