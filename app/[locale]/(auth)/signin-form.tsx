@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { FcGoogle } from "react-icons/fc";
 import { Loader2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 type SigninFormProps = {
   /** Comes from `searchParams.error` via the page component */
@@ -40,6 +41,8 @@ type SigninFormProps = {
 };
 
 const SigninForm = ({ initialError = "" }: SigninFormProps) => {
+  const t = useTranslations("SigninForm");
+  const locale = useLocale();
   const [formError, setFormError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -48,14 +51,14 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
   // Map URL error codes -> human messages shown in the UI
   const mappedInitialError = useMemo(() => {
     if (initialError === "already_logged_in_elsewhere") {
-      return "Already logged in on another device.";
+      return t("errors.alreadyLoggedInElsewhere");
     }
     if (initialError === "lock_error") {
-      return "Couldn't verify session lock. Please try again.";
+      return t("errors.lockError");
     }
     // pass-through any other message you might send
     return initialError || "";
-  }, [initialError]);
+  }, [initialError, t]);
 
   // Show the error (if any) on first render
   useEffect(() => {
@@ -63,12 +66,12 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
       setFormError(mappedInitialError);
       // optional toast for visibility
       if (initialError === "already_logged_in_elsewhere") {
-        toast.error("Already logged in on another device");
+        toast.error(t("errors.alreadyLoggedInElsewhere"));
       } else if (initialError === "lock_error") {
-        toast.error("Session lock check failed");
+        toast.error(t("errors.sessionLockFailed"));
       }
     }
-  }, [mappedInitialError, initialError]);
+  }, [mappedInitialError, initialError, t]);
 
   const form = useForm<yup.InferType<typeof signInSchema>>({
     resolver: yupResolver(signInSchema),
@@ -85,8 +88,8 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
           setFormError("");
         },
         onSuccess: () => {
-          toast.success("Login Successful");
-          router.push("/admin");
+          toast.success(t("toasts.loginSuccessful"));
+          router.push(`/${locale}/admin`);
           router.refresh();
         },
         onError: (ctx) => {
@@ -102,18 +105,18 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
     setFormError("");
     try {
       await authClient.signIn.social(
-        { provider: "google", callbackURL: "/admin" },
+        { provider: "google", callbackURL: `/${locale}/admin` },
         {
           onSuccess: () => {
             router.refresh();
-            toast.success("Login Successful");
+            toast.success(t("toasts.loginSuccessful"));
           },
           onError: (ctx) => setFormError(ctx.error.message),
         }
       );
     } catch (err) {
       console.error("Google Sign-In Error:", err);
-      toast.error("Google Login Failed. Try again.");
+      toast.error(t("toasts.googleLoginFailed"));
     } finally {
       setIsGoogleLoading(false);
     }
@@ -124,8 +127,8 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
   return (
     <Card>
       <CardHeader className="items-center">
-        <CardTitle className="text-2xl">Sign In</CardTitle>
-        <CardDescription>Enter your account details to login</CardDescription>
+        <CardTitle className="text-2xl">{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -137,11 +140,11 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t("fields.email.label")}</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="Enter email address"
+                        placeholder={t("fields.email.placeholder")}
                         autoComplete="email"
                         {...field}
                       />
@@ -156,11 +159,11 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t("fields.password.label")}</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Enter password"
+                        placeholder={t("fields.password.placeholder")}
                         autoComplete="current-password"
                         {...field}
                       />
@@ -177,10 +180,10 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 animate-spin" size={18} />
-                  Signing In...
+                  {t("buttons.signingIn")}
                 </>
               ) : (
-                "Sign In"
+                t("buttons.signIn")
               )}
             </Button>
           </form>
@@ -195,22 +198,22 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
           {isGoogleLoading ? (
             <>
               <Loader2 className="animate-spin" size={18} />
-              Signing In...
+              {t("buttons.signingIn")}
             </>
           ) : (
             <>
               <FcGoogle size={20} />
-              Sign in with Google
+              {t("buttons.signInWithGoogle")}
             </>
           )}
         </Button>
 
         <div className="mt-5 space-x-1 text-center text-sm">
           <Link
-            href="/auth/forgot-password"
+            href={`/${locale}/auth/forgot-password`}
             className="text-sm text-muted-foreground hover:underline"
           >
-            Forgot password?
+            {t("links.forgotPassword")}
           </Link>
         </div>
       </CardContent>

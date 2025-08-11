@@ -328,4 +328,36 @@
     "editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval": "এডিট রিকোয়েস্ট সফলভাবে জমা হয়েছে। অ্যাডমিন অনুমোদনের জন্য অপেক্ষা করুন।",
     "failedToSubmitEditRequestPleaseTryAgain": "এডিট রিকোয়েস্ট জমা ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"
   }
+  ,
+  "SigninForm": {
+    "title": "সাইন ইন",
+    "description": "লগইনের জন্য আপনার অ্যাকাউন্টের তথ্য দিন",
+    "fields": {
+      "email": {
+        "label": "ইমেইল",
+        "placeholder": "ইমেইল ঠিকানা লিখুন"
+      },
+      "password": {
+        "label": "পাসওয়ার্ড",
+        "placeholder": "পাসওয়ার্ড লিখুন"
+      }
+    },
+    "buttons": {
+      "signingIn": "সাইন ইন হচ্ছে...",
+      "signIn": "সাইন ইন",
+      "signInWithGoogle": "গুগল দিয়ে সাইন ইন"
+    },
+    "links": {
+      "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?"
+    },
+    "errors": {
+      "alreadyLoggedInElsewhere": "আপনি ইতিমধ্যে অন্য ডিভাইসে লগইন করা আছে।",
+      "lockError": "সেশন লক যাচাই করা যায়নি। দয়া করে আবার চেষ্টা করুন।",
+      "sessionLockFailed": "সেশন লক পরীক্ষা ব্যর্থ হয়েছে"
+    },
+    "toasts": {
+      "loginSuccessful": "লগইন সফল হয়েছে",
+      "googleLoginFailed": "গুগল লগইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"
+    }
+  }
 }

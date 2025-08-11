@@ -329,4 +329,36 @@
     "editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval": "Edit request submitted successfully. Please wait for admin approval.",
     "failedToSubmitEditRequestPleaseTryAgain": "Failed to submit edit request. Please try again."
   }
+  ,
+  "SigninForm": {
+    "title": "Sign In",
+    "description": "Enter your account details to login",
+    "fields": {
+      "email": {
+        "label": "Email",
+        "placeholder": "Enter email address"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Enter password"
+      }
+    },
+    "buttons": {
+      "signingIn": "Signing In...",
+      "signIn": "Sign In",
+      "signInWithGoogle": "Sign in with Google"
+    },
+    "links": {
+      "forgotPassword": "Forgot password?"
+    },
+    "errors": {
+      "alreadyLoggedInElsewhere": "Already logged in on another device.",
+      "lockError": "Couldn't verify session lock. Please try again.",
+      "sessionLockFailed": "Session lock check failed"
+    },
+    "toasts": {
+      "loginSuccessful": "Login Successful",
+      "googleLoginFailed": "Google Login Failed. Try again."
+    }
+  }
 }

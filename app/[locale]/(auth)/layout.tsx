@@ -1,24 +1,42 @@
 //Estiak
 
 import Image from "next/image";
+import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { notFound } from "next/navigation";
+import { routing } from "@/i18n/routing";
 
-const AuthLayout = ({ children }: { children: React.ReactNode }) => {
+interface Props {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}
+
+const AuthLayout = async ({ children, params }: Props) => {
+  const { locale } = await params;
+
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
+  const messages = (await import(`@/locale/${locale}.json`)).default;
+
   return (
-    <div className="grid h-screen place-items-center px-4 py-8">
-      <main className="flex w-full max-w-sm flex-col gap-8">
-      <div className="flex items-center justify-center bg-[#155E75] p-2 rounded-lg">
-       <Image
-          src="/logo_img.png"
-          width={100}
-          height={100}
-          alt="logo"
-          priority
-        />
-        <h1 className="text-xl font-bold text-center text-white">ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ </h1>
-       </div>
-        {children}
-      </main>
-    </div>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <div className="grid h-screen place-items-center px-4 py-8">
+        <main className="flex w-full max-w-sm flex-col gap-8">
+          <div className="flex items-center justify-center bg-[#155E75] p-2 rounded-lg">
+            <Image
+              src="/logo_img.png"
+              width={100}
+              height={100}
+              alt="logo"
+              priority
+            />
+            <h1 className="text-xl font-bold text-center text-white">ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ </h1>
+          </div>
+          {children}
+        </main>
+      </div>
+    </NextIntlClientProvider>
   );
 };
 
