@@ -5,6 +5,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import fileDownload from "js-file-download";
 import "@fontsource/noto-sans-bengali";
 import { useSelectedUser } from "@/providers/treeProvider";
+import { useTranslations } from "next-intl";
 
 interface AdminTableProps {
   userData: any;
@@ -39,6 +40,8 @@ const AdminTable: React.FC<AdminTableProps> = ({
 
   const { selectedUser } = useSelectedUser();
   const [selectedUserData, setSelectedUserData] = useState<any>(null);
+  const month = useTranslations("dashboard.UserDashboard.months");
+  const t = useTranslations("universalTableShow");
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -56,8 +59,8 @@ const AdminTable: React.FC<AdminTableProps> = ({
   }, [selectedUser]);
 
   const months = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December",
+    month("january"), month("february"), month("march"), month("april"), month("may"), month("june"),
+    month("july"), month("august"), month("september"), month("october"), month("november"), month("december"),
   ];
 
   const monthDays = useMemo(() => {
@@ -89,7 +92,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
         const n = Number(v) || 0;
         return n >= 1 && n <= 5 ? n : 0;
       }
-      if (["Dua","tasbih","amoliSura","hijbulBahar","dayeeAmol","ayamroja"].includes(field)) {
+      if (["Dua", "tasbih", "amoliSura", "hijbulBahar", "dayeeAmol", "ayamroja"].includes(field)) {
         return v === "হ্যাঁ" ? 1 : 0;
       }
       const n = parseFloat(v);
@@ -107,7 +110,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
     const labelKeys = Object.keys(labelsMap);
 
     const transposed = labelKeys.map((labelKey) => {
-      const row: { labelKey: string; label: string; [key: number]: any } = {
+      const row: { labelKey: string; label: string;[key: number]: any } = {
         labelKey,
         label: labelsMap[labelKey],
       };
@@ -140,7 +143,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
   const convertToCSV = () => {
     const BOM = "\uFEFF";
     const monthName = months[selectedMonth];
-    const headers = ["Label", ...monthDays.map((d) => `${d}`)];
+    const headers = [t("label"), ...monthDays.map((d) => `${d}`)];
     const rows = filteredData.map((row) => [row.label, ...monthDays.map((d) => row[d] ?? "-")]);
     const csv = BOM + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
     const safeName = (selectedUserData?.name || "User").replace(/[\/\\:?*"<>|]/g, "_");
@@ -205,15 +208,15 @@ const AdminTable: React.FC<AdminTableProps> = ({
             </thead>
             <tbody>
               ${monthDays
-                .map(
-                  (day) => `
+        .map(
+          (day) => `
                     <tr>
                       <td class="row-label">${day}</td>
                       ${printableRows.map((row) => `<td>${row[day] ?? "-"}</td>`).join("")}
                     </tr>
                   `
-                )
-                .join("")}
+        )
+        .join("")}
             </tbody>
           </table>
         </body>
@@ -317,10 +320,10 @@ const AdminTable: React.FC<AdminTableProps> = ({
         <table className="border-collapse border border-gray-300 w-full table-auto text-sm md:text-base">
           <thead>
             <tr className="bg-gray-200">
-              <th className="border border-gray-300 px-4 py-2 text-left">Label</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">{t("label")}</th>
               {monthDays.map((day) => (
                 <th key={day} className="border border-gray-300 px-6 py-2 text-center text-nowrap">
-                  Day {day}
+                  {t("day", { day })}
                 </th>
               ))}
             </tr>

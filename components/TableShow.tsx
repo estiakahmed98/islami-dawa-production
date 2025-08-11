@@ -7,6 +7,7 @@ import DOMPurify from "dompurify"
 import "@fontsource/noto-sans-bengali"
 import { EditRequestModal } from "./edit-request-modal"
 import { createEditRequest, getEditRequestsByEmail } from "@/lib/edit-requests"
+import { useTranslations } from "next-intl";
 
 type EditStatus = "pending" | "approved" | "rejected"
 
@@ -59,21 +60,23 @@ const UniversalTableShow: React.FC<Props> = ({
   const [editRequestModal, setEditRequestModal] = useState<{ day: number } | null>(null)
   const [editRequestStatuses, setEditRequestStatuses] = useState<EditRequestStatus>({})
   const [tableData, setTableData] = useState<any>({})
+  const month = useTranslations("dashboard.UserDashboard.months");
+  const t = useTranslations("universalTableShow");
 
   const months = useMemo(
     () => [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
+      month("january"),
+      month("february"),
+      month("march"),
+      month("april"),
+      month("may"),
+      month("june"),
+      month("july"),
+      month("august"),
+      month("september"),
+      month("october"),
+      month("november"),
+      month("december"),
     ],
     [],
   )
@@ -112,7 +115,7 @@ const UniversalTableShow: React.FC<Props> = ({
         })
         setEditRequestStatuses(statuses)
       } catch (error) {
-        console.error("Error fetching edit request statuses:", error)
+        console.error(t("errorFetchingEditRequestStatuses"), error)
       }
     }
     fetchEditRequestStatuses()
@@ -141,7 +144,7 @@ const UniversalTableShow: React.FC<Props> = ({
 
     // মতামত row (eye button)
     const motamotRow: { label: string; key: string; [key: number]: any } = {
-      label: "মতামত",
+      label: t("motamot"),
       key: "editorContent",
     }
     monthDays.forEach((day) => {
@@ -161,7 +164,7 @@ const UniversalTableShow: React.FC<Props> = ({
 
     // Edit row (buttons per day)
     const editRow: { label: string; key: string; [key: number]: any } = {
-      label: "Edit",
+      label: t("edit"),
       key: "editActions",
     }
     monthDays.forEach((day) => {
@@ -186,7 +189,7 @@ const UniversalTableShow: React.FC<Props> = ({
             className="text-sm bg-green-600 text-white py-1 px-3 rounded"
             onClick={() => handleEditClick(day, transposed)}
           >
-            Edit
+            {t("edit")}
           </button>
         )
       } else if (requestStatus === "approved" && editedOnce) {
@@ -196,13 +199,13 @@ const UniversalTableShow: React.FC<Props> = ({
             disabled
             title="Already edited once"
           >
-            Edited
+            {t("edited")}
           </button>
         )
       } else if (requestStatus === "pending") {
         editRow[day] = (
           <button className="text-sm bg-yellow-500 text-white py-1 px-3 rounded cursor-not-allowed" disabled>
-            Pending
+            {t("pending")}
           </button>
         )
       } else if (requestStatus === "rejected") {
@@ -211,7 +214,7 @@ const UniversalTableShow: React.FC<Props> = ({
             className="text-sm bg-gray-600 text-white py-1 px-3 rounded"
             onClick={() => setEditRequestModal({ day })}
           >
-            Rejected
+            {t("rejected")}
           </button>
         )
       } else {
@@ -220,7 +223,7 @@ const UniversalTableShow: React.FC<Props> = ({
             className="text-sm bg-rose-600 text-white py-1 px-3 rounded"
             onClick={() => setEditRequestModal({ day })}
           >
-            Request Edit
+            {t("requestEdit")}
           </button>
         )
       }
@@ -268,12 +271,12 @@ const UniversalTableShow: React.FC<Props> = ({
     const year = selectedYear
 
     if (!monthName || !year || !userEmail || !Array.isArray(transposedData)) {
-      console.error("Invalid data for PDF generation")
+      console.error(t("invalidDataForPDFGeneration"))
       return
     }
 
     // Exclude মতামত & Edit rows from PDF
-    const printableRows = transposedData.filter((row) => row.label !== "মতামত" && row.label !== "Edit")
+    const printableRows = transposedData.filter((row) => row.label !== t("motamot") && row.label !== t("edit"))
 
     const tableHTML = `
     <html>
@@ -412,7 +415,7 @@ const UniversalTableShow: React.FC<Props> = ({
   const handleEditClick = (day: number, currentTransposed: any[]) => {
     const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
     if (editRequestStatuses[date]?.editedOnce) {
-      alert("You can only edit data once after approval")
+      alert(t("youCanOnlyEditDataOnceAfterApproval"))
       return
     }
     // All row values except last two (মতামত + Edit actions)
@@ -424,11 +427,11 @@ const UniversalTableShow: React.FC<Props> = ({
     const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
 
     if (editRequestStatuses[date]?.status !== "approved") {
-      alert("You can only edit data after your request has been approved")
+      alert(t("youCanOnlyEditDataAfterYourRequestHasBeenApproved"))
       return
     }
     if (editRequestStatuses[date]?.editedOnce) {
-      alert("You can only edit data once after approval")
+      alert(t("youCanOnlyEditDataOnceAfterApproval"))
       return
     }
 
@@ -465,17 +468,17 @@ const UniversalTableShow: React.FC<Props> = ({
       }))
 
       setEditPopup(null)
-      alert("Data updated successfully. You cannot edit this date again.")
+      alert(t("dataUpdatedSuccessfullyYouCannotEditThisDateAgain"))
     } catch (error) {
       console.error("Error saving edit:", error)
-      alert("Failed to save edits. Please try again.")
+      alert(t("failedToSaveEditsPleaseTryAgain"))
     }
   }
 
   const handleEditRequest = async (day: number, reason: string) => {
     if (!userEmail || !user) return
     if (isFutureDate(day)) {
-      alert("You cannot request edits for future dates")
+      alert(t("youCannotRequestEditsForFutureDates"))
       return
     }
 
@@ -508,11 +511,11 @@ const UniversalTableShow: React.FC<Props> = ({
           editedOnce: false,
         },
       }))
-      alert("Edit request submitted successfully. Please wait for admin approval.")
+      alert(t("editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval"))
       setEditRequestModal(null)
     } catch (error) {
       console.error("Failed to create edit request:", error)
-      alert("Failed to submit edit request. Please try again.")
+      alert(t("failedToSubmitEditRequestPleaseTryAgain"))
     }
   }
 
@@ -580,10 +583,10 @@ const UniversalTableShow: React.FC<Props> = ({
         <table className="border-collapse border border-gray-300 w-full table-auto text-sm md:text-base">
           <thead>
             <tr className="bg-gray-200">
-              <th className="border border-gray-300 px-4 py-2">Label</th>
+              <th className="border border-gray-300 px-4 py-2">{t("label")}</th>
               {monthDays.map((day) => (
                 <th key={day} className="border border-gray-300 px-6 py-2 text-center text-nowrap">
-                  Day {day}
+                  {t("day")} {day}
                 </th>
               ))}
             </tr>
@@ -640,9 +643,9 @@ const UniversalTableShow: React.FC<Props> = ({
               className="absolute top-4 right-6 text-xl text-red-500 hover:text-red-700"
               onClick={() => setMotamotPopup(null)}
             >
-              ✖
+              {t("close")}
             </button>
-            <h3 className="text-lg font-bold mb-4">মতামত</h3>
+            <h3 className="text-lg font-bold mb-4">{t("motamot")}</h3>
             <p className="lg:text-xl">{motamotPopup}</p>
           </div>
         </div>
@@ -655,10 +658,10 @@ const UniversalTableShow: React.FC<Props> = ({
               className="absolute top-4 right-6 text-xl text-red-500 hover:text-red-700"
               onClick={() => setEditPopup(null)}
             >
-              ✖
+              {t("close")}
             </button>
-            <h3 className="text-lg font-bold mb-4">Edit Data for Day: {editPopup.day}</h3>
-            <p className="text-amber-600 mb-4">Note: You can only edit this data once after approval.</p>
+            <h3 className="text-lg font-bold mb-4">{t("editDataForDay")} {editPopup.day}</h3>
+            <p className="text-amber-600 mb-4">{t("noteYouCanOnlyEditThisDataOnceAfterApproval")}</p>
             {editPopup.data.map((value: any, index: number) => (
               <div key={index} className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">{transposedData[index]?.label || ""}</label>
@@ -679,13 +682,13 @@ const UniversalTableShow: React.FC<Props> = ({
                 className="text-sm bg-cyan-600 text-white py-2 px-4 rounded"
                 onClick={() => handleSaveEdit(editPopup.day, editPopup.data)}
               >
-                Save
+                {t("save")}
               </button>
               <button
                 className="text-sm bg-rose-500 text-white py-2 px-4 rounded hover:bg-rose-700"
                 onClick={() => setEditPopup(null)}
               >
-                Cancel
+                {t("cancel")}
               </button>
             </div>
           </div>

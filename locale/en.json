@@ -302,5 +302,31 @@
       "markazadmin": "Markaz Admin",
       "daye": "Daee"
     }
+  },
+  "universalTableShow": {
+    "title": "Universal Table Show",
+    "errorFetchingEditRequestStatuses": "Error fetching edit request statuses",
+    "editDataForDay": "Edit Data for Day",
+    "noteYouCanOnlyEditThisDataOnceAfterApproval": "Note: You can only edit this data once after approval",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "motamot": "Motamot",
+    "motamotPopup": "Motamot Popup",
+    "label": "Label",
+    "day": "Day",
+    "edit": "Edit",
+    "edited": "Edited",
+    "pending": "Pending",
+    "rejected": "Rejected",
+    "requestEdit": "Request Edit",
+    "invalidDataForPDFGeneration": "Invalid data for PDF generation",
+    "youCanOnlyEditDataOnceAfterApproval": "You can only edit data once after approval",
+    "youCanOnlyEditDataAfterYourRequestHasBeenApproved": "You can only edit data after your request has been approved",
+    "dataUpdatedSuccessfullyYouCannotEditThisDateAgain": "Data updated successfully. You cannot edit this date again.",
+    "failedToSaveEditsPleaseTryAgain": "Failed to save edits. Please try again.",
+    "youCannotRequestEditsForFutureDates": "You cannot request edits for future dates",
+    "editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval": "Edit request submitted successfully. Please wait for admin approval.",
+    "failedToSubmitEditRequestPleaseTryAgain": "Failed to submit edit request. Please try again."
   }
 }
