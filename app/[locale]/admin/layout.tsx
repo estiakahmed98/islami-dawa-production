@@ -21,6 +21,9 @@ const AdmindLayout = async ({ children, params }: Props) => {
     notFound();
   }
 
+  // Load translation messages for the locale so all namespaces (e.g., 'treeView') are available
+  const messages = (await import(`@/locale/${locale}.json`)).default;
+
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -30,7 +33,7 @@ const AdmindLayout = async ({ children, params }: Props) => {
   }
 
   return (
-    <NextIntlClientProvider locale={locale}>
+    <NextIntlClientProvider locale={locale} messages={messages}>
       <SidebarProvider>
         <div className="flex fixed size-full">
           <ImpersonateSidebar />

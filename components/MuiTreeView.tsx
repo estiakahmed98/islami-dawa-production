@@ -1,4 +1,4 @@
-"use client"; //Juwel
+"use client";
 
 import React, { useState, useEffect, JSX, useCallback } from "react";
 import Box from "@mui/material/Box";
@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { ScrollArea } from "./ui/scroll-area";
 import { PiTreeViewBold } from "react-icons/pi";
+import { useTranslations } from "next-intl";
 
 export const roleList = [
   "centraladmin",
@@ -41,6 +42,7 @@ interface TreeNode {
 }
 
 const MuiTreeView: React.FC = () => {
+  const t = useTranslations("treeView");
   const { setSelectedUser } = useSelectedUser();
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
   const [filteredTree, setFilteredTree] = useState<TreeNode[]>([]);
@@ -56,7 +58,7 @@ const MuiTreeView: React.FC = () => {
     const fetchUsers = async () => {
       try {
         const response = await fetch("/api/users", { cache: "no-store" });
-        if (!response.ok) throw new Error("Failed to fetch users");
+        if (!response.ok) throw new Error(t("fetchError"));
 
         const usersData: User[] = await response.json();
         setUsers(usersData);
@@ -69,12 +71,12 @@ const MuiTreeView: React.FC = () => {
         setTreeData(tree);
         setFilteredTree(tree);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error(t("fetchError"), error);
       }
     };
 
     fetchUsers();
-  }, [session?.user]);
+  }, [session?.user, t]);
 
   const buildTree = (users: User[], loggedInUser: User | null): TreeNode[] => {
     if (loggedInUser) {
@@ -85,7 +87,7 @@ const MuiTreeView: React.FC = () => {
     users.forEach((user) => {
       userMap.set(user.email, {
         id: user.id,
-        label: `${user.name} (${user.role})`,
+        label: `${user.name} (${t(`roles.${user.role}`)})`,
         user: user.email,
         children: [],
       });
@@ -132,7 +134,6 @@ const MuiTreeView: React.FC = () => {
           parentUser = users.find((u) => u.role === "centraladmin");
         }
         break;
-
       default:
         return null;
     }
@@ -223,7 +224,7 @@ const MuiTreeView: React.FC = () => {
       <Stack spacing={2}>
         <input
           type="text"
-          placeholder="Search user..."
+          placeholder={t("searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-[85%] mx-auto p-2 border rounded-md text-black"
@@ -232,7 +233,7 @@ const MuiTreeView: React.FC = () => {
         <IconButton size="small" onClick={handleToggle} className="text-white">
           <PiTreeViewBold className="size-6 text-white" />
           <span className="text-white">
-            {isExpanded ? "Collapse All" : "Expand All"}
+            {isExpanded ? t("collapseAll") : t("expandAll")}
           </span>
           {isExpanded ? (
             <ArrowDropUpIcon className="text-white" />
