@@ -86,7 +86,7 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
         },
         onSuccess: () => {
           toast.success("Login Successful");
-          router.push("/dashboard");
+          router.push("/admin");
           router.refresh();
         },
         onError: (ctx) => {
