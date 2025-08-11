@@ -23,6 +23,7 @@ import { useEffect, useMemo, useState } from "react";
 import moment from "moment-hijri";
 import { useRouter } from "next/navigation";
 import LanguageSwitcher from "../language-switcher";
+import { useTranslations } from "next-intl";
 
 function getInitials(name?: string | null, email?: string | null) {
   if (name && name.trim()) {
@@ -38,6 +39,7 @@ const Header = () => {
   const { data: session } = useSession();
   const { toggleSidebar } = useSidebar();
   const userRole = session?.user?.role;
+  const t = useTranslations("header");
 
   // Hydration-safe date text
   const [mounted, setMounted] = useState(false);
@@ -76,107 +78,102 @@ const Header = () => {
         size="icon"
         variant="secondary"
         className="h-9 w-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20"
-        aria-label="Toggle sidebar"
+        aria-label={t("toggleSidebar")}
       >
         <Menu className="h-5 w-5 text-white" />
       </Button>
 
-
       {/* Center: Title + Dates */}
       <div className="flex flex-col items-center text-center leading-tight">
         <h1 className="text-sm md:text-lg font-semibold tracking-wide">
-          ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ
+          {t("instituteName")}
         </h1>
         <div className="text-[10px] md:text-sm/5 text-white/90" suppressHydrationWarning>
-          দাওয়াতি বছর ({mounted ? gregorian : "—"}) ইং /
-          {mounted ? ` ${hijri}` : " —"} হিজ
+          {t("dawahYear")} ({mounted ? gregorian : "—"}) {t("gregorian")} /
+          {mounted ? ` ${hijri}` : " —"} {t("hijri")}
         </div>
-         
       </div>
       
       <div className="flex gap-5">
         <LanguageSwitcher/>
-      {/* Right: Avatar = dropdown trigger */}
-      <DropdownMenu modal={false}>
-       
-        <DropdownMenuTrigger asChild>
-          <button
-            className="
-              relative inline-flex h-11 w-11 items-center justify-center rounded-full
-              ring-2 ring-white/30 transition
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60
-              group
-            "
-            aria-label="Open account menu"
-          >
-            {/* Gradient ring wrapper for a nicer look */}
-            <span
+        {/* Right: Avatar = dropdown trigger */}
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <button
               className="
-                absolute -inset-[2px] rounded-full
-                bg-gradient-to-br from-teal-600/50 to-cyan-600/50
-                opacity-0 group-hover:opacity-100 transition pointer-events-none
-                blur-[2px]
+                relative inline-flex h-11 w-11 items-center justify-center rounded-full
+                ring-2 ring-white/30 transition
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60
+                group
               "
-            />
-            <Avatar className="relative h-10 w-10 ring-1 ring-white/30 shadow-sm">
-              <AvatarImage
-                src={session?.user?.image ?? undefined}
-                alt={session?.user?.name ?? "Profile"}
-              />
-              <AvatarFallback className="bg-gradient-to-br from-teal-600 to-cyan-600 text-white text-sm font-semibold">
-                {initials || <UserRound className="h-5 w-5" />}
-              </AvatarFallback>
-            </Avatar>
-            {/* Status dot (optional) */}
-            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-[#155E75]" />
-          </button>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent align="end" className="max-w-72 rounded-xl shadow-lg">
-          <DropdownMenuLabel className="flex min-w-0 flex-col">
-            <span className="truncate text-base font-semibold text-foreground">
-              {session?.user?.name ?? "User"}
-            </span>
-            {session?.user?.role ? (
-              <span className="inline-flex w-max items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                {session.user.role}
-              </span>
-            ) : null}
-            <span className="truncate text-xs text-muted-foreground">
-              {session?.user?.email ?? ""}
-            </span>
-          </DropdownMenuLabel>
-
-          <DropdownMenuSeparator />
-       
-          <DropdownMenuGroup>
-            <DropdownMenuItem asChild>
-              <Link href={profileHref} className="cursor-pointer">
-                <UserRound className="opacity-70 mr-2 h-4 w-4" aria-hidden="true" />
-                <span>Profile</span>
-              </Link>
-            </DropdownMenuItem>
-
-            <DropdownMenuItem
-              onClick={() => {
-                signOut({
-                  fetchOptions: {
-                    onSuccess: () => {
-                      router.replace("/");
-                      router.refresh();
-                    },
-                  },
-                });
-              }}
-              className="text-red-600 focus:text-red-700"
+              aria-label={t("openAccountMenu")}
             >
-              <LogOut className="opacity-70 mr-2 h-4 w-4" aria-hidden="true" />
-              <span>Logout</span>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+              <span
+                className="
+                  absolute -inset-[2px] rounded-full
+                  bg-gradient-to-br from-teal-600/50 to-cyan-600/50
+                  opacity-0 group-hover:opacity-100 transition pointer-events-none
+                  blur-[2px]
+                "
+              />
+              <Avatar className="relative h-10 w-10 ring-1 ring-white/30 shadow-sm">
+                <AvatarImage
+                  src={session?.user?.image ?? undefined}
+                  alt={session?.user?.name ?? t("profile")}
+                />
+                <AvatarFallback className="bg-gradient-to-br from-teal-600 to-cyan-600 text-white text-sm font-semibold">
+                  {initials || <UserRound className="h-5 w-5" />}
+                </AvatarFallback>
+              </Avatar>
+              <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-[#155E75]" />
+            </button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end" className="max-w-72 rounded-xl shadow-lg">
+            <DropdownMenuLabel className="flex min-w-0 flex-col">
+              <span className="truncate text-base font-semibold text-foreground">
+                {session?.user?.name ?? t("user")}
+              </span>
+              {session?.user?.role ? (
+                <span className="inline-flex w-max items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                  {t(`roles.${session.user.role}` as const)}
+                </span>
+              ) : null}
+              <span className="truncate text-xs text-muted-foreground">
+                {session?.user?.email ?? ""}
+              </span>
+            </DropdownMenuLabel>
+
+            <DropdownMenuSeparator />
+       
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link href={profileHref} className="cursor-pointer">
+                  <UserRound className="opacity-70 mr-2 h-4 w-4" aria-hidden="true" />
+                  <span>{t("profile")}</span>
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => {
+                  signOut({
+                    fetchOptions: {
+                      onSuccess: () => {
+                        router.replace("/");
+                        router.refresh();
+                      },
+                    },
+                  });
+                }}
+                className="text-red-600 focus:text-red-700"
+              >
+                <LogOut className="opacity-70 mr-2 h-4 w-4" aria-hidden="true" />
+                <span>{t("logout")}</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </header>
   );
 };

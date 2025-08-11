@@ -1,0 +1,40 @@
+{
+  "header": {
+    "toggleSidebar": "Toggle Sidebar",
+    "instituteName": "Islamic Dawah Institute Bangladesh",
+    "dawahYear": "Dawah Year",
+    "gregorian": "Gregorian",
+    "hijri": "Hijri",
+    "openAccountMenu": "Open Account Menu",
+    "profile": "Profile",
+    "user": "User",
+    "logout": "Logout",
+    "roles": {
+      "centraladmin": "Central Admin",
+      "daye": "Daee"
+    }
+  },
+  "dashboard": {
+    "sideBar": {
+      "dashBoard": "Dashboard",
+      "noRole": "No Role",
+      "gotoUserMode": "Go to User Mode",
+      "gotoAdminMode": "Go to Admin Mode",
+      "amoliMuhasaba": "Amoli Muhasaba",
+      "moktobSubject": "Moktob Subject",
+      "talimSubject": "Talim Subject",
+      "dayiSubject": "Dayi Subject",
+      "dawatiSubject": "Dawati Subject",
+      "dawatiMojlish": "Dawati Mojlish",
+      "jamatSubject": "Jamat Subject",
+      "dineFera": "Dine Fera",
+      "soforSubject": "Sofor Subject",
+      "leaveSubject": "Leave Subject",
+      "calendar": "Calendar",
+      "addDayi": "Add Dayi",
+      "viewDayi": "View Dayi",
+      "leaveMatters": "Leave Matters",
+      "realTree": "Real Tree"
+    }
+  }
+}

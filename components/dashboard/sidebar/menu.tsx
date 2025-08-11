@@ -2,8 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import MenuItem from "./menu-item";
-
-// Importing React icons
 import { LuLayoutDashboard } from "react-icons/lu";
 import {
   FaRegFileAlt,
@@ -65,32 +63,29 @@ const SidebarMenu = () => {
     "/dashboard/*",
   ];
 
-  // State for admin/user mode and button text
-  // const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
-  // const [buttText, setButtonText] = useState<string>("");
   const [isAdminMode, setIsAdminMode] = useState<boolean>(
     adminRoutes.includes(currentRoute)
   );
   const [buttText, setButtonText] = useState<string>(
-    isAdmin ? "Goto User Mode" : "Goto Admin Mode"
+    isAdmin ? t("gotoUserMode") : t("gotoAdminMode")
   );
 
   // Initialize mode based on current route
   useEffect(() => {
     if (adminRoutes.includes(currentRoute)) {
       setIsAdminMode(true);
-      setButtonText("Goto User Mode");
+      setButtonText(t("gotoUserMode"));
     } else if (userRoutes.some((route) => currentRoute.startsWith(route))) {
       setIsAdminMode(false);
-      setButtonText("Goto Admin Mode");
+      setButtonText(t("gotoAdminMode"));
     }
-  }, [currentRoute]);
+  }, [currentRoute, t]);
 
   // Handle mode toggle with immediate text update
   const handleModeToggle = () => {
     const newMode = !isAdminMode;
     setIsAdminMode(newMode);
-    setButtonText(newMode ? "Goto User Mode" : "Goto Admin Mode");
+    setButtonText(newMode ? t("gotoUserMode") : t("gotoAdminMode"));
     router.push(newMode ? "/admin" : "/dashboard");
   };
 
@@ -102,62 +97,62 @@ const SidebarMenu = () => {
   
   const menuList = [
     {
-      title: t("dashBoard", { role: session?.user?.role || "No Role" }),
-    icon: <LuLayoutDashboard className="size-5" />,
-    url: "/dashboard",
+      title: t("dashBoard", { role: session?.user?.role || t("noRole") }),
+      icon: <LuLayoutDashboard className="size-5" />,
+      url: "/dashboard",
     },
     {
-      title: "আ’মলি মুহাসাবা",
+      title: t("amoliMuhasaba"),
       icon: <FaRegFileAlt className="size-5" />,
       url: "/dashboard/amoli-muhasaba",
     },
     {
-      title: "মক্তব বিষয়",
+      title: t("moktobSubject"),
       icon: <LiaChalkboardTeacherSolid className="size-5" />,
       url: "/dashboard/moktob",
     },
     {
-      title: "তালিম বিষয়",
+      title: t("talimSubject"),
       icon: <FaQuran className="size-5" />,
       url: "/dashboard/talim",
     },
     {
-      title: "সহযোগী দায়ী বিষয",
+      title: t("dayiSubject"),
       icon: <MdOutlinePeopleAlt className="size-5" />,
       url: "/dashboard/dayi",
     },
     {
-      title: "দাওয়াতি বিষয়",
+      title: t("dawatiSubject"),
       icon: <FaRegHandshake className="size-5" />,
       url: "/dashboard/dawati",
     },
     {
-      title: "দাওয়াতি মজলিশ",
+      title: t("dawatiMojlish"),
       icon: <FaUsers className="size-5" />,
       url: "/dashboard/dawati-mojlish",
     },
     {
-      title: "জামাত বিষয়",
+      title: t("jamatSubject"),
       icon: <MdOutlineMosque className="size-5" />,
       url: "/dashboard/jamat",
     },
     {
-      title: "দ্বীনে ফিরে এসেছে",
+      title: t("dineFera"),
       icon: <BsMoonStars className="size-5" />,
       url: "/dashboard/dine-fera",
     },
     {
-      title: "সফর বিষয়",
+      title: t("soforSubject"),
       icon: <MdOutlineTravelExplore className="size-5" />,
       url: "/dashboard/sofor",
     },
     {
-      title: "ছুটি বিষয়",
+      title: t("leaveSubject"),
       icon: <FcLeave className="size-5" />,
       url: "/dashboard/leave",
     },
     {
-      title: "কর্মসূচি",
+      title: t("calendar"),
       icon: <GrSchedules className="size-5" />,
       url: "/dashboard/calendar",
     },
@@ -167,27 +162,27 @@ const SidebarMenu = () => {
     {
       url: "/admin",
       icon: <LuLayoutDashboard className="size-6" />,
-      title: `ড্যাশবোর্ড (${session?.user?.role || "No Role"})`,
+      title: `${t("dashBoard")} (${session?.user?.role || t("noRole")})`,
     },
     {
       url: "/admin/register",
       icon: <IoPersonAddSharp className="size-6" />,
-      title: "দায়ী এড করা",
+      title: t("addDayi"),
     },
     {
       url: "/admin/users",
       icon: <MdPeople className="size-6" />,
-      title: "দায়ী দেখুন",
+      title: t("viewDayi"),
     },
     {
       url: "/admin/notification",
       icon: <FcAcceptDatabase className="size-6" />,
-      title: "ছুটির বিষয়",
+      title: t("leaveMatters"),
     },
     {
       url: "/admin/RealTree",
       icon: <FaTree className="size-6" />,
-      title: "Real Tree",
+      title: t("realTree"),
     },
   ];
 
@@ -240,7 +235,7 @@ const SidebarMenu = () => {
             onClick={() => {
               const newMode = !isAdminMode;
               setIsAdminMode(newMode);
-              setButtonText(newMode ? "Goto User Mode" : "Goto Admin Mode"); // Toggle button text
+              setButtonText(newMode ? t("gotoUserMode") : t("gotoAdminMode"));
             }}
           >
             {buttText}

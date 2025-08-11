@@ -1,7 +1,40 @@
 {
- "dashboard":{
-    "sideBar":{
-        "dashBoard" : "ড্যাশবোর্ড"
+  "header": {
+    "toggleSidebar": "সাইডবার টগল করুন",
+    "instituteName": "ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ",
+    "dawahYear": "দাওয়াতি বছর",
+    "gregorian": "ইং",
+    "hijri": "হিজরি",
+    "openAccountMenu": "অ্যাকাউন্ট মেনু খুলুন",
+    "profile": "প্রোফাইল",
+    "user": "ব্যবহারকারী",
+    "logout": "লগআউট",
+    "roles": {
+      "centraladmin": "সেন্ট্রাল অ্যাডমিন",
+      "daye": "দাঈ"
     }
- }
+  },
+  "dashboard": {
+    "sideBar": {
+      "dashBoard": "ড্যাশবোর্ড",
+      "noRole": "কোন ভূমিকা নেই",
+      "gotoUserMode": "ইউজার মোডে যান",
+      "gotoAdminMode": "অ্যাডমিন মোডে যান",
+      "amoliMuhasaba": "আ'মলি মুহাসাবা",
+      "moktobSubject": "মক্তব বিষয়",
+      "talimSubject": "তালিম বিষয়",
+      "dayiSubject": "সহযোগী দায়ী বিষয়",
+      "dawatiSubject": "দাওয়াতি বিষয়",
+      "dawatiMojlish": "দাওয়াতি মজলিশ",
+      "jamatSubject": "জামাত বিষয়",
+      "dineFera": "দ্বীনে ফিরে এসেছে",
+      "soforSubject": "সফর বিষয়",
+      "leaveSubject": "ছুটি বিষয়",
+      "calendar": "কর্মসূচি",
+      "addDayi": "দায়ী এড করুন",
+      "viewDayi": "দায়ী দেখুন",
+      "leaveMatters": "ছুটির বিষয়",
+      "realTree": "রিয়েল ট্রি"
+    }
+  }
 }
