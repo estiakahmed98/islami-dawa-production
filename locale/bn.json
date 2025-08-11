@@ -11,7 +11,9 @@
     "logout": "লগআউট",
     "roles": {
       "centraladmin": "সেন্ট্রাল অ্যাডমিন",
-      "daye": "দাঈ"
+      "daye": "দাঈ",
+      "divisionadmin": "ডিভিশন অ্যাডমিন",
+      "markazadmin": "মারকাজ অ্যাডমিন"
     }
   },
   "dashboard": {

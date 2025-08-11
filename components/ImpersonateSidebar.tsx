@@ -18,6 +18,7 @@ import { useTranslations } from "next-intl";
 
 const ImpersonateSidebar: React.FC = () => {
   const t = useTranslations("dashboard.sideBar");
+  const t2 = useTranslations("header");
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const router = useRouter();
@@ -86,7 +87,7 @@ const ImpersonateSidebar: React.FC = () => {
     {
       href: "/admin",
       icon: <LuLayoutDashboard className="size-6" />,
-      label: `${t("dashBoard")} (${session?.user?.role || t("noRole")})`,
+      label: `${t("dashBoard")} (${t2(`roles.${userRole}`)})`,
       roles: ["centraladmin", "divisionadmin", "districtadmin", "areaadmin", "upozilaadmin", "user"],
     },
     {

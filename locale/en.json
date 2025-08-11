@@ -11,7 +11,9 @@
     "logout": "Logout",
     "roles": {
       "centraladmin": "Central Admin",
-      "daye": "Daee"
+      "daye": "Daee",
+      "divisionadmin": "Division Admin",
+      "markazadmin": "Markaz Admin"
     }
   },
   "dashboard": {
