@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import moment from "moment-hijri";
 import { toast } from "sonner";
-import Loading from "@/app/dashboard/loading"; // Assuming this path is correct
+import Loading from "@/app/[locale]/dashboard/loading"; // Assuming this path is correct
 
 interface AmoliMuhasabaFormValues {
   tahajjud: number;

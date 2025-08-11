@@ -62,7 +62,7 @@ const SigninForm = () => {
         },
         onSuccess: () => {
           toast.success("Login Successful");
-          router.push("/admin");
+          router.push("/dashboard");
           router.refresh();
         },
         onError: (ctx) => {

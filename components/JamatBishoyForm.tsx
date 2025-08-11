@@ -10,7 +10,7 @@ import { useSession } from "@/lib/auth-client";
 import { useState, useEffect } from "react";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
-import Loading from "@/app/dashboard/loading";
+import Loading from "@/app/[locale]/dashboard/loading";
 
 interface FormValues {
   jamatBerHoise: string | number;

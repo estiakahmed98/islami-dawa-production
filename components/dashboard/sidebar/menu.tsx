@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import MenuItem from "./menu-item";
@@ -26,8 +27,10 @@ import { GrSchedules } from "react-icons/gr";
 import { useSession } from "@/lib/auth-client";
 import { IoPersonAddSharp } from "react-icons/io5";
 import MuiTreeView from "@/components/MuiTreeView";
+import { useTranslations } from "next-intl";
 
 const SidebarMenu = () => {
+  const t = useTranslations("dashboard.sideBar");
   const router = useRouter();
   const { data: session } = useSession();
   const userRole = session?.user?.role;
@@ -96,12 +99,12 @@ const SidebarMenu = () => {
   useEffect(() => {
     setUserName(userEmail);
   }, [userEmail]);
-
+  
   const menuList = [
     {
-      title: `ড্যাশবোর্ড (${session?.user?.role || "No Role"})`,
-      icon: <LuLayoutDashboard className="size-5" />,
-      url: "/dashboard",
+      title: t("dashBoard", { role: session?.user?.role || "No Role" }),
+    icon: <LuLayoutDashboard className="size-5" />,
+    url: "/dashboard",
     },
     {
       title: "আ’মলি মুহাসাবা",

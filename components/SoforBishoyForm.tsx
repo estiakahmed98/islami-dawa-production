@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
-import Loading from "@/app/dashboard/loading";
+import Loading from "@/app/[locale]/dashboard/loading";
 
 type FormValues = {
   moktobVisit: number | string;
