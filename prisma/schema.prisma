@@ -322,6 +322,7 @@ model LeaveRequest {
   reason      String   @db.Text
   approvedBy  String?
   status      String   @default("pending") // pending, approved, rejected
+  rejectionReason  String?  // Reason why the leave was rejected
   phone       String?
   name        String?
   requestDate DateTime @default(now())
