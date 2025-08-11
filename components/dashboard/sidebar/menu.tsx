@@ -25,10 +25,12 @@ import { GrSchedules } from "react-icons/gr";
 import { useSession } from "@/lib/auth-client";
 import { IoPersonAddSharp } from "react-icons/io5";
 import MuiTreeView from "@/components/MuiTreeView";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 const SidebarMenu = () => {
   const t = useTranslations("dashboard.sideBar");
+  const locale = useLocale();
+
   const router = useRouter();
   const { data: session } = useSession();
   const userRole = session?.user?.role;
@@ -62,31 +64,34 @@ const SidebarMenu = () => {
     "/dashboard/amoli-muhasaba",
     "/dashboard/*",
   ];
+  const adminRoutesLocale = adminRoutes.map((p) => `/${locale}${p}`);
+  const userRoutesLocale = userRoutes.map((p) => `/${locale}${p.replace("*", "")}`);
 
   const [isAdminMode, setIsAdminMode] = useState<boolean>(
-    adminRoutes.includes(currentRoute)
+    adminRoutesLocale.includes(currentRoute)
   );
+
   const [buttText, setButtonText] = useState<string>(
     isAdmin ? t("gotoUserMode") : t("gotoAdminMode")
   );
 
   // Initialize mode based on current route
   useEffect(() => {
-    if (adminRoutes.includes(currentRoute)) {
+    if (adminRoutesLocale.includes(currentRoute)) {
       setIsAdminMode(true);
       setButtonText(t("gotoUserMode"));
-    } else if (userRoutes.some((route) => currentRoute.startsWith(route))) {
+    } else if (userRoutesLocale.some((route) => currentRoute.startsWith(route))) {
       setIsAdminMode(false);
       setButtonText(t("gotoAdminMode"));
     }
-  }, [currentRoute, t]);
+  }, [currentRoute, t, locale]);
 
   // Handle mode toggle with immediate text update
   const handleModeToggle = () => {
     const newMode = !isAdminMode;
     setIsAdminMode(newMode);
     setButtonText(newMode ? t("gotoUserMode") : t("gotoAdminMode"));
-    router.push(newMode ? "/admin" : "/dashboard");
+    router.push(newMode ? `/${locale}/admin` : `/${locale}/dashboard`);
   };
 
   // Ensure `userName` updates reactively
@@ -94,6 +99,7 @@ const SidebarMenu = () => {
   useEffect(() => {
     setUserName(userEmail);
   }, [userEmail]);
+
   
   const menuList = [
     {

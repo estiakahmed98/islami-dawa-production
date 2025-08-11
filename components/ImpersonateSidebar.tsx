@@ -14,11 +14,13 @@ import { useSession } from "@/lib/auth-client";
 import { FiEdit3 } from "react-icons/fi";
 import { LuArrowLeftFromLine, LuArrowRightToLine, LuLayoutDashboard } from "react-icons/lu";
 import { Bell } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 const ImpersonateSidebar: React.FC = () => {
   const t = useTranslations("dashboard.sideBar");
   const t2 = useTranslations("header");
+  const locale = useLocale();
+
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const router = useRouter();
@@ -77,7 +79,8 @@ const ImpersonateSidebar: React.FC = () => {
     }
   }, [isAdminForNotification]);
 
-  const isActive = (path: string): boolean => pathname === path;
+  // Compare against locale-prefixed route, e.g. /en/admin
+  const isActive = (basePath: string): boolean => pathname === `/${locale}${basePath}`;
 
   const toggleCollapse = (): void => {
     setIsCollapsed(!isCollapsed);
@@ -148,9 +151,10 @@ const ImpersonateSidebar: React.FC = () => {
               }
 
               const active = isActive(href);
+              const localeHref = `/${locale}${href}`;
               return (
                 <Link
-                  href={href}
+                  href={localeHref}
                   key={href}
                   className={`flex items-center justify-between whitespace-nowrap px-2 py-2 font-medium ${
                     active ? "rounded-md bg-cyan-600 text-white" : "text-white/80 hover:text-white"
