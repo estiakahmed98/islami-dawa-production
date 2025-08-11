@@ -1,3 +1,4 @@
+
 {
   "header": {
     "toggleSidebar": "Toggle Sidebar",
@@ -11,37 +12,287 @@
     "logout": "Logout",
     "roles": {
       "centraladmin": "Central Admin",
-      "daye": "Daee",
       "divisionadmin": "Division Admin",
-      "markazadmin": "Markaz Admin"
+      "markazadmin": "Markaz Admin",
+      "daye": "Daee",
+      "user": "User"
     }
   },
   "dashboard": {
     "sideBar": {
       "dashBoard": "Dashboard",
-      "noRole": "No Role",
+      "noRole": "No role",
       "gotoUserMode": "Go to User Mode",
       "gotoAdminMode": "Go to Admin Mode",
-      "amoliMuhasaba": "Amoli Muhasaba",
-      "moktobSubject": "Moktob Subject",
-      "talimSubject": "Talim Subject",
-      "dayiSubject": "Dayi Subject",
-      "dawatiSubject": "Dawati Subject",
-      "dawatiMojlish": "Dawati Mojlish",
-      "jamatSubject": "Jamat Subject",
-      "dineFera": "Dine Fera",
-      "soforSubject": "Sofor Subject",
-      "leaveSubject": "Leave Subject",
-      "calendar": "Calendar",
-      "addDayi": "Add Dayi",
-      "viewDayi": "View Dayi",
+      "amoliMuhasaba": "A'mali Muhasaba",
+      "moktobSubject": "Maktab Matters",
+      "talimSubject": "Taleem Matters",
+      "dayiSubject": "Assistant Daee Matters",
+      "dawatiSubject": "Dawah Matters",
+      "dawatiMojlish": "Dawah Majlis",
+      "jamatSubject": "Jamaat Matters",
+      "dineFera": "Returned to Islam",
+      "soforSubject": "Travel Matters",
+      "leaveSubject": "Leave Matters",
+      "calendar": "Program",
+      "addDayi": "Add Daee",
+      "viewDayi": "View Daee",
       "leaveMatters": "Leave Matters",
       "realTree": "Real Tree",
       "editRequest": "Edit Request"
+    },
+    "UserDashboard": {
+      "welcome": "Welcome",
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      },
+      "dashboard": {
+        "backToDashboard": "Back to Dashboard",
+        "comparison": "View Comparison",
+        "amoliMuhasaba": "A'mali Muhasaba",
+        "moktobSubject": "Maktab Matters",
+        "talimSubject": "Women's Taleem Matters",
+        "dayiSubject": "Assistant Daee Matters",
+        "dawatiSubject": "Dawah Matters",
+        "dawatiMojlish": "Dawah Majlis",
+        "jamatSubject": "Jamaat Matters",
+        "dineFera": "Returned to Islam",
+        "soforSubject": "Travel Matters",
+        "phone": "Phone",
+        "address": "Address",
+        "division": "Division",
+        "district": "District",
+        "upazila": "Upazila",
+        "union": "Union",
+        "description": "Description",
+        "noData": "No information found",
+        "close": "Close"
+      },
+      "comparison": {
+        "missingDates": "Please select both 'From' and 'To' values.",
+        "day": "By Day",
+        "month": "By Month",
+        "year": "By Year",
+        "from": "From",
+        "compare": "Compare",
+        "downloadPdf": "Download PDF",
+        "label": "Label",
+        "difference": "Difference",
+        "change": "Change",
+        "noData": "No data found"
+      },
+      "tabs": {
+        "amoli": "A'mali Muhasaba",
+        "moktob": "Maktab Matters",
+        "talim": "Women's Taleem",
+        "daye": "Assistant Daee",
+        "dawati": "Dawah Matters",
+        "dawatimojlish": "Dawah Majlis",
+        "jamat": "Jamaat Matters",
+        "dinefera": "Returned to Islam",
+        "sofor": "Travel Matters"
+      },
+      "detailModal": {
+        "title": "Assistant Daee Details",
+        "close": "Close",
+        "noData": "No information found"
+      },
+      "toast": {
+        "errorFetchingData": "Failed to load data"
+      },
+      "amoli": {
+        "tahajjud": "Tahajjud",
+        "surah": "Surah",
+        "ayat": "Ayat",
+        "zikir": "Dhikr",
+        "ishraq": "Ishraq/Awwabin/Chasht",
+        "jamat": "Jamaat",
+        "sirat": "Seerah",
+        "dua": "Dua",
+        "ilm": "Ilm",
+        "tasbih": "Tasbih",
+        "dayeeAmol": "Daee A'mal",
+        "amoliSura": "Amali Surah",
+        "ayamroja": "Ayyam Fasting",
+        "hijbulBahar": "Hizb al-Bahr"
+      },
+      "moktob": {
+        "notunMoktobChalu": "New Maktab Started",
+        "totalMoktob": "Total Maktabs",
+        "totalStudent": "Total Students",
+        "obhibhabokConference": "Guardian Conference Held",
+        "moktoThekeMadrasaAdmission": "Admitted to Madrasa from Maktab",
+        "notunBoyoskoShikkha": "New Adult Education",
+        "totalBoyoskoShikkha": "Total Adult Education",
+        "boyoskoShikkhaOnshogrohon": "Participation in Adult Education",
+        "newMuslimeDinerFikir": "Care for New Muslims"
+      },
+      "talim": {
+        "mohilaTalim": "Women's Taleem Held",
+        "mohilaOnshogrohon": "Women's Participation"
+      },
+      "dayi": {
+        "sohojogiDayeToiri": "Assistant Daee Created",
+        "assistantsList": "Assistant Daee List"
+      },
+      "dawati": {
+        "nonMuslimDawat": "Dawah to Non-Muslims",
+        "murtadDawat": "Dawah to Apostates",
+        "alemderSatheyMojlish": "Majlis with Scholars",
+        "publicSatheyMojlish": "Majlis with Public",
+        "nonMuslimSaptahikGasht": "Weekly Outreach with Non-Muslims"
+      },
+      "dawatiMojlish": {
+        "dawatterGuruttoMojlish": "Majlis on Importance of Dawah",
+        "mojlisheOnshogrohon": "Participation in Majlis",
+        "prosikkhonKormoshalaAyojon": "Training Workshop Organized",
+        "prosikkhonOnshogrohon": "Participation in Training",
+        "jummahAlochona": "Jumu'ah Talk",
+        "dhormoSova": "Religious Assembly",
+        "mashwaraPoint": "Mashwara Points"
+      },
+      "jamat": {
+        "jamatBerHoise": "Jamaat Dispatched",
+        "jamatSathi": "Jamaat Companions"
+      },
+      "dineFera": {
+        "nonMuslimMuslimHoise": "Non-Muslim Became Muslim",
+        "murtadIslamFireche": "Apostate Returned to Islam"
+      },
+      "soforbisoy": {
+        "moktobVisit": "Ongoing Maktab Visited",
+        "madrasaVisit": "Madrasa Visited",
+        "schoolCollegeVisit": "School/College Visited",
+        "madrasaVisitList": "Madrasa List",
+        "schoolCollegeVisitList": "School/College List"
+      }
+    },
+    "adminDashboard": {
+      "welcome": "Welcome",
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      },
+      "error": {
+        "userLoad": "Failed to load users",
+        "dataLoad": "Failed to load data"
+      },
+      "dashboard": {
+        "comparison": "View Comparison",
+        "amoliMuhasaba": "A'mali Muhasaba",
+        "moktobSubject": "Maktab Matters",
+        "talimSubject": "Women's Taleem Matters",
+        "dayiSubject": "Assistant Daee Matters",
+        "dawatiSubject": "Dawah Matters",
+        "dawatiMojlish": "Dawah Majlis",
+        "jamatSubject": "Jamaat Matters",
+        "dineFera": "Returned to Islam",
+        "soforSubject": "Travel Matters"
+      },
+      "modalTitle": {
+        "assistants": "Assistant Daee Details",
+        "madrasa": "Madrasa List",
+        "school": "School/College List"
+      },
+      "amoli": {
+        "tahajjud": "Tahajjud",
+        "surah": "Surah",
+        "ayat": "Ayat",
+        "zikir": "Dhikr",
+        "ishraq": "Ishraq/Awwabin/Chasht",
+        "jamat": "Jamaat",
+        "sirat": "Seerah",
+        "dua": "Dua",
+        "ilm": "Ilm",
+        "tasbih": "Tasbih",
+        "dayeeAmol": "Daee A'mal",
+        "amoliSura": "Amali Surah",
+        "ayamroja": "Ayyam Fasting",
+        "hijbulBahar": "Hizb al-Bahr"
+      },
+      "moktob": {
+        "title": "Maktab Matters",
+        "notunMoktobChalu": "New Maktab Started",
+        "totalMoktob": "Total Maktabs",
+        "totalStudent": "Total Students",
+        "obhibhabokConference": "Guardian Conference Held",
+        "moktoThekeMadrasaAdmission": "Admitted to Madrasa from Maktab",
+        "notunBoyoskoShikkha": "New Adult Education",
+        "totalBoyoskoShikkha": "Total Adult Education",
+        "boyoskoShikkhaOnshogrohon": "Participation in Adult Education",
+        "newMuslimeDinerFikir": "Care for New Muslims"
+      },
+      "talim": {
+        "title": "Women's Taleem",
+        "mohilaTalim": "Women's Taleem Held",
+        "mohilaOnshogrohon": "Women's Participation"
+      },
+      "daye": {
+        "title": "Assistant Daee",
+        "sohojogiDayeToiri": "Assistant Daee Created",
+        "assistantsList": "Assistant Daee List"
+      },
+      "dawati": {
+        "title": "Dawah Matters",
+        "nonMuslimDawat": "Dawah to Non-Muslims",
+        "murtadDawat": "Dawah to Apostates",
+        "alemderSatheyMojlish": "Majlis with Scholars",
+        "publicSatheyMojlish": "Majlis with Public",
+        "nonMuslimSaptahikGasht": "Weekly Outreach with Non-Muslims"
+      },
+      "dawatiMojlish": {
+        "title": "Dawah Majlis",
+        "dawatterGuruttoMojlish": "Majlis on Importance of Dawah",
+        "mojlisheOnshogrohon": "Participation in Majlis",
+        "prosikkhonKormoshalaAyojon": "Training Workshop Organized",
+        "prosikkhonOnshogrohon": "Participation in Training",
+        "jummahAlochona": "Jumu'ah Talk",
+        "dhormoSova": "Religious Assembly",
+        "mashwaraPoint": "Mashwara Points"
+      },
+      "jamat": {
+        "title": "Jamaat Matters",
+        "jamatBerHoise": "Jamaat Dispatched",
+        "jamatSathi": "Jamaat Companions"
+      },
+      "dineFera": {
+        "title": "Returned to Islam",
+        "nonMuslimMuslimHoise": "Non-Muslim Became Muslim",
+        "murtadIslamFireche": "Apostate Returned to Islam"
+      },
+      "sofor": {
+        "title": "Travel Matters",
+        "moktobVisit": "Ongoing Maktab Visited",
+        "madrasaVisit": "Madrasa Visited",
+        "schoolCollegeVisit": "School/College Visited",
+        "madrasaVisitList": "Madrasa List",
+        "schoolCollegeVisitList": "School/College List"
+      }
     }
   },
   "treeView": {
-    "searchPlaceholder": "Search user...",
+    "searchPlaceholder": "Search users...",
     "expandAll": "Expand All",
     "collapseAll": "Collapse All",
     "fetchError": "Failed to fetch users",
@@ -49,7 +300,7 @@
       "centraladmin": "Central Admin",
       "divisionadmin": "Division Admin",
       "markazadmin": "Markaz Admin",
-      "daye": "Dayee"
+      "daye": "Daee"
     }
   }
 }

@@ -11,9 +11,10 @@
     "logout": "লগআউট",
     "roles": {
       "centraladmin": "সেন্ট্রাল অ্যাডমিন",
-      "daye": "দাঈ",
       "divisionadmin": "ডিভিশন অ্যাডমিন",
-      "markazadmin": "মারকাজ অ্যাডমিন"
+      "markazadmin": "মারকাজ অ্যাডমিন",
+      "daye": "দাঈ",
+      "user": "ব্যবহারকারী"
     }
   },
   "dashboard": {
@@ -38,6 +39,255 @@
       "leaveMatters": "ছুটির বিষয়",
       "realTree": "রিয়েল ট্রি",
       "editRequest": "এডিট রিকোয়েস্ট"
+    },
+    "UserDashboard": {
+      "welcome": "স্বাগতম",
+      "months": {
+        "january": "জানুয়ারি",
+        "february": "ফেব্রুয়ারি",
+        "march": "মার্চ",
+        "april": "এপ্রিল",
+        "may": "মে",
+        "june": "জুন",
+        "july": "জুলাই",
+        "august": "আগস্ট",
+        "september": "সেপ্টেম্বর",
+        "october": "অক্টোবর",
+        "november": "নভেম্বর",
+        "december": "ডিসেম্বর"
+      },
+      "dashboard": {
+        "backToDashboard": "ড্যাশবোর্ডে ফিরে যান",
+        "comparison": "তুলনা দেখুন",
+        "amoliMuhasaba": "আ'মলি মুহাসাবা",
+        "moktobSubject": "মক্তব বিষয়",
+        "talimSubject": "মহিলাদের তালিম বিষয়",
+        "dayiSubject": "সহযোগী দায়ী বিষয়",
+        "dawatiSubject": "দাওয়াতি বিষয়",
+        "dawatiMojlish": "দাওয়াতি মজলিশ",
+        "jamatSubject": "জামাত বিষয়",
+        "dineFera": "দ্বীনে ফিরে এসেছে",
+        "soforSubject": "সফর বিষয়",
+        "phone": "ফোন",
+        "address": "ঠিকানা",
+        "division": "বিভাগ",
+        "district": "জেলা",
+        "upazila": "উপজেলা",
+        "union": "ইউনিয়ন",
+        "description": "বিবরণ",
+        "noData": "কোন তথ্য পাওয়া যায়নি",
+        "close": "বন্ধ করুন"
+      },
+      "comparison": {
+        "missingDates": "দয়া করে 'থেকে' এবং 'প্রতি' উভয় মান নির্বাচন করুন",
+        "day": "দিন অনুযায়ী",
+        "month": "মাস অনুযায়ী",
+        "year": "বছর অনুযায়ী",
+        "from": "থেকে",
+        "compare": "তুলনা করুন",
+        "downloadPdf": "PDF ডাউনলোড করুন",
+        "label": "লেবেল",
+        "difference": "পার্থক্য",
+        "change": "পরিবর্তন",
+        "noData": "কোন ডেটা পাওয়া যায়নি"
+      },
+      "tabs": {
+        "amoli": "আ'মলি মুহাসাবা",
+        "moktob": "মক্তব বিষয়",
+        "talim": "মহিলাদের তালিম",
+        "daye": "সহযোগী দায়ী",
+        "dawati": "দাওয়াতি বিষয়",
+        "dawatimojlish": "দাওয়াতি মজলিশ",
+        "jamat": "জামাত বিষয়",
+        "dinefera": "দ্বীনে ফিরে এসেছে",
+        "sofor": "সফর বিষয়"
+      },
+      "detailModal": {
+        "title": "সহযোগী দায়ীর তথ্য",
+        "close": "বন্ধ করুন",
+        "noData": "কোন তথ্য পাওয়া যায়নি"
+      },
+      "toast": {
+        "errorFetchingData": "ডেটা লোড করতে সমস্যা হয়েছে"
+      },
+      "amoli": {
+        "tahajjud": "তাহাজ্জুদ",
+        "surah": "সুরা",
+        "ayat": "আয়াত",
+        "zikir": "যিকির",
+        "ishraq": "ইশরাক/আওয়াবীন/চাশ্ত",
+        "jamat": "জামাত",
+        "sirat": "সিরাত",
+        "dua": "দোয়া",
+        "ilm": "ইলম",
+        "tasbih": "তাসবীহ",
+        "dayeeAmol": "দায়ী আমল",
+        "amoliSura": "আমলি সুরা",
+        "ayamroja": "আইয়ামে রোজা",
+        "hijbulBahar": "হিজবুল বাহার"
+      },
+      "moktob": {
+        "notunMoktobChalu": "নতুন মক্তব চালু হয়েছে",
+        "totalMoktob": "মোট মক্তব",
+        "totalStudent": "মোট ছাত্র-ছাত্রী",
+        "obhibhabokConference": "অভিভাবক কনফারেন্স হয়েছে",
+        "moktoThekeMadrasaAdmission": "মক্তব থেকে মাদ্রাসায় ভর্তি হয়েছে",
+        "notunBoyoskoShikkha": "নতুন বয়স্ক শিক্ষা",
+        "totalBoyoskoShikkha": "মোট বয়স্ক শিক্ষা",
+        "boyoskoShikkhaOnshogrohon": "বয়স্ক শিক্ষায় অংশগ্রহণ",
+        "newMuslimeDinerFikir": "নতুন মুসলিমদের ফিকির"
+      },
+      "talim": {
+        "mohilaTalim": "মহিলাদের তালিম হয়েছে",
+        "mohilaOnshogrohon": "মহিলাদের অংশগ্রহণ"
+      },
+      "dayi": {
+        "sohojogiDayeToiri": "সহযোগী দায়ী তৈরি হয়েছে",
+        "assistantsList": "সহযোগী দায়ীর তালিকা"
+      },
+      "dawati": {
+        "nonMuslimDawat": "অমুসলিমদের দাওয়াত",
+        "murtadDawat": "মুরতাদদের দাওয়াত",
+        "alemderSatheyMojlish": "আলেমদের সাথে মজলিশ",
+        "publicSatheyMojlish": "পাবলিকের সাথে মজলিশ",
+        "nonMuslimSaptahikGasht": "অমুসলিমদের সাথে সাপ্তাহিক গাশ্ত"
+      },
+      "dawatiMojlish": {
+        "dawatterGuruttoMojlish": "দাওয়াতের গুরুত্ব মজলিশ",
+        "mojlisheOnshogrohon": "মজলিশে অংশগ্রহণ",
+        "prosikkhonKormoshalaAyojon": "প্রশিক্ষণ কর্মশালা আয়োজন",
+        "prosikkhonOnshogrohon": "প্রশিক্ষণে অংশগ্রহণ",
+        "jummahAlochona": "জুম্মার আলোচনা",
+        "dhormoSova": "ধর্ম সংসভা",
+        "mashwaraPoint": "মাশওয়ারা পয়েন্ট"
+      },
+      "jamat": {
+        "jamatBerHoise": "জামাত বের হয়েছে",
+        "jamatSathi": "জামাত সাথী"
+      },
+      "dineFera": {
+        "nonMuslimMuslimHoise": "অমুসলিম মুসলিম হয়েছে",
+        "murtadIslamFireche": "মুরতাদ ইসলামে ফিরেছে"
+      },
+      "soforbisoy": {
+        "moktobVisit": "চলমান মক্তব পরিদর্শন হয়েছে",
+        "madrasaVisit": "মাদ্রাসা সফর হয়েছে",
+        "schoolCollegeVisit": "স্কুল/কলেজ সফর হয়েছে",
+        "madrasaVisitList": "মাদ্রাসার তালিকা",
+        "schoolCollegeVisitList": "স্কুল/কলেজ তালিকা"
+      }
+    },
+    "adminDashboard": {
+      "welcome": "স্বাগতম",
+      "months": {
+        "january": "জানুয়ারি",
+        "february": "ফেব্রুয়ারি",
+        "march": "মার্চ",
+        "april": "এপ্রিল",
+        "may": "মে",
+        "june": "জুন",
+        "july": "জুলাই",
+        "august": "আগস্ট",
+        "september": "সেপ্টেম্বর",
+        "october": "অক্টোবর",
+        "november": "নভেম্বর",
+        "december": "ডিসেম্বর"
+      },
+      "error": {
+        "userLoad": "ইউজার লোড করতে ব্যর্থ",
+        "dataLoad": "ডেটা লোড করতে ব্যর্থ"
+      },
+      "dashboard": {
+        "comparison": "তুলনা দেখুন",
+        "amoliMuhasaba": "আমলি মুহাসাবা",
+        "moktobSubject": "মক্তব বিষয়",
+        "talimSubject": "মহিলাদের তালিম বিষয়",
+        "dayiSubject": "সহযোগী দায়ী বিষয়",
+        "dawatiSubject": "দাওয়াতি বিষয়",
+        "dawatiMojlish": "দাওয়াতি মজলিশ",
+        "jamatSubject": "জামাত বিষয়",
+        "dineFera": "দ্বীনে ফিরে এসেছে",
+        "soforSubject": "সফর বিষয়"
+      },
+      "modalTitle": {
+        "assistants": "সহযোগী দায়ীর বিস্তারিত",
+        "madrasa": "মাদ্রাসার তালিকা",
+        "school": "স্কুল/কলেজ তালিকা"
+      },
+      "amoli": {
+        "tahajjud": "তাহাজ্জুদ",
+        "surah": "সুরা",
+        "ayat": "আয়াত",
+        "zikir": "যিকির",
+        "ishraq": "ইশরাক/আওয়াবীন/চাশ্ত",
+        "jamat": "জামাত",
+        "sirat": "সিরাত",
+        "dua": "দোয়া",
+        "ilm": "ইলম",
+        "tasbih": "তাসবীহ",
+        "dayeeAmol": "দায়ী আমল",
+        "amoliSura": "আমলি সুরা",
+        "ayamroja": "আইয়ামে রোজা",
+        "hijbulBahar": "হিজবুল বাহার"
+      },
+      "moktob": {
+        "title": "মক্তব বিষয়",
+        "notunMoktobChalu": "নতুন মক্তব চালু হয়েছে",
+        "totalMoktob": "মোট মক্তব",
+        "totalStudent": "মোট ছাত্র-ছাত্রী",
+        "obhibhabokConference": "অভিভাবক কনফারেন্স হয়েছে",
+        "moktoThekeMadrasaAdmission": "মক্তব থেকে মাদ্রাসায় ভর্তি হয়েছে",
+        "notunBoyoskoShikkha": "নতুন বয়স্ক শিক্ষা",
+        "totalBoyoskoShikkha": "মোট বয়স্ক শিক্ষা",
+        "boyoskoShikkhaOnshogrohon": "বয়স্ক শিক্ষায় অংশগ্রহণ",
+        "newMuslimeDinerFikir": "নতুন মুসলিমদের ফিকির"
+      },
+      "talim": {
+        "title": "মহিলাদের তালিম",
+        "mohilaTalim": "মহিলাদের তালিম হয়েছে",
+        "mohilaOnshogrohon": "মহিলাদের অংশগ্রহণ"
+      },
+      "daye": {
+        "title": "সহযোগী দায়ী",
+        "sohojogiDayeToiri": "সহযোগী দায়ী তৈরি হয়েছে",
+        "assistantsList": "সহযোগী দায়ীর তালিকা"
+      },
+      "dawati": {
+        "title": "দাওয়াতি বিষয়",
+        "nonMuslimDawat": "অমুসলিমদের দাওয়াত",
+        "murtadDawat": "মুরতাদদের দাওয়াত",
+        "alemderSatheyMojlish": "আলেমদের সাথে মজলিশ",
+        "publicSatheyMojlish": "পাবলিকের সাথে মজলিশ",
+        "nonMuslimSaptahikGasht": "অমুসলিমদের সাথে সাপ্তাহিক গাশ্ত"
+      },
+      "dawatiMojlish": {
+        "title": "দাওয়াতি মজলিশ",
+        "dawatterGuruttoMojlish": "দাওয়াতের গুরুত্ব মজলিশ",
+        "mojlisheOnshogrohon": "মজলিশে অংশগ্রহণ",
+        "prosikkhonKormoshalaAyojon": "প্রশিক্ষণ কর্মশালা আয়োজন",
+        "prosikkhonOnshogrohon": "প্রশিক্ষণে অংশগ্রহণ",
+        "jummahAlochona": "জুম্মার আলোচনা",
+        "dhormoSova": "ধর্ম সংসভা",
+        "mashwaraPoint": "মাশওয়ারা পয়েন্ট"
+      },
+      "jamat": {
+        "title": "জামাত বিষয়",
+        "jamatBerHoise": "জামাত বের হয়েছে",
+        "jamatSathi": "জামাত সাথী"
+      },
+      "dineFera": {
+        "title": "দ্বীনে ফিরে এসেছে",
+        "nonMuslimMuslimHoise": "অমুসলিম মুসলিম হয়েছে",
+        "murtadIslamFireche": "মুরতাদ ইসলামে ফিরেছে"
+      },
+      "sofor": {
+        "title": "সফর বিষয়",
+        "moktobVisit": "চলমান মক্তব পরিদর্শন হয়েছে",
+        "madrasaVisit": "মাদ্রাসা সফর হয়েছে",
+        "schoolCollegeVisit": "স্কুল/কলেজ সফর হয়েছে",
+        "madrasaVisitList": "মাদ্রাসার তালিকা",
+        "schoolCollegeVisitList": "স্কুল/কলেজ তালিকা"
+      }
     }
   },
   "treeView": {
