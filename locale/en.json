@@ -11,7 +11,9 @@
     "logout": "Logout",
     "roles": {
       "centraladmin": "Central Admin",
-      "daye": "Daee"
+      "daye": "Daee",
+      "divisionadmin": "Division Admin",
+      "markazadmin": "Markaz Admin"
     }
   },
   "dashboard": {
@@ -34,7 +36,20 @@
       "addDayi": "Add Dayi",
       "viewDayi": "View Dayi",
       "leaveMatters": "Leave Matters",
-      "realTree": "Real Tree"
+      "realTree": "Real Tree",
+      "editRequest": "Edit Request"
+    }
+  },
+  "treeView": {
+    "searchPlaceholder": "Search user...",
+    "expandAll": "Expand All",
+    "collapseAll": "Collapse All",
+    "fetchError": "Failed to fetch users",
+    "roles": {
+      "centraladmin": "Central Admin",
+      "divisionadmin": "Division Admin",
+      "markazadmin": "Markaz Admin",
+      "daye": "Dayee"
     }
   }
 }

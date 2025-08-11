@@ -11,7 +11,9 @@
     "logout": "লগআউট",
     "roles": {
       "centraladmin": "সেন্ট্রাল অ্যাডমিন",
-      "daye": "দাঈ"
+      "daye": "দাঈ",
+      "divisionadmin": "ডিভিশন অ্যাডমিন",
+      "markazadmin": "মারকাজ অ্যাডমিন"
     }
   },
   "dashboard": {
@@ -34,7 +36,20 @@
       "addDayi": "দায়ী এড করুন",
       "viewDayi": "দায়ী দেখুন",
       "leaveMatters": "ছুটির বিষয়",
-      "realTree": "রিয়েল ট্রি"
+      "realTree": "রিয়েল ট্রি",
+      "editRequest": "এডিট রিকোয়েস্ট"
+    }
+  },
+  "treeView": {
+    "searchPlaceholder": "ব্যবহারকারী খুঁজুন...",
+    "expandAll": "সব প্রসারিত করুন",
+    "collapseAll": "সব সংকুচিত করুন",
+    "fetchError": "ব্যবহারকারী আনতে ব্যর্থ হয়েছে",
+    "roles": {
+      "centraladmin": "সেন্ট্রাল অ্যাডমিন",
+      "divisionadmin": "ডিভিশন অ্যাডমিন",
+      "markazadmin": "মারকাজ অ্যাডমিন",
+      "daye": "দাঈ"
     }
   }
 }
