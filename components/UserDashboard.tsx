@@ -9,6 +9,7 @@ import UniversalTableShow from "@/components/TableShow"; // Added UniversalTable
 import TallyAdmin from "@/components/TallyAdmin";
 import ComparisonTallyCard from "@/components/ComparisonTallyCard";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface TallyProps {
   userData: Record<string, any>;
@@ -48,6 +49,7 @@ const Dashboard: React.FC<TallyProps> = () => {
   const [detailModalTitle, setDetailModalTitle] = useState("");
   const [detailModalDate, setDetailModalDate] = useState("");
   const [detailModalItems, setDetailModalItems] = useState<any[]>([]);
+  const t = useTranslations("dashboard.UserDashboard");
 
   // Handler for month change
   const onMonthChange = (month: number) => {
@@ -60,8 +62,18 @@ const Dashboard: React.FC<TallyProps> = () => {
   };
 
   const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    t("months.january"),
+    t("months.february"),
+    t("months.march"),
+    t("months.april"),
+    t("months.may"),
+    t("months.june"),
+    t("months.july"),
+    t("months.august"),
+    t("months.september"),
+    t("months.october"),
+    t("months.november"),
+    t("months.december"),
   ];
 
   // Helper function to format date as YYYY-MM-DD (Dhaka timezone)
@@ -88,7 +100,7 @@ const Dashboard: React.FC<TallyProps> = () => {
     // DAYE: assistants list
     if (rowKey === "assistantsList") {
       const items = userDayeData?._assistantsByDate?.[dateKey] || [];
-      setDetailModalTitle("সহযোগী দায়ীর তথ্য");
+      setDetailModalTitle(t("detailModal.title"));
       setDetailModalDate(dateKey);
       setDetailModalItems(items);
       if (items.length) setDetailModalOpen(true);
@@ -98,7 +110,7 @@ const Dashboard: React.FC<TallyProps> = () => {
     // SOFOR: madrasa / school lists
     if (rowKey === "madrasaVisitList") {
       const items = userSoforBishoyData?._madrasaByDate?.[dateKey] || [];
-      setDetailModalTitle("মাদ্রাসার তালিকা");
+      setDetailModalTitle(t("detailModal.title"));
       setDetailModalDate(dateKey);
       setDetailModalItems(items);
       if (items.length) setDetailModalOpen(true);
@@ -106,7 +118,7 @@ const Dashboard: React.FC<TallyProps> = () => {
     }
     if (rowKey === "schoolCollegeVisitList") {
       const items = userSoforBishoyData?._schoolByDate?.[dateKey] || [];
-      setDetailModalTitle("স্কুল/কলেজ তালিকা");
+      setDetailModalTitle(t("detailModal.title"));
       setDetailModalDate(dateKey);
       setDetailModalItems(items);
       if (items.length) setDetailModalOpen(true);
@@ -123,91 +135,91 @@ const Dashboard: React.FC<TallyProps> = () => {
         const endpoints = [
           {
             url: `/api/amoli?email=${encodeURIComponent(userEmail)}`, setter: setUserAmoliData, labelMap: {
-              tahajjud: "তাহাজ্জুদ",
-              surah: "সুরা",
-              ayat: "আয়াত",
-              zikir: "যিকির",
-              ishraq: "ইশরাক/আওয়াবীন/চাশ্ত",
-              jamat: "জামাত",
-              sirat: "সিরাত",
-              Dua: "দোয়া",
-              ilm: "ইলম",
-              tasbih: "তাসবীহ",
-              dayeeAmol: "দায়ী আমল",
-              amoliSura: "আমলি সুরা",
-              ayamroja: "আইয়ামে রোজা",
-              hijbulBahar: "হিজবুল বাহার",
+              tahajjud: t("amoli.tahajjud"),
+              surah: t("amoli.surah"),
+              ayat: t("amoli.ayat"),
+              zikir: t("amoli.zikir"),
+              ishraq: t("amoli.ishraq"),
+              jamat: t("amoli.jamat"),
+              sirat: t("amoli.sirat"),
+              Dua: t("amoli.dua"),
+              ilm: t("amoli.ilm"),
+              tasbih: t("amoli.tasbih"),
+              dayeeAmol: t("amoli.dayeeAmol"),
+              amoliSura: t("amoli.amoliSura"),
+              ayamroja: t("amoli.ayamroja"),
+              hijbulBahar: t("amoli.hijbulBahar"),
             }
           },
           {
             url: `/api/moktob?email=${encodeURIComponent(userEmail)}`, setter: setUserMoktobBisoyData, labelMap: {
-              notunMoktobChalu: "নতুন মক্তব চালু হয়েছে",
-              totalMoktob: "মোট মক্তব",
-              totalStudent: "মোট ছাত্র-ছাত্রী",
-              obhibhabokConference: "অভিভাবক কনফারেন্স হয়েছে",
-              moktoThekeMadrasaAdmission: "মক্তব থেকে মাদ্রাসায় ভর্তি হয়েছে",
-              notunBoyoskoShikkha: "নতুন বয়স্ক শিক্ষা",
-              totalBoyoskoShikkha: "মোট বয়স্ক শিক্ষা",
-              boyoskoShikkhaOnshogrohon: "বয়স্ক শিক্ষায় অংশগ্রহণ",
-              newMuslimeDinerFikir: "নতুন মুসলিমদের ফিকির",
+              notunMoktobChalu: t("moktob.notunMoktobChalu"),
+              totalMoktob: t("moktob.totalMoktob"),
+              totalStudent: t("moktob.totalStudent"),
+              obhibhabokConference: t("moktob.obhibhabokConference"),
+              moktoThekeMadrasaAdmission: t("moktob.moktoThekeMadrasaAdmission"),
+              notunBoyoskoShikkha: t("moktob.notunBoyoskoShikkha"),
+              totalBoyoskoShikkha: t("moktob.totalBoyoskoShikkha"),
+              boyoskoShikkhaOnshogrohon: t("moktob.boyoskoShikkhaOnshogrohon"),
+              newMuslimeDinerFikir: t("moktob.newMuslimeDinerFikir"),
             }
           },
           {
             url: `/api/talim?email=${encodeURIComponent(userEmail)}`, setter: setUserTalimBisoyData, labelMap: {
-              mohilaTalim: "মহিলাদের তালিম হয়েছে",
-              mohilaOnshogrohon: "মহিলাদের অংশগ্রহণ",
+              mohilaTalim: t("talim.mohilaTalim"),
+              mohilaOnshogrohon: t("talim.mohilaOnshogrohon"),
             }
           },
           {
             url: `/api/dayi?email=${encodeURIComponent(userEmail)}`,
             setter: setUserDayeData,
             labelMap: {
-              sohojogiDayeToiri: "সহযোগী দায়ী তৈরি হয়েছে",
+              sohojogiDayeToiri: t("dayi.sohojogiDayeToiri"),
               // ADD THIS so the table shows the clickable row:
-              assistantsList: "সহযোগী দায়ীর তালিকা",
+              assistantsList: t("dayi.assistantsList"),
             }
           },
           {
             url: `/api/dawati?email=${encodeURIComponent(userEmail)}`, setter: setUserDawatiBisoyData, labelMap: {
-              nonMuslimDawat: "অমুসলিমদের দাওয়াত",
-              murtadDawat: "মুরতাদদের দাওয়াত",
-              alemderSatheyMojlish: "আলেমদের সাথে মজলিশ",
-              publicSatheyMojlish: "পাবলিকের সাথে মজলিশ",
-              nonMuslimSaptahikGasht: "অমুসলিমদের সাথে সাপ্তাহিক গাশ্ত",
+              nonMuslimDawat: t("dawati.nonMuslimDawat"),
+              murtadDawat: t("dawati.murtadDawat"),
+              alemderSatheyMojlish: t("dawati.alemderSatheyMojlish"),
+              publicSatheyMojlish: t("dawati.publicSatheyMojlish"),
+              nonMuslimSaptahikGasht: t("dawati.nonMuslimSaptahikGasht"),
             }
           },
           {
             url: `/api/dawatimojlish?email=${encodeURIComponent(userEmail)}`, setter: setUserDawatiMojlishData, labelMap: {
-              dawatterGuruttoMojlish: "দাওয়াতের গুরুত্ব মজলিশ",
-              mojlisheOnshogrohon: "মজলিশে অংশগ্রহণ",
-              prosikkhonKormoshalaAyojon: "প্রশিক্ষণ কর্মশালা আয়োজন",
-              prosikkhonOnshogrohon: "প্রশিক্ষণে অংশগ্রহণ",
-              jummahAlochona: "জুম্মার আলোচনা",
-              dhormoSova: "ধর্ম সংসভা",
-              mashwaraPoint: "মাশওয়ারা পয়েন্ট",
+              dawatterGuruttoMojlish: t("dawatiMojlish.dawatterGuruttoMojlish"),
+              mojlisheOnshogrohon: t("dawatiMojlish.mojlisheOnshogrohon"),
+              prosikkhonKormoshalaAyojon: t("dawatiMojlish.prosikkhonKormoshalaAyojon"),
+              prosikkhonOnshogrohon: t("dawatiMojlish.prosikkhonOnshogrohon"),
+              jummahAlochona: t("dawatiMojlish.jummahAlochona"),
+              dhormoSova: t("dawatiMojlish.dhormoSova"),
+              mashwaraPoint: t("dawatiMojlish.mashwaraPoint"),
             }
           },
           {
             url: `/api/jamat?email=${encodeURIComponent(userEmail)}`, setter: setUserJamatBisoyData, labelMap: {
-              jamatBerHoise: "জামাত বের হয়েছে",
-              jamatSathi: "জামাত সাথী",
+              jamatBerHoise: t("jamat.jamatBerHoise"),
+              jamatSathi: t("jamat.jamatSathi"),
             }
           },
           {
             url: `/api/dinefera?email=${encodeURIComponent(userEmail)}`, setter: setUserDineFeraData, labelMap: {
-              nonMuslimMuslimHoise: "অমুসলিম মুসলিম হয়েছে",
-              murtadIslamFireche: "মুরতাদ ইসলামে ফিরেছে",
+              nonMuslimMuslimHoise: t("dineFera.nonMuslimMuslimHoise"),
+              murtadIslamFireche: t("dineFera.murtadIslamFireche"),
             }
           },
           {
             url: `/api/soforbisoy?email=${encodeURIComponent(userEmail)}`,
             setter: setUserSoforBishoyData,
             labelMap: {
-              moktobVisit: "চলমান মক্তব পরিদর্শন হয়েছে",
-              madrasaVisit: "মাদ্রাসা সফর হয়েছে",
-              schoolCollegeVisit: "স্কুল/কলেজ সফর হয়েছে",
-              madrasaVisitList: "মাদ্রাসার তালিকা",
-              schoolCollegeVisitList: "স্কুল/কলেজ তালিকা",
+              moktobVisit: t("soforbisoy.moktobVisit"),
+              madrasaVisit: t("soforbisoy.madrasaVisit"),
+              schoolCollegeVisit: t("soforbisoy.schoolCollegeVisit"),
+              madrasaVisitList: t("soforbisoy.madrasaVisitList"),
+              schoolCollegeVisitList: t("soforbisoy.schoolCollegeVisitList"),
             }
           },
         ];
@@ -263,13 +275,13 @@ const Dashboard: React.FC<TallyProps> = () => {
             });
           } catch (error) {
             console.error(`Error fetching ${url}:`, error);
-            toast.error(`ডেটা লোড করতে সমস্যা হয়েছে: ${url}`);
+            toast.error(t("toast.errorFetchingData"));
           }
         });
         await Promise.all(fetchPromises);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
-        toast.error("ড্যাশবোর্ড ডেটা লোড করতে সমস্যা হয়েছে");
+        toast.error(t("toast.errorFetchingData"));
       } finally {
         setLoading(false);
       }
@@ -548,7 +560,7 @@ const Dashboard: React.FC<TallyProps> = () => {
       <div className="flex flex-col gap-4 lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl">
         {/* Heading */}
         <h1 className="text-xl md:text-2xl font-bold text-gray-800 text-center lg:text-left">
-          স্বাগতম,{" "}
+          {t("welcome")},{" "}
           <span className="text-emerald-600">{session?.user?.name}</span>
         </h1>
         {/* Action Buttons */}
@@ -557,7 +569,7 @@ const Dashboard: React.FC<TallyProps> = () => {
             onClick={() => setShowComparison(!showComparison)}
             className="bg-emerald-600 text-white font-semibold px-4 md:px-6 py-2 rounded-lg shadow-md hover:bg-emerald-700 transition-all duration-300 w-full md:w-auto"
           >
-            {showComparison ? "ড্যাশবোর্ডে ফিরে জান" : "📊 তুলনা দেখুন"}
+            {showComparison ? t("dashboard.backToDashboard") : t("dashboard.comparison")}
           </button>
           {!showComparison && (
             <div className="flex gap-3 items-center w-full md:w-auto">
@@ -595,9 +607,9 @@ const Dashboard: React.FC<TallyProps> = () => {
               onChange={(e) => setComparisonType(e.target.value)}
               className="border px-4 py-2 rounded-md shadow-sm"
             >
-              <option value="day">দিন অনুযায়ী</option>
-              <option value="month">মাস অনুযায়ী</option>
-              <option value="year">বছর অনুযায়ী</option>
+              <option value="day">{t("comparison.day")}</option>
+              <option value="month">{t("comparison.month")}</option>
+              <option value="year">{t("comparison.year")}</option>
             </select>
             {comparisonType === "day" && (
               <>
@@ -623,7 +635,7 @@ const Dashboard: React.FC<TallyProps> = () => {
                   onChange={(e) => setFrom(e.target.value)}
                   className="border px-4 py-2 rounded-md shadow-sm"
                 />
-                <span className="font-bold">থেকে</span>
+                <span className="font-bold">{t("comparison.from")}</span>
                 <input
                   type="month"
                   value={to}
@@ -647,7 +659,7 @@ const Dashboard: React.FC<TallyProps> = () => {
                     )
                   )}
                 </select>
-                <span className="font-bold">থেকে</span>
+                <span className="font-bold">{t("comparison.from")}</span>
                 <select
                   value={to}
                   onChange={(e) => setTo(e.target.value)}
@@ -667,7 +679,7 @@ const Dashboard: React.FC<TallyProps> = () => {
               onClick={handleCompare}
               className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
             >
-              তুলনা করুন
+              {t("comparison.compare")}
             </button>
           </div>
           <div className="bg-gray-100 p-2 lg:p-4 rounded-lg shadow overflow-x-auto">
@@ -675,13 +687,15 @@ const Dashboard: React.FC<TallyProps> = () => {
               <table className="w-full border-collapse border border-gray-300 text-sm lg:text-base">
                 <thead>
                   <tr className="bg-gray-200">
-                    <th className="border px-2 lg:px-4 py-1 lg:py-2">Label</th>
+                    <th className="border px-2 lg:px-4 py-1 lg:py-2">{t("comparison.label")}</th>
                     <th className="border px-2 lg:px-4 py-1 lg:py-2">{from}</th>
                     <th className="border px-2 lg:px-4 py-1 lg:py-2">{to}</th>
                     <th className="border px-2 lg:px-4 py-1 lg:py-2">
-                      Difference
+                      {t("comparison.difference")}
                     </th>
-                    <th className="border px-2 lg:px-4 py-1 lg:py-2">Change</th>
+                    <th className="border px-2 lg:px-4 py-1 lg:py-2">
+                      {t("comparison.change")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -712,7 +726,7 @@ const Dashboard: React.FC<TallyProps> = () => {
               </table>
             ) : (
               <p className="text-center text-gray-600">
-                Select values and click "Compare" to see results.
+                {t("comparison.noData")}
               </p>
             )}
             {comparisonData.length > 0 && (
@@ -721,7 +735,7 @@ const Dashboard: React.FC<TallyProps> = () => {
                   onClick={convertToPDF}
                   className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
                 >
-                  Download PDF
+                  {t("comparison.downloadPdf")}
                 </button>
               </div>
             )}
@@ -749,56 +763,56 @@ const Dashboard: React.FC<TallyProps> = () => {
             <TallyAdmin
               userData={filterChartAndTallyData(userMoktobBisoyData)}
               emails={userEmail}
-              title="মক্তব বিষয়"
+              title={t("dashboard.moktobSubject")}
             />
             <TallyAdmin
               userData={filterChartAndTallyData(userDawatiBisoyData)}
               emails={userEmail}
-              title="দাওয়াতি বিষয়"
+              title={t("dashboard.dawatiSubject")}
             />
             <TallyAdmin
               userData={filterChartAndTallyData(userDawatiMojlishData)}
               emails={userEmail}
-              title="দাওয়াতি মজলিশ"
+              title={t("dashboard.dawatiMojlish")}
             />
             <TallyAdmin
               userData={filterChartAndTallyData(userJamatBisoyData)}
               emails={userEmail}
-              title="জামাত বিষয়"
+              title={t("dashboard.jamatSubject")}
             />
             <TallyAdmin
               userData={filterChartAndTallyData(userDineFeraData)}
               emails={userEmail}
-              title="দ্বীনে ফিরে এসেছে"
+              title={t("dashboard.dineFera")}
             />
             <TallyAdmin
               userData={filterChartAndTallyData(userTalimBisoyData)}
               emails={userEmail}
-              title="মহিলাদের তালিম বিষয়"
+              title={t("dashboard.talimSubject")}
             />
             <TallyAdmin
               userData={filterChartAndTallyData(userSoforBishoyData)}
               emails={userEmail}
-              title="সফর বিষয়"
+              title={t("dashboard.soforSubject")}
             />
             <TallyAdmin
               userData={filterChartAndTallyData(userDayeData)}
               emails={userEmail}
-              title="সহযোগী দায়ী বিষয"
+              title={t("dashboard.dayiSubject")}
             />
           </div>
           <div className="border border-[#155E75] p-2 lg:p-6 mt-10 rounded-xl overflow-y-auto">
             <Tabs defaultValue="Amolimusahaba" className="w-full lg:p-4">
               <TabsList className="mx-10 grid grid-cols-2 md:grid-cols-4 my-6">
-                <TabsTrigger value="Amolimusahaba">আ'মলি মুহাসাবা</TabsTrigger>
-                <TabsTrigger value="moktob">মক্তব বিষয়</TabsTrigger>
-                <TabsTrigger value="talim">মহিলাদের তালিম বিষয়</TabsTrigger>
-                <TabsTrigger value="daye">সহযোগী দায়ী বিষয</TabsTrigger>
-                <TabsTrigger value="dawati">দাওয়াতি বিষয়</TabsTrigger>
-                <TabsTrigger value="dawatimojlish">দাওয়াতি মজলিশ</TabsTrigger>
-                <TabsTrigger value="jamat">জামাত বিষয়</TabsTrigger>
-                <TabsTrigger value="dinefera">দ্বীনে ফিরে এসেছে</TabsTrigger>
-                <TabsTrigger value="sofor">সফর বিষয়</TabsTrigger>
+                <TabsTrigger value="Amolimusahaba">{t("dashboard.amoliMuhasaba")}</TabsTrigger>
+                <TabsTrigger value="moktob">{t("dashboard.moktobSubject")}</TabsTrigger>
+                <TabsTrigger value="talim">{t("dashboard.talimSubject")}</TabsTrigger>
+                <TabsTrigger value="daye">{t("dashboard.dayiSubject")}</TabsTrigger>
+                <TabsTrigger value="dawati">{t("dashboard.dawatiSubject")}</TabsTrigger>
+                <TabsTrigger value="dawatimojlish">{t("dashboard.dawatiMojlish")}</TabsTrigger>
+                <TabsTrigger value="jamat">{t("dashboard.jamatSubject")}</TabsTrigger>
+                <TabsTrigger value="dinefera">{t("dashboard.dineFera")}</TabsTrigger>
+                <TabsTrigger value="sofor">{t("dashboard.soforSubject")}</TabsTrigger>
               </TabsList>
               {/* Tab Content */}
               <TabsContent value="Amolimusahaba">
@@ -886,7 +900,7 @@ const Dashboard: React.FC<TallyProps> = () => {
 
             <div className="max-h-[70vh] overflow-auto p-6 space-y-3">
               {/* Assistants: full cards */}
-              {detailModalTitle === "সহযোগী দায়ীর তথ্য" ? (
+              {detailModalTitle === t("dashboard.dayiSubject") ? (
                 detailModalItems.length ? (
                   detailModalItems.map((a: any, idx: number) => (
                     <div key={a.id || idx} className="rounded-xl border p-4 shadow-sm hover:shadow">
@@ -899,20 +913,20 @@ const Dashboard: React.FC<TallyProps> = () => {
                         ) : null}
                       </div>
                       <div className="mt-2 grid gap-1 text-sm text-gray-700">
-                        <div><span className="font-medium">ফোন:</span> {a?.phone || "-"}</div>
-                        <div><span className="font-medium">ঠিকানা:</span> {a?.address || "-"}</div>
-                        <div><span className="font-medium">বিভাগ:</span> {a?.division || "-"}</div>
-                        <div><span className="font-medium">জেলা:</span> {a?.district || "-"}</div>
-                        <div><span className="font-medium">উপজেলা:</span> {a?.upazila || "-"}</div>
-                        <div><span className="font-medium">ইউনিয়ন:</span> {a?.union || "-"}</div>
+                        <div><span className="font-medium">{t("dashboard.phone")}:</span> {a?.phone || "-"}</div>
+                        <div><span className="font-medium">{t("dashboard.address")}:</span> {a?.address || "-"}</div>
+                        <div><span className="font-medium">{t("dashboard.division")}:</span> {a?.division || "-"}</div>
+                        <div><span className="font-medium">{t("dashboard.district")}:</span> {a?.district || "-"}</div>
+                        <div><span className="font-medium">{t("dashboard.upazila")}:</span> {a?.upazila || "-"}</div>
+                        <div><span className="font-medium">{t("dashboard.union")}:</span> {a?.union || "-"}</div>
                         {a?.description ? (
-                          <div className="mt-1"><span className="font-medium">বিবরণ:</span> {a.description}</div>
+                          <div className="mt-1"><span className="font-medium">{t("dashboard.description")}:</span> {a.description}</div>
                         ) : null}
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-gray-600">কোনো সহযোগী দায়ীর তথ্য পাওয়া যায়নি</div>
+                  <div className="text-gray-600">{t("dashboard.noData")}</div>
                 )
               ) : (
                 // Madrasa / School lists as simple lines
@@ -922,7 +936,7 @@ const Dashboard: React.FC<TallyProps> = () => {
                       <div key={idx} className="rounded border p-3">{idx + 1}. {t}</div>
                     ))
                   ) : (
-                    <div className="text-gray-600">কোনো তথ্য পাওয়া যায়নি</div>
+                    <div className="text-gray-600">{t("dashboard.noData")}</div>
                   )}
                 </div>
               )}
@@ -933,7 +947,7 @@ const Dashboard: React.FC<TallyProps> = () => {
                 onClick={() => setDetailModalOpen(false)}
                 className="rounded-lg border px-4 py-2 hover:bg-gray-50"
               >
-                Close
+                {t("dashboard.close")}
               </button>
             </div>
           </div>

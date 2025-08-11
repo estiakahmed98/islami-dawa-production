@@ -10,6 +10,7 @@ import AmoliChartAdmin from "@/components/AmoliChartAdmin";
 import AdminTable from "@/components/AdminTable";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 // ----------------- Types -----------------
 interface User {
@@ -37,8 +38,8 @@ type LabeledData = {
 
 // ----------------- Helpers -----------------
 const months = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December",
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
 
 function dhakaYMD(d: Date) {
@@ -105,8 +106,9 @@ const AdminDashboard: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalDateKey, setModalDateKey] = useState("");
-  const [modalType, setModalType] = useState<"assistants"|"madrasa"|"school" | null>(null);
+  const [modalType, setModalType] = useState<"assistants" | "madrasa" | "school" | null>(null);
   const [modalItems, setModalItems] = useState<any[]>([]);
+  const t = useTranslations("dashboard.adminDashboard");
 
   // ---------- fetch users ----------
   useEffect(() => {
@@ -118,7 +120,7 @@ const AdminDashboard: React.FC = () => {
         setUsers(usersData);
       } catch (e) {
         console.error(e);
-        toast.error("Users লোড করতে সমস্যা হয়েছে");
+        toast.error(t("error.userLoad"));
       }
     };
     go();
@@ -173,11 +175,11 @@ const AdminDashboard: React.FC = () => {
         };
         findChild(chosen.email);
 
-        if (chosen.role === "unionadmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role==="daye" && u.union===chosen.union).map((u)=>u.email)])];
-        else if (chosen.role === "upozilaadmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role==="daye" && u.upazila===chosen.upazila).map((u)=>u.email)])];
-        else if (chosen.role === "districtadmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role==="daye" && u.district===chosen.district).map((u)=>u.email)])];
-        else if (chosen.role === "divisionadmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role==="daye" && u.division===chosen.division).map((u)=>u.email)])];
-        else if (chosen.role === "centraladmin") selEmails = [...new Set([...selEmails, ...users.filter((u)=>u.role==="daye").map((u)=>u.email)])];
+        if (chosen.role === "unionadmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role === "daye" && u.union === chosen.union).map((u) => u.email)])];
+        else if (chosen.role === "upozilaadmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role === "daye" && u.upazila === chosen.upazila).map((u) => u.email)])];
+        else if (chosen.role === "districtadmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role === "daye" && u.district === chosen.district).map((u) => u.email)])];
+        else if (chosen.role === "divisionadmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role === "daye" && u.division === chosen.division).map((u) => u.email)])];
+        else if (chosen.role === "centraladmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role === "daye").map((u) => u.email)])];
 
         setEmailList(selEmails);
       } else {
@@ -196,10 +198,20 @@ const AdminDashboard: React.FC = () => {
         url: "/api/amoli",
         setter: setAmoliData,
         labelMap: {
-          tahajjud: "তাহাজ্জুদ", surah: "সুরা", ayat: "আয়াত", zikir: "যিকির",
-          ishraq: "ইশরাক/আওয়াবীন/চাশ্ত", jamat: "জামাত", sirat: "সিরাত", Dua: "দোয়া",
-          ilm: "ইলম", tasbih: "তাসবীহ", dayeeAmol: "দায়ী আমল", amoliSura: "আমলি সুরা",
-          ayamroja: "আইয়ামে রোজা", hijbulBahar: "হিজবুল বাহার",
+          tahajjud: t("amoli.tahajjud"),
+          surah: t("amoli.surah"),
+          ayat: t("amoli.ayat"),
+          zikir: t("amoli.zikir"),
+          ishraq: t("amoli.ishraq"),
+          jamat: t("amoli.jamat"),
+          sirat: t("amoli.sirat"),
+          Dua: t("amoli.dua"),
+          ilm: t("amoli.ilm"),
+          tasbih: t("amoli.tasbih"),
+          dayeeAmol: t("amoli.dayeeAmol"),
+          amoliSura: t("amoli.amoliSura"),
+          ayamroja: t("amoli.ayamroja"),
+          hijbulBahar: t("amoli.hijbulBahar"),
         },
       },
       {
@@ -207,33 +219,37 @@ const AdminDashboard: React.FC = () => {
         url: "/api/moktob",
         setter: setMoktobData,
         labelMap: {
-          notunMoktobChalu: "নতুন মক্তব চালু হয়েছে", totalMoktob: "মোট মক্তব",
-          totalStudent: "মোট ছাত্র-ছাত্রী", obhibhabokConference: "অভিভাবক কনফারেন্স হয়েছে",
-          moktoThekeMadrasaAdmission: "মক্তব থেকে মাদ্রাসায় ভর্তি হয়েছে",
-          notunBoyoskoShikkha: "নতুন বয়স্ক শিক্ষা", totalBoyoskoShikkha: "মোট বয়স্ক শিক্ষা",
-          boyoskoShikkhaOnshogrohon: "বয়স্ক শিক্ষায় অংশগ্রহণ", newMuslimeDinerFikir: "নতুন মুসলিমদের ফিকির",
+          notunMoktobChalu: t("moktob.notunMoktobChalu"),
+          totalMoktob: t("moktob.totalMoktob"),
+          totalStudent: t("moktob.totalStudent"),
+          obhibhabokConference: t("moktob.obhibhabokConference"),
+          moktoThekeMadrasaAdmission: t("moktob.moktoThekeMadrasaAdmission"),
+          notunBoyoskoShikkha: t("moktob.notunBoyoskoShikkha"),
+          totalBoyoskoShikkha: t("moktob.totalBoyoskoShikkha"),
+          boyoskoShikkhaOnshogrohon: t("moktob.boyoskoShikkhaOnshogrohon"),
+          newMuslimeDinerFikir: t("moktob.newMuslimeDinerFikir"),
         },
       },
       {
         key: "talim",
         url: "/api/talim",
         setter: setTalimData,
-        labelMap: { mohilaTalim: "মহিলাদের তালিম হয়েছে", mohilaOnshogrohon: "মহিলাদের অংশগ্রহণ" },
+        labelMap: { mohilaTalim: t("talim.mohilaTalim"), mohilaOnshogrohon: t("talim.mohilaOnshogrohon") },
       },
       {
         key: "daye",
         url: "/api/dayi",
         setter: setDayeData,
-        labelMap: { sohojogiDayeToiri: "সহযোগী দায়ী তৈরি হয়েছে", assistantsList: "সহযোগী দায়ীর তালিকা" },
+        labelMap: { sohojogiDayeToiri: t("daye.sohojogiDayeToiri"), assistantsList: t("daye.assistantsList") },
       },
       {
         key: "dawati",
         url: "/api/dawati",
         setter: setDawatiData,
         labelMap: {
-          nonMuslimDawat: "অমুসলিমদের দাওয়াত", murtadDawat: "মুরতাদদের দাওয়াত",
-          alemderSatheyMojlish: "আলেমদের সাথে মজলিশ", publicSatheyMojlish: "পাবলিকের সাথে মজলিশ",
-          nonMuslimSaptahikGasht: "অমুসলিমদের সাথে সাপ্তাহিক গাশ্ত",
+          nonMuslimDawat: t("dawati.nonMuslimDawat"), murtadDawat: t("dawati.murtadDawat"),
+          alemderSatheyMojlish: t("dawati.alemderSatheyMojlish"), publicSatheyMojlish: t("dawati.publicSatheyMojlish"),
+          nonMuslimSaptahikGasht: t("dawati.nonMuslimSaptahikGasht"),
         },
       },
       {
@@ -241,33 +257,33 @@ const AdminDashboard: React.FC = () => {
         url: "/api/dawatimojlish",
         setter: setDawatiMojlishData,
         labelMap: {
-          dawatterGuruttoMojlish: "দাওয়াতের গুরুত্ব মজলিশ", mojlisheOnshogrohon: "মজলিশে অংশগ্রহণ",
-          prosikkhonKormoshalaAyojon: "প্রশিক্ষণ কর্মশালা আয়োজন", prosikkhonOnshogrohon: "প্রশিক্ষণে অংশগ্রহণ",
-          jummahAlochona: "জুম্মার আলোচনা", dhormoSova: "ধর্ম সংসভা", mashwaraPoint: "মাশওয়ারা পয়েন্ট",
+          dawatterGuruttoMojlish: t("dawatiMojlish.dawatterGuruttoMojlish"), mojlisheOnshogrohon: t("dawatiMojlish.mojlisheOnshogrohon"),
+          prosikkhonKormoshalaAyojon: t("dawatiMojlish.prosikkhonKormoshalaAyojon"), prosikkhonOnshogrohon: t("dawatiMojlish.prosikkhonOnshogrohon"),
+          jummahAlochona: t("dawatiMojlish.jummahAlochona"), dhormoSova: t("dawatiMojlish.dhormoSova"), mashwaraPoint: t("dawatiMojlish.mashwaraPoint"),
         },
       },
       {
         key: "jamat",
         url: "/api/jamat",
         setter: setJamatData,
-        labelMap: { jamatBerHoise: "জামাত বের হয়েছে", jamatSathi: "জামাত সাথী" },
+        labelMap: { jamatBerHoise: t("jamat.jamatBerHoise"), jamatSathi: t("jamat.jamatSathi") },
       },
       {
         key: "dinefera",
         url: "/api/dinefera",
         setter: setDineFeraData,
-        labelMap: { nonMuslimMuslimHoise: "অমুসলিম মুসলিম হয়েছে", murtadIslamFireche: "মুরতাদ ইসলামে ফিরেছে" },
+        labelMap: { nonMuslimMuslimHoise: t("dineFera.nonMuslimMuslimHoise"), murtadIslamFireche: t("dineFera.murtadIslamFireche") },
       },
       {
         key: "sofor",
         url: "/api/soforbisoy",
         setter: setSoforData,
         labelMap: {
-          moktobVisit: "চলমান মক্তব পরিদর্শন হয়েছে",
-          madrasaVisit: "মাদ্রাসা সফর হয়েছে",
-          schoolCollegeVisit: "স্কুল/কলেজ সফর হয়েছে",
-          madrasaVisitList: "মাদ্রাসার তালিকা",
-          schoolCollegeVisitList: "স্কুল/কলেজ তালিকা",
+          moktobVisit: t("sofor.moktobVisit"),
+          madrasaVisit: t("sofor.madrasaVisit"),
+          schoolCollegeVisit: t("sofor.schoolCollegeVisit"),
+          madrasaVisitList: t("sofor.madrasaVisitList"),
+          schoolCollegeVisitList: t("sofor.schoolCollegeVisitList"),
         },
       },
     ],
@@ -336,7 +352,7 @@ const AdminDashboard: React.FC = () => {
                   return { email, records };
                 } catch (e) {
                   console.error(`Error fetching ${ep.key} for ${email}:`, e);
-                  toast.error(`ডেটা লোড সমস্যা: ${ep.key} (${email})`);
+                  toast.error(t("error.dataLoad"));
                   return { email, records: [] as any[] };
                 }
               })
@@ -352,13 +368,12 @@ const AdminDashboard: React.FC = () => {
         );
       } catch (e) {
         console.error("Admin dashboard fetch error:", e);
-        toast.error("ড্যাশবোর্ড ডেটা লোড করতে সমস্যা হয়েছে");
+        toast.error(t("error.dataLoad"));
       } finally {
         setLoading(false);
       }
     };
     go();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emailList]);
 
   // filter to selected month/year (same shape back)
@@ -386,12 +401,11 @@ const AdminDashboard: React.FC = () => {
   // derived
   const filteredAmoliData = useMemo(
     () => filterChartAndTallyData(amoliData),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [amoliData, selectedMonth, selectedYear]
   );
 
   // ---------- click aggregator ----------
-  const openAggregatedModal = (type: "assistants"|"madrasa"|"school", dateKey: string) => {
+  const openAggregatedModal = (type: "assistants" | "madrasa" | "school", dateKey: string) => {
     let items: any[] = [];
     if (type === "assistants") {
       const m = dayeData.meta?.assistants || {};
@@ -399,21 +413,21 @@ const AdminDashboard: React.FC = () => {
         const arr = m[email]?.[dateKey] || [];
         items = items.concat(arr);
       });
-      setModalTitle("সহযোগী দায়ীর তথ্য");
+      setModalTitle(t("modalTitle.assistants"));
     } else if (type === "madrasa") {
       const m = soforData.meta?.madrasa || {};
       emailList.forEach((email) => {
         const arr = m[email]?.[dateKey] || [];
         items = items.concat(arr);
       });
-      setModalTitle("মাদ্রাসার তালিকা");
+      setModalTitle(t("modalTitle.madrasa"));
     } else if (type === "school") {
       const m = soforData.meta?.school || {};
       emailList.forEach((email) => {
         const arr = m[email]?.[dateKey] || [];
         items = items.concat(arr);
       });
-      setModalTitle("স্কুল/কলেজ তালিকা");
+      setModalTitle(t("modalTitle.school"));
     }
     setModalType(type);
     setModalDateKey(dateKey);
@@ -444,7 +458,8 @@ const AdminDashboard: React.FC = () => {
     <div className="space-y-4">
       <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl space-y-4 lg:space-y-0 lg:space-x-4">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800 text-center lg:text-left">
-          স্বাগতম, <span className="text-emerald-600">{session?.user?.name}</span>
+          {t("welcome")},{" "}
+          <span className="text-emerald-600">{session?.user?.name}</span>
         </h1>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
@@ -452,7 +467,7 @@ const AdminDashboard: React.FC = () => {
             onClick={() => router.push("admin/comparison")}
             className="bg-emerald-600 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-emerald-700 transition-all duration-300 focus:ring focus:ring-emerald-300 w-full sm:w-auto"
           >
-            📊 তুলনা দেখুন
+            {t("dashboard.comparison")}
           </button>
 
           <div className="flex gap-3 items-center w-full md:w-auto">
@@ -484,36 +499,37 @@ const AdminDashboard: React.FC = () => {
       <div className="flex flex-col gap-4">
         <div className="grow grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-8 pb-4 pt-2">
           <AmoliChartAdmin data={filteredAmoliData.records} emailList={emailList} />
-          <TallyAdmin userData={filterChartAndTallyData(moktobData)} emails={emailList} title="মক্তব বিষয়" />
-          <TallyAdmin userData={filterChartAndTallyData(dawatiData)} emails={emailList} title="দাওয়াতি বিষয়" />
-          <TallyAdmin userData={filterChartAndTallyData(dawatiMojlishData)} emails={emailList} title="দাওয়াতি মজলিশ" />
-          <TallyAdmin userData={filterChartAndTallyData(jamatData)} emails={emailList} title="জামাত বিষয়" />
-          <TallyAdmin userData={filterChartAndTallyData(dineFeraData)} emails={emailList} title="দ্বীনে ফিরে এসেছে" />
-          <TallyAdmin userData={filterChartAndTallyData(talimData)} emails={emailList} title="মহিলাদের তালিম বিষয়" />
-          <TallyAdmin userData={filterChartAndTallyData(soforData)} emails={emailList} title="সফর বিষয়" />
-          <TallyAdmin userData={filterChartAndTallyData(dayeData)} emails={emailList} title="সহযোগী দায়ী বিষয" />
+          <TallyAdmin userData={filterChartAndTallyData(moktobData)} emails={emailList} title={t("moktob.title")} />
+          <TallyAdmin userData={filterChartAndTallyData(dawatiData)} emails={emailList} title={t("dawati.title")} />
+          <TallyAdmin userData={filterChartAndTallyData(dawatiMojlishData)} emails={emailList} title={t("dawatiMojlish.title")} />
+          <TallyAdmin userData={filterChartAndTallyData(jamatData)} emails={emailList} title={t("jamat.title")} />
+          <TallyAdmin userData={filterChartAndTallyData(dineFeraData)} emails={emailList} title={t("dineFera.title")} />
+          <TallyAdmin userData={filterChartAndTallyData(talimData)} emails={emailList} title={t("talim.title")} />
+          <TallyAdmin userData={filterChartAndTallyData(soforData)} emails={emailList} title={t("sofor.title")} />
+          <TallyAdmin userData={filterChartAndTallyData(dayeData)} emails={emailList} title={t("daye.title")} />
         </div>
       </div>
 
       <div className="border border-[#155E75] lg:p-6 mt-10 rounded-xl overflow-y-auto">
         <Tabs defaultValue="moktob" className="w-full p-4">
           <TabsList className="grid grid-cols-2 md:grid-cols-4">
-            <TabsTrigger value="moktob">মক্তব বিষয়</TabsTrigger>
-            <TabsTrigger value="talim">মহিলাদের তালিম</TabsTrigger>
-            <TabsTrigger value="daye">সহযোগী দায়ী বিষয</TabsTrigger>
-            <TabsTrigger value="dawati">দাওয়াতি বিষয়</TabsTrigger>
-            <TabsTrigger value="dawatimojlish">দাওয়াতি মজলিশ</TabsTrigger>
-            <TabsTrigger value="jamat">জামাত বিষয়</TabsTrigger>
-            <TabsTrigger value="dinefera">দ্বীনে ফিরে এসেছে</TabsTrigger>
-            <TabsTrigger value="sofor">সফর বিষয়</TabsTrigger>
+            <TabsTrigger value="Amolimusahaba">{t("dashboard.amoliMuhasaba")}</TabsTrigger>
+            <TabsTrigger value="moktob">{t("dashboard.moktobSubject")}</TabsTrigger>
+            <TabsTrigger value="talim">{t("dashboard.talimSubject")}</TabsTrigger>
+            <TabsTrigger value="daye">{t("dashboard.dayiSubject")}</TabsTrigger>
+            <TabsTrigger value="dawati">{t("dashboard.dawatiSubject")}</TabsTrigger>
+            <TabsTrigger value="dawatimojlish">{t("dashboard.dawatiMojlish")}</TabsTrigger>
+            <TabsTrigger value="jamat">{t("dashboard.jamatSubject")}</TabsTrigger>
+            <TabsTrigger value="dinefera">{t("dashboard.dineFera")}</TabsTrigger>
+            <TabsTrigger value="sofor">{t("dashboard.soforSubject")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="moktob">
-            <AdminTable userData={moktobData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear}/>
+            <AdminTable userData={moktobData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} />
           </TabsContent>
 
           <TabsContent value="talim">
-            <AdminTable userData={talimData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear}/>
+            <AdminTable userData={talimData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} />
           </TabsContent>
 
           <TabsContent value="daye">
@@ -522,25 +538,25 @@ const AdminDashboard: React.FC = () => {
               emailList={emailList}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
-              clickableFields={["assistantsList","assistants"]}
+              clickableFields={["assistantsList", "assistants"]}
               onCellClick={handleDayeCellClick}
             />
           </TabsContent>
 
           <TabsContent value="dawati">
-            <AdminTable userData={dawatiData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear}/>
+            <AdminTable userData={dawatiData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} />
           </TabsContent>
 
           <TabsContent value="dawatimojlish">
-            <AdminTable userData={dawatiMojlishData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear}/>
+            <AdminTable userData={dawatiMojlishData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} />
           </TabsContent>
 
           <TabsContent value="jamat">
-            <AdminTable userData={jamatData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear}/>
+            <AdminTable userData={jamatData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} />
           </TabsContent>
 
           <TabsContent value="dinefera">
-            <AdminTable userData={dineFeraData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear}/>
+            <AdminTable userData={dineFeraData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} />
           </TabsContent>
 
           <TabsContent value="sofor">
@@ -549,7 +565,7 @@ const AdminDashboard: React.FC = () => {
               emailList={emailList}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
-              clickableFields={["madrasaVisitList","schoolCollegeVisitList"]}
+              clickableFields={["madrasaVisitList", "schoolCollegeVisitList"]}
               onCellClick={handleSoforCellClick}
             />
           </TabsContent>
