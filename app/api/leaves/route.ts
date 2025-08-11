@@ -152,7 +152,20 @@ export async function PUT(req: NextRequest) {
       reason,
       approvedBy,
       status,
+      rejectionReason, // New field for rejection reason
     } = body
+
+
+    // right after destructuring and before building `data`
+if (status === "rejected") {
+  if (!rejectionReason || !rejectionReason.trim()) {
+    return NextResponse.json(
+      { error: "Rejection reason is required when rejecting a leave." },
+      { status: 400 }
+    );
+  }
+}
+
 
     if (!id || !email) {
       return NextResponse.json({ error: "Both id and email are required." }, { status: 400 })
@@ -185,6 +198,18 @@ export async function PUT(req: NextRequest) {
     if (reason !== undefined) data.reason = reason
     if (approvedBy !== undefined) data.approvedBy = approvedBy
     if (status !== undefined) data.status = status
+
+    // when building `data`
+if (rejectionReason !== undefined) {
+  // normalize to trimmed string or null
+  const normalized = typeof rejectionReason === "string" ? rejectionReason.trim() : null;
+  data.rejectionReason = normalized && status === "rejected" ? normalized : null;
+}
+
+// optionally: if status changes away from rejected and no explicit reason sent, clear it
+if (status && status !== "rejected" && rejectionReason === undefined) {
+  data.rejectionReason = null;
+}
 
     await prisma.leaveRequest.update({ where: { id }, data })
 

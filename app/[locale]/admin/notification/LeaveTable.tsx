@@ -41,6 +41,7 @@ interface LeaveRecord {
   approvedBy: string | null;
   status: string;
   requestDate: string;
+  rejectionReason?: string | null; // ← NEW
   user: {
     name: string | null;
     email: string;
@@ -118,6 +119,13 @@ const AdminLeaveManagement: React.FC = () => {
   );
   const tableRef = useRef<HTMLDivElement>(null);
 
+  // rejection modal state
+  const [rejectModal, setRejectModal] = useState<{
+    open: boolean;
+    leave: LeaveRecord | null;
+    reason: string;
+  }>({ open: false, leave: null, reason: "" });
+
   // inside AdminLeaveManagement component body
   const html2pdfRef = useRef<any | null>(null);
   const ensureHtml2Pdf = useCallback(async () => {
@@ -190,7 +198,6 @@ const AdminLeaveManagement: React.FC = () => {
           other: 0,
           total: 0,
           leaves: [],
-          // 👇 NEW
           notificationCount: 0,
           hasNewNotification: false,
         };
@@ -321,7 +328,9 @@ const AdminLeaveManagement: React.FC = () => {
       await html2pdf()
         .set({
           margin: [15, 15],
-          filename: `leave_summary_report_${new Date().toISOString().split("T")[0]}.pdf`,
+          filename: `leave_summary_report_${
+            new Date().toISOString().split("T")[0]
+          }.pdf`,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true },
           jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
@@ -429,6 +438,12 @@ const AdminLeaveManagement: React.FC = () => {
             <div style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:12px;font-size:13px;line-height:1.6">
               ${leave.reason}
             </div>
+            ${
+              leave.status?.toLowerCase?.() === "rejected" &&
+              leave.rejectionReason
+                ? `<div style="margin-top:10px"><strong>Rejection reason:</strong> ${leave.rejectionReason}</div>`
+                : ""
+            }
           </div>
         </div>
 
@@ -448,7 +463,9 @@ const AdminLeaveManagement: React.FC = () => {
       await html2pdf()
         .set({
           margin: 10,
-          filename: `leave_request_${safeFilename(leave.user.name || "user")}_${ymd(leave.fromDate)}.pdf`,
+          filename: `leave_request_${safeFilename(
+            leave.user.name || "user"
+          )}_${ymd(leave.fromDate)}.pdf`,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
@@ -469,25 +486,36 @@ const AdminLeaveManagement: React.FC = () => {
     setSearchTerm("");
   };
 
+  // UPDATED: accept optional rejectionReason and send only if present
   const updateStatus = async (
     leaveId: string,
     userEmail: string,
     newStatus: string,
-    approvedBy = "Admin" // Default to "Admin" if not specified
+    approvedBy = "Admin", // Default to "Admin" if not specified
+    rejectionReason?: string
   ) => {
     try {
+      const payload: any = {
+        id: leaveId,
+        email: userEmail, // For ownership verification on the server
+        status: newStatus,
+        approvedBy: newStatus === "approved" ? approvedBy : null, // Set approvedBy only if approved
+      };
+      if (rejectionReason !== undefined) {
+        payload.rejectionReason =
+          typeof rejectionReason === "string"
+            ? rejectionReason.trim()
+            : rejectionReason;
+      }
+
       const response = await fetch("/api/leaves", {
         method: "PUT",
-        body: JSON.stringify({
-          id: leaveId,
-          email: userEmail, // For ownership verification on the server
-          status: newStatus,
-          approvedBy: newStatus === "approved" ? approvedBy : null, // Set approvedBy only if approved
-        }),
+        body: JSON.stringify(payload),
         headers: { "Content-Type": "application/json" },
       });
       if (response.ok) {
         toast.success("Leave status updated successfully!");
+        setRejectModal({ open: false, leave: null, reason: "" });
         fetchLeaveRequestsForAdmin(); // Re-fetch data to update the table
       } else {
         const errorData = await response.json();
@@ -499,6 +527,37 @@ const AdminLeaveManagement: React.FC = () => {
       console.error("Error updating status:", error);
       toast.error("An unexpected error occurred while updating status.");
     }
+  };
+
+  // Intercept select change to require reason on rejection
+  const handleStatusChange = (leave: LeaveRecord, value: string) => {
+    const newStatus = value.toLowerCase();
+    if (newStatus === "rejected") {
+      setRejectModal({
+        open: true,
+        leave,
+        reason: leave.rejectionReason || "",
+      });
+    } else {
+      updateStatus(leave.id, leave.user.email, newStatus, "Admin");
+    }
+  };
+
+  // Confirm rejection from modal
+  const confirmReject = async () => {
+    if (!rejectModal.leave) return;
+    const reason = rejectModal.reason.trim();
+    if (!reason) {
+      toast.error("Please provide a rejection reason.");
+      return;
+    }
+    await updateStatus(
+      rejectModal.leave.id,
+      rejectModal.leave.user.email,
+      "rejected",
+      "Admin",
+      reason
+    );
   };
 
   const userSummaries = groupLeavesByUser(filteredLeaves);
@@ -611,7 +670,7 @@ const AdminLeaveManagement: React.FC = () => {
 
                           <span className="mr-2">{user.name}</span>
 
-                          {/* 👇 notification count in parentheses, colored if 'new' is present */}
+                          {/* notification count in parentheses */}
                           <span
                             className={[
                               "inline-flex items-center rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none",
@@ -687,6 +746,10 @@ const AdminLeaveManagement: React.FC = () => {
                                         Status
                                       </TableHead>
                                       <TableHead className="text-xs text-blue-700">
+                                        Rejection Reason
+                                      </TableHead>
+
+                                      <TableHead className="text-xs text-blue-700">
                                         Requested On
                                       </TableHead>
                                       <TableHead className="text-xs text-blue-700">
@@ -751,6 +814,13 @@ const AdminLeaveManagement: React.FC = () => {
                                             {leave.status}
                                           </Badge>
                                         </TableCell>
+                                        {/* 👇 ADD THIS CELL */}
+                                        <TableCell className="text-xs max-w-sm truncate">
+                                          {leave.status.toLowerCase() ===
+                                          "rejected"
+                                            ? leave.rejectionReason || "-"
+                                            : "-"}
+                                        </TableCell>
                                         <TableCell className="text-xs">
                                           <time suppressHydrationWarning>
                                             {formatDateYMD(leave.requestDate)}
@@ -764,11 +834,9 @@ const AdminLeaveManagement: React.FC = () => {
                                             <select
                                               value={leave.status}
                                               onChange={(e) =>
-                                                updateStatus(
-                                                  leave.id,
-                                                  leave.user.email,
-                                                  e.target.value,
-                                                  "Admin"
+                                                handleStatusChange(
+                                                  leave,
+                                                  e.target.value
                                                 )
                                               }
                                               className="text-xs border rounded p-1 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -799,6 +867,8 @@ const AdminLeaveManagement: React.FC = () => {
                                               )}
                                             </Button>
                                           </div>
+                                         
+                                         
                                         </TableCell>
                                       </TableRow>
                                     ))}
@@ -826,6 +896,75 @@ const AdminLeaveManagement: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* ========= Rejection Modal ========= */}
+      {rejectModal.open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="w-full max-w-lg rounded-md bg-white shadow-lg">
+            <div className="border-b px-4 py-3">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Reject Leave
+              </h2>
+              <p className="text-xs text-gray-500">
+                Please provide a reason. This will be saved with the request.
+              </p>
+            </div>
+
+            <div className="px-4 py-3">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Rejection reason
+              </label>
+              <textarea
+                className="min-h-[120px] w-full resize-y rounded-md border border-gray-300 p-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+                placeholder="Type the reason for rejection..."
+                value={rejectModal.reason}
+                onChange={(e) =>
+                  setRejectModal((prev) => ({
+                    ...prev,
+                    reason: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
+              <Button
+                variant="outline"
+                onClick={() =>
+                  setRejectModal({ open: false, leave: null, reason: "" })
+                }
+              >
+                Cancel
+              </Button>
+              <Button
+                className="bg-red-600 hover:bg-red-700 text-white"
+                onClick={async () => {
+                  const reason = rejectModal.reason.trim();
+                  if (!reason) {
+                    toast.error("Please provide a rejection reason.");
+                    return;
+                  }
+                  if (rejectModal.leave) {
+                    await updateStatus(
+                      rejectModal.leave.id,
+                      rejectModal.leave.user.email,
+                      "rejected",
+                      "Admin",
+                      reason
+                    );
+                  }
+                }}
+              >
+                Save Reason & Reject
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
