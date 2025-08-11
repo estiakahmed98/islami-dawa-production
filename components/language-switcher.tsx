@@ -35,20 +35,20 @@ export default function LanguageSwitcher() {
         <Button
           variant="ghost"
           size="icon"
-          className="bg-green-700 hover:bg-green-600 text-white hover:text-white"
+          className="bg-white hover:bg-teal-700 hover:text-white text-black mt-[7px]"
         >
           <Globe className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => switchLanguage("bn")}>
+          <span className={locale === "bn" ? "font-bold text-teal-700" : ""}>বাংলা</span>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => switchLanguage("en")}>
-          <span className={locale === "en" ? "font-bold text-green-700" : ""}>English</span>
+          <span className={locale === "en" ? "font-bold text-teal-700" : ""}>English</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => switchLanguage("ar")}>
-          <span className={locale === "ar" ? "font-bold text-green-700" : ""}>العربية</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => switchLanguage("bn")}>
-          <span className={locale === "bn" ? "font-bold text-green-700" : ""}>বাংলা</span>
+          <span className={locale === "ar" ? "font-bold text-teal-700" : ""}>العربية</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
