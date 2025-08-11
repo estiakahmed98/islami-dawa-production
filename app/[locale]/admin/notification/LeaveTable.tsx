@@ -17,6 +17,7 @@ import {
   Download,
   Loader2,
   Search,
+  Eye,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -117,6 +118,13 @@ const AdminLeaveManagement: React.FC = () => {
   const [expandedUsers, setExpandedUsers] = useState<Record<string, boolean>>(
     {}
   );
+  const [viewReasonModal, setViewReasonModal] = useState<{
+    open: boolean;
+    text: string;
+  }>({
+    open: false,
+    text: "",
+  });
   const tableRef = useRef<HTMLDivElement>(null);
 
   // rejection modal state
@@ -745,9 +753,6 @@ const AdminLeaveManagement: React.FC = () => {
                                       <TableHead className="text-xs text-blue-700">
                                         Status
                                       </TableHead>
-                                      <TableHead className="text-xs text-blue-700">
-                                        Rejection Reason
-                                      </TableHead>
 
                                       <TableHead className="text-xs text-blue-700">
                                         Requested On
@@ -800,27 +805,42 @@ const AdminLeaveManagement: React.FC = () => {
                                           {leave.reason}
                                         </TableCell>
                                         <TableCell className="text-xs">
-                                          <Badge
-                                            className={
-                                              leave.status.toLowerCase() ===
-                                              "pending"
-                                                ? "bg-yellow-500 text-white"
-                                                : leave.status.toLowerCase() ===
-                                                    "approved"
-                                                  ? "bg-green-500 text-white"
-                                                  : "bg-red-500 text-white"
-                                            }
-                                          >
-                                            {leave.status}
-                                          </Badge>
+                                          <div className="inline-flex items-center gap-2">
+                                            <Badge
+                                              className={
+                                                leave.status.toLowerCase() ===
+                                                "pending"
+                                                  ? "bg-yellow-500 text-white"
+                                                  : leave.status.toLowerCase() ===
+                                                      "approved"
+                                                    ? "bg-green-500 text-white"
+                                                    : "bg-red-500 text-white"
+                                              }
+                                            >
+                                              {leave.status}
+                                            </Badge>
+
+                                            {leave.status.toLowerCase() ===
+                                              "rejected" && (
+                                              <button
+                                                type="button"
+                                                title="View rejection reason"
+                                                onClick={() =>
+                                                  setViewReasonModal({
+                                                    open: true,
+                                                    text:
+                                                      leave.rejectionReason?.trim() ||
+                                                      "No reason provided",
+                                                  })
+                                                }
+                                                className="p-1.5 rounded-md text-red-700 hover:bg-red-100"
+                                              >
+                                                <Eye className="h-4 w-4" />
+                                              </button>
+                                            )}
+                                          </div>
                                         </TableCell>
-                                        {/* 👇 ADD THIS CELL */}
-                                        <TableCell className="text-xs max-w-sm truncate">
-                                          {leave.status.toLowerCase() ===
-                                          "rejected"
-                                            ? leave.rejectionReason || "-"
-                                            : "-"}
-                                        </TableCell>
+
                                         <TableCell className="text-xs">
                                           <time suppressHydrationWarning>
                                             {formatDateYMD(leave.requestDate)}
@@ -867,8 +887,6 @@ const AdminLeaveManagement: React.FC = () => {
                                               )}
                                             </Button>
                                           </div>
-                                         
-                                         
                                         </TableCell>
                                       </TableRow>
                                     ))}
@@ -960,6 +978,45 @@ const AdminLeaveManagement: React.FC = () => {
                 }}
               >
                 Save Reason & Reject
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {viewReasonModal.open && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="w-full max-w-lg rounded-md bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b px-4 py-3">
+              <h2 className="text-base font-semibold text-gray-900">
+                প্রত্যাখ্যানের কারণ
+              </h2>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setViewReasonModal({ open: false, text: "" })}
+                className="p-1.5 rounded-md hover:bg-gray-100 text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="px-4 py-4">
+              <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800 whitespace-pre-wrap">
+                {viewReasonModal.text}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
+              <Button
+                variant="outline"
+                onClick={() => setViewReasonModal({ open: false, text: "" })}
+              >
+                ঠিক আছে
               </Button>
             </div>
           </div>
