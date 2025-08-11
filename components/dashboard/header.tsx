@@ -351,6 +351,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import moment from "moment-hijri";
 import { useRouter } from "next/navigation";
+import LanguageSwitcher from "../language-switcher";
 
 function getInitials(name?: string | null, email?: string | null) {
   if (name && name.trim()) {
@@ -409,6 +410,7 @@ const Header = () => {
         <Menu className="h-5 w-5" />
       </Button>
 
+
       {/* Center: Title + Dates */}
       <div className="flex flex-col items-center text-center leading-tight">
         <h1 className="text-sm md:text-lg font-semibold tracking-wide">
@@ -418,11 +420,14 @@ const Header = () => {
           দাওয়াতি বছর ({mounted ? gregorian : "—"}) ইং /
           {mounted ? ` ${hijri}` : " —"} হিজ
         </div>
+         
       </div>
-
+      
+      <div className="flex gap-5">
+        <LanguageSwitcher/>
       {/* Right: Avatar = dropdown trigger */}
       <DropdownMenu modal={false}>
-        
+       
         <DropdownMenuTrigger asChild>
           <button
             className="
@@ -472,7 +477,7 @@ const Header = () => {
           </DropdownMenuLabel>
 
           <DropdownMenuSeparator />
-
+       
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
               <Link href={profileHref} className="cursor-pointer">
@@ -500,6 +505,7 @@ const Header = () => {
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
+    </div>
     </header>
   );
 };
