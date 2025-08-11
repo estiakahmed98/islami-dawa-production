@@ -1,46 +1,76 @@
-"use client"
+"use client";
 
-import React from "react"
-import { useEffect, useRef, useState, useCallback } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge, ChevronDown, ChevronRight, Download, Loader2, Search, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { toast } from "sonner"
-
+import React from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Badge,
+  ChevronDown,
+  ChevronRight,
+  Download,
+  Loader2,
+  Search,
+  X,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { toast } from "sonner";
 
 interface LeaveRecord {
-  id: string
-  userId: string
-  leaveType: string
-  fromDate: string
-  toDate: string
-  days: number
-  reason: string
-  approvedBy: string | null
-  status: string
-  requestDate: string
+  id: string;
+  userId: string;
+  leaveType: string;
+  fromDate: string;
+  toDate: string;
+  days: number;
+  reason: string;
+  approvedBy: string | null;
+  status: string;
+  requestDate: string;
   user: {
-    name: string | null
-    email: string
-    phone: string | null
-  }
+    name: string | null;
+    email: string;
+    phone: string | null;
+  };
 }
 
 interface LeaveUserSummary {
-  name: string
-  email: string
-  phone?: string
-  casual: number
-  sick: number
-  maternity: number // Added maternity
-  paternity: number
-  annual: number // Added annual
-  other: number
-  total: number
-  leaves: LeaveRecord[] // full list of their leaves
+  name: string;
+  email: string;
+  phone?: string;
+  casual: number;
+  sick: number;
+  maternity: number; // Added maternity
+  paternity: number;
+  annual: number; // Added annual
+  other: number;
+  total: number;
+  leaves: LeaveRecord[]; // full list of their leaves
+  notificationCount: number; // total pending leaves
+  hasNewNotification: boolean; // pending within the last 48h
 }
+
+const isRecent = (dateString: string, hours = 48) => {
+  const dt = new Date(dateString);
+  if (Number.isNaN(dt.getTime())) return false;
+  const diffMs = Date.now() - dt.getTime();
+  const diffH = diffMs / (1000 * 60 * 60);
+  return diffH <= hours;
+};
 
 // Helpers (place these near the top of your component file)
 const safeFilename = (s: string) =>
@@ -61,71 +91,92 @@ const ymd = (d: string) => {
     const dd = String(dt.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   }
-  return String(d).replace(/[^\d-]/g, "_").slice(0, 10) || "date";
+  return (
+    String(d)
+      .replace(/[^\d-]/g, "_")
+      .slice(0, 10) || "date"
+  );
 };
 
+// SSR-safe YYYY-MM-DD (UTC) so server & client match
+const formatDateYMD = (dateString: string) => {
+  const dt = new Date(dateString);
+  if (Number.isNaN(dt.getTime())) return dateString;
+  const y = dt.getUTCFullYear();
+  const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(dt.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
 
 const AdminLeaveManagement: React.FC = () => {
-  const [leaveRequests, setLeaveRequests] = useState<LeaveRecord[]>([])
-  const [filteredLeaves, setFilteredLeaves] = useState<LeaveRecord[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
-  const [expandedUsers, setExpandedUsers] = useState<Record<string, boolean>>({})
-  const tableRef = useRef<HTMLDivElement>(null)
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRecord[]>([]);
+  const [filteredLeaves, setFilteredLeaves] = useState<LeaveRecord[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [expandedUsers, setExpandedUsers] = useState<Record<string, boolean>>(
+    {}
+  );
+  const tableRef = useRef<HTMLDivElement>(null);
 
   // inside AdminLeaveManagement component body
-const html2pdfRef = useRef<any | null>(null);
-const ensureHtml2Pdf = useCallback(async () => {
-  if (html2pdfRef.current) return html2pdfRef.current;
-  const mod = await import("html2pdf.js/dist/html2pdf.bundle.min.js");
-  html2pdfRef.current = (mod as any).default || mod;
-  return html2pdfRef.current;
-}, []);
-
+  const html2pdfRef = useRef<any | null>(null);
+  const ensureHtml2Pdf = useCallback(async () => {
+    if (html2pdfRef.current) return html2pdfRef.current;
+    const mod = await import("html2pdf.js/dist/html2pdf.bundle.min.js");
+    html2pdfRef.current = (mod as any).default || mod;
+    return html2pdfRef.current;
+  }, []);
 
   const fetchLeaveRequestsForAdmin = useCallback(async () => {
     try {
-      const response = await fetch("/api/leaves") // Fetch all leaves for admin
+      const response = await fetch("/api/leaves"); // Fetch all leaves for admin
       if (response.ok) {
-        const data = await response.json()
-        setLeaveRequests(data.leaveRequests)
-        setFilteredLeaves(data.leaveRequests)
+        const data = await response.json();
+        setLeaveRequests(data.leaveRequests);
+        setFilteredLeaves(data.leaveRequests);
       } else {
-        const errorData = await response.json()
-        toast.error(`Failed to fetch leave requests: ${errorData.error || "Unknown error"}`)
+        const errorData = await response.json();
+        toast.error(
+          `Failed to fetch leave requests: ${errorData.error || "Unknown error"}`
+        );
       }
     } catch (error) {
-      console.error("Error fetching leave requests:", error)
-      toast.error("An unexpected error occurred while fetching leave requests.")
+      console.error("Error fetching leave requests:", error);
+      toast.error(
+        "An unexpected error occurred while fetching leave requests."
+      );
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    fetchLeaveRequestsForAdmin()
-  }, [fetchLeaveRequestsForAdmin])
+    fetchLeaveRequestsForAdmin();
+  }, [fetchLeaveRequestsForAdmin]);
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
-      setFilteredLeaves(leaveRequests)
+      setFilteredLeaves(leaveRequests);
     } else {
-      const lowercasedSearch = searchTerm.toLowerCase()
+      const lowercasedSearch = searchTerm.toLowerCase();
       const filtered = leaveRequests.filter(
         (leave) =>
-          (leave.user.email && leave.user.email.toLowerCase().includes(lowercasedSearch)) ||
-          (leave.user.name && leave.user.name.toLowerCase().includes(lowercasedSearch)) ||
+          (leave.user.email &&
+            leave.user.email.toLowerCase().includes(lowercasedSearch)) ||
+          (leave.user.name &&
+            leave.user.name.toLowerCase().includes(lowercasedSearch)) ||
           (leave.user.phone && leave.user.phone.includes(lowercasedSearch)) ||
           leave.leaveType.toLowerCase().includes(lowercasedSearch) ||
           leave.reason.toLowerCase().includes(lowercasedSearch) ||
-          leave.status.toLowerCase().includes(lowercasedSearch),
-      )
-      setFilteredLeaves(filtered)
+          leave.status.toLowerCase().includes(lowercasedSearch)
+      );
+      setFilteredLeaves(filtered);
     }
-  }, [searchTerm, leaveRequests])
+  }, [searchTerm, leaveRequests]);
 
   const groupLeavesByUser = (leaves: LeaveRecord[]): LeaveUserSummary[] => {
-    const grouped: Record<string, LeaveUserSummary> = {}
+    const grouped: Record<string, LeaveUserSummary> = {};
+
     for (const leave of leaves) {
-      const email = leave.user.email
+      const email = leave.user.email;
       if (!grouped[email]) {
         grouped[email] = {
           name: leave.user.name || "N/A",
@@ -139,50 +190,65 @@ const ensureHtml2Pdf = useCallback(async () => {
           other: 0,
           total: 0,
           leaves: [],
+          // 👇 NEW
+          notificationCount: 0,
+          hasNewNotification: false,
+        };
+      }
+
+      const bucket = grouped[email];
+      bucket.leaves.push(leave);
+
+      // ✅ notification logic (doesn't affect totals)
+      if ((leave.status ?? "").toLowerCase() === "pending") {
+        bucket.notificationCount += 1;
+        if (isRecent(leave.requestDate, 48)) {
+          bucket.hasNewNotification = true;
         }
       }
-      grouped[email].leaves.push(leave)
-      // Only count approved leaves in the summary totals
-      if (leave.status.toLowerCase() === "approved") {
-        const type = leave.leaveType.toLowerCase()
-        const days = Number(leave.days)
-        if (type === "casual") grouped[email].casual += days
-        else if (type === "sick") grouped[email].sick += days
-        else if (type === "maternity") grouped[email].maternity += days
-        else if (type === "paternity") grouped[email].paternity += days
-        else if (type === "annual") grouped[email].annual += days
-        else grouped[email].other += days
-        grouped[email].total += days
+
+      // ✅ existing totals (approved only) — unchanged
+      if ((leave.status ?? "").toLowerCase() === "approved") {
+        const type = (leave.leaveType ?? "").toLowerCase();
+        const days = Number(leave.days) || 0;
+        if (type === "casual") bucket.casual += days;
+        else if (type === "sick") bucket.sick += days;
+        else if (type === "maternity") bucket.maternity += days;
+        else if (type === "paternity") bucket.paternity += days;
+        else if (type === "annual") bucket.annual += days;
+        else bucket.other += days;
+        bucket.total += days;
       }
     }
-    return Object.values(grouped)
-  }
+
+    return Object.values(grouped);
+  };
 
   const toggleUser = (email: string) => {
     setExpandedUsers((prev) => ({
       ...prev,
       [email]: !prev[email],
-    }))
-  }
+    }));
+  };
 
- const handleDownloadAll = async () => {
-  setIsGeneratingPdf(true);
-  try {
-    const html2pdf = await ensureHtml2Pdf();
+  const handleDownloadAll = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      const html2pdf = await ensureHtml2Pdf();
 
-    // build a clean container (don’t clone Tailwind DOM)
-    const container = document.createElement("div");
-    container.style.padding = "24px";
-    container.style.fontFamily = "Arial, sans-serif";
+      // build a clean container (don’t clone Tailwind DOM)
+      const container = document.createElement("div");
+      container.style.padding = "24px";
+      container.style.fontFamily = "Arial, sans-serif";
 
-    const header = document.createElement("div");
-    header.style.display = "flex";
-    header.style.justifyContent = "space-between";
-    header.style.alignItems = "center";
-    header.style.marginBottom = "30px";
-    header.style.borderBottom = "2px solid #333";
-    header.style.paddingBottom = "12px";
-    header.innerHTML = `
+      const header = document.createElement("div");
+      header.style.display = "flex";
+      header.style.justifyContent = "space-between";
+      header.style.alignItems = "center";
+      header.style.marginBottom = "30px";
+      header.style.borderBottom = "2px solid #333";
+      header.style.paddingBottom = "12px";
+      header.innerHTML = `
       <div>
         <h1 style="margin:0;font-size:22px;color:#2d3748">ছুটি সম্পর্কিত তথ্য</h1>
         <p style="margin:6px 0 0 0;font-size:12px;color:#475569">
@@ -199,19 +265,27 @@ const ensureHtml2Pdf = useCallback(async () => {
         মোট ব্যক্তি: <strong>${groupLeavesByUser(filteredLeaves).length}</strong>
       </div>
     `;
-    container.appendChild(header);
+      container.appendChild(header);
 
-    const summaryTable = document.createElement("table");
-    summaryTable.style.width = "100%";
-    summaryTable.style.borderCollapse = "collapse";
-    summaryTable.style.fontSize = "12px";
+      const summaryTable = document.createElement("table");
+      summaryTable.style.width = "100%";
+      summaryTable.style.borderCollapse = "collapse";
+      summaryTable.style.fontSize = "12px";
 
-    const thead = document.createElement("thead");
-    thead.innerHTML = `
+      const thead = document.createElement("thead");
+      thead.innerHTML = `
       <tr>
         ${[
-          "Name","Email","Phone","Casual","Sick","Maternity",
-          "Paternity","Annual","Other","Total",
+          "Name",
+          "Email",
+          "Phone",
+          "Casual",
+          "Sick",
+          "Maternity",
+          "Paternity",
+          "Annual",
+          "Other",
+          "Total",
         ]
           .map(
             (h) =>
@@ -220,14 +294,14 @@ const ensureHtml2Pdf = useCallback(async () => {
           .join("")}
       </tr>
     `;
-    summaryTable.appendChild(thead);
+      summaryTable.appendChild(thead);
 
-    const tbody = document.createElement("tbody");
-    const userSummaries = groupLeavesByUser(filteredLeaves);
-    userSummaries.forEach((user, index) => {
-      const row = document.createElement("tr");
-      row.style.background = index % 2 === 0 ? "#f8fafc" : "#ffffff";
-      row.innerHTML = `
+      const tbody = document.createElement("tbody");
+      const userSummaries = groupLeavesByUser(filteredLeaves);
+      userSummaries.forEach((user, index) => {
+        const row = document.createElement("tr");
+        row.style.background = index % 2 === 0 ? "#f8fafc" : "#ffffff";
+        row.innerHTML = `
         <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.name}</td>
         <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.email}</td>
         <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.phone}</td>
@@ -239,71 +313,71 @@ const ensureHtml2Pdf = useCallback(async () => {
         <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.other}</td>
         <td style="padding:8px 10px;border:1px solid #e2e8f0;font-weight:700">${user.total}</td>
       `;
-      tbody.appendChild(row);
-    });
-    summaryTable.appendChild(tbody);
-    container.appendChild(summaryTable);
+        tbody.appendChild(row);
+      });
+      summaryTable.appendChild(tbody);
+      container.appendChild(summaryTable);
 
-    await html2pdf()
-      .set({
-        margin: [15, 15],
-        filename: `leave_summary_report_${new Date().toISOString().split("T")[0]}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
-        // ✅ let big tables flow across pages instead of cutting off
-        pagebreak: { mode: ["css", "legacy"] },
-      })
-      .from(container)
-      .save();
+      await html2pdf()
+        .set({
+          margin: [15, 15],
+          filename: `leave_summary_report_${new Date().toISOString().split("T")[0]}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+          // ✅ let big tables flow across pages instead of cutting off
+          pagebreak: { mode: ["css", "legacy"] },
+        })
+        .from(container)
+        .save();
 
-    toast.success("Summary PDF generated successfully!");
-  } catch (error) {
-    console.error("Error generating PDF:", error);
-    toast.error("Failed to generate PDF. Please try again.");
-  } finally {
-    setIsGeneratingPdf(false);
-  }
-};
-
-// Full, updated single-download method
-const handleDownloadSingle = async (leave: LeaveRecord) => {
-  setIsGeneratingPdf(true);
-  try {
-    const html2pdf = await ensureHtml2Pdf();
-
-    const formatDate = (dateString: string) => {
-      const dt = new Date(dateString);
-      if (!Number.isNaN(dt.getTime())) {
-        return dt.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-      }
-      return dateString;
-    };
-
-    const fromDate = formatDate(leave.fromDate);
-    const toDate = formatDate(leave.toDate);
-
-    let statusBgColor = "#fde68a"; // pending
-    let statusTextColor = "#7c2d12";
-    const st = leave.status?.toLowerCase?.() || "pending";
-    if (st === "approved") {
-      statusBgColor = "#10b981";
-      statusTextColor = "#ffffff";
-    } else if (st === "rejected") {
-      statusBgColor = "#ef4444";
-      statusTextColor = "#ffffff";
+      toast.success("Summary PDF generated successfully!");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to generate PDF. Please try again.");
+    } finally {
+      setIsGeneratingPdf(false);
     }
+  };
 
-    const container = document.createElement("div");
-    container.style.padding = "40px";
-    container.style.fontFamily = "Arial, sans-serif";
-    container.style.maxWidth = "800px";
-    container.style.margin = "0 auto";
-    container.innerHTML = `
+  // Full, updated single-download method
+  const handleDownloadSingle = async (leave: LeaveRecord) => {
+    setIsGeneratingPdf(true);
+    try {
+      const html2pdf = await ensureHtml2Pdf();
+
+      const formatDate = (dateString: string) => {
+        const dt = new Date(dateString);
+        if (!Number.isNaN(dt.getTime())) {
+          return dt.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+        }
+        return dateString;
+      };
+
+      const fromDate = formatDate(leave.fromDate);
+      const toDate = formatDate(leave.toDate);
+
+      let statusBgColor = "#fde68a"; // pending
+      let statusTextColor = "#7c2d12";
+      const st = leave.status?.toLowerCase?.() || "pending";
+      if (st === "approved") {
+        statusBgColor = "#10b981";
+        statusTextColor = "#ffffff";
+      } else if (st === "rejected") {
+        statusBgColor = "#ef4444";
+        statusTextColor = "#ffffff";
+      }
+
+      const container = document.createElement("div");
+      container.style.padding = "40px";
+      container.style.fontFamily = "Arial, sans-serif";
+      container.style.maxWidth = "800px";
+      container.style.margin = "0 auto";
+      container.innerHTML = `
       <div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,.1)">
         <div style="background:#2d3748;color:#fff;padding:20px">
           <h1 style="margin:0;font-size:24px">ছুটির আবেদন</h1>
@@ -371,36 +445,35 @@ const handleDownloadSingle = async (leave: LeaveRecord) => {
       </div>
     `;
 
-    await html2pdf()
-      .set({
-        margin: 10,
-        filename: `leave_request_${safeFilename(leave.user.name || "user")}_${ymd(leave.fromDate)}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      })
-      .from(container)
-      .save();
+      await html2pdf()
+        .set({
+          margin: 10,
+          filename: `leave_request_${safeFilename(leave.user.name || "user")}_${ymd(leave.fromDate)}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        })
+        .from(container)
+        .save();
 
-    toast.success("Leave request PDF generated successfully!");
-  } catch (error) {
-    console.error("Error generating PDF:", error);
-    toast.error("Failed to generate PDF. Please try again.");
-  } finally {
-    setIsGeneratingPdf(false);
-  }
-};
-
+      toast.success("Leave request PDF generated successfully!");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to generate PDF. Please try again.");
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   const clearSearch = () => {
-    setSearchTerm("")
-  }
+    setSearchTerm("");
+  };
 
   const updateStatus = async (
     leaveId: string,
     userEmail: string,
     newStatus: string,
-    approvedBy = "Admin", // Default to "Admin" if not specified
+    approvedBy = "Admin" // Default to "Admin" if not specified
   ) => {
     try {
       const response = await fetch("/api/leaves", {
@@ -412,27 +485,31 @@ const handleDownloadSingle = async (leave: LeaveRecord) => {
           approvedBy: newStatus === "approved" ? approvedBy : null, // Set approvedBy only if approved
         }),
         headers: { "Content-Type": "application/json" },
-      })
+      });
       if (response.ok) {
-        toast.success("Leave status updated successfully!")
-        fetchLeaveRequestsForAdmin() // Re-fetch data to update the table
+        toast.success("Leave status updated successfully!");
+        fetchLeaveRequestsForAdmin(); // Re-fetch data to update the table
       } else {
-        const errorData = await response.json()
-        toast.error(`Failed to update status: ${errorData.error || "Unknown error"}`)
+        const errorData = await response.json();
+        toast.error(
+          `Failed to update status: ${errorData.error || "Unknown error"}`
+        );
       }
     } catch (error) {
-      console.error("Error updating status:", error)
-      toast.error("An unexpected error occurred while updating status.")
+      console.error("Error updating status:", error);
+      toast.error("An unexpected error occurred while updating status.");
     }
-  }
+  };
 
-  const userSummaries = groupLeavesByUser(filteredLeaves)
+  const userSummaries = groupLeavesByUser(filteredLeaves);
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
       <Card className="w-full mx-auto shadow-xl rounded-lg overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white p-6">
-          <CardTitle className="text-3xl font-extrabold">Leave Management Dashboard</CardTitle>
+          <CardTitle className="text-3xl font-extrabold">
+            Leave Management Dashboard
+          </CardTitle>
           <CardDescription className="text-blue-100 mt-2">
             Overview and management of all submitted leave requests.
           </CardDescription>
@@ -474,20 +551,43 @@ const handleDownloadSingle = async (leave: LeaveRecord) => {
             </Button>
           </div>
 
-          <div className="overflow-x-auto bg-white shadow-md rounded-lg border border-gray-200" ref={tableRef}>
+          <div
+            className="overflow-x-auto bg-white shadow-md rounded-lg border border-gray-200"
+            ref={tableRef}
+          >
             <Table>
               <TableHeader>
                 <TableRow className="bg-blue-50">
-                  <TableHead className="font-bold text-blue-800">Name</TableHead>
-                  <TableHead className="font-bold text-blue-800">Email</TableHead>
-                  <TableHead className="font-bold text-blue-800">Phone</TableHead>
-                  <TableHead className="font-bold text-blue-800">Casual</TableHead>
-                  <TableHead className="font-bold text-blue-800">Sick</TableHead>
-                  <TableHead className="font-bold text-blue-800">Maternity</TableHead>
-                  <TableHead className="font-bold text-blue-800">Paternity</TableHead>
-                  <TableHead className="font-bold text-blue-800">Annual</TableHead>
-                  <TableHead className="font-bold text-blue-800">Other</TableHead>
-                  <TableHead className="font-bold text-blue-800">Total</TableHead>
+                  <TableHead className="font-bold text-blue-800">
+                    Name
+                  </TableHead>
+                  <TableHead className="font-bold text-blue-800">
+                    Email
+                  </TableHead>
+                  <TableHead className="font-bold text-blue-800">
+                    Phone
+                  </TableHead>
+                  <TableHead className="font-bold text-blue-800">
+                    Casual
+                  </TableHead>
+                  <TableHead className="font-bold text-blue-800">
+                    Sick
+                  </TableHead>
+                  <TableHead className="font-bold text-blue-800">
+                    Maternity
+                  </TableHead>
+                  <TableHead className="font-bold text-blue-800">
+                    Paternity
+                  </TableHead>
+                  <TableHead className="font-bold text-blue-800">
+                    Annual
+                  </TableHead>
+                  <TableHead className="font-bold text-blue-800">
+                    Other
+                  </TableHead>
+                  <TableHead className="font-bold text-blue-800">
+                    Total
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -495,7 +595,11 @@ const handleDownloadSingle = async (leave: LeaveRecord) => {
                   userSummaries.map((user, idx) => (
                     <React.Fragment key={`user-summary-${user.email}`}>
                       <TableRow
-                        className="cursor-pointer hover:bg-blue-50 transition-colors"
+                        className={[
+                          "cursor-pointer hover:bg-blue-50 transition-colors",
+                          user.notificationCount > 0 ? "bg-orange-50" : "",
+                          user.hasNewNotification ? "ring-1 ring-red-200" : "",
+                        ].join(" ")}
                         onClick={() => toggleUser(user.email)}
                       >
                         <TableCell className="font-medium flex items-center text-blue-900">
@@ -504,56 +608,142 @@ const handleDownloadSingle = async (leave: LeaveRecord) => {
                           ) : (
                             <ChevronRight className="h-4 w-4 mr-2 text-blue-600" />
                           )}
-                          {user.name}
+
+                          <span className="mr-2">{user.name}</span>
+
+                          {/* 👇 notification count in parentheses, colored if 'new' is present */}
+                          <span
+                            className={[
+                              "inline-flex items-center rounded px-1.5 py-0.5 text-[11px] font-semibold leading-none",
+                              user.hasNewNotification
+                                ? "bg-red-500 text-white animate-pulse"
+                                : "bg-gray-200 text-gray-800",
+                            ].join(" ")}
+                            title={
+                              user.hasNewNotification
+                                ? "New pending requests in the last 48 hours"
+                                : "Pending requests"
+                            }
+                          >
+                            ({user.notificationCount})
+                          </span>
                         </TableCell>
-                        <TableCell className="text-gray-700">{user.email}</TableCell>
-                        <TableCell className="text-gray-700">{user.phone}</TableCell>
-                        <TableCell className="text-gray-700">{user.casual}</TableCell>
-                        <TableCell className="text-gray-700">{user.sick}</TableCell>
-                        <TableCell className="text-gray-700">{user.maternity}</TableCell>
-                        <TableCell className="text-gray-700">{user.paternity}</TableCell>
-                        <TableCell className="text-gray-700">{user.annual}</TableCell>
-                        <TableCell className="text-gray-700">{user.other}</TableCell>
-                        <TableCell className="font-bold text-blue-900">{user.total}</TableCell>
+
+                        <TableCell className="text-gray-700">
+                          {user.email}
+                        </TableCell>
+                        <TableCell className="text-gray-700">
+                          {user.phone}
+                        </TableCell>
+                        <TableCell className="text-gray-700">
+                          {user.casual}
+                        </TableCell>
+                        <TableCell className="text-gray-700">
+                          {user.sick}
+                        </TableCell>
+                        <TableCell className="text-gray-700">
+                          {user.maternity}
+                        </TableCell>
+                        <TableCell className="text-gray-700">
+                          {user.paternity}
+                        </TableCell>
+                        <TableCell className="text-gray-700">
+                          {user.annual}
+                        </TableCell>
+                        <TableCell className="text-gray-700">
+                          {user.other}
+                        </TableCell>
+                        <TableCell className="font-bold text-blue-900">
+                          {user.total}
+                        </TableCell>
                       </TableRow>
                       {expandedUsers[user.email] && (
                         <TableRow>
                           <TableCell colSpan={10} className="p-0">
                             <div className="bg-blue-50 px-4 py-2 border-t border-b border-blue-200">
-                              <h3 className="text-sm font-semibold text-blue-800 mb-2">Leave Details</h3>
+                              <h3 className="text-sm font-semibold text-blue-800 mb-2">
+                                Leave Details
+                              </h3>
                               <div className="overflow-x-auto max-h-96 overflow-y-auto rounded-md border border-blue-100">
                                 <Table>
                                   <TableHeader>
                                     <TableRow className="bg-blue-100">
-                                      <TableHead className="text-xs text-blue-700">Type</TableHead>
-                                      <TableHead className="text-xs text-blue-700">From</TableHead>
-                                      <TableHead className="text-xs text-blue-700">To</TableHead>
-                                      <TableHead className="text-xs text-blue-700">Days</TableHead>
-                                      <TableHead className="text-xs text-blue-700">Reason</TableHead>
-                                      <TableHead className="text-xs text-blue-700">Status</TableHead>
-                                      <TableHead className="text-xs text-blue-700">Requested On</TableHead>
-                                      <TableHead className="text-xs text-blue-700">Approved By</TableHead>
-                                      <TableHead className="text-xs text-blue-700">Actions</TableHead>
+                                      <TableHead className="text-xs text-blue-700">
+                                        Type
+                                      </TableHead>
+                                      <TableHead className="text-xs text-blue-700">
+                                        From
+                                      </TableHead>
+                                      <TableHead className="text-xs text-blue-700">
+                                        To
+                                      </TableHead>
+                                      <TableHead className="text-xs text-blue-700">
+                                        Days
+                                      </TableHead>
+                                      <TableHead className="text-xs text-blue-700">
+                                        Reason
+                                      </TableHead>
+                                      <TableHead className="text-xs text-blue-700">
+                                        Status
+                                      </TableHead>
+                                      <TableHead className="text-xs text-blue-700">
+                                        Requested On
+                                      </TableHead>
+                                      <TableHead className="text-xs text-blue-700">
+                                        Approved By
+                                      </TableHead>
+                                      <TableHead className="text-xs text-blue-700">
+                                        Actions
+                                      </TableHead>
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
                                     {user.leaves.map((leave, i) => (
-                                      <TableRow key={`${leave.id}`} className={i % 2 === 0 ? "bg-white" : "bg-blue-50"}>
-                                        <TableCell className="text-xs capitalize">{leave.leaveType}</TableCell>
-                                        <TableCell className="text-xs">
-                                          {new Date(leave.fromDate).toLocaleDateString()}
+                                      <TableRow
+                                        key={leave.id}
+                                        className={[
+                                          i % 2 === 0
+                                            ? "bg-white"
+                                            : "bg-gray-100",
+                                          // Light orange background if pending
+                                          (leave.status ?? "").toLowerCase() ===
+                                          "pending"
+                                            ? "bg-orange-100"
+                                            : "",
+                                          (leave.status ?? "").toLowerCase() ===
+                                            "pending" &&
+                                          isRecent(leave.requestDate, 48)
+                                            ? "ring-1 ring-red-200"
+                                            : "",
+                                        ].join(" ")}
+                                      >
+                                        <TableCell className="text-xs capitalize">
+                                          {leave.leaveType}
                                         </TableCell>
                                         <TableCell className="text-xs">
-                                          {new Date(leave.toDate).toLocaleDateString()}
+                                          <time suppressHydrationWarning>
+                                            {formatDateYMD(leave.fromDate)}
+                                          </time>
                                         </TableCell>
-                                        <TableCell className="text-xs">{leave.days}</TableCell>
-                                        <TableCell className="text-xs max-w-xs truncate">{leave.reason}</TableCell>
+                                        <TableCell className="text-xs">
+                                          <time suppressHydrationWarning>
+                                            {formatDateYMD(leave.toDate)}
+                                          </time>
+                                        </TableCell>
+                                        <TableCell className="text-xs">
+                                          {leave.days}
+                                        </TableCell>
+                                        <TableCell className="text-xs max-w-xs truncate">
+                                          {leave.reason}
+                                        </TableCell>
                                         <TableCell className="text-xs">
                                           <Badge
                                             className={
-                                              leave.status.toLowerCase() === "pending"
+                                              leave.status.toLowerCase() ===
+                                              "pending"
                                                 ? "bg-yellow-500 text-white"
-                                                : leave.status.toLowerCase() === "approved"
+                                                : leave.status.toLowerCase() ===
+                                                    "approved"
                                                   ? "bg-green-500 text-white"
                                                   : "bg-red-500 text-white"
                                             }
@@ -562,27 +752,44 @@ const handleDownloadSingle = async (leave: LeaveRecord) => {
                                           </Badge>
                                         </TableCell>
                                         <TableCell className="text-xs">
-                                          {new Date(leave.requestDate).toLocaleDateString()}
+                                          <time suppressHydrationWarning>
+                                            {formatDateYMD(leave.requestDate)}
+                                          </time>
                                         </TableCell>
-                                        <TableCell className="text-xs">{leave.approvedBy || "N/A"}</TableCell>
+                                        <TableCell className="text-xs">
+                                          {leave.approvedBy || "N/A"}
+                                        </TableCell>
                                         <TableCell className="text-xs">
                                           <div className="flex gap-1">
                                             <select
                                               value={leave.status}
                                               onChange={(e) =>
-                                                updateStatus(leave.id, leave.user.email, e.target.value, "Admin")
+                                                updateStatus(
+                                                  leave.id,
+                                                  leave.user.email,
+                                                  e.target.value,
+                                                  "Admin"
+                                                )
                                               }
                                               className="text-xs border rounded p-1 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                             >
-                                              <option value="pending">Pending</option>
-                                              <option value="approved">Approved</option>
-                                              <option value="rejected">Rejected</option>
+                                              <option value="pending">
+                                                Pending
+                                              </option>
+                                              <option value="approved">
+                                                Approved
+                                              </option>
+                                              <option value="rejected">
+                                                Rejected
+                                              </option>
                                             </select>
                                             <Button
                                               variant="outline"
                                               size="sm"
                                               className="h-7 w-7 p-0 bg-blue-500 hover:bg-blue-600 text-white"
-                                              onClick={() => handleDownloadSingle(leave)}
+                                              onClick={() =>
+                                                handleDownloadSingle(leave)
+                                              }
                                               disabled={isGeneratingPdf}
                                             >
                                               {isGeneratingPdf ? (
@@ -606,7 +813,10 @@ const handleDownloadSingle = async (leave: LeaveRecord) => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center text-gray-500 py-4">
+                    <TableCell
+                      colSpan={10}
+                      className="text-center text-gray-500 py-4"
+                    >
                       No leave records found
                     </TableCell>
                   </TableRow>
@@ -617,7 +827,7 @@ const handleDownloadSingle = async (leave: LeaveRecord) => {
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
 
-export default AdminLeaveManagement
+export default AdminLeaveManagement;
