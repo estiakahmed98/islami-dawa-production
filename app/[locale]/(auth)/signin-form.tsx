@@ -25,36 +25,60 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { signIn, useSession } from "@/lib/auth-client";
+import { signIn } from "@/lib/auth-client";
 import { FormError } from "@/components/FormError";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { FcGoogle } from "react-icons/fc";
-import { Loader2 } from "lucide-react"; // Loading Icon
+import { Loader2 } from "lucide-react";
 
-const SigninForm = () => {
+type SigninFormProps = {
+  /** Comes from `searchParams.error` via the page component */
+  initialError?: string;
+};
+
+const SigninForm = ({ initialError = "" }: SigninFormProps) => {
   const [formError, setFormError] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // State for Sign In button
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false); // State for Google Sign-In
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
-  const session = useSession();
+
+  // Map URL error codes -> human messages shown in the UI
+  const mappedInitialError = useMemo(() => {
+    if (initialError === "already_logged_in_elsewhere") {
+      return "Already logged in on another device.";
+    }
+    if (initialError === "lock_error") {
+      return "Couldn't verify session lock. Please try again.";
+    }
+    // pass-through any other message you might send
+    return initialError || "";
+  }, [initialError]);
+
+  // Show the error (if any) on first render
+  useEffect(() => {
+    if (mappedInitialError) {
+      setFormError(mappedInitialError);
+      // optional toast for visibility
+      if (initialError === "already_logged_in_elsewhere") {
+        toast.error("Already logged in on another device");
+      } else if (initialError === "lock_error") {
+        toast.error("Session lock check failed");
+      }
+    }
+  }, [mappedInitialError, initialError]);
 
   const form = useForm<yup.InferType<typeof signInSchema>>({
     resolver: yupResolver(signInSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
+    mode: "onBlur",
   });
 
   const onSubmit = async (values: yup.InferType<typeof signInSchema>) => {
     await signIn.email(
-      {
-        email: values.email,
-        password: values.password,
-      },
+      { email: values.email, password: values.password },
       {
         onRequest: () => {
           setIsLoading(true);
@@ -68,42 +92,34 @@ const SigninForm = () => {
         onError: (ctx) => {
           setFormError(ctx.error.message);
         },
-        onFinally: () => {
-          setIsLoading(false); // Stop loading
-        },
+        onFinally: () => setIsLoading(false),
       }
     );
-
-    setIsLoading(false);
   };
 
-  // Google Sign-In Function with Loading State
   const handleGoogleLogin = async () => {
-    setIsGoogleLoading(true); // Start loading
-
+    setIsGoogleLoading(true);
+    setFormError("");
     try {
       await authClient.signIn.social(
         { provider: "google", callbackURL: "/admin" },
         {
-          onRequest: () => {
-            setFormError("");
-          },
-          onSuccess: async () => {
+          onSuccess: () => {
             router.refresh();
             toast.success("Login Successful");
           },
-          onError: (ctx) => {
-            setFormError(ctx.error.message);
-          },
+          onError: (ctx) => setFormError(ctx.error.message),
         }
       );
-    } catch (error) {
-      console.error("Google Sign-In Error:", error);
+    } catch (err) {
+      console.error("Google Sign-In Error:", err);
       toast.error("Google Login Failed. Try again.");
     } finally {
-      setIsGoogleLoading(false); // Stop loading
+      setIsGoogleLoading(false);
     }
   };
+
+  const isBusy = isLoading || isGoogleLoading || form.formState.isSubmitting;
 
   return (
     <Card>
@@ -111,6 +127,7 @@ const SigninForm = () => {
         <CardTitle className="text-2xl">Sign In</CardTitle>
         <CardDescription>Enter your account details to login</CardDescription>
       </CardHeader>
+
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -125,6 +142,7 @@ const SigninForm = () => {
                       <Input
                         type="email"
                         placeholder="Enter email address"
+                        autoComplete="email"
                         {...field}
                       />
                     </FormControl>
@@ -132,6 +150,7 @@ const SigninForm = () => {
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="password"
@@ -142,6 +161,7 @@ const SigninForm = () => {
                       <Input
                         type="password"
                         placeholder="Enter password"
+                        autoComplete="current-password"
                         {...field}
                       />
                     </FormControl>
@@ -150,13 +170,13 @@ const SigninForm = () => {
                 )}
               />
             </FormFieldset>
+
             <FormError message={formError} />
 
-            {/* Sign In Button with Loading Indicator */}
-            <Button type="submit" className="mt-4 w-full" disabled={isLoading}>
+            <Button type="submit" className="mt-4 w-full" disabled={isBusy}>
               {isLoading ? (
                 <>
-                  <Loader2 className="animate-spin mr-2" size={18} />
+                  <Loader2 className="mr-2 animate-spin" size={18} />
                   Signing In...
                 </>
               ) : (
@@ -166,11 +186,11 @@ const SigninForm = () => {
           </form>
         </Form>
 
-        {/* Google Sign-In Button with Loading Indicator */}
         <Button
           onClick={handleGoogleLogin}
-          className="mt-4 w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
-          disabled={isLoading || isGoogleLoading}
+          className="mt-4 flex w-full items-center justify-center gap-2 bg-white text-gray-700 hover:bg-gray-100"
+          variant="outline"
+          disabled={isBusy}
         >
           {isGoogleLoading ? (
             <>
@@ -187,7 +207,7 @@ const SigninForm = () => {
 
         <div className="mt-5 space-x-1 text-center text-sm">
           <Link
-            href="/auth/sign-up"
+            href="/auth/forgot-password"
             className="text-sm text-muted-foreground hover:underline"
           >
             Forgot password?

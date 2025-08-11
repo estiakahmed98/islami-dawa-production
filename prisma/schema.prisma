@@ -31,6 +31,9 @@ model users {
   sessions      sessions[]
   accounts      accounts[]
   CalendarEvent CalendarEvent[]
+
+  activeDeviceId   String?
+  activeSessionId  String?
   
   // Relations with new data models
   amoliData        AmoliMuhasaba[]

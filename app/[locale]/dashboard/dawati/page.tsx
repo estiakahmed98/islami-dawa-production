@@ -8,22 +8,20 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/TabButton";
-import AmoliTableShow from "@/components/TableShow";
-import DawatiMojlishForm from "@/components/DawatiMojlishForm";
-import Loading from "@/app/dashboard/loading";
+import UniversalTableShow from "@/components/TableShow"; // same component used elsewhere
+import DawatiForm from "@/components/DawatiForm";
+import Loading from "@/app/[locale]/dashboard/loading";
 
-type MojlishRow = {
-  dawatterGuruttoMojlish?: number;
-  mojlisheOnshogrohon?: number;
-  prosikkhonKormoshalaAyojon?: number;
-  prosikkhonOnshogrohon?: number;
-  jummahAlochona?: number;
-  dhormoSova?: number;
-  mashwaraPoint?: number;
+type RecordRow = {
+  nonMuslimDawat?: number;
+  murtadDawat?: number;
+  alemderSatheyMojlish?: number;
+  publicSatheyMojlish?: number;
+  nonMuslimSaptahikGasht?: number;
   editorContent?: string | null;
 };
 
-const DawatiMojlisPage: React.FC = () => {
+const DawatiPage: React.FC = () => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email ?? "";
   const [loading, setLoading] = useState(true);
@@ -38,33 +36,28 @@ const DawatiMojlisPage: React.FC = () => {
         return;
       }
       try {
-        const res = await fetch(
-          `/api/dawatimojlish?email=${encodeURIComponent(userEmail)}&sort=asc`
-        );
+        const res = await fetch(`/api/dawati?email=${encodeURIComponent(userEmail)}&sort=asc`);
         const json = await res.json();
 
         const records = (json?.records ?? []) as Array<{
           date: string | Date;
-          dawatterGuruttoMojlish?: number;
-          mojlisheOnshogrohon?: number;
-          prosikkhonKormoshalaAyojon?: number;
-          prosikkhonOnshogrohon?: number;
-          jummahAlochona?: number;
-          dhormoSova?: number;
-          mashwaraPoint?: number;
+          nonMuslimDawat?: number;
+          murtadDawat?: number;
+          alemderSatheyMojlish?: number;
+          publicSatheyMojlish?: number;
+          nonMuslimSaptahikGasht?: number;
           editorContent?: string | null;
         }>;
 
-        const shaped = records.reduce<Record<string, MojlishRow>>((acc, rec) => {
+        // Transform for UniversalTableShow: records[email][YYYY-MM-DD] = { fields... }
+        const shaped = records.reduce<Record<string, RecordRow>>((acc, rec) => {
           const dateStr = new Date(rec.date).toISOString().split("T")[0];
           acc[dateStr] = {
-            dawatterGuruttoMojlish: rec.dawatterGuruttoMojlish ?? 0,
-            mojlisheOnshogrohon: rec.mojlisheOnshogrohon ?? 0,
-            prosikkhonKormoshalaAyojon: rec.prosikkhonKormoshalaAyojon ?? 0,
-            prosikkhonOnshogrohon: rec.prosikkhonOnshogrohon ?? 0,
-            jummahAlochona: rec.jummahAlochona ?? 0,
-            dhormoSova: rec.dhormoSova ?? 0,
-            mashwaraPoint: rec.mashwaraPoint ?? 0,
+            nonMuslimDawat: rec.nonMuslimDawat ?? 0,
+            murtadDawat: rec.murtadDawat ?? 0,
+            alemderSatheyMojlish: rec.alemderSatheyMojlish ?? 0,
+            publicSatheyMojlish: rec.publicSatheyMojlish ?? 0,
+            nonMuslimSaptahikGasht: rec.nonMuslimSaptahikGasht ?? 0,
             editorContent: rec.editorContent ?? "",
           };
           return acc;
@@ -73,17 +66,15 @@ const DawatiMojlisPage: React.FC = () => {
         setUserData({
           records: { [userEmail]: shaped },
           labelMap: {
-            dawatterGuruttoMojlish: "দাওয়াতের গুরুত্ব বিষয়ে মজলিশ",
-            mojlisheOnshogrohon: "মজলিশে অংশগ্রহণ",
-            prosikkhonKormoshalaAyojon: "প্রশিক্ষণ কর্মশালা আয়োজন",
-            prosikkhonOnshogrohon: "প্রশিক্ষণে অংশগ্রহণ",
-            jummahAlochona: "জুমা আলোচনা",
-            dhormoSova: "ধর্মীয় সভা",
-            mashwaraPoint: "মাশওয়ারা পয়েন্ট",
+            nonMuslimDawat: "অমুসলিম দাওয়াত",
+            murtadDawat: "মুরতাদ দাওয়াত",
+            alemderSatheyMojlish: "আলেমদের সাথে মজলিশ",
+            publicSatheyMojlish: "সাধারণ জনগণের সাথে মজলিশ",
+            nonMuslimSaptahikGasht: "অমুসলিম সাপ্তাহিক গশত",
           },
         });
       } catch (e) {
-        console.error("Failed to fetch Dawati Mojlish records:", e);
+        console.error("Failed to fetch Dawati records:", e);
       } finally {
         setLoading(false);
       }
@@ -106,13 +97,14 @@ const DawatiMojlisPage: React.FC = () => {
 
         <TabsContent value="dataForm">
           <div className="bg-gray-50 lg:rounded lg:shadow">
-            <DawatiMojlishForm />
+            {/* Make sure DawatiForm posts to /api/dawati */}
+            <DawatiForm />
           </div>
         </TabsContent>
 
         <TabsContent value="report">
           <div className="bg-gray-50 rounded shadow">
-            <AmoliTableShow
+            <UniversalTableShow
               userData={userData}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
@@ -126,4 +118,4 @@ const DawatiMojlisPage: React.FC = () => {
   );
 };
 
-export default DawatiMojlisPage;
+export default DawatiPage;
