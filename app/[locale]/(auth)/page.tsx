@@ -1,9 +1,16 @@
-//Estiak
+// app/(auth)/page.tsx
 
 import SigninForm from "./signin-form";
 
-const SignInPage = async () => {
-  return <SigninForm />;
-};
+export default async function SignInPage({
+  searchParams,
+}: {
+  // Next 15: searchParams is a Promise
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;               // ✅ await before using
+  const raw = sp?.error;
+  const error = Array.isArray(raw) ? raw[0] : raw ?? "";
 
-export default SignInPage;
+  return <SigninForm initialError={error} />;
+}
