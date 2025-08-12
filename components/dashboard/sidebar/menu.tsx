@@ -87,6 +87,45 @@ const SidebarMenu = () => {
     }
   }, [currentRoute, t, locale]);
 
+  // Pending counts (admin): leaves from API, edit-requests from localStorage
+  const [pendingLeaveCount, setPendingLeaveCount] = useState<number>(0);
+  const [pendingEditCount, setPendingEditCount] = useState<number>(0);
+
+  const fetchPendingLeaveCount = async () => {
+    try {
+      const res = await fetch("/api/leaves?status=pending");
+      if (!res.ok) throw new Error("bad status");
+      const data = await res.json();
+      setPendingLeaveCount(Array.isArray(data?.leaveRequests) ? data.leaveRequests.length : 0);
+    } catch {
+      setPendingLeaveCount(0);
+    }
+  };
+
+  const fetchPendingEditCount = async () => {
+    try {
+      const raw = typeof window !== "undefined" ? localStorage.getItem("editRequests") : null;
+      const list = raw ? JSON.parse(raw) : [];
+      const pending = Array.isArray(list)
+        ? list.filter((r: any) => (r?.status || "").toLowerCase() === "pending").length
+        : 0;
+      setPendingEditCount(pending);
+    } catch {
+      setPendingEditCount(0);
+    }
+  };
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    fetchPendingLeaveCount();
+    fetchPendingEditCount();
+    const interval = setInterval(() => {
+      fetchPendingLeaveCount();
+      fetchPendingEditCount();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [isAdmin]);
+
   // Handle mode toggle with immediate text update
   const handleModeToggle = () => {
     const newMode = !isAdminMode;
@@ -185,6 +224,8 @@ const SidebarMenu = () => {
       url: "/admin/leave",
       icon: <FcAcceptDatabase className="size-6" />,
       title: t("leaveMatters"),
+      notificationCount: pendingLeaveCount,
+      showNotification: true,
     },
     {
       url: "/admin/RealTree",
@@ -195,6 +236,8 @@ const SidebarMenu = () => {
       url: "/admin/edit-request",
       icon: <FiEdit3 className="size-5" />,
       title: t("editRequest"),
+      notificationCount: pendingEditCount,
+      showNotification: true,
     }
   ];
 
