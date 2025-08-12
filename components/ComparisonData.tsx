@@ -15,6 +15,7 @@ import { userDayeData } from "@/app/data/dayiUserData";
 import { userTalimBisoyData } from "@/app/data/talimBisoyUserData";
 import { userAmoliData } from "@/app/data/amoliMuhasabaUserData";
 import ComparisonTallyCard from "@/components/ComparisonTallyCard";
+import { useTranslations } from "next-intl";
 
 interface User {
   id: string;
@@ -93,6 +94,7 @@ const ComparisonDataComponent: React.FC = () => {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [comparisonData, setComparisonData] = useState<any[]>([]);
+  const t = useTranslations('comparison');
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -137,7 +139,7 @@ const ComparisonDataComponent: React.FC = () => {
   // Handle comparison button click
   const handleCompare = () => {
     if (!from || !to) {
-      alert("Please select both 'From' and 'To' values.");
+      alert(t("messages.invalidRange"));
       return;
     }
 
@@ -232,7 +234,7 @@ const ComparisonDataComponent: React.FC = () => {
 
   const convertToPDF = async () => {
     if (!comparisonData.length) {
-      console.error("No data available for PDF generation");
+      console.error(t("messages.noDataForPdf"));
       return;
     }
 
@@ -272,15 +274,15 @@ const ComparisonDataComponent: React.FC = () => {
           </style>
         </head>
         <body>
-          <h2>তুলনা রিপোর্ট</h2>
+          <h2>${t("pdf.title")}</h2>
           <table>
             <thead>
               <tr>
-                <th>Label</th>
+                <th>${t("table.label")}</th>
                 <th>${from}</th>
                 <th>${to}</th>
-                <th>Difference</th>
-                <th>Change</th>
+                <th>${t("table.difference")}</th>
+                <th>${t("table.change")}</th>
               </tr>
             </thead>
             <tbody>
@@ -324,7 +326,7 @@ const ComparisonDataComponent: React.FC = () => {
             pdf.setPage(i);
             pdf.setFontSize(10);
             pdf.text(
-              `Page ${i} of ${totalPages}`,
+              t("pdf.page", { page: i, total: totalPages }),
               pdf.internal.pageSize.getWidth() - 20,
               pdf.internal.pageSize.getHeight() - 5
             );
@@ -332,13 +334,13 @@ const ComparisonDataComponent: React.FC = () => {
         })
         .save();
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error(t("messages.errorGeneratingPDF"), error);
     }
   };
 
   return (
     <div className="p-2 lg:p-6 bg-white shadow-md rounded-lg">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">তুলনা দেখুন</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-4">{t("title")}</h1>
       <div className="grid lg:flex lg:flex-wrap gap-4 mb-6">
         <select
           value={comparisonType}
@@ -350,9 +352,9 @@ const ComparisonDataComponent: React.FC = () => {
           }}
           className="border px-4 py-2 rounded-md shadow-sm"
         >
-          <option value="day">Day-to-Day</option>
-          <option value="month">Month-to-Month</option>
-          <option value="year">Year-to-Year</option>
+          <option value="day">{t("controls.dayToDay")}</option>
+          <option value="month">{t("controls.monthToMonth")}</option>
+          <option value="year">{t("controls.yearToYear")}</option>
         </select>
 
         {comparisonType === "day" && (
@@ -381,7 +383,7 @@ const ComparisonDataComponent: React.FC = () => {
                 onChange={(e) => setFrom(e.target.value)}
                 className="border px-4 py-2 rounded-md shadow-sm"
               />
-              <span className="self-center font-bold">to</span>
+              <span className="self-center font-bold">{t("controls.to")}</span>
               <input
                 type="month"
                 value={to}
@@ -402,7 +404,7 @@ const ComparisonDataComponent: React.FC = () => {
               >
                 {generateYearOptions()}
               </select>
-              <span className="py-1 self-center font-bold">to</span>
+              <span className="py-1 self-center font-bold">{t("controls.to")}</span>
               <select
                 value={to}
                 onChange={(e) => setTo(e.target.value)}
@@ -418,7 +420,7 @@ const ComparisonDataComponent: React.FC = () => {
           onClick={handleCompare}
           className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
         >
-          Compare
+          {t("controls.compare")}
         </button>
       </div>
 
@@ -427,11 +429,11 @@ const ComparisonDataComponent: React.FC = () => {
           <table className="w-full border-collapse border border-gray-300 text-sm lg:text-base">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border px-2 lg:px-4 py-1 lg:py-2">Label</th>
+                <th className="border px-2 lg:px-4 py-1 lg:py-2">{t("table.label")}</th>
                 <th className="border px-2 lg:px-4 py-1 lg:py-2">{from}</th>
                 <th className="border px-2 lg:px-4 py-1 lg:py-2">{to}</th>
-                <th className="border px-2 lg:px-4 py-1 lg:py-2">Difference</th>
-                <th className="border px-2 lg:px-4 py-1 lg:py-2">Change</th>
+                <th className="border px-2 lg:px-4 py-1 lg:py-2">{t("table.difference")}</th>
+                <th className="border px-2 lg:px-4 py-1 lg:py-2">{t("table.change")}</th>
               </tr>
             </thead>
             <tbody>
@@ -462,7 +464,7 @@ const ComparisonDataComponent: React.FC = () => {
           </table>
         ) : (
           <p className="text-center text-gray-600">
-            Select values and click "Compare" to see results.
+            {t('messages.selectValues')}
           </p>
         )}
 
@@ -472,7 +474,7 @@ const ComparisonDataComponent: React.FC = () => {
               onClick={convertToPDF}
               className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
             >
-              Download PDF
+              {t("controls.downloadPdf")}
             </button>
           </div>
         )}

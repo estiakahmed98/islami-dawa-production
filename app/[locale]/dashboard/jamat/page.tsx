@@ -2,15 +2,11 @@
 
 import React from "react";
 import JamatBishoyForm from "@/components/JamatBishoyForm";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/TabButton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton";
 import AmoliTableShow from "@/components/TableShow";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 /** Format a date to YYYY-MM-DD in Dhaka time (safe) */
 function dhakaYMD(d: Date) {
@@ -27,16 +23,20 @@ const JamatPage: React.FC = () => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email ?? "";
 
+  const tCommon = useTranslations("common");
+  const tToast = useTranslations("dashboard.UserDashboard.toast");
+  const tJamat = useTranslations("dashboard.UserDashboard.jamat");
+
   const [userData, setUserData] = React.useState<any>({ records: {} });
   const [selectedMonth, setSelectedMonth] = React.useState<number>(new Date().getMonth());
   const [selectedYear, setSelectedYear] = React.useState<number>(new Date().getFullYear());
 
   const labelMap = React.useMemo(
     () => ({
-      jamatBerHoise: "জামাত বের হয়েছে",
-      jamatSathi: "জামাতের মোট সাথী",
+      jamatBerHoise: tJamat("jamatBerHoise"),
+      jamatSathi: tJamat("jamatSathi"),
     }),
-    []
+    [tJamat]
   );
 
   React.useEffect(() => {
@@ -63,9 +63,9 @@ const JamatPage: React.FC = () => {
           const dateKey = dhakaYMD(new Date(rec.date));
           if (!dateKey) return;
           transformed[userEmail][dateKey] = {
-            jamatBerHoise: rec.jamatBerHoise,
-            jamatSathi: rec.jamatSathi,
-            editorContent: rec.editorContent,
+            jamatBerHoise: rec.jamatBerHoise ?? 0,
+            jamatSathi: rec.jamatSathi ?? 0,
+            editorContent: rec.editorContent ?? "",
           };
         });
 
@@ -73,21 +73,21 @@ const JamatPage: React.FC = () => {
       } catch (err: any) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Failed to fetch Jamat data:", err);
-          toast.error("জামাত তথ্য আনা যায়নি।");
+          toast.error(tToast("errorFetchingData"));
         }
       }
     })();
 
     return () => ac.abort();
-  }, [userEmail, labelMap]);
+  }, [userEmail, labelMap, tToast]);
 
   return (
     <div>
       <Tabs defaultValue="dataForm" className="w-full p-2 lg:p-4">
         <div className="flex justify-between">
           <TabsList>
-            <TabsTrigger value="dataForm">তথ্য দিন</TabsTrigger>
-            <TabsTrigger value="report">প্রতিবেদন</TabsTrigger>
+            <TabsTrigger value="dataForm">{tCommon("dataForm")}</TabsTrigger>
+            <TabsTrigger value="report">{tCommon("report")}</TabsTrigger>
           </TabsList>
         </div>
 

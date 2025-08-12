@@ -1,5 +1,4 @@
-//Estiak
-
+// components/Register.tsx
 "use client";
 
 import React, { useState, useCallback, useMemo } from "react";
@@ -8,10 +7,20 @@ import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
 import { admin, useSession } from "@/lib/auth-client";
 import markazList from "@/app/data/markazList";
 import * as yup from "yup";
+import { useTranslations } from "next-intl";
 
 type LocationOption = { value: number | string; title: string };
+type Variant = "standard" | "special";
 
-const Register = () => {
+type Props = {
+  variant?: Variant; // default "standard"
+};
+
+const Register: React.FC<Props> = ({ variant = "standard" }) => {
+  const t = useTranslations("register");
+  const { data: session } = useSession();
+  const loggedInUserRole = session?.user?.role || null;
+
   const [formData, setFormData] = useState({
     name: "",
     role: "",
@@ -28,71 +37,37 @@ const Register = () => {
     email: "",
     password: "",
   });
-
   const [loading, setLoading] = useState(false);
 
   const signUpSchemaUser = yup.object().shape({
-    name: yup.string().required("Name is required"),
-    email: yup.string().email("Invalid email").required("Email is required"),
-    password: yup.string().min(8).required("Password is required"),
-    role: yup.string().required("Role is required"),
-    phone: yup.string().required("Phone is required"),
+    name: yup.string().required(t("errors.nameRequired")),
+    email: yup.string().email(t("errors.emailInvalid")).required(t("errors.emailRequired")),
+    password: yup.string().min(8, t("errors.passwordMin")).required(t("errors.passwordRequired")),
+    role: yup.string().required(t("errors.roleRequired")),
+    phone: yup.string().required(t("errors.phoneRequired")),
   });
 
-  const roleHierarchy = {
-    centraladmin: ["centraladmin", "divisionadmin", "markazadmin", "daye"],
+  // Role visibility:
+  // - standard: centraladmin can create centraladmin too
+  // - special: centraladmin cannot create centraladmin (only division/markaz/daye)
+  const roleHierarchy: Record<string, string[]> = {
+    centraladmin: variant === "standard"
+      ? ["centraladmin", "divisionadmin", "markazadmin", "daye"]
+      : ["divisionadmin", "markazadmin", "daye"],
     divisionadmin: ["markazadmin", "daye"],
     markazadmin: ["daye"],
   };
 
-  const { data: session } = useSession();
-  const loggedInUserRole = session?.user?.role || null;
-
   const roleOptions = useMemo(() => {
     if (!loggedInUserRole) return [];
+    const allowed = roleHierarchy[loggedInUserRole as keyof typeof roleHierarchy] || [];
+    return allowed.map((r) => ({ value: r, title: getRoleTitle(r, t) }));
+  }, [loggedInUserRole, t, variant]);
 
-    // If current user is centraladmin, show all roles including centraladmin
-    if (loggedInUserRole === 'centraladmin') {
-      return [
-        { value: 'centraladmin', title: getRoleTitle('centraladmin') },
-        { value: 'divisionadmin', title: getRoleTitle('divisionadmin') },
-        { value: 'markazadmin', title: getRoleTitle('markazadmin') },
-        { value: 'daye', title: getRoleTitle('daye') },
-      ];
-    }
-
-    return (
-      roleHierarchy[loggedInUserRole as keyof typeof roleHierarchy]?.map(
-        (r) => ({
-          value: r,
-          title: getRoleTitle(r),
-        })
-      ) || []
-    );
-  }, [loggedInUserRole]);
-
-  function getRoleTitle(role: string) {
-    const roleTitles: Record<string, string> = {
-      superadmin: "সুপার এডমিন",
-      centraladmin: "কেন্দ্রীয় এডমিন",
-      divisionadmin: "বিভাগীয় এডমিন",
-      markazadmin: "মার্কায এডমিন",
-      daye: "দা'ঈ",
-    };
-    return roleTitles[role] || role;
-  }
-
-  const districtsList: LocationOption[] = formData.divisionId
-    ? districts[formData.divisionId] || []
-    : [];
-
-  const upazilasList: LocationOption[] = formData.districtId
-    ? upazilas[formData.districtId] || []
-    : [];
-
-  const unionsList: LocationOption[] = formData.upazilaId
-    ? unions[formData.upazilaId] || []
-    : [];
+  // Geo lists
+  const districtsList: LocationOption[] = formData.divisionId ? (districts[formData.divisionId] || []) : [];
+  const upazilasList: LocationOption[] = formData.districtId ? (upazilas[formData.districtId] || []) : [];
+  const unionsList: LocationOption[] = formData.upazilaId ? (unions[formData.upazilaId] || []) : [];
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -112,11 +87,8 @@ const Register = () => {
             union: "",
           };
         }
-
         if (name === "districtId") {
-          const found = districtsList.find(
-            (item) => String(item.value) === String(value)
-          );
+          const found = districtsList.find((item) => String(item.value) === String(value));
           return {
             ...prev,
             districtId: value,
@@ -127,11 +99,8 @@ const Register = () => {
             union: "",
           };
         }
-
         if (name === "upazilaId") {
-          const found = upazilasList.find(
-            (item) => String(item.value) === String(value)
-          );
+          const found = upazilasList.find((item) => String(item.value) === String(value));
           return {
             ...prev,
             upazilaId: value,
@@ -140,18 +109,10 @@ const Register = () => {
             union: "",
           };
         }
-
         if (name === "unionId") {
-          const found = unionsList.find(
-            (item) => String(item.value) === String(value)
-          );
-          return {
-            ...prev,
-            unionId: value,
-            union: found?.title || "",
-          };
+          const found = unionsList.find((item) => String(item.value) === String(value));
+          return { ...prev, unionId: value, union: found?.title || "" };
         }
-
         return { ...prev, [name]: value };
       });
     },
@@ -159,19 +120,23 @@ const Register = () => {
   );
 
   const { role } = formData;
-  const hideDivision = role === "centraladmin";
-  const hideDistrict = role === "divisionadmin";
-  const hideUpazila = role === "divisionadmin" || role === "districtadmin";
+
+  // In standard mode we hide geo inputs based on role (old behavior).
+  // In special mode we keep them visible always.
+  const geoAlwaysVisible = variant === "special";
+  const hideDivision = !geoAlwaysVisible && role === "centraladmin";
+  const hideDistrict = !geoAlwaysVisible && role === "divisionadmin";
+  const hideUpazila = !geoAlwaysVisible && (role === "divisionadmin" || role === "districtadmin");
   const hideUnion =
-    role === "divisionadmin" ||
-    role === "districtadmin" ||
-    role === "upozilaadmin";
+    !geoAlwaysVisible &&
+    (role === "divisionadmin" || role === "districtadmin" || role === "upozilaadmin");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     try {
       await signUpSchemaUser.validate(formData, { abortEarly: false });
+
       await admin.createUser(
         {
           name: formData.name,
@@ -189,7 +154,7 @@ const Register = () => {
         },
         {
           onSuccess: () => {
-            toast.success("User created!");
+            toast.success(t("toasts.created"));
             setFormData({
               name: "",
               role: "",
@@ -210,12 +175,12 @@ const Register = () => {
           onError: (ctx) => toast.error(ctx.error.message),
         }
       );
-    } catch (error) {
-      if (error instanceof yup.ValidationError) {
-        error.inner.forEach((err) => toast.error(err.message));
+    } catch (error: any) {
+      if (error?.name === "ValidationError" && Array.isArray(error.inner)) {
+        error.inner.forEach((err: any) => toast.error(err.message));
       } else {
         console.error("Error creating user:", error);
-        toast.error("Something went wrong!");
+        toast.error(t("toasts.error"));
       }
     } finally {
       setLoading(false);
@@ -224,103 +189,105 @@ const Register = () => {
 
   return (
     <div className="flex items-center justify-center lg:m-10">
-      <div className="w-full p-8 space-y-6 ">
-        <h2 className="text-2xl font-bold text-center">নতুন দা'ঈ যোগ করুন</h2>
+      <div className="w-full p-8 space-y-6">
+        <h2 className="text-2xl font-bold text-center">
+          {variant === "special" ? t("titles.special") : t("titles.standard")}
+        </h2>
+
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <InputField
-            label="Full Name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-          />
+          <InputField label={t("fields.name")} name="name" value={formData.name} onChange={handleChange} />
+
           <SelectField
-            label="Role"
+            label={t("fields.role")}
             name="role"
             value={formData.role}
             onChange={handleChange}
             options={roleOptions}
             required
+            placeholder={t("select")}
           />
-          {!hideDivision && <SelectField
-            label="Division"
-            name="divisionId"
-            value={formData.divisionId}
-            onChange={handleChange}
-            options={divisions}
-            required
-          />}
+
+          {!hideDivision && (
+            <SelectField
+              label={t("fields.division")}
+              name="divisionId"
+              value={formData.divisionId}
+              onChange={handleChange}
+              options={divisions}
+              required
+              placeholder={t("select")}
+            />
+          )}
+
           {!hideDistrict && (
             <SelectField
-              label="District"
+              label={t("fields.district")}
               name="districtId"
               value={formData.districtId}
               onChange={handleChange}
               options={districtsList}
               disabled={!districtsList.length}
               required
+              placeholder={t("select")}
             />
           )}
+
           {!hideUpazila && (
             <SelectField
-              label="Upazila"
+              label={t("fields.upazila")}
               name="upazilaId"
               value={formData.upazilaId}
               onChange={handleChange}
               options={upazilasList}
               disabled={!upazilasList.length}
               required
+              placeholder={t("select")}
             />
           )}
+
           {!hideUnion && (
             <SelectField
-              label="Union"
+              label={t("fields.union")}
               name="unionId"
               value={formData.unionId}
               onChange={handleChange}
               options={unionsList}
               disabled={!unionsList.length}
               required
+              placeholder={t("select")}
             />
           )}
 
-          {!hideDivision && <SelectField
-            label="Markaz"
-            name="markaz"
-            value={formData.markaz}
-            onChange={handleChange}
-            options={markazList.map(({ name }) => ({
-              value: name,
-              title: name,
-            }))}
-            required
-          />}
+          {/* Markaz: always visible in special, otherwise like before */}
+          {(variant === "special" || !hideDivision) && (
+            <SelectField
+              label={t("fields.markaz")}
+              name="markaz"
+              value={formData.markaz}
+              onChange={handleChange}
+              options={markazList.map(({ name }) => ({ value: name, title: name }))}
+              required={variant !== "special" ? true : false}
+              placeholder={t("select")}
+            />
+          )}
 
-          <InputField
-            label="Mobile Number"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-          />
-          <InputField
-            label="Email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
+          <InputField label={t("fields.phone")} name="phone" value={formData.phone} onChange={handleChange} />
+          <InputField label={t("fields.email")} name="email" value={formData.email} onChange={handleChange} />
           <InputField
             type="password"
-            label="Create New Password"
+            label={t("fields.password")}
             name="password"
             value={formData.password}
             onChange={handleChange}
           />
+
           <div className="flex justify-end">
             <button
               type="submit"
               disabled={loading}
               className="w-32 py-2 px-4 bg-[#155E75] text-white rounded-md hover:bg-blue-600"
             >
-              {loading ? "Processing..." : "Add User"}
+              {loading ? t("buttons.processing") : t("buttons.addUser")}
             </button>
           </div>
         </form>
@@ -329,7 +296,18 @@ const Register = () => {
   );
 };
 
-// Reusable components remain the same
+function getRoleTitle(role: string, t: ReturnType<typeof useTranslations>) {
+  const map: Record<string, string> = {
+    superadmin: t("roles.superadmin"),
+    centraladmin: t("roles.centraladmin"),
+    divisionadmin: t("roles.divisionadmin"),
+    markazadmin: t("roles.markazadmin"),
+    daye: t("roles.daye"),
+  };
+  return map[role] || role;
+}
+
+// Reusables
 interface InputFieldProps {
   label: string;
   name: string;
@@ -347,17 +325,14 @@ const InputField: React.FC<InputFieldProps> = ({ label, ...props }) => (
 interface SelectFieldProps {
   label: string;
   options: { value: number | string; title: string }[];
+  placeholder?: string;
   [key: string]: any;
 }
-const SelectField: React.FC<SelectFieldProps> = ({
-  label,
-  options,
-  ...props
-}) => (
+const SelectField: React.FC<SelectFieldProps> = ({ label, options = [], placeholder, ...props }) => (
   <div>
     <label className="block text-sm font-medium text-gray-700">{label}</label>
     <select className="w-full p-2 border rounded-md" {...props}>
-      <option value="">Select {label}</option>
+      <option value="">{placeholder || "Select"}</option>
       {options.map(({ value, title }) => (
         <option key={value} value={value}>
           {title}

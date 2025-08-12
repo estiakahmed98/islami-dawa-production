@@ -1,4 +1,3 @@
-
 {
   "header": {
     "toggleSidebar": "Toggle Sidebar",
@@ -149,7 +148,7 @@
       "dayi": {
         "sohojogiDayeToiri": "Assistant Daee Created",
         "assistantsList": "Assistant Daee List",
-        "title": "Assistant Daee", 
+        "title": "Assistant Daee",
         "assistant": "Assistant",
         "name": "Name",
         "phone": "Phone",
@@ -350,8 +349,7 @@
     "youCannotRequestEditsForFutureDates": "You cannot request edits for future dates",
     "editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval": "Edit request submitted successfully. Please wait for admin approval.",
     "failedToSubmitEditRequestPleaseTryAgain": "Failed to submit edit request. Please try again."
-  }
-  ,
+  },
   "SigninForm": {
     "title": "Sign In",
     "description": "Enter your account details to login",
@@ -388,10 +386,10 @@
     "dataForm": "Data Form",
     "report": "Report",
     "points": "Points",
-    "submit":"Submit",
-    "editorContent":"Editor Content",
-    "editorTitle":"Editor Title",
-    "editorContentPlaceholder":"Editor Content Placeholder",
+    "submit": "Submit",
+    "editorContent": "Editor Content",
+    "editorTitle": "Editor Title",
+    "editorContentPlaceholder": "Editor Content Placeholder",
     "selectOption": "Select Option",
     "youHaveAlreadySubmittedToday": "You have already submitted today",
     "userEmailIsNotSet": "User email is not set",
@@ -403,19 +401,262 @@
     "editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval": "Edit request submitted successfully. Please wait for admin approval.",
     "failedToSubmitEditRequestPleaseTryAgain": "Failed to submit edit request. Please try again.",
     "editRequestFailed": "Edit request failed",
-    "totalPoints":"Total Points",
-    "close":"Close",
-    "cancel":"Cancel",
-    "save":"Save"
+    "totalPoints": "Total Points",
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save"
   },
   "editRequest": {
-  "title": "Request Edit Permission",
-  "description": "You need admin approval to edit data for Day {day}. Please explain why you need to make changes.",
-  "reasonLabel": "Reason for Edit",
-  "reasonPlaceholder": "Please explain why you need to edit this data...",
-  "reasonRequired": "Please provide a reason for your edit request",
-  "submit": "Submit Request",
-  "cancel": "Cancel",
-  "close": "Close"
-}
+    "title": "Request Edit Permission",
+    "description": "You need admin approval to edit data for Day {day}. Please explain why you need to make changes.",
+    "reasonLabel": "Reason for Edit",
+    "reasonPlaceholder": "Please explain why you need to edit this data...",
+    "reasonRequired": "Please provide a reason for your edit request",
+    "submit": "Submit Request",
+    "cancel": "Cancel",
+    "close": "Close"
+  },
+  "leaveTable": {
+    "title": "Your Leave Requests",
+    "subtitle": "See statuses of submitted requests at a glance.",
+    "subtitleNow": "Submitted requests and current status",
+    "loading": "Loading data…",
+    "errorSubtitle": "There was a problem loading data.",
+    "errorPrefix": "Error:",
+    "page": {
+      "title": "Leave Management",
+      "subtitle": "Apply for and track your leave requests.",
+      "openForm": "Apply for leave",
+      "dialog": {
+        "title": "Apply for Leave",
+        "description": "Fill out the form below to submit your leave request."
+      },
+      "loadingSession": "Loading user session...",
+      "loginPrompt": "Please log in to manage your leave requests."
+    },
+    "errors": {
+      "fetchFailed": "Failed to fetch leave list.",
+      "unknown": "Unknown error",
+      "toastPrefix": "Failed to load:"
+    },
+    "empty": {
+      "title": "No leave requests found",
+      "subtitle": "New submissions will appear here."
+    },
+    "table": {
+      "leaveType": "Leave Type",
+      "from": "Start Date",
+      "to": "End Date",
+      "days": "Days",
+      "reason": "Reason",
+      "status": "Status",
+      "requestDate": "Request Date",
+      "approvedBy": "Approved By"
+    },
+    "status": {
+      "approved": "Approved",
+      "pending": "Pending",
+      "rejected": "Rejected"
+    },
+    "types": {
+      "casual": "Casual",
+      "sick": "Sick",
+      "maternity": "Maternity",
+      "paternity": "Paternity",
+      "annual": "Annual",
+      "other": "Other"
+    },
+    "actions": {
+      "viewRejection": "View rejection reason",
+      "close": "Close",
+      "ok": "OK"
+    },
+    "rejectionModal": {
+      "title": "Rejection Reason"
+    },
+    "noRejectionReason": "No reason was provided"
+  },
+  "leaveForm": {
+    "title": "Leave Request",
+    "autofillNote": "Your name and phone are pulled from your profile.",
+    "computedDays": {
+      "title": "Calculated from selected dates",
+      "label": "Total Days"
+    },
+    "name": "Name",
+    "nameHelp": "This is taken from your profile.",
+    "phone": "Phone Number",
+    "phoneFormatHelp": "Format: 01XXXXXXXXX (Bangladesh)",
+    "phonePatternTitle": "Bangladeshi mobile: 013–019 series, 11 digits",
+    "typeLabel": "Leave Type",
+    "typePlaceholder": "Select a leave type",
+    "types": {
+      "casual": "Casual Leave",
+      "sick": "Sick Leave",
+      "paternity": "Paternity Leave",
+      "annual": "Annual Leave",
+      "other": "Other"
+    },
+    "dates": {
+      "from": "Start Date",
+      "to": "End Date",
+      "badRange": "Invalid range. Start date must be before or equal to end date.",
+      "hint": "Day count is inclusive (both start and end are counted)."
+    },
+    "reason": {
+      "label": "Reason",
+      "placeholder": "Briefly describe why you need this leave…",
+      "hint": "Be clear and concise. Add references if needed.",
+      "appliedDuration": "Applied Duration",
+      "days": "days"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "submit": "Submit Leave Request",
+      "submitting": "Submitting…"
+    },
+    "toasts": { "submitted": "✅ Leave request submitted successfully!" },
+    "errors": {
+      "typeRequired": "Please select a leave type.",
+      "dateRequired": "Please select both dates.",
+      "badRange": "Date range is invalid.",
+      "reasonRequired": "Please provide a reason for your leave.",
+      "generic": "Failed to submit leave request."
+    }
+  },
+  "calendar": {
+    "page": {
+      "title": "View Program"
+    },
+    "component": {
+      "untitledEvent": "Untitled Event",
+      "eventDetailsTitle": "Event Details",
+      "labels": {
+        "title": "Title",
+        "creatorEmail": "Creator Email",
+        "visibility": "Visibility",
+        "time": "Time",
+        "description": "Description"
+      },
+      "actions": {
+        "close": "Close",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "formTitle": {
+        "create": "Create Event",
+        "edit": "Edit Event"
+      },
+      "rbc": {
+        "today": "Today",
+        "previous": "Back",
+        "next": "Next",
+        "month": "Month",
+        "week": "Week",
+        "day": "Day",
+        "agenda": "Agenda",
+        "showMore": "+{total} more"
+      }
+    }
+  },
+  "amoliChart": {
+    "title": "A'mali Muhasaba",
+    "closed": "Closed",
+    "remaining": "Remaining",
+    "noDataUser": "No data available for the specified user.",
+    "noDataUsers": "No data available for the specified users."
+  },
+  "comparison": {
+    "title": "Comparison",
+    "page": {
+      "title": "Comparison",
+      "subtitle": "Compare metrics across dates or periods."
+    },
+    "controls": {
+      "type": "Compare by",
+      "dayToDay": "Day to Day",
+      "monthToMonth": "Month to Month",
+      "yearToYear": "Year to Year",
+      "from": "From",
+      "to": "To",
+      "toWord": "to",
+      "compare": "Compare",
+      "downloadPdf": "Download PDF"
+    },
+    "table": {
+      "label": "Label",
+      "fromHeader": "From",
+      "toHeader": "To",
+      "difference": "Difference",
+      "change": "Change"
+    },
+    "messages": {
+      "selectValues": "Select values and click \"Compare\" to see results.",
+      "noData": "No data available for comparison.",
+      "invalidRange": "Please select both 'From' and 'To' values.",
+      "noDataForPdf": "No data available for PDF generation."
+    },
+    "pdf": {
+      "title": "Comparison Report",
+      "page": "Page {page} of {total}"
+    },
+    "tally": {
+      "title": "Comparison",
+      "current": "Current",
+      "previous": "Previous",
+      "change": "Change"
+    }
+  },
+  "register": {
+    "tabs": {
+      "standard": "Add Da'ee",
+      "special": "Add Special Da'ee"
+    },
+    "titles": {
+      "standard": "Add New Da'ee",
+      "special": "Add Special Da'ee"
+    },
+    "fields": {
+      "name": "Full Name",
+      "role": "Role",
+      "division": "Division",
+      "district": "District",
+      "upazila": "Upazila",
+      "union": "Union",
+      "markaz": "Markaz",
+      "phone": "Mobile Number",
+      "email": "Email",
+      "password": "Create New Password"
+    },
+    "roles": {
+      "superadmin": "Super Admin",
+      "centraladmin": "Central Admin",
+      "divisionadmin": "Division Admin",
+      "markazadmin": "Markaz Admin",
+      "daye": "Da'ee"
+    },
+    "buttons": {
+      "addUser": "Add User",
+      "processing": "Processing..."
+    },
+    "select": "Select",
+    "toasts": {
+      "created": "User created!",
+      "error": "Something went wrong!"
+    },
+    "errors": {
+      "nameRequired": "Name is required",
+      "emailInvalid": "Invalid email",
+      "emailRequired": "Email is required",
+      "passwordMin": "Password must be at least 8 characters",
+      "passwordRequired": "Password is required",
+      "roleRequired": "Role is required",
+      "phoneRequired": "Phone is required",
+      "divisionRequired": "Division is required",
+      "districtRequired": "District is required",
+      "upazilaRequired": "Upazila is required",
+      "unionRequired": "Union is required",
+      "markazRequired": "Markaz is required"
+    }
+  }
 }

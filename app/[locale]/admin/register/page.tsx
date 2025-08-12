@@ -1,42 +1,43 @@
+// app/[locale]/dashboard/add-dayee/page.tsx
 "use client";
 
 import { useState } from "react";
 import Register from "@/components/Register";
-import SpeacialRegister from "@/components/SpeacialRegister";
+import { useTranslations } from "next-intl";
 
 const Page = () => {
-  const [activeTab, setActiveTab] = useState("register");
+  const [activeTab, setActiveTab] = useState<"standard" | "special">("standard");
+  const t = useTranslations("register.tabs");
 
   return (
     <div className="mx-auto bg-white shadow-lg rounded-lg">
-      {/* Tab Buttons */}
+      {/* Tabs */}
       <div className="flex border-b mb-4">
         <button
           className={`flex-1 py-2 text-center ${
-            activeTab === "register"
+            activeTab === "standard"
               ? "border-b-4 border-[#155E75] font-bold text-[#155E75]"
               : "text-gray-500"
           }`}
-          onClick={() => setActiveTab("register")}
+          onClick={() => setActiveTab("standard")}
         >
-          দা'ঈ যোগ করুন
+          {t("standard")}
         </button>
         <button
           className={`flex-1 py-2 text-center ${
-            activeTab === "specialRegister"
+            activeTab === "special"
               ? "border-b-4 border-[#155E75] font-bold text-[#155E75]"
               : "text-gray-500"
           }`}
-          onClick={() => setActiveTab("specialRegister")}
+          onClick={() => setActiveTab("special")}
         >
-          বিশেষ দা'ঈ যোগ করুন
+          {t("special")}
         </button>
       </div>
 
-      {/* Tab Content */}
+      {/* Content */}
       <div className="p-4">
-        {activeTab === "register" && <Register />}
-        {activeTab === "specialRegister" && <SpeacialRegister />}
+        <Register variant={activeTab} />
       </div>
     </div>
   );

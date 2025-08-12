@@ -6,8 +6,10 @@ import SoforBishoyForm from "@/components/SoforBishoyForm";
 import AmoliTableShow from "@/components/TableShow";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 function dhakaYMD(d: Date) {
+  if (!(d instanceof Date) || isNaN(d.getTime())) return "";
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Dhaka",
     year: "numeric",
@@ -24,7 +26,12 @@ function toNumberedHTML(arr: unknown): string {
 
 const SoforPage: React.FC = () => {
   const { data: session } = useSession();
-  const userEmail = session?.user?.email;
+  const userEmail = session?.user?.email ?? "";
+
+  const tCommon = useTranslations("common");
+  const tToast = useTranslations("dashboard.UserDashboard.toast");
+  const tSofor = useTranslations("dashboard.UserDashboard.soforbisoy");
+
   const [userData, setUserData] = useState<any>({ records: {} });
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
@@ -44,7 +51,7 @@ const SoforPage: React.FC = () => {
         const json = await res.json();
         setIsSubmittedToday(!!json.isSubmittedToday);
       } catch (e) {
-        if (!(e instanceof DOMException && e.name === "AbortError")) {
+        if (!(e instanceof DOMException && (e as DOMException).name === "AbortError")) {
           console.error(e);
         }
       }
@@ -65,6 +72,7 @@ const SoforPage: React.FC = () => {
 
         all.forEach((rec) => {
           const dateKey = dhakaYMD(new Date(rec.date));
+          if (!dateKey) return;
           transformed[userEmail][dateKey] = {
             moktobVisit: rec.moktobVisit ?? 0,
             madrasaVisit: rec.madrasaVisit ?? 0,
@@ -74,20 +82,21 @@ const SoforPage: React.FC = () => {
             editorContent: rec.editorContent ?? "",
           };
         });
+
         setUserData({
           records: transformed,
           labelMap: {
-            moktobVisit: "চলমান মক্তব পরিদর্শন হয়েছে",
-            madrasaVisit: "মাদ্রাসা সফর হয়েছে (সংখ্যা)",
-            madrasaVisitList: "মাদ্রাসার তালিকা",
-            schoolCollegeVisit: "স্কুল/কলেজ/ভার্সিটি সফর হয়েছে (সংখ্যা)",
-            schoolCollegeVisitList: "স্কুল/কলেজ/ভার্সিটির তালিকা",
+            moktobVisit: tSofor("moktobVisit"),
+            madrasaVisit: tSofor("madrasaVisit"),
+            madrasaVisitList: tSofor("madrasaVisitList"),
+            schoolCollegeVisit: tSofor("schoolCollegeVisit"),
+            schoolCollegeVisitList: tSofor("schoolCollegeVisitList"),
           },
         });
       } catch (error) {
-        if (!(error instanceof DOMException && error.name === "AbortError")) {
+        if (!(error instanceof DOMException && (error as DOMException).name === "AbortError")) {
           console.error("Failed to fetch Sofor data:", error);
-          toast.error("সফর তথ্য আনা যায়নি।");
+          toast.error(tToast("errorFetchingData"));
         }
       }
     };
@@ -95,15 +104,15 @@ const SoforPage: React.FC = () => {
     fetchToday();
     fetchAll();
     return () => ac.abort();
-  }, [userEmail]);
+  }, [userEmail, tSofor, tToast]);
 
   return (
     <div>
       <Tabs defaultValue="dataForm" className="w-full p-2 lg:p-4">
         <div className="flex justify-between">
           <TabsList>
-            <TabsTrigger value="dataForm">তথ্য দিন</TabsTrigger>
-            <TabsTrigger value="report">প্রতিবেদন</TabsTrigger>
+            <TabsTrigger value="dataForm">{tCommon("dataForm")}</TabsTrigger>
+            <TabsTrigger value="report">{tCommon("report")}</TabsTrigger>
           </TabsList>
         </div>
 

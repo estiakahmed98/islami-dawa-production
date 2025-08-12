@@ -23,7 +23,8 @@ import {
   Info,
   Calculator,
 } from "lucide-react";
-import { cn } from "@/lib/utils"; // if you don't have cn util, replace cn(...) with string join
+import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface LeaveRequestFormProps {
   userEmail: string;
@@ -43,7 +44,8 @@ const getInclusiveDays = (from: string, to: string) => {
   start.setUTCHours(0, 0, 0, 0);
   end.setUTCHours(0, 0, 0, 0);
   if (start > end) return null;
-  const diff = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  const diff =
+    Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   return diff;
 };
 
@@ -52,6 +54,10 @@ export function LeaveRequestForm({
   onSubmissionSuccess,
   onClose,
 }: LeaveRequestFormProps) {
+  const t = useTranslations("leaveForm");
+  const { data } = useSession();
+  const user = data?.user;
+
   const [leaveType, setLeaveType] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -60,37 +66,38 @@ export function LeaveRequestForm({
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { data } = useSession();
-  const user = data?.user;
-
-  // সেশন আসলে নাম/ফোন অটো-ফিল
+  // Autofill name/phone from session once
   useEffect(() => {
     if (user) {
       setName((prev) => (prev?.trim() ? prev : user.name ?? ""));
-      setPhone((prev) => (prev?.trim() ? prev : (user?.phone as string) ?? ""));
+      setPhone((prev) =>
+        prev?.trim() ? prev : ((user as any)?.phone as string) ?? ""
+      );
     }
   }, [user]);
 
-  // গণনা করা দিনের সংখ্যা (ইনক্লুসিভ)
-  const calculatedDays = useMemo(() => getInclusiveDays(fromDate, toDate), [fromDate, toDate]);
+  const calculatedDays = useMemo(
+    () => getInclusiveDays(fromDate, toDate),
+    [fromDate, toDate]
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!leaveType) {
-      toast.error("ছুটির ধরন নির্বাচন করুন।");
+      toast.error(t("errors.typeRequired"));
       return;
     }
     if (!fromDate || !toDate) {
-      toast.error("তারিখ দিন।");
+      toast.error(t("errors.dateRequired"));
       return;
     }
     if (getInclusiveDays(fromDate, toDate) === null) {
-      toast.error("তারিখের সীমা সঠিক নয়।");
+      toast.error(t("errors.badRange"));
       return;
     }
     if (!reason.trim()) {
-      toast.error("ছুটির কারণ লিখুন।");
+      toast.error(t("errors.reasonRequired"));
       return;
     }
 
@@ -110,19 +117,18 @@ export function LeaveRequestForm({
         }),
       });
 
-      const resJson = await response.json();
+      const resJson = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         if (resJson?.errors) {
           Object.values(resJson.errors).forEach((msg) => toast.error(String(msg)));
         } else {
-          throw new Error(resJson?.error || "ছুটির আবেদন জমা দিতে ব্যর্থ।");
+          throw new Error(resJson?.error || t("errors.generic"));
         }
         return;
       }
 
-      toast.success("✅ ছুটির আবেদন সফলভাবে জমা হয়েছে!");
-      // ফর্ম রিসেট
+      toast.success(t("toasts.submitted"));
       setLeaveType("");
       setFromDate("");
       setToDate("");
@@ -133,13 +139,14 @@ export function LeaveRequestForm({
       onSubmissionSuccess();
       onClose();
     } catch (err: any) {
-      toast.error(`ত্রুটি: ${err?.message || "অপ্রত্যাশিত সমস্যা ঘটেছে।"}`);
+      toast.error(`${t("errors.generic")} ${err?.message ?? ""}`.trim());
     } finally {
       setLoading(false);
     }
   };
 
-  const isRangeInvalid = fromDate && toDate && getInclusiveDays(fromDate, toDate) === null;
+  const isRangeInvalid =
+    fromDate && toDate && getInclusiveDays(fromDate, toDate) === null;
 
   return (
     <form
@@ -148,15 +155,13 @@ export function LeaveRequestForm({
         "grid gap-6 rounded-2xl bg-muted/30 p-5 md:p-6",
         "shadow-sm ring-1 ring-border"
       )}
-      aria-label="ছুটির আবেদন ফর্ম"
+      aria-label={t("title")}
     >
-      {/* শীর্ষ সারাংশ */}
+      {/* header */}
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h3 className="text-xl font-semibold tracking-tight">ছুটির আবেদন</h3>
-          <p className="text-sm text-muted-foreground">
-            আপনার প্রোফাইলের নাম ও ফোন স্বয়ংক্রিয়ভাবে যুক্ত হয়েছে।
-          </p>
+          <h3 className="text-xl font-semibold tracking-tight">{t("title")}</h3>
+          <p className="text-sm text-muted-foreground">{t("autofillNote")}</p>
         </div>
 
         {calculatedDays !== null && !isRangeInvalid && (
@@ -166,30 +171,29 @@ export function LeaveRequestForm({
               "text-sm"
             )}
             aria-live="polite"
-            title="নির্বাচিত তারিখ অনুযায়ী গণনা"
+            title={t("computedDays.title")}
           >
             <Calculator className="h-4 w-4" />
-            মোট দিন: <span className="font-semibold">{toBn(calculatedDays)}</span>
+            {t("computedDays.label")}:{" "}
+            <span className="font-semibold">{toBn(calculatedDays)}</span>
           </div>
         )}
       </div>
 
-      {/* নাম/ফোন */}
+      {/* name/phone */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="name" className="flex items-center gap-2">
             <User className="h-4 w-4" />
-            নাম
+            {t("name")}
           </Label>
           <Input id="name" value={name} readOnly required />
-          <p className="text-xs text-muted-foreground">
-            এই ঘরটি আপনার প্রোফাইল থেকে নেওয়া হয়েছে।
-          </p>
+          <p className="text-xs text-muted-foreground">{t("nameHelp")}</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="phone" className="flex items-center gap-2">
             <Phone className="h-4 w-4" />
-            ফোন নম্বর
+            {t("phone")}
           </Label>
           <Input
             id="phone"
@@ -198,37 +202,35 @@ export function LeaveRequestForm({
             required
             inputMode="numeric"
             pattern="^01[3-9]\d{8}$"
-            title="বাংলাদেশি মোবাইল নম্বর: ০১৩–০১৯ সিরিজ, মোট ১১ ডিজিট"
+            title={t("phonePatternTitle")}
           />
-          <p className="text-xs text-muted-foreground">
-            ফরম্যাট: 01XXXXXXXXX (বাংলাদেশ)
-          </p>
+          <p className="text-xs text-muted-foreground">{t("phoneFormatHelp")}</p>
         </div>
       </div>
 
-      {/* ছুটির ধরন */}
+      {/* type */}
       <div className="space-y-2">
-        <Label htmlFor="leaveType">ছুটির ধরন</Label>
-        <Select value={leaveType} onValueChange={setLeaveType} required>
-          <SelectTrigger id="leaveType" aria-label="ছুটির ধরন নির্বাচন করুন">
-            <SelectValue placeholder="ছুটির ধরন নির্বাচন করুন" />
+        <Label htmlFor="leaveType">{t("typeLabel")}</Label>
+        <Select value={leaveType} onValueChange={setLeaveType}>
+          <SelectTrigger id="leaveType" aria-label={t("typePlaceholder")}>
+            <SelectValue placeholder={t("typePlaceholder")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="casual">ক্যাজুয়াল ছুটি</SelectItem>
-            <SelectItem value="sick">অসুস্থতার ছুটি</SelectItem>
-            <SelectItem value="paternity">পিতৃত্বকালীন ছুটি</SelectItem>
-            <SelectItem value="annual">বাৎসরিক ছুটি</SelectItem>
-            <SelectItem value="other">অন্যান্য</SelectItem>
+            <SelectItem value="casual">{t("types.casual")}</SelectItem>
+            <SelectItem value="sick">{t("types.sick")}</SelectItem>
+            <SelectItem value="paternity">{t("types.paternity")}</SelectItem>
+            <SelectItem value="annual">{t("types.annual")}</SelectItem>
+            <SelectItem value="other">{t("types.other")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* তারিখ */}
+      {/* dates */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="fromDate" className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4" />
-            শুরুর তারিখ
+            {t("dates.from")}
           </Label>
           <Input
             id="fromDate"
@@ -241,7 +243,7 @@ export function LeaveRequestForm({
         <div className="space-y-2">
           <Label htmlFor="toDate" className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4" />
-            শেষ তারিখ
+            {t("dates.to")}
           </Label>
           <Input
             id="toDate"
@@ -254,7 +256,7 @@ export function LeaveRequestForm({
         </div>
       </div>
 
-      {/* সতর্কতা / হিন্ট */}
+      {/* hint/warn */}
       <div
         className={cn(
           "rounded-xl border px-3 py-2 text-sm",
@@ -266,52 +268,48 @@ export function LeaveRequestForm({
           <Info className={cn("mt-[2px] h-4 w-4", isRangeInvalid ? "text-destructive" : "")} />
           <div>
             {isRangeInvalid ? (
-              <span className="text-destructive">তারিখের সীমা সঠিক নয়। শুরুর তারিখ শেষ তারিখের আগের হতে হবে।</span>
+              <span className="text-destructive">{t("dates.badRange")}</span>
             ) : (
-              <span className="text-muted-foreground">
-                দিন গণনা ইনক্লুসিভ (শুরু ও শেষ—দুটিই ধরা হয়)।
-              </span>
+              <span className="text-muted-foreground">{t("dates.hint")}</span>
             )}
           </div>
         </div>
       </div>
 
-      {/* কারণ */}
+      {/* reason */}
       <div className="space-y-2">
-        <Label htmlFor="reason">ছুটির কারণ</Label>
+        <Label htmlFor="reason">{t("reason.label")}</Label>
         <Textarea
           id="reason"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          placeholder="সংক্ষেপে আপনার ছুটির কারণ লিখুন…"
+          placeholder={t("reason.placeholder")}
           className="min-h-[110px]"
           required
         />
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>স্পষ্ট ও সংক্ষিপ্ত কারণ দিন। প্রয়োজনে রেফারেন্স যুক্ত করুন।</span>
+          <span>{t("reason.hint")}</span>
           {calculatedDays !== null && !isRangeInvalid && (
-            <span aria-live="polite">আবেদিত মেয়াদ: {toBn(calculatedDays)} দিন</span>
+            <span aria-live="polite">
+              {t("reason.appliedDuration")}: {toBn(calculatedDays)} {t("reason.days")}
+            </span>
           )}
         </div>
       </div>
 
-      {/* Actions */}
+      {/* actions */}
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onClose}>
-          বাতিল
+          {t("actions.cancel")}
         </Button>
-        <Button
-          type="submit"
-          disabled={loading}
-          className="font-semibold transition-colors"
-        >
+        <Button type="submit" disabled={loading} className="font-semibold transition-colors">
           {loading ? (
             <span className="inline-flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              জমা হচ্ছে…
+              {t("actions.submitting")}
             </span>
           ) : (
-            "ছুটির আবেদন জমা দিন"
+            t("actions.submit")
           )}
         </Button>
       </div>

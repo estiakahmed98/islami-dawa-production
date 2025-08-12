@@ -1,5 +1,4 @@
-//Estiak
-
+// Estiak
 "use client";
 
 import React from "react";
@@ -8,6 +7,7 @@ import DineFirecheForm from "@/components/DineFirecheForm";
 import AmoliTableShow from "@/components/TableShow";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 /** Format a date to YYYY-MM-DD in Dhaka time (safe) */
 function dhakaYMD(d: Date) {
@@ -24,16 +24,20 @@ const DineFeraPage: React.FC = () => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email ?? "";
 
+  const tCommon = useTranslations("common");
+  const tToast = useTranslations("dashboard.UserDashboard.toast");
+  const tDF = useTranslations("dashboard.UserDashboard.dineFera");
+
   const [userData, setUserData] = React.useState<any>({ records: {} });
   const [selectedMonth, setSelectedMonth] = React.useState<number>(new Date().getMonth());
   const [selectedYear, setSelectedYear] = React.useState<number>(new Date().getFullYear());
 
   const labelMap = React.useMemo(
     () => ({
-      nonMuslimMuslimHoise: "অমুসলিম মুসলিম হয়েছে",
-      murtadIslamFireche: "মুরতাদ ইসলাম ফিরেছে",
+      nonMuslimMuslimHoise: tDF("nonMuslimMuslimHoise"),
+      murtadIslamFireche: tDF("murtadIslamFireche"),
     }),
-    []
+    [tDF]
   );
 
   React.useEffect(() => {
@@ -51,7 +55,6 @@ const DineFeraPage: React.FC = () => {
         });
         if (!res.ok) throw new Error("Failed to fetch Dine Fera records");
 
-        // API shape: { isSubmittedToday, today, records }
         const json = await res.json();
         const all: Array<any> = Array.isArray(json.records) ? json.records : [];
 
@@ -60,9 +63,9 @@ const DineFeraPage: React.FC = () => {
           const dateKey = dhakaYMD(new Date(rec.date));
           if (!dateKey) return;
           transformed[userEmail][dateKey] = {
-            nonMuslimMuslimHoise: rec.nonMuslimMuslimHoise,
-            murtadIslamFireche: rec.murtadIslamFireche,
-            editorContent: rec.editorContent,
+            nonMuslimMuslimHoise: rec.nonMuslimMuslimHoise ?? 0,
+            murtadIslamFireche: rec.murtadIslamFireche ?? 0,
+            editorContent: rec.editorContent ?? "",
           };
         });
 
@@ -70,21 +73,21 @@ const DineFeraPage: React.FC = () => {
       } catch (err: any) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Failed to fetch Dine Fera data:", err);
-          toast.error("দ্বীনে ফেরার তথ্য আনা যায়নি।");
+          toast.error(tToast("errorFetchingData"));
         }
       }
     })();
 
     return () => ac.abort();
-  }, [userEmail, labelMap]);
+  }, [userEmail, labelMap, tToast]);
 
   return (
     <div>
       <Tabs defaultValue="dataForm" className="w-full p-2 lg:p-4">
         <div className="flex justify-between">
           <TabsList>
-            <TabsTrigger value="dataForm">তথ্য দিন</TabsTrigger>
-            <TabsTrigger value="report">প্রতিবেদন</TabsTrigger>
+            <TabsTrigger value="dataForm">{tCommon("dataForm")}</TabsTrigger>
+            <TabsTrigger value="report">{tCommon("report")}</TabsTrigger>
           </TabsList>
         </div>
 

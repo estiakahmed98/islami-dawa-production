@@ -1,18 +1,9 @@
-//Faysal
-
 "use client";
 
-import React from "react";
-import {
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
-// import renderLegend from "./renderLegend";
+import React, { useMemo } from "react";
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import renderLegend from "./PiechartLegend";
+import { useTranslations } from "next-intl";
 
 interface AmoliChartProps {
   data: {
@@ -37,45 +28,46 @@ const AmoliChart: React.FC<AmoliChartProps> = ({
   startAngle = 90,
   endAngle = 450,
 }) => {
-  // Extract percentages for the specified user and calculate average
+  const t = useTranslations();
+  const tChart = (k: string) => t(`amoliChart.${k}`);
+
   const userData = data[userEmail];
 
-  if (!userData) {
+  const percentages = useMemo(() => {
+    if (!userData) return [];
+    const v = Object.values(userData)
+      .map((entry) => Number.parseFloat(entry?.percentage ?? "0"))
+      .filter((n) => Number.isFinite(n))
+      .map((n) => Math.min(100, Math.max(0, n)));
+    return v;
+  }, [userData]);
+
+  if (!userData || percentages.length === 0) {
     return (
-      <div className="text-center text-red-500 font-bold">
-        No data available for the specified user.
+      <div className="text-center text-red-500 font-semibold">
+        {tChart("noDataUser")}
       </div>
     );
   }
 
-  const percentages: number[] = Object.values(userData).map((entry) =>
-    parseFloat(entry.percentage)
+  const average =
+    percentages.reduce((sum, value) => sum + value, 0) / Math.max(1, percentages.length);
+
+  const chartData = useMemo(
+    () => [
+      { name: tChart("closed"), value: Number(average.toFixed(2)), color: "#4caf50" },
+      { name: tChart("remaining"), value: Number((100 - average).toFixed(2)), color: "#f44336" },
+    ],
+    [average, t]
   );
-
-  const averagePercentage =
-    percentages.reduce((sum, value) => sum + value, 0) / percentages.length;
-
-  const chartData = [
-    {
-      name: "Closed",
-      value: parseFloat(averagePercentage.toFixed(2)),
-      color: "#4caf50",
-    },
-    {
-      name: "Remaining",
-      value: parseFloat((100 - averagePercentage).toFixed(2)),
-      color: "#f44336",
-    },
-  ];
 
   return (
     <div className="rounded-lg bg-gradient-to-r from-blue-50 border to-white shadow-xl grow">
-      {/* Title Section */}
       <div className="p-6 text-center border-b border-gray-200">
-        <h2 className="text-xl font-bold text-gray-800">আ’মলি মুহাসাবা</h2>
+        {/* Or: t("dashboard.UserDashboard.amoli.title") */}
+        <h2 className="text-xl font-bold text-gray-800">{tChart("title")}</h2>
       </div>
 
-      {/* Chart Section */}
       <div className="max-w-sm mx-auto relative p-6 rounded-b-lg">
         <ResponsiveContainer width="100%" height={400}>
           <PieChart className="p-4">
@@ -93,13 +85,8 @@ const AmoliChart: React.FC<AmoliChartProps> = ({
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => [`${value}%`, ""]} />
-            <Legend
-              align="center"
-              verticalAlign="bottom"
-              height={36}
-              content={renderLegend}
-            />
+            <Tooltip formatter={(value: number) => [`${value}%`, ""]} />
+            <Legend align="center" verticalAlign="bottom" height={36} content={renderLegend} />
           </PieChart>
         </ResponsiveContainer>
       </div>

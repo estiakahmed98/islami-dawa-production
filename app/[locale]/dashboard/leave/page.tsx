@@ -14,12 +14,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PlusIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function LeavesPage() {
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [refetchTrigger, setRefetchTrigger] = useState(0); // State to trigger table refetch
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
+  const t = useTranslations("leaveTable.page");
 
   const refetchLeaveRequests = useCallback(() => {
     setRefetchTrigger((prev) => prev + 1);
@@ -29,9 +31,9 @@ export default function LeavesPage() {
     return (
       <main className="flex flex-col items-center justify-center min-h-[80vh] p-4 md:p-6 lg:p-8 space-y-8 bg-gray-50 dark:bg-gray-900">
         <h1 className="text-4xl font-bold text-center text-gray-800 dark:text-gray-200">
-          Leave Management
+          {t("title")}
         </h1>
-        <p className="text-lg text-muted-foreground">Loading user session...</p>
+        <p className="text-lg text-muted-foreground">{t("loadingSession")}</p>
       </main>
     );
   }
@@ -40,11 +42,9 @@ export default function LeavesPage() {
     return (
       <main className="flex flex-col items-center justify-center min-h-[80vh] p-4 md:p-6 lg:p-8 space-y-8 bg-gray-50 dark:bg-gray-900">
         <h1 className="text-4xl font-bold text-center text-gray-800 dark:text-gray-200">
-          Leave Management
+          {t("title")}
         </h1>
-        <p className="text-lg text-muted-foreground">
-          Please log in to manage your leave requests.
-        </p>
+        <p className="text-lg text-muted-foreground">{t("loginPrompt")}</p>
       </main>
     );
   }
@@ -56,16 +56,16 @@ export default function LeavesPage() {
           <DialogTrigger asChild>
             <Button className="bg-sky-600 hover:bg-sky-800 text-white shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
               <PlusIcon className="mr-2 h-5 w-5" />
-              ছুটির জন্য আবেদন করুন
+              {t("openForm")}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden rounded-lg shadow-2xl">
             <DialogHeader className="bg-gradient-to-r from-sky-600 to-cyan-700 text-white p-6 rounded-t-lg">
               <DialogTitle className="text-2xl font-bold">
-                ছুটির জন্য আবেদন করুন
+                {t("dialog.title")}
               </DialogTitle>
               <DialogDescription className="text-purple-100">
-                আপনার ছুটির আবেদন জমা দিতে নীচের ফর্মটি পূরণ করুন।
+                {t("dialog.description")}
               </DialogDescription>
             </DialogHeader>
             <LeaveRequestForm

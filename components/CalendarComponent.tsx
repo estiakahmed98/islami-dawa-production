@@ -1,15 +1,16 @@
-//Component/CalendarComponent.tsx
-"use client"; 
+// components/CalendarComponent.tsx
+"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
-import { enUS } from "date-fns/locale/en-US";
+import { enUS, bn as bnLocale } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import CalendarEventForm from "./CalendarForm";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 import { useSession } from "@/lib/auth-client";
+import { useLocale, useTranslations } from "next-intl";
 
 interface GoogleEvent {
   id?: string;
@@ -25,8 +26,11 @@ interface GoogleEvent {
   visibility?: string;
 }
 
-const locales = {
+const localesMap: Record<string, Locale> = {
+  en: enUS,
   "en-US": enUS,
+  bn: bnLocale,
+  "bn-BD": bnLocale,
 };
 
 const localizer = dateFnsLocalizer({
@@ -34,15 +38,27 @@ const localizer = dateFnsLocalizer({
   parse,
   startOfWeek,
   getDay,
-  locales,
+  locales: localesMap,
 });
 
 export default function GoogleCalendar() {
   const [events, setEvents] = useState<GoogleEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<GoogleEvent | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const session = useSession();
   const [isEditing, setIsEditing] = useState(false);
+
+  const { data: session } = useSession();
+  const locale = useLocale();
+  const t = useTranslations("calendar.component");
+
+  // Normalize culture for react-big-calendar and Intl APIs
+  const culture = useMemo(() => {
+    if (locale === "bn" || locale === "bn-BD") return "bn";
+    return "en-US";
+  }, [locale]);
+
+  const intlLocale = useMemo(() => (culture === "bn" ? "bn-BD" : "en-US"), [culture]);
+
   const [currentDateRange, setCurrentDateRange] = useState<{
     start: Date;
     end: Date;
@@ -50,7 +66,7 @@ export default function GoogleCalendar() {
     const today = new Date();
     const start = new Date(today.getFullYear(), today.getMonth(), 1);
     const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    end.setHours(23, 59, 59, 999); // Include entire last day
+    end.setHours(23, 59, 59, 999);
     return { start, end };
   });
 
@@ -59,41 +75,36 @@ export default function GoogleCalendar() {
       const timeMin = start.toISOString();
       const timeMax = end.toISOString();
 
-      const response = await fetch(
-        `/api/calendar?timeMin=${timeMin}&timeMax=${timeMax}`
-      );
+      const response = await fetch(`/api/calendar?timeMin=${timeMin}&timeMax=${timeMax}`);
       if (!response.ok) throw new Error("Failed to fetch events");
 
       const googleEvents = await response.json();
 
       const formattedEvents = googleEvents.map((event: any) => {
-        let start, end;
+        let start: Date;
+        let end: Date;
+
         if (event.start.dateTime) {
           start = new Date(event.start.dateTime);
           end = new Date(event.end.dateTime);
         } else {
-          // All-day event: parse dates in local time zone
-          const [startYear, startMonth, startDay] = event.start.date
-            .split("-")
-            .map(Number);
-          start = new Date(startYear, startMonth - 1, startDay);
-
-          const [endYear, endMonth, endDay] = event.end.date
-            .split("-")
-            .map(Number);
-          end = new Date(endYear, endMonth - 1, endDay);
+          // All-day event - treat as local dates
+          const [sy, sm, sd] = event.start.date.split("-").map(Number);
+          const [ey, em, ed] = event.end.date.split("-").map(Number);
+          start = new Date(sy, sm - 1, sd);
+          end = new Date(ey, em - 1, ed);
         }
 
         return {
           id: event.id,
-          title: event.summary || "Untitled Event",
+          title: event.summary || t("untitledEvent"),
           description: event.description || "",
           start,
           end,
           attendees: event.attendees?.map((att: any) => att.email) || [],
           creator: event.creator,
           visibility: event.visibility || "default",
-        };
+        } as GoogleEvent;
       });
 
       setEvents(formattedEvents);
@@ -104,6 +115,7 @@ export default function GoogleCalendar() {
 
   useEffect(() => {
     fetchEvents(currentDateRange.start, currentDateRange.end);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDateRange]);
 
   const handleRangeChange = (range: Date[] | { start: Date; end: Date }) => {
@@ -120,7 +132,7 @@ export default function GoogleCalendar() {
       start: slotInfo.start,
       end: slotInfo.end,
       attendees: [],
-      creator: { email: session.data?.user.email as string },
+      creator: { email: (session?.user?.email as string) ?? "" },
     });
     setIsFormOpen(true);
     setIsEditing(false);
@@ -143,9 +155,7 @@ export default function GoogleCalendar() {
   const handleSubmitEvent = async (eventData: any) => {
     try {
       const method = selectedEvent?.id ? "PUT" : "POST";
-      const url = "/api/calendar";
-
-      const response = await fetch(url, {
+      const response = await fetch("/api/calendar", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -174,15 +184,29 @@ export default function GoogleCalendar() {
   const initialValues = {
     title: selectedEvent?.title || "",
     description: selectedEvent?.description || "",
-    start: selectedEvent?.start?.toISOString().slice(0, 16) || "",
-    end: selectedEvent?.end?.toISOString().slice(0, 16) || "",
-    // attendees: selectedEvent?.attendees?.join(", ") || "",
+    start: selectedEvent?.start ? toInputDatetimeLocal(selectedEvent.start) : "",
+    end: selectedEvent?.end ? toInputDatetimeLocal(selectedEvent.end) : "",
     attendees: selectedEvent?.attendees || [],
   };
+
+  const messages = useMemo(
+    () => ({
+      today: t("rbc.today"),
+      previous: t("rbc.previous"),
+      next: t("rbc.next"),
+      month: t("rbc.month"),
+      week: t("rbc.week"),
+      day: t("rbc.day"),
+      agenda: t("rbc.agenda"),
+      showMore: (total: number) => t("rbc.showMore", { total }),
+    }),
+    [t]
+  );
 
   return (
     <div className="relative h-[800px]">
       <Calendar
+        culture={culture}
         localizer={localizer}
         events={events}
         startAccessor="start"
@@ -193,41 +217,39 @@ export default function GoogleCalendar() {
         selectable
         defaultView="month"
         views={["month", "week", "day"]}
+        messages={messages}
       />
 
       {/* Event Details Modal */}
-      <Dialog
-        open={selectedEvent && !isFormOpen ? true : undefined}
-        onOpenChange={() => setSelectedEvent(null)}
-      >
+      <Dialog open={!!selectedEvent && !isFormOpen} onOpenChange={() => setSelectedEvent(null)}>
         <DialogContent>
-          <DialogTitle className="text-xl font-bold">Event Details</DialogTitle>
+          <DialogTitle className="text-xl font-bold">{t("eventDetailsTitle")}</DialogTitle>
           <div className="space-y-3">
             <p>
-              <strong>Title:</strong> {selectedEvent?.title}
+              <strong>{t("labels.title")}:</strong> {selectedEvent?.title}
             </p>
             <p>
-              <strong>Creator Email:</strong> {selectedEvent?.creator?.email}
+              <strong>{t("labels.creatorEmail")}:</strong> {selectedEvent?.creator?.email}
             </p>
             <p>
-              <strong>Visibility:</strong> {selectedEvent?.visibility}
+              <strong>{t("labels.visibility")}:</strong> {selectedEvent?.visibility}
             </p>
             <p>
-              <strong>Time:</strong>{" "}
-              {selectedEvent?.start?.toLocaleTimeString("en-US", {
+              <strong>{t("labels.time")}:</strong>{" "}
+              {selectedEvent?.start?.toLocaleTimeString(intlLocale, {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
               })}{" "}
               -{" "}
-              {selectedEvent?.end?.toLocaleTimeString("en-US", {
+              {selectedEvent?.end?.toLocaleTimeString(intlLocale, {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
               })}
             </p>
             <p>
-              <strong>Description:</strong>
+              <strong>{t("labels.description")}:</strong>
             </p>
             <div
               dangerouslySetInnerHTML={{
@@ -236,10 +258,10 @@ export default function GoogleCalendar() {
             />
             <div className="flex justify-between mt-4">
               <Button variant="outline" onClick={() => setSelectedEvent(null)}>
-                Close
+                {t("actions.close")}
               </Button>
 
-              {selectedEvent?.creator?.email === session.data?.user?.email && (
+              {selectedEvent?.creator?.email === session?.user?.email && (
                 <div className="space-x-2">
                   <Button
                     variant="secondary"
@@ -248,15 +270,13 @@ export default function GoogleCalendar() {
                       setIsFormOpen(true);
                     }}
                   >
-                    Edit
+                    {t("actions.edit")}
                   </Button>
                   <Button
                     variant="destructive"
-                    onClick={() =>
-                      selectedEvent?.id && handleDeleteEvent(selectedEvent.id)
-                    }
+                    onClick={() => selectedEvent?.id && handleDeleteEvent(selectedEvent.id)}
                   >
-                    Delete
+                    {t("actions.delete")}
                   </Button>
                 </div>
               )}
@@ -269,7 +289,7 @@ export default function GoogleCalendar() {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent key={selectedEvent?.id || "new-event"}>
           <DialogTitle className="text-xl font-bold">
-            {isEditing ? "Edit Event" : "Create Event"}
+            {isEditing ? t("formTitle.edit") : t("formTitle.create")}
           </DialogTitle>
           <CalendarEventForm
             initialValues={initialValues}
@@ -282,5 +302,22 @@ export default function GoogleCalendar() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+/** Convert a Date to local datetime-local input value (YYYY-MM-DDTHH:MM) */
+function toInputDatetimeLocal(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const dt = new Date(d);
+  return (
+    dt.getFullYear() +
+    "-" +
+    pad(dt.getMonth() + 1) +
+    "-" +
+    pad(dt.getDate()) +
+    "T" +
+    pad(dt.getHours()) +
+    ":" +
+    pad(dt.getMinutes())
   );
 }

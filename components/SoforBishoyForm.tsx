@@ -1,5 +1,4 @@
 // Estiak — StrictMode-safe: remove useFormikContext, resize lists via effects in render
-
 "use client";
 
 import React from "react";
@@ -11,6 +10,7 @@ import { useSession } from "@/lib/auth-client";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
 import Loading from "@/app/[locale]/dashboard/loading";
+import { useTranslations } from "next-intl";
 
 type FormValues = {
   moktobVisit: number | string;
@@ -54,10 +54,17 @@ type Props = {
   setIsSubmittedToday?: (v: boolean) => void;
 };
 
-const SoforBishoyForm: React.FC<Props> = ({ isSubmittedToday: propSubmitted, setIsSubmittedToday: setPropSubmitted }) => {
+const SoforBishoyForm: React.FC<Props> = ({
+  isSubmittedToday: propSubmitted,
+  setIsSubmittedToday: setPropSubmitted,
+}) => {
   const router = useRouter();
   const { data: session } = useSession();
   const email = session?.user?.email || "";
+
+  const tCommon = useTranslations("common");
+  const tSofor = useTranslations("dashboard.UserDashboard.soforbisoy");
+  const tToast = useTranslations("dashboard.UserDashboard.toast");
 
   const [isSubmittedTodayLocal, setIsSubmittedTodayLocal] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
@@ -89,14 +96,14 @@ const SoforBishoyForm: React.FC<Props> = ({ isSubmittedToday: propSubmitted, set
       } catch (err: any) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Submission status check failed:", err);
-          toast.error("Submission status check failed.");
+          toast.error(tToast("errorFetchingData"));
         }
       } finally {
         setLoading(false);
       }
     })();
     return () => ac.abort();
-  }, [email, propSubmitted]);
+  }, [email, propSubmitted, tToast]);
 
   if (loading) return <Loading />;
 
@@ -104,23 +111,23 @@ const SoforBishoyForm: React.FC<Props> = ({ isSubmittedToday: propSubmitted, set
     <div className="mx-auto mt-8 w-full rounded bg-white p-4 lg:p-10 shadow-lg">
       {effectiveSubmitted && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
-          You have already submitted today.
+          {tCommon("youHaveAlreadySubmittedToday")}
         </div>
       )}
 
-      <h2 className="mb-6 text-2xl">সফর বিষয়</h2>
+      <h2 className="mb-6 text-2xl">{tSofor("title")}</h2>
 
       <Formik<FormValues>
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
           if (effectiveSubmitted) {
-            toast.error("You have already submitted today.");
+            toast.error(tCommon("youHaveAlreadySubmittedToday"));
             setSubmitting(false);
             return;
           }
           if (!email) {
-            toast.error("User email not found. Please login.");
+            toast.error(tCommon("userEmailIsNotSet"));
             setSubmitting(false);
             return;
           }
@@ -144,29 +151,27 @@ const SoforBishoyForm: React.FC<Props> = ({ isSubmittedToday: propSubmitted, set
             const json = await res.json().catch(() => ({}));
 
             if (!res.ok) {
-              toast.error(json?.error || "Submission failed, please try again.");
+              toast.error(json?.error || tCommon("formSubmissionFailed"));
               return;
             }
 
-            toast.success("Submitted successfully!");
+            toast.success(tCommon("submittedSuccessfully"));
             resetForm();
             setEffectiveSubmitted(true);
             router.push("/dashboard");
           } catch (err) {
             console.error("Submit error:", err);
-            toast.error("Unexpected error during submission.");
+            toast.error(tCommon("formSubmissionFailed"));
           } finally {
             setSubmitting(false);
           }
         }}
       >
         {({ values, setFieldValue, isSubmitting }) => {
-          // Resize lists whenever counts change (no useFormikContext)
+          // Keep list lengths in sync with counts
           React.useEffect(() => {
             const count = Math.max(0, Number(values.madrasaVisit || 0));
-            let list = Array.isArray(values.madrasaVisitList)
-              ? [...values.madrasaVisitList]
-              : [];
+            let list = Array.isArray(values.madrasaVisitList) ? [...values.madrasaVisitList] : [];
             if (list.length !== count) {
               if (list.length < count) list.push(...Array(count - list.length).fill(""));
               else list = list.slice(0, count);
@@ -192,14 +197,14 @@ const SoforBishoyForm: React.FC<Props> = ({ isSubmittedToday: propSubmitted, set
                 {/* Moktob visit count */}
                 <div className="lg:col-span-2">
                   <label htmlFor="moktobVisit" className="mb-2 block text-gray-700">
-                    চলমান মক্তব পরিদর্শন হয়েছে
+                    {tSofor("moktobVisit")}
                   </label>
                   <Field
                     id="moktobVisit"
                     name="moktobVisit"
                     type="number"
                     min={0}
-                    placeholder="সংখ্যা লিখুন"
+                    placeholder="0"
                     className="w-full rounded border border-gray-300 px-4 py-2 mb-2"
                     disabled={effectiveSubmitted || isSubmitting}
                   />
@@ -208,12 +213,14 @@ const SoforBishoyForm: React.FC<Props> = ({ isSubmittedToday: propSubmitted, set
 
                 {/* Madrasa: count -> N inputs */}
                 <div>
-                  <label className="mb-2 block text-gray-700">মাদ্রাসা সফর হয়েছে (সংখ্যা)</label>
+                  <label className="mb-2 block text-gray-700">
+                    {tSofor("madrasaVisit")}
+                  </label>
                   <Field
                     name="madrasaVisit"
                     type="number"
                     min={0}
-                    placeholder="কতটি?"
+                    placeholder="0"
                     className="w-full rounded border border-gray-300 px-4 py-2 mb-2"
                     disabled={effectiveSubmitted || isSubmitting}
                   />
@@ -249,13 +256,13 @@ const SoforBishoyForm: React.FC<Props> = ({ isSubmittedToday: propSubmitted, set
                 {/* School/College/University: count -> N inputs */}
                 <div>
                   <label className="mb-2 block text-gray-700">
-                    স্কুল/কলেজ/ভার্সিটি দাওয়াতী সফর হয়েছে (সংখ্যা)
+                    {tSofor("schoolCollegeVisit")}
                   </label>
                   <Field
                     name="schoolCollegeVisit"
                     type="number"
                     min={0}
-                    placeholder="কতটি?"
+                    placeholder="0"
                     className="w-full rounded border border-gray-300 px-4 py-2 mb-2"
                     disabled={effectiveSubmitted || isSubmitting}
                   />
@@ -295,9 +302,9 @@ const SoforBishoyForm: React.FC<Props> = ({ isSubmittedToday: propSubmitted, set
 
               {/* Editor */}
               <div className="col-span-2 mt-6">
-                <h1 className="pb-3">মতামত লিখুন</h1>
+                <label className="pb-3 block">{tCommon("editorContent")}</label>
                 <JoditEditorComponent
-                  placeholder="আপনার মতামত লিখুন..."
+                  placeholder={tCommon("editorContentPlaceholder")}
                   initialValue={initialValues.editorContent}
                   onContentChange={(content) => setFieldValue("editorContent", content)}
                   height="300px"
@@ -313,7 +320,7 @@ const SoforBishoyForm: React.FC<Props> = ({ isSubmittedToday: propSubmitted, set
                   type="submit"
                   disabled={effectiveSubmitted || isSubmitting}
                 >
-                  {isSubmitting ? "Submitting..." : "Submit"}
+                  {tCommon("submit")}
                 </Button>
               </div>
             </Form>

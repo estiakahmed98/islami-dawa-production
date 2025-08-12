@@ -127,7 +127,6 @@
         "hijbulBahar": "হিজবুল বাহার",
         "percentage": "পরিশেট",
         "title": "আ'মলি মুহাসাবা"
-
       },
       "moktob": {
         "notunMoktobChalu": "নতুন মক্তব চালু হয়েছে",
@@ -140,7 +139,7 @@
         "boyoskoShikkhaOnshogrohon": "বয়স্ক শিক্ষায় অংশগ্রহণ",
         "newMuslimeDinerFikir": "নতুন মুসলিমদের ফিকির",
         "title": "মক্তব বিষয়"
-        },
+      },
       "talim": {
         "mohilaTalim": "মহিলাদের তালিম হয়েছে",
         "mohilaOnshogrohon": "মহিলাদের অংশগ্রহণ",
@@ -183,7 +182,8 @@
       "jamat": {
         "jamatBerHoise": "জামাত বের হয়েছে",
         "jamatSathi": "জামাত সাথী",
-        "title": "জামাত বিষয়"
+        "title": "জামাত বিষয়",
+        "editorContentPlaceholder": "আপনার মতামত লিখুন"
       },
       "dineFera": {
         "nonMuslimMuslimHoise": "অমুসলিম মুসলিম হয়েছে",
@@ -221,7 +221,7 @@
       },
       "dashboard": {
         "comparison": "তুলনা দেখুন",
-        "amoliMuhasaba": "আমলি মুহাসাবা",
+        "amoliMuhasaba": "আ’মলি মুহাসাবা",
         "moktobSubject": "মক্তব বিষয়",
         "talimSubject": "মহিলাদের তালিম বিষয়",
         "dayiSubject": "সহযোগী দায়ী বিষয়",
@@ -349,8 +349,7 @@
     "youCannotRequestEditsForFutureDates": "ভবিষ্যতের তারিখের জন্য এডিট রিকোয়েস্ট করা যাবে না",
     "editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval": "এডিট রিকোয়েস্ট সফলভাবে জমা হয়েছে। অ্যাডমিন অনুমোদনের জন্য অপেক্ষা করুন।",
     "failedToSubmitEditRequestPleaseTryAgain": "এডিট রিকোয়েস্ট জমা ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"
-  }
-  ,
+  },
   "SigninForm": {
     "title": "সাইন ইন",
     "description": "লগইনের জন্য আপনার অ্যাকাউন্টের তথ্য দিন",
@@ -402,20 +401,263 @@
     "editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval": "এডিট রিকোয়েস্ট সফলভাবে জমা হয়েছে। অ্যাডমিন অনুমোদনের জন্য অপেক্ষা করুন।",
     "failedToSubmitEditRequestPleaseTryAgain": "এডিট রিকোয়েস্ট জমা ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
     "editRequestFailed": "এডিট রিকোয়েস্ট ব্যর্থ হয়েছে",
-    "totalPoints":"সর্বমোট পয়েন্ট",
-    "submit":"জমা দিন ",
+    "totalPoints": "সর্বমোট পয়েন্ট",
+    "submit": "জমা দিন ",
     "close": "বন্ধ করুন",
     "cancel": "বাতিল",
     "save": "সংরক্ষণ"
   },
   "editRequest": {
-  "title": "সম্পাদনার অনুমতি অনুরোধ",
-  "description": "দিন {day}-এর তথ্য সম্পাদনা করতে আপনার প্রশাসকের অনুমতি প্রয়োজন। দয়া করে ব্যাখ্যা করুন কেন আপনি পরিবর্তন করতে চান।",
-  "reasonLabel": "সম্পাদনার কারণ",
-  "reasonPlaceholder": "দয়া করে ব্যাখ্যা করুন কেন আপনি এই তথ্য সম্পাদনা করতে চান...",
-  "reasonRequired": "দয়া করে আপনার সম্পাদনার অনুরোধের কারণ লিখুন",
-  "submit": "অনুরোধ জমা দিন",
-  "cancel": "বাতিল করুন",
-  "close": "বন্ধ করুন"
-}
+    "title": "সম্পাদনার অনুমতি অনুরোধ",
+    "description": "দিন {day}-এর তথ্য সম্পাদনা করতে আপনার প্রশাসকের অনুমতি প্রয়োজন। দয়া করে ব্যাখ্যা করুন কেন আপনি পরিবর্তন করতে চান।",
+    "reasonLabel": "সম্পাদনার কারণ",
+    "reasonPlaceholder": "দয়া করে ব্যাখ্যা করুন কেন আপনি এই তথ্য সম্পাদনা করতে চান...",
+    "reasonRequired": "দয়া করে আপনার সম্পাদনার অনুরোধের কারণ লিখুন",
+    "submit": "অনুরোধ জমা দিন",
+    "cancel": "বাতিল করুন",
+    "close": "বন্ধ করুন"
+  },
+  "leaveTable": {
+    "title": "আপনার ছুটির আবেদনসমূহ",
+    "subtitle": "জমাকৃত আবেদনের অবস্থা এক নজরে দেখুন।",
+    "subtitleNow": "জমাকৃত আবেদন ও বর্তমান স্ট্যাটাস",
+    "loading": "ডাটা লোড হচ্ছে…",
+    "errorSubtitle": "ডাটা লোড করতে সমস্যা হয়েছে।",
+    "errorPrefix": "ত্রুটি:",
+    "page": {
+      "title": "ছুটি ব্যবস্থাপনা",
+      "subtitle": "আপনার ছুটির আবেদন করুন এবং অবস্থা দেখুন।",
+      "openForm": "ছুটির জন্য আবেদন করুন",
+      "dialog": {
+        "title": "ছুটির জন্য আবেদন করুন",
+        "description": "ছুটির আবেদন জমা দিতে নিচের ফর্মটি পূরণ করুন।"
+      },
+      "loadingSession": "ইউজার সেশন লোড হচ্ছে...",
+      "loginPrompt": "ছুটির আবেদন ব্যবস্থাপনা করতে লগইন করুন।"
+    },
+    "errors": {
+      "fetchFailed": "ছুটির তালিকা পাওয়া যায়নি।",
+      "unknown": "অজানা ত্রুটি",
+      "toastPrefix": "ডাটা লোড করতে সমস্যা:"
+    },
+    "empty": {
+      "title": "কোনো ছুটির আবেদন পাওয়া যায়নি",
+      "subtitle": "আপনি যে আবেদন করবেন, সেটি এখানে দেখাবে।"
+    },
+    "table": {
+      "leaveType": "ছুটির ধরন",
+      "from": "শুরুর তারিখ",
+      "to": "শেষ তারিখ",
+      "days": "দিন",
+      "reason": "কারণ",
+      "status": "অবস্থা",
+      "requestDate": "আবেদনের তারিখ",
+      "approvedBy": "যিনি অনুমোদন করেছেন"
+    },
+    "status": {
+      "approved": "অনুমোদিত",
+      "pending": "অপেক্ষমাণ",
+      "rejected": "প্রত্যাখ্যাত"
+    },
+    "types": {
+      "casual": "ক্যাজুয়াল",
+      "sick": "অসুস্থতা",
+      "maternity": "মাতৃত্বকালীন",
+      "paternity": "পিতৃত্বকালীন",
+      "annual": "বাৎসরিক",
+      "other": "অন্যান্য"
+    },
+    "actions": {
+      "viewRejection": "প্রত্যাখ্যানের কারণ দেখুন",
+      "close": "বন্ধ করুন",
+      "ok": "ঠিক আছে"
+    },
+    "rejectionModal": {
+      "title": "প্রত্যাখ্যানের কারণ"
+    },
+    "noRejectionReason": "কোনো কারণ সংরক্ষিত নেই"
+  },
+  "leaveForm": {
+    "title": "ছুটির আবেদন",
+    "autofillNote": "আপনার প্রোফাইল থেকে নাম ও ফোন স্বয়ংক্রিয়ভাবে নেওয়া হয়েছে।",
+    "computedDays": {
+      "title": "নির্বাচিত তারিখ অনুযায়ী গণনা",
+      "label": "মোট দিন"
+    },
+    "name": "নাম",
+    "nameHelp": "এটি আপনার প্রোফাইল থেকে নেওয়া হয়েছে।",
+    "phone": "ফোন নম্বর",
+    "phoneFormatHelp": "ফরম্যাট: 01XXXXXXXXX (বাংলাদেশ)",
+    "phonePatternTitle": "বাংলাদেশি মোবাইল নম্বর: ০১৩–০১৯ সিরিজ, মোট ১১ ডিজিট",
+    "typeLabel": "ছুটির ধরন",
+    "typePlaceholder": "ছুটির ধরন নির্বাচন করুন",
+    "types": {
+      "casual": "ক্যাজুয়াল ছুটি",
+      "sick": "অসুস্থতার ছুটি",
+      "paternity": "পিতৃত্বকালীন ছুটি",
+      "annual": "বৎসরিক ছুটি",
+      "other": "অন্যান্য"
+    },
+    "dates": {
+      "from": "শুরুর তারিখ",
+      "to": "শেষ তারিখ",
+      "badRange": "তারিখের সীমা সঠিক নয়। শুরুর তারিখ শেষ তারিখের আগে/সমান হতে হবে।",
+      "hint": "দিন গণনা ইনক্লুসিভ (শুরু ও শেষ—দুটিই ধরা হয়)।"
+    },
+    "reason": {
+      "label": "ছুটির কারণ",
+      "placeholder": "সংক্ষেপে আপনার ছুটির কারণ লিখুন…",
+      "hint": "স্পষ্ট ও সংক্ষিপ্ত কারণ দিন। প্রয়োজনে রেফারেন্স যুক্ত করুন।",
+      "appliedDuration": "আবেদিত মেয়াদ",
+      "days": "দিন"
+    },
+    "actions": {
+      "cancel": "বাতিল",
+      "submit": "ছুটির আবেদন জমা দিন",
+      "submitting": "জমা হচ্ছে…"
+    },
+    "toasts": { "submitted": "✅ ছুটির আবেদন সফলভাবে জমা হয়েছে!" },
+    "errors": {
+      "typeRequired": "ছুটির ধরন নির্বাচন করুন।",
+      "dateRequired": "উভয় তারিখ নির্বাচন করুন।",
+      "badRange": "তারিখের সীমা সঠিক নয়।",
+      "reasonRequired": "ছুটির কারণ লিখুন।",
+      "generic": "ছুটির আবেদন জমা দিতে ব্যর্থ।"
+    }
+  },
+  "calendar": {
+    "page": {
+      "title": "কর্মসূচি দেখুন"
+    },
+    "component": {
+      "untitledEvent": "শিরোনামহীন ইভেন্ট",
+      "eventDetailsTitle": "ইভেন্টের বিস্তারিত",
+      "labels": {
+        "title": "শিরোনাম",
+        "creatorEmail": "সৃষ্টিকারীর ইমেইল",
+        "visibility": "দৃশ্যমানতা",
+        "time": "সময়",
+        "description": "বিবরণ"
+      },
+      "actions": {
+        "close": "বন্ধ করুন",
+        "edit": "সম্পাদনা",
+        "delete": "মুছুন"
+      },
+      "formTitle": {
+        "create": "নতুন ইভেন্ট",
+        "edit": "ইভেন্ট সম্পাদনা"
+      },
+      "rbc": {
+        "today": "আজ",
+        "previous": "পেছনে",
+        "next": "পরবর্তী",
+        "month": "মাস",
+        "week": "সপ্তাহ",
+        "day": "দিন",
+        "agenda": "এজেন্ডা",
+        "showMore": "+আরও {total}"
+      }
+    }
+  },
+  "amoliChart": {
+    "title": "আ’মলি মুহাসাবা",
+    "closed": "সম্পন্ন",
+    "remaining": "অবশিষ্ট",
+    "noDataUser": "উল্লিখিত ব্যবহারকারীর জন্য কোনো তথ্য নেই।",
+    "noDataUsers": "উল্লিখিত ব্যবহারকারীদের জন্য কোনো তথ্য নেই।"
+  },
+  "comparison": {
+    "title": "তুলনা",
+    "page": {
+      "title": "তুলনা",
+      "subtitle": "তারিখ/সময়পর্ব ধরে পরিমাপগুলোর তুলনা করুন।"
+    },
+    "controls": {
+      "type": "তুলনার ধরন",
+      "dayToDay": "দিনভিত্তিক",
+      "monthToMonth": "মাসভিত্তিক",
+      "yearToYear": "বছরভিত্তিক",
+      "from": "হতে",
+      "to": "পর্যন্ত",
+      "toWord": "থেকে",
+      "compare": "তুলনা করুন",
+      "downloadPdf": "পিডিএফ ডাউনলোড"
+    },
+    "table": {
+      "label": "লেবেল",
+      "fromHeader": "হতে",
+      "toHeader": "পর্যন্ত",
+      "difference": "পার্থক্য",
+      "change": "পরিবর্তন"
+    },
+    "messages": {
+      "selectValues": "মান নির্বাচন করে \"তুলনা করুন\" বাটনে ক্লিক করুন।",
+      "noData": "তুলনার জন্য কোনো ডেটা নেই।",
+      "invalidRange": "দয়া করে ‘হতে’ ও ‘পর্যন্ত’—উভয় মান নির্বাচন করুন।",
+      "noDataForPdf": "পিডিএফ তৈরির জন্য কোনো তথ্য নেই।"
+    },
+    "pdf": {
+      "title": "তুলনা রিপোর্ট",
+      "page": "পৃষ্ঠা {page} মোট {total}"
+    },
+    "tally": {
+      "title": "তুলনা",
+      "current": "বর্তমান",
+      "previous": "পূর্ববর্তী",
+      "change": "পরিবর্তন"
+    }
+  },
+  "register": {
+    "tabs": {
+      "standard": "দা'ঈ যোগ করুন",
+      "special": "বিশেষ দা'ঈ যোগ করুন"
+    },
+    "titles": {
+      "standard": "নতুন দা'ঈ যোগ করুন",
+      "special": "বিশেষ দা'ঈ যোগ করুন"
+    },
+    "fields": {
+      "name": "পূর্ণ নাম",
+      "role": "ভূমিকা",
+      "division": "বিভাগ",
+      "district": "জেলা",
+      "upazila": "উপজেলা",
+      "union": "ইউনিয়ন",
+      "markaz": "মার্কায",
+      "phone": "মোবাইল নম্বর",
+      "email": "ইমেইল",
+      "password": "নতুন পাসওয়ার্ড তৈরি"
+    },
+    "roles": {
+      "superadmin": "সুপার এডমিন",
+      "centraladmin": "কেন্দ্রীয় এডমিন",
+      "divisionadmin": "বিভাগীয় এডমিন",
+      "markazadmin": "মার্কায এডমিন",
+      "daye": "দা'ঈ"
+    },
+    "buttons": {
+      "addUser": "ব্যবহারকারী যোগ করুন",
+      "processing": "প্রসেসিং..."
+    },
+    "select": "নির্বাচন করুন",
+    "toasts": {
+      "created": "ব্যবহারকারী তৈরি হয়েছে!",
+      "error": "কিছু ভুল হয়েছে!"
+    },
+    "errors": {
+      "nameRequired": "নাম প্রয়োজন",
+      "emailInvalid": "ইমেইল সঠিক নয়",
+      "emailRequired": "ইমেইল প্রয়োজন",
+      "passwordMin": "পাসওয়ার্ড অন্তত ৮ অক্ষরের হতে হবে",
+      "passwordRequired": "পাসওয়ার্ড প্রয়োজন",
+      "roleRequired": "ভূমিকা প্রয়োজন",
+      "phoneRequired": "মোবাইল নম্বর প্রয়োজন",
+      "divisionRequired": "বিভাগ প্রয়োজন",
+      "districtRequired": "জেলা প্রয়োজন",
+      "upazilaRequired": "উপজেলা প্রয়োজন",
+      "unionRequired": "ইউনিয়ন প্রয়োজন",
+      "markazRequired": "মার্কায প্রয়োজন"
+    }
+  }
 }
