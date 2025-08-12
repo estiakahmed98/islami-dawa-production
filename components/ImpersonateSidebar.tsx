@@ -53,25 +53,15 @@ const ImpersonateSidebar: React.FC = () => {
     }
   };
 
-  // ✨ NEW: Fetch pending edit requests count (tries filtered endpoint first)
-  const fetchPendingEditCount = async () => { // <-- ADD
+  // ✨ NEW: Fetch pending edit requests count directly from localStorage (client-side source of truth)
+  const fetchPendingEditCount = async () => {
     try {
-      // If you have a filtered endpoint:
-      let res = await fetch("/api/edit-requests?status=pending");
-      if (res.ok) {
-        const data = await res.json();
-        const list = data?.requests || data?.editRequests || data || [];
-        setPendingEditCount(Array.isArray(list) ? list.length : 0);
-        return;
-      }
-
-      // Fallback: fetch all and filter on client
-      res = await fetch("/api/edit-requests");
-      if (!res.ok) throw new Error("bad status");
-      const data = await res.json();
-      const list = data?.requests || data?.editRequests || [];
-      const pending = Array.isArray(list) ? list.filter((r: any) => (r.status || "").toLowerCase() === "pending") : [];
-      setPendingEditCount(pending.length);
+      const raw = typeof window !== "undefined" ? localStorage.getItem("editRequests") : null;
+      const list = raw ? JSON.parse(raw) : [];
+      const pending = Array.isArray(list)
+        ? list.filter((r: any) => (r?.status || "").toLowerCase() === "pending").length
+        : 0;
+      setPendingEditCount(pending);
     } catch {
       setPendingEditCount(0);
     }
@@ -127,7 +117,7 @@ const ImpersonateSidebar: React.FC = () => {
       roles: ["centraladmin"],
     },
     {
-      href: "/admin/notification",
+      href: "/admin/leave",
       icon: <FcAcceptDatabase className="size-6" />,
       label: t("leaveMatters"),
       roles: ["centraladmin"],
@@ -191,15 +181,6 @@ const ImpersonateSidebar: React.FC = () => {
                       <Bell className="size-5 text-yellow-400" />
                       <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
                         {notificationCount > 99 ? "99+" : notificationCount}
-                      </span>
-                    </div>
-                  )}
-
-                  {showNotification && !!pendingEditCount && pendingEditCount > 0 && (
-                    <div className="relative">
-                      <Bell className="size-5 text-yellow-400" />
-                      <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                        {pendingEditCount > 99 ? "99+" : pendingEditCount}
                       </span>
                     </div>
                   )}

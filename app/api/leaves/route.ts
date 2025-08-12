@@ -20,10 +20,6 @@ function toDateOnlyISO(d: Date) {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
 }
 
-/** =========================================================
- * GET /api/leaves?email=...&status=...&fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
- * GET /api/leaves (for admin to fetch all)
- * ========================================================= */
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -76,10 +72,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/** ===========================
- * POST /api/leaves
- * Body: { email, name?, phone, leaveType, from, to, reason }
- * =========================== */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -132,11 +124,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/** ===========================
- * PUT /api/leaves
- * Body: { id, email, ...partialFields }
- * Ensures the leave belongs to the user identified by email
- * =========================== */
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json()
@@ -220,10 +207,6 @@ if (status && status !== "rejected" && rejectionReason === undefined) {
   }
 }
 
-/** ===========================
- * DELETE /api/leaves
- * Body: { id, email } — verifies ownership then deletes
- * =========================== */
 export async function DELETE(req: NextRequest) {
   try {
     const { id, email } = await req.json()

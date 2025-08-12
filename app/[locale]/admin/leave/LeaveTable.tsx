@@ -51,10 +51,11 @@ interface LeaveUserSummary {
   hasNewNotification: boolean;
 }
 
-const isRecent = (dateString: string, hours = 48) => {
+const isRecent = (dateString: string, hours = 48, nowMs?: number) => {
   const dt = new Date(dateString);
   if (Number.isNaN(dt.getTime())) return false;
-  const diffH = (Date.now() - dt.getTime()) / (1000 * 60 * 60);
+  const now = typeof nowMs === "number" ? nowMs : Date.now();
+  const diffH = (now - dt.getTime()) / (1000 * 60 * 60);
   return diffH <= hours;
 };
 
@@ -102,6 +103,8 @@ const AdminLeaveManagement: React.FC = () => {
   const [expandedUsers, setExpandedUsers] = useState<Record<string, boolean>>({});
   const [viewReasonModal, setViewReasonModal] = useState<{ open: boolean; text: string; }>({ open: false, text: "" });
   const tableRef = useRef<HTMLDivElement>(null);
+  // Avoid hydration mismatches: only compute time-sensitive UI after mount
+  const [isClient, setIsClient] = useState(false);
 
   const [rejectModal, setRejectModal] = useState<{ open: boolean; leave: LeaveRecord | null; reason: string; }>({
     open: false, leave: null, reason: ""
@@ -118,13 +121,23 @@ const AdminLeaveManagement: React.FC = () => {
   const fetchLeaveRequestsForAdmin = useCallback(async () => {
     try {
       const response = await fetch("/api/leaves");
+      const contentType = response.headers.get("content-type") || "";
       if (response.ok) {
-        const data = await response.json();
-        setLeaveRequests(data.leaveRequests);
-        setFilteredLeaves(data.leaveRequests);
+        if (contentType.includes("application/json")) {
+          const data = await response.json();
+          const list = Array.isArray(data?.leaveRequests) ? data.leaveRequests : [];
+          setLeaveRequests(list);
+          setFilteredLeaves(list);
+        } else {
+          // No JSON body; treat as empty list
+          setLeaveRequests([]);
+          setFilteredLeaves([]);
+        }
       } else {
-        const errorData = await response.json();
-        toast.error(t("toasts.fetchFailed", { msg: errorData.error || "Unknown error" }));
+        // Safely read error text; may be empty
+        const text = await response.text();
+        const msg = text?.trim() ? text.trim() : `${response.status} ${response.statusText}`;
+        toast.error(t("toasts.fetchFailed", { msg }));
       }
     } catch (error) {
       console.error("Error fetching leave requests:", error);
@@ -133,6 +146,7 @@ const AdminLeaveManagement: React.FC = () => {
   }, [t]);
 
   useEffect(() => {
+    setIsClient(true);
     fetchLeaveRequestsForAdmin();
   }, [fetchLeaveRequestsForAdmin]);
 
@@ -177,7 +191,8 @@ const AdminLeaveManagement: React.FC = () => {
 
       if (lower(leave.status) === "pending") {
         bucket.notificationCount += 1;
-        if (isRecent(leave.requestDate, 48)) bucket.hasNewNotification = true;
+        // Only evaluate recency on the client to avoid SSR hydration mismatches
+        if (isClient && isRecent(leave.requestDate, 48)) bucket.hasNewNotification = true;
       }
 
       if (lower(leave.status) === "approved") {
@@ -448,9 +463,13 @@ const AdminLeaveManagement: React.FC = () => {
         id: leaveId,
         email: userEmail,
         status: newStatus,
-        approvedBy: lower(newStatus) === "approved" ? approvedBy : null,
       };
-      if (rejectionReason !== undefined) payload.rejectionReason = (rejectionReason ?? "").trim();
+      if (lower(newStatus) === "approved" && approvedBy) {
+        payload.approvedBy = approvedBy;
+      }
+      if (lower(newStatus) === "rejected") {
+        payload.rejectionReason = (rejectionReason ?? "").trim();
+      }
 
       const response = await fetch("/api/leaves", {
         method: "PUT",
@@ -463,8 +482,17 @@ const AdminLeaveManagement: React.FC = () => {
         setRejectModal({ open: false, leave: null, reason: "" });
         fetchLeaveRequestsForAdmin();
       } else {
-        const errorData = await response.json();
-        toast.error(t("toasts.statusFailed", { msg: errorData.error || "Unknown error" }));
+        const text = await response.text();
+        let msg = `${response.status} ${response.statusText}`;
+        try {
+          const maybe = text ? JSON.parse(text) : null;
+          if (maybe && typeof maybe === "object" && (maybe.error || maybe.message)) {
+            msg = maybe.error || maybe.message;
+          }
+        } catch {
+          if (text && text.trim()) msg = text.trim();
+        }
+        toast.error(t("toasts.statusFailed", { msg }));
       }
     } catch (error) {
       console.error("Error updating status:", error);

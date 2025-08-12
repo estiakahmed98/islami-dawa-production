@@ -58,7 +58,7 @@ const SidebarMenu = () => {
     "/admin",
     "/admin/users",
     "/admin/register",
-    "/admin/notification",
+    "/admin/leave",
   ];
   const userRoutes = [
     "/dashboard",
@@ -182,7 +182,7 @@ const SidebarMenu = () => {
       title: t("viewDayi"),
     },
     {
-      url: "/admin/notification",
+      url: "/admin/leave",
       icon: <FcAcceptDatabase className="size-6" />,
       title: t("leaveMatters"),
     },
