@@ -154,9 +154,8 @@ const ImpersonateSidebar: React.FC = () => {
     <div className="flex h-screen font-tiro">
       {!isMobile && (
         <div
-          className={`fixed h-full overflow-y-auto bg-sky-900 transition-all duration-300 md:relative ${
-            isCollapsed ? "w-[70px]" : "w-72"
-          }`}
+          className={`fixed h-full overflow-y-auto bg-sky-900 transition-all duration-300 md:relative ${isCollapsed ? "w-[70px]" : "w-72"
+            }`}
         >
           <div className="flex items-center justify-between px-4 py-4">
             <button
@@ -178,9 +177,8 @@ const ImpersonateSidebar: React.FC = () => {
                 <Link
                   href={localeHref}
                   key={href}
-                  className={`flex items-center justify-between whitespace-nowrap px-2 py-2 font-medium ${
-                    active ? "rounded-md bg-cyan-600 text-white" : "text-white/80 hover:text-white"
-                  }`}
+                  className={`flex items-center justify-between whitespace-nowrap px-2 py-2 font-medium ${active ? "rounded-md bg-cyan-600 text-white" : "text-white/80 hover:text-white"
+                    }`}
                   aria-current={active ? "page" : undefined}
                 >
                   <div className="flex items-center">
@@ -193,6 +191,15 @@ const ImpersonateSidebar: React.FC = () => {
                       <Bell className="size-5 text-yellow-400" />
                       <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
                         {notificationCount > 99 ? "99+" : notificationCount}
+                      </span>
+                    </div>
+                  )}
+
+                  {showNotification && !!pendingEditCount && pendingEditCount > 0 && (
+                    <div className="relative">
+                      <Bell className="size-5 text-yellow-400" />
+                      <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                        {pendingEditCount > 99 ? "99+" : pendingEditCount}
                       </span>
                     </div>
                   )}

@@ -26,6 +26,7 @@ import { useSession } from "@/lib/auth-client";
 import { IoPersonAddSharp } from "react-icons/io5";
 import MuiTreeView from "@/components/MuiTreeView";
 import { useLocale, useTranslations } from "next-intl";
+import { FiEdit3 } from "react-icons/fi";
 
 const SidebarMenu = () => {
   const t = useTranslations("dashboard.sideBar");
@@ -190,6 +191,11 @@ const SidebarMenu = () => {
       icon: <FaTree className="size-6" />,
       title: t("realTree"),
     },
+    {
+      url: "/admin/edit-request",
+      icon: <FiEdit3 className="size-5" />,
+      title: t("editRequest"),
+    }
   ];
 
   return (
