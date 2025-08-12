@@ -26,39 +26,57 @@ const ImpersonateSidebar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Fetch user role from session
   const { data: session } = useSession();
-  const userRole = session?.user?.role || "user"; // Default to "user" if undefined
+  const userRole = session?.user?.role || "user";
 
   const [pendingLeaveCount, setPendingLeaveCount] = useState<number>(0);
 
+  // ✨ NEW: pending edit requests count
+  const [pendingEditCount, setPendingEditCount] = useState<number>(0); // <-- ADD
+
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Function to fetch pending leave requests count
+  // Fetch pending leave requests count
   const fetchPendingLeaveCount = async () => {
     try {
-      const response = await fetch("/api/leaves?status=pending");
-      if (response.ok) {
-        const data = await response.json();
-        setPendingLeaveCount(data.leaveRequests.length);
-      } else {
-        console.error("Failed to fetch pending leave requests:", response.statusText);
-        setPendingLeaveCount(0);
-      }
-    } catch (error) {
-      console.error("Error fetching pending leave requests:", error);
+      const res = await fetch("/api/leaves?status=pending");
+      if (!res.ok) throw new Error("bad status");
+      const data = await res.json();
+      setPendingLeaveCount(Array.isArray(data?.leaveRequests) ? data.leaveRequests.length : 0);
+    } catch {
       setPendingLeaveCount(0);
     }
   };
 
-  // Define admin roles for fetching notifications
+  // ✨ NEW: Fetch pending edit requests count (tries filtered endpoint first)
+  const fetchPendingEditCount = async () => { // <-- ADD
+    try {
+      // If you have a filtered endpoint:
+      let res = await fetch("/api/edit-requests?status=pending");
+      if (res.ok) {
+        const data = await res.json();
+        const list = data?.requests || data?.editRequests || data || [];
+        setPendingEditCount(Array.isArray(list) ? list.length : 0);
+        return;
+      }
+
+      // Fallback: fetch all and filter on client
+      res = await fetch("/api/edit-requests");
+      if (!res.ok) throw new Error("bad status");
+      const data = await res.json();
+      const list = data?.requests || data?.editRequests || [];
+      const pending = Array.isArray(list) ? list.filter((r: any) => (r.status || "").toLowerCase() === "pending") : [];
+      setPendingEditCount(pending.length);
+    } catch {
+      setPendingEditCount(0);
+    }
+  };
+
   const adminRolesForNotification = [
     "centraladmin",
     "superadmin",
@@ -70,21 +88,24 @@ const ImpersonateSidebar: React.FC = () => {
   ];
   const isAdminForNotification = adminRolesForNotification.includes(userRole as string);
 
-  // Fetch pending leave count on mount and every 30 seconds if admin
+  // Poll both counts every 30s if admin
   useEffect(() => {
-    if (isAdminForNotification) {
-      fetchPendingLeaveCount(); // Initial fetch
-      const interval = setInterval(fetchPendingLeaveCount, 30000); // Poll every 30 seconds
-      return () => clearInterval(interval); // Cleanup on unmount
-    }
+    if (!isAdminForNotification) return;
+
+    // initial
+    fetchPendingLeaveCount();
+    fetchPendingEditCount(); // <-- ADD
+
+    const interval = setInterval(() => {
+      fetchPendingLeaveCount();
+      fetchPendingEditCount(); // <-- ADD
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [isAdminForNotification]);
 
-  // Compare against locale-prefixed route, e.g. /en/admin
   const isActive = (basePath: string): boolean => pathname === `/${locale}${basePath}`;
-
-  const toggleCollapse = (): void => {
-    setIsCollapsed(!isCollapsed);
-  };
+  const toggleCollapse = () => setIsCollapsed((s) => !s);
 
   const allMenuItems = [
     {
@@ -124,6 +145,8 @@ const ImpersonateSidebar: React.FC = () => {
       icon: <FiEdit3 className="size-5" />,
       label: t("editRequest"),
       roles: ["centraladmin"],
+      notificationCount: pendingEditCount,
+      showNotification: true,
     },
   ];
 
@@ -146,12 +169,11 @@ const ImpersonateSidebar: React.FC = () => {
 
           <ul className="space-y-2 px-4">
             {allMenuItems.map(({ href, icon, label, roles, notificationCount, showNotification }) => {
-              if (!roles.includes(userRole)) {
-                return null;
-              }
+              if (!roles.includes(userRole)) return null;
 
               const active = isActive(href);
               const localeHref = `/${locale}${href}`;
+
               return (
                 <Link
                   href={localeHref}
@@ -165,7 +187,8 @@ const ImpersonateSidebar: React.FC = () => {
                     <div className={`text-xl ${isCollapsed ? "mx-auto" : "mr-3"}`}>{icon}</div>
                     {!isCollapsed && <li className="text-sm">{label}</li>}
                   </div>
-                  {showNotification && notificationCount !== undefined && notificationCount > 0 && (
+
+                  {showNotification && !!notificationCount && notificationCount > 0 && (
                     <div className="relative">
                       <Bell className="size-5 text-yellow-400" />
                       <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">

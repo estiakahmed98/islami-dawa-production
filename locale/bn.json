@@ -659,5 +659,275 @@
       "unionRequired": "ইউনিয়ন প্রয়োজন",
       "markazRequired": "মার্কায প্রয়োজন"
     }
+  },
+  "usersTable": {
+    "title": "সকল এডমিন ও দা'ঈ দেখুন",
+    "filters": {
+      "allRoles": "সব রোল",
+      "roleOptions": {
+        "centraladmin": "কেন্দ্রীয় এডমিন",
+        "divisionadmin": "বিভাগীয় এডমিন",
+        "districtadmin": "জেলা এডমিন",
+        "upozilaadmin": "উপজেলা এডমিন",
+        "unionadmin": "ইউনিয়ন এডমিন",
+        "markazadmin": "মার্কায এডমিন",
+        "daye": "দা'ঈ",
+        "assistantList": "সহযোগী দায়ী"
+      },
+      "placeholders": {
+        "name": "নাম",
+        "division": "বিভাগ",
+        "district": "জেলা",
+        "upazila": "উপজেলা",
+        "union": "ইউনিয়ন"
+      }
+    },
+    "export": {
+      "title": "ইউজার রিপোর্ট",
+      "download": "পিডিএফ ডাউনলোড",
+      "generatedOn": "{date} তারিখে প্রস্তুত"
+    },
+    "columns": {
+      "name": "নাম",
+      "email": "ইমেইল",
+      "role": "রোল",
+      "division": "বিভাগ",
+      "district": "জেলা",
+      "upazila": "উপজেলা",
+      "union": "ইউনিয়ন",
+      "phone": "ফোন",
+      "markaz": "মার্কায",
+      "adminAssigned": "দায়িত্বপ্রাপ্ত এডমিন",
+      "status": "স্ট্যাটাস",
+      "actions": "একশন"
+    },
+    "status": {
+      "active": "সক্রিয়",
+      "banned": "নিষিদ্ধ",
+      "authenticating": "প্রমাণীকরণ চলছে…"
+    },
+    "actions": {
+      "ban": "ব্যান",
+      "unban": "আনব্যান",
+      "edit": "এডিট",
+      "delete": "মুছুন"
+    },
+    "modals": {
+      "deleteConfirmTitle": "আপনি কি নিশ্চিত যে আপনি এই ব্যবহারকারীকে মুছে ফেলতে চান?",
+      "deleteWarningTitle": "আপনি যদি নিশ্চিত হন আপনি এই ব্যবহারকারীকে মুছে ফেলতে চান",
+      "firstContactDev": "প্রথমে ডেভেলপারের সাথে যোগাযোগ করুন।",
+      "delete": "মুছে ফেলুন",
+      "contactDev": "যোগাযোগ করুন",
+      "yes": "হ্যাঁ",
+      "no": "না",
+      "editNoteLabel": "নোট (পরিবর্তনের কারণ)",
+      "save": "পরিবর্তন সংরক্ষণ",
+      "cancel": "বাতিল",
+      "saveConfirmTitle": "আপনি কি নিশ্চিত যে আপনি এই পরিবর্তনগুলি সংরক্ষণ করতে চান?",
+      "saveConfirmProceed": "পরিবর্তন করুন",
+      "saveWarningTitle": "আপনি যদি নিশ্চিত হন যে আপনি এই ব্যবহারকারীর তথ্য পরিবর্তন করতে চান তাহলে"
+    },
+    "toasts": {
+      "updateSuccess": "ব্যবহারকারী হালনাগাদ হয়েছে",
+      "updateFailed": "ব্যবহারকারী হালনাগাদ ব্যর্থ",
+      "deleteSuccess": "ব্যবহারকারী মুছে ফেলা হয়েছে!",
+      "deleteFailed": "ব্যবহারকারী মুছে ফেলা যায়নি।",
+      "banFailed": "স্ট্যাটাস আপডেট ব্যর্থ।",
+      "banUpdated": "ব্যবহারকারী {action} হয়েছে!"
+    },
+    "tabs": {
+      "moktob": "মক্তব বিষয়",
+      "talim": "মহিলাদের তালিম",
+      "daye": "সহযোগী দায়ী",
+      "dawati": "দাওয়াতি বিষয়",
+      "dawatimojlish": "দাওয়াতি মজলিশ",
+      "jamat": "জামাত বিষয়",
+      "dinefera": "দ্বীনে ফিরে এসেছে",
+      "sofor": "সফর বিষয়"
+    },
+    "totalsTitle": "সর্বমোট ডাটা দেখুন"
+  },
+  "assistantDaeeList": {
+    "unknownUser": "(অজানা ব্যবহারকারী)",
+    "summary": "সহযোগী দায়ী তালিকা — মোট {total} জন (প্যারেন্ট দা'ঈ: {parents})",
+    "buttons": { "exportPdf": "Export PDF", "exportCsv": "Export CSV" },
+    "table": {
+      "headers": {
+        "parent": "দা'ঈ এর নাম",
+        "assistant": "সহযোগীর নাম",
+        "phone": "ফোন",
+        "email": "ইমেইল",
+        "address": "ঠিকানা",
+        "division": "বিভাগ",
+        "district": "জেলা",
+        "upazila": "উপজেলা",
+        "union": "ইউনিয়ন",
+        "date": "তারিখ"
+      }
+    },
+    "status": { "loading": "লোড হচ্ছে..." },
+    "empty": { "noRows": "বর্তমান ফিল্টারে কোনো সহযোগী দায়ী পাওয়া যায়নি।" },
+    "errors": {
+      "loadFailed": "সহযোগী দায়ী লোড ব্যর্থ",
+      "partial": "কিছু ডেটা লোড করা যায়নি। বাকি অংশ দেখানো হয়েছে।"
+    },
+    "pdf": {
+      "title": "সহযোগী দায়ী রিপোর্ট",
+      "totalParents": "মোট প্যারেন্ট",
+      "totalAssistants": "মোট সহযোগী",
+      "printed": "প্রিন্টেড",
+      "pageXofY": "পৃষ্ঠা {current} / {total}"
+    }
+  },
+  "leaveAdmin": {
+    "title": "ছুটি ব্যবস্থাপনা ড্যাশবোর্ড",
+    "subtitle": "সকল জমাকৃত ছুটির আবেদনের সারসংক্ষেপ ও ব্যবস্থাপনা।",
+    "search": {
+      "placeholder": "নাম, ইমেইল, ফোন, ধরন, কারণ বা স্ট্যাটাস দিয়ে খুঁজুন…",
+      "clear": "সার্চ মুছুন"
+    },
+    "buttons": {
+      "downloadSummary": "সারাংশ ডাউনলোড",
+      "generating": "তৈরি হচ্ছে...",
+      "downloadSingle": "এই আবেদন ডাউনলোড",
+      "cancel": "বাতিল",
+      "close": "বন্ধ",
+      "ok": "ঠিক আছে"
+    },
+    "columns": {
+      "name": "নাম",
+      "email": "ইমেইল",
+      "phone": "ফোন",
+      "casual": "ক্যাজুয়াল",
+      "sick": "সিক",
+      "maternity": "ম্যাটারনিটি",
+      "paternity": "প্যাটারনিটি",
+      "annual": "বার্ষিক",
+      "other": "অন্যান্য",
+      "total": "মোট",
+      "type": "ধরন",
+      "from": "শুরুর তারিখ",
+      "to": "শেষ তারিখ",
+      "days": "দিন",
+      "reason": "কারণ",
+      "status": "স্ট্যাটাস",
+      "requestedOn": "আবেদনের তারিখ",
+      "approvedBy": "অনুমোদনকারী",
+      "actions": "অ্যাকশন"
+    },
+    "types": {
+      "casual": "ক্যাজুয়াল",
+      "sick": "সিক",
+      "maternity": "ম্যাটারনিটি",
+      "paternity": "প্যাটারনিটি",
+      "annual": "বার্ষিক",
+      "other": "অন্যান্য"
+    },
+    "status": {
+      "pending": "পেন্ডিং",
+      "approved": "অনুমোদিত",
+      "rejected": "প্রত্যাখ্যাত"
+    },
+    "details": {
+      "title": "ছুটির বিস্তারিত",
+      "viewRejection": "প্রত্যাখ্যানের কারণ দেখুন",
+      "noRejectionReason": "কোনো কারণ দেওয়া হয়নি",
+      "rejectionTitle": "প্রত্যাখ্যানের কারণ"
+    },
+    "reject": {
+      "title": "ছুটি প্রত্যাখ্যান করুন",
+      "subtitle": "একটি কারণ লিখুন। এটি আবেদনের সাথে সংরক্ষিত হবে।",
+      "reasonLabel": "প্রত্যাখ্যানের কারণ",
+      "reasonPlaceholder": "প্রত্যাখ্যানের কারণ লিখুন...",
+      "reasonRequired": "দয়া করে প্রত্যাখ্যানের কারণ লিখুন।",
+      "saveAndReject": "কারণ সংরক্ষণ ও প্রত্যাখ্যান"
+    },
+    "labels": {
+      "na": "প্রযোজ্য নয়",
+      "pending": "পেন্ডিং",
+      "reason": "কারণ",
+      "rejectionReason": "প্রত্যাখ্যানের কারণ"
+    },
+    "tooltips": {
+      "pending": "পেন্ডিং আবেদন",
+      "newPending": "গত ৪৮ ঘণ্টার নতুন পেন্ডিং আবেদন"
+    },
+    "empty": "কোনো ছুটির রেকর্ড পাওয়া যায়নি",
+    "toasts": {
+      "fetchFailed": "ছুটির আবেদন আনা ব্যর্থ: {msg}",
+      "fetchUnexpected": "ছুটির আবেদন আনার সময় সমস্যা হয়েছে।",
+      "summarySuccess": "সারাংশ পিডিএফ তৈরি হয়েছে!",
+      "summaryFail": "পিডিএফ তৈরি ব্যর্থ। আবার চেষ্টা করুন।",
+      "singleSuccess": "ছুটির আবেদন পিডিএফ তৈরি হয়েছে!",
+      "singleFail": "পিডিএফ তৈরি ব্যর্থ। আবার চেষ্টা করুন।",
+      "statusUpdated": "ছুটির স্ট্যাটাস আপডেট হয়েছে!",
+      "statusFailed": "স্ট্যাটাস আপডেট ব্যর্থ: {msg}",
+      "statusUnexpected": "স্ট্যাটাস আপডেটের সময় সমস্যা হয়েছে।"
+    },
+    "pdf": {
+      "summaryTitle": "ছুটির সারাংশ",
+      "singleTitle": "ছুটির আবেদন",
+      "generatedOn": "তৈরির সময়",
+      "totalPeople": "মোট ব্যক্তি",
+      "employeeInfo": "কর্মী তথ্য",
+      "leaveDetails": "ছুটির বিবরণ",
+      "employeeSign": "কর্মীর স্বাক্ষর",
+      "adminSign": "অ্যাডমিনের স্বাক্ষর"
+    }
+  },
+  "editRequests": {
+    "page": {
+      "title": "এডিট অনুরোধ ব্যবস্থাপনা",
+      "subtitle": "সকল এডিট পারমিশন অনুরোধের সারসংক্ষেপ ও ব্যবস্থাপনা।"
+    },
+    "search": {
+      "placeholder": "নাম, ইমেইল, ফোন, ভূমিকা বা কারণ দিয়ে খুঁজুন…",
+      "clear": "সার্চ মুছুন"
+    },
+    "actions": {
+      "downloadSummary": "সারাংশ ডাউনলোড করুন",
+      "generating": "তৈরি হচ্ছে…"
+    },
+    "table": {
+      "name": "নাম",
+      "email": "ইমেইল",
+      "phone": "ফোন",
+      "role": "ভূমিকা",
+      "pending": "অপেক্ষমান",
+      "approved": "অনুমোদিত",
+      "rejected": "প্রত্যাখ্যাত",
+      "total": "মোট"
+    },
+    "details": {
+      "title": "এডিট অনুরোধের বিস্তারিত",
+      "date": "তারিখ",
+      "location": "অবস্থান",
+      "reason": "কারণ",
+      "status": "অবস্থা",
+      "actions": "অ্যাকশন"
+    },
+    "status": {
+      "pending": "অপেক্ষমান",
+      "approved": "অনুমোদিত",
+      "rejected": "প্রত্যাখ্যাত"
+    },
+    "badges": {
+      "pendingHint": "অপেক্ষমান অনুরোধ (নতুন অনুরোধ ৪৮ ঘণ্টা পর্যন্ত পালস করবে)"
+    },
+    "messages": {
+      "noData": "কোনো এডিট অনুরোধ পাওয়া যায়নি"
+    },
+    "toasts": {
+      "fetchError": "এডিট অনুরোধ আনা যায়নি।",
+      "statusUpdated": "স্ট্যাটাস সফলভাবে আপডেট হয়েছে!",
+      "statusUpdateFailed": "স্ট্যাটাস আপডেট ব্যর্থ হয়েছে।",
+      "pdfSuccess": "সারাংশ পিডিএফ সফলভাবে তৈরি হয়েছে!",
+      "pdfFailed": "পিডিএফ তৈরি ব্যর্থ হয়েছে।"
+    },
+    "pdf": {
+      "title": "এডিট অনুরোধের সারাংশ",
+      "generatedAt": "তৈরি করা হয়েছে:",
+      "totalUsers": "মোট ব্যবহারকারী:"
+    }
   }
 }

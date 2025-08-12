@@ -404,7 +404,9 @@
     "totalPoints": "Total Points",
     "close": "Close",
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "tryAgain": "Try Again",
+    "error": "Error"
   },
   "editRequest": {
     "title": "Request Edit Permission",
@@ -657,6 +659,276 @@
       "upazilaRequired": "Upazila is required",
       "unionRequired": "Union is required",
       "markazRequired": "Markaz is required"
+    }
+  },
+  "usersTable": {
+    "title": "View all Admins & Da'ees",
+    "filters": {
+      "allRoles": "All Roles",
+      "roleOptions": {
+        "centraladmin": "Central Admin",
+        "divisionadmin": "Division Admin",
+        "districtadmin": "District Admin",
+        "upozilaadmin": "Upazila Admin",
+        "unionadmin": "Union Admin",
+        "markazadmin": "Markaz Admin",
+        "daye": "Da'ee",
+        "assistantList": "Assistant Da'ee"
+      },
+      "placeholders": {
+        "name": "Name",
+        "division": "Division",
+        "district": "District",
+        "upazila": "Upazila",
+        "union": "Union"
+      }
+    },
+    "export": {
+      "title": "User Report",
+      "download": "Download PDF",
+      "generatedOn": "Generated on {date}"
+    },
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "division": "Division",
+      "district": "District",
+      "upazila": "Upazila",
+      "union": "Union",
+      "phone": "Phone",
+      "markaz": "Markaz",
+      "adminAssigned": "Admin Assigned",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "banned": "Banned",
+      "authenticating": "Authenticating..."
+    },
+    "actions": {
+      "ban": "Ban",
+      "unban": "Unban",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "modals": {
+      "deleteConfirmTitle": "Are you sure you want to delete this user?",
+      "deleteWarningTitle": "If you are sure you want to delete this user",
+      "firstContactDev": "Please contact the developer first.",
+      "delete": "Delete",
+      "contactDev": "Contact",
+      "yes": "Yes",
+      "no": "No",
+      "editNoteLabel": "Note (Reason for Changes)",
+      "save": "Save Changes",
+      "cancel": "Cancel",
+      "saveConfirmTitle": "Are you sure you want to save these changes?",
+      "saveConfirmProceed": "Change",
+      "saveWarningTitle": "If you are sure that you want to change this user's information then"
+    },
+    "toasts": {
+      "updateSuccess": "User updated successfully",
+      "updateFailed": "Failed to update user",
+      "deleteSuccess": "User deleted successfully!",
+      "deleteFailed": "Failed to delete user.",
+      "banFailed": "Failed to update user status.",
+      "banUpdated": "User {action} successfully!"
+    },
+    "tabs": {
+      "moktob": "Maktab Matters",
+      "talim": "Women's Taleem",
+      "daye": "Assistant Da'ee",
+      "dawati": "Dawah Matters",
+      "dawatimojlish": "Dawah Majlis",
+      "jamat": "Jamaat Matters",
+      "dinefera": "Returned to Islam",
+      "sofor": "Travel Matters"
+    },
+    "totalsTitle": "View Aggregated Data"
+  },
+  "assistantDaeeList": {
+    "unknownUser": "(Unknown user)",
+    "summary": "Assistant Da'ee List — Total {total} (Parent Da'ee: {parents})",
+    "buttons": { "exportPdf": "Export PDF", "exportCsv": "Export CSV" },
+    "table": {
+      "headers": {
+        "parent": "Name of Daye",
+        "assistant": "Assistant Name",
+        "phone": "Phone",
+        "email": "Email",
+        "address": "Address",
+        "division": "Division",
+        "district": "District",
+        "upazila": "Upazila",
+        "union": "Union",
+        "date": "Date of Record"
+      }
+    },
+    "status": { "loading": "Loading..." },
+    "empty": { "noRows": "No assistants found for the current filter." },
+    "errors": {
+      "loadFailed": "Failed to load assistants",
+      "partial": "Some data couldn't be loaded. The rest is shown."
+    },
+    "pdf": {
+      "title": "Assistant Da'ee Report",
+      "totalParents": "Total Parents",
+      "totalAssistants": "Total Assistants",
+      "printed": "Printed",
+      "pageXofY": "Page {current} of {total}"
+    }
+  },
+  "leaveAdmin": {
+    "title": "Leave Management Dashboard",
+    "subtitle": "Overview and management of all submitted leave requests.",
+    "search": {
+      "placeholder": "Search by name, email, phone, type, reason, or status…",
+      "clear": "Clear search"
+    },
+    "buttons": {
+      "downloadSummary": "Download Summary",
+      "generating": "Generating...",
+      "downloadSingle": "Download this request",
+      "cancel": "Cancel",
+      "close": "Close",
+      "ok": "OK"
+    },
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "casual": "Casual",
+      "sick": "Sick",
+      "maternity": "Maternity",
+      "paternity": "Paternity",
+      "annual": "Annual",
+      "other": "Other",
+      "total": "Total",
+      "type": "Type",
+      "from": "From",
+      "to": "To",
+      "days": "Days",
+      "reason": "Reason",
+      "status": "Status",
+      "requestedOn": "Requested On",
+      "approvedBy": "Approved By",
+      "actions": "Actions"
+    },
+    "types": {
+      "casual": "Casual",
+      "sick": "Sick",
+      "maternity": "Maternity",
+      "paternity": "Paternity",
+      "annual": "Annual",
+      "other": "Other"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "details": {
+      "title": "Leave Details",
+      "viewRejection": "View rejection reason",
+      "noRejectionReason": "No reason provided",
+      "rejectionTitle": "Rejection Reason"
+    },
+    "reject": {
+      "title": "Reject Leave",
+      "subtitle": "Please provide a reason. This will be saved with the request.",
+      "reasonLabel": "Rejection reason",
+      "reasonPlaceholder": "Type the reason for rejection...",
+      "reasonRequired": "Please provide a rejection reason.",
+      "saveAndReject": "Save Reason & Reject"
+    },
+    "labels": {
+      "na": "N/A",
+      "pending": "Pending",
+      "reason": "Reason",
+      "rejectionReason": "Rejection reason"
+    },
+    "tooltips": {
+      "pending": "Pending requests",
+      "newPending": "New pending requests in the last 48 hours"
+    },
+    "empty": "No leave records found",
+    "toasts": {
+      "fetchFailed": "Failed to fetch leave requests: {msg}",
+      "fetchUnexpected": "An unexpected error occurred while fetching leave requests.",
+      "summarySuccess": "Summary PDF generated successfully!",
+      "summaryFail": "Failed to generate PDF. Please try again.",
+      "singleSuccess": "Leave request PDF generated successfully!",
+      "singleFail": "Failed to generate PDF. Please try again.",
+      "statusUpdated": "Leave status updated successfully!",
+      "statusFailed": "Failed to update status: {msg}",
+      "statusUnexpected": "An unexpected error occurred while updating status."
+    },
+    "pdf": {
+      "summaryTitle": "Leave Summary",
+      "singleTitle": "Leave Request",
+      "generatedOn": "Generated on",
+      "totalPeople": "Total people",
+      "employeeInfo": "Employee Info",
+      "leaveDetails": "Leave Details",
+      "employeeSign": "Employee Signature",
+      "adminSign": "Admin Signature"
+    }
+  },
+  "editRequests": {
+    "page": {
+      "title": "Edit Request Management",
+      "subtitle": "Overview and management of all edit permission requests."
+    },
+    "search": {
+      "placeholder": "Search by name, email, phone, role or reason…",
+      "clear": "Clear search"
+    },
+    "actions": {
+      "downloadSummary": "Download Summary",
+      "generating": "Generating…"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "total": "Total"
+    },
+    "details": {
+      "title": "Edit Request Details",
+      "date": "Date",
+      "location": "Location",
+      "reason": "Reason",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "badges": {
+      "pendingHint": "Pending requests (new ones pulse for 48h)"
+    },
+    "messages": {
+      "noData": "No edit requests found"
+    },
+    "toasts": {
+      "fetchError": "Failed to fetch edit requests.",
+      "statusUpdated": "Status updated successfully!",
+      "statusUpdateFailed": "Failed to update status.",
+      "pdfSuccess": "Summary PDF generated successfully!",
+      "pdfFailed": "Failed to generate PDF."
+    },
+    "pdf": {
+      "title": "Edit Requests Summary",
+      "generatedAt": "Generated:",
+      "totalUsers": "Total users:"
     }
   }
 }

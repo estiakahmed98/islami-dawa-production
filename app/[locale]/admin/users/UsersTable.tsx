@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -71,7 +72,7 @@ const SelectField: React.FC<SelectFieldProps> = ({ label, name, value, onChange,
     <div>
       <label className="text-sm font-medium text-gray-700">{label}</label>
       <select name={name} value={value} onChange={onChange} className="w-full p-2 border rounded-md">
-        <option value="">Select {label}</option>
+        <option value="">{label}</option>
         {options.map((option) => (
           <option className="truncate" key={option.value} value={option.value}>
             {option.title}
@@ -83,7 +84,6 @@ const SelectField: React.FC<SelectFieldProps> = ({ label, name, value, onChange,
 };
 
 /** ------------- Label Maps (rows) ------------- */
-/** আমলী */
 const AMOLI_LABELS: Record<string, string> = {
   tahajjud: "তাহাজ্জুদ (মিনিট/রাকাআত)",
   surah: "সূরা",
@@ -103,7 +103,6 @@ const AMOLI_LABELS: Record<string, string> = {
   editorContent: "মতামত",
 };
 
-/** মক্তব */
 const MOKTOB_LABELS: Record<string, string> = {
   notunMoktobChalu: "নতুন মক্তব চালু",
   totalMoktob: "মোট মক্তব",
@@ -117,14 +116,12 @@ const MOKTOB_LABELS: Record<string, string> = {
   editorContent: "মতামত",
 };
 
-/** তালিম (মহিলা) */
 const TALIM_LABELS: Record<string, string> = {
   mohilaTalim: "মহিলাদের তালিম",
   mohilaOnshogrohon: "মহিলাদের অংশগ্রহণ",
   editorContent: "মতামত",
 };
 
-/** দাওয়াতি বিষয় */
 const DAWATI_LABELS: Record<string, string> = {
   nonMuslimDawat: "অমুসলিমকে দাওয়াত",
   murtadDawat: "মুরতাদকে দাওয়াত",
@@ -134,7 +131,6 @@ const DAWATI_LABELS: Record<string, string> = {
   editorContent: "মতামত",
 };
 
-/** দাওয়াতি মজলিশ */
 const DAWATI_MOJLISH_LABELS: Record<string, string> = {
   dawatterGuruttoMojlish: "দাওয়াতের গুরুত্ব মজলিশ",
   mojlisheOnshogrohon: "মজলিশে অংশগ্রহণ",
@@ -146,21 +142,18 @@ const DAWATI_MOJLISH_LABELS: Record<string, string> = {
   editorContent: "মতামত",
 };
 
-/** জামাত বিষয় */
 const JAMAT_LABELS: Record<string, string> = {
   jamatBerHoise: "জামাত বের হয়েছে",
   jamatSathi: "জামাত সাথী",
   editorContent: "মতামত",
 };
 
-/** দ্বীনে ফেরা */
 const DINEFERA_LABELS: Record<string, string> = {
   nonMuslimMuslimHoise: "অমুসলিম মুসলিম হয়েছে",
   murtadIslamFireche: "মুরতাদ ইসলাম ফিরেছে",
   editorContent: "মতামত",
 };
 
-/** সফর বিষয় */
 const SOFOR_LABELS: Record<string, string> = {
   madrasaVisit: "মাদ্রাসা ভিজিট",
   madrasaVisitList: "মাদ্রাসা ভিজিট তালিকা",
@@ -181,7 +174,6 @@ async function fetchAmoli(emails: string[]): Promise<UserDataForAdminTable> {
       (json.records || []).forEach((r: any) => {
         const dateKey = toDateKey(r.date);
         const slot = ensureEmailDateSlot(records, email, dateKey);
-        // map fields
         slot.tahajjud = r.tahajjud ?? "-";
         slot.surah = r.surah ?? "-";
         slot.ayat = r.ayat ?? "-";
@@ -359,6 +351,8 @@ async function fetchSofor(emails: string[]): Promise<UserDataForAdminTable> {
 
 /** ----------------- Component ----------------- */
 export default function UsersTable() {
+  const t = useTranslations("usersTable");
+
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -392,18 +386,18 @@ export default function UsersTable() {
   const [moktobData, setMoktobData] = useState<UserDataForAdminTable>({ records: {}, labelMap: MOKTOB_LABELS });
   const [talimData, setTalimData] = useState<UserDataForAdminTable>({ records: {}, labelMap: TALIM_LABELS });
   const [dawatiData, setDawatiData] = useState<UserDataForAdminTable>({ records: {}, labelMap: DAWATI_LABELS });
-  const [dawatiMojlishData, setDawatiMojlishData] = useState<UserDataForAdminTable>({
-    records: {},
-    labelMap: DAWATI_MOJLISH_LABELS,
-  });
+  const [dawatiMojlishData, setDawatiMojlishData] = useState<UserDataForAdminTable>({ records: {}, labelMap: DAWATI_MOJLISH_LABELS });
   const [jamatData, setJamatData] = useState<UserDataForAdminTable>({ records: {}, labelMap: JAMAT_LABELS });
   const [dineFeraData, setDineFeraData] = useState<UserDataForAdminTable>({ records: {}, labelMap: DINEFERA_LABELS });
   const [soforData, setSoforData] = useState<UserDataForAdminTable>({ records: {}, labelMap: SOFOR_LABELS });
 
+  /** role label helper (UI) */
+  const roleLabel = (role: string) =>
+    t.optional ? t.optional(`filters.roleOptions.${role}`, { default: role }) : t(`filters.roleOptions.${role}`);
+
   /** Fetch users */
   useEffect(() => {
     if (isPending || !sessionUser) return;
-
     const fetchUsers = async () => {
       setLoading(true);
       try {
@@ -417,7 +411,6 @@ export default function UsersTable() {
         setLoading(false);
       }
     };
-
     fetchUsers();
   }, [isPending, sessionUser]);
 
@@ -431,7 +424,6 @@ export default function UsersTable() {
             (user[key as keyof User] as string)?.toLowerCase().includes(value.toLowerCase()))
       )
     );
-
     setFilteredUsers(filtered);
     setEmailList(filtered.map((user) => user.email));
   }, [filters, users]);
@@ -452,9 +444,7 @@ export default function UsersTable() {
         return;
       }
       try {
-        const [
-          amoli, moktob, talim, dawati, dawatiMojlish, jamat, dineFera, sofor,
-        ] = await Promise.allSettled([
+        const [amoli, moktob, talim, dawati, dawatiMojlish, jamat, dineFera, sofor] = await Promise.allSettled([
           fetchAmoli(emailList),
           fetchMoktob(emailList),
           fetchTalim(emailList),
@@ -537,10 +527,10 @@ export default function UsersTable() {
       setUsers(data.users);
 
       setSelectedUser(null);
-      toast.success("User updated successfully");
+      toast.success(t("toasts.updateSuccess"));
     } catch (error) {
       console.error("Update error:", error);
-      toast.error("Failed to update user");
+      toast.error(t("toasts.updateFailed"));
     } finally {
       setShowSaveFirstModal(false);
       setShowSaveSecondModal(false);
@@ -609,49 +599,17 @@ export default function UsersTable() {
       }
 
       setUsers((prevUsers) => prevUsers.map((user) => (user.id === userId ? { ...user, banned: !isBanned } : user)));
-
-      toast.success(`User ${isBanned ? "unbanned" : "banned"} successfully!`);
+      toast.success(
+        t("toasts.banUpdated", { action: isBanned ? t("actions.unban").toLowerCase() : t("actions.ban").toLowerCase() })
+      );
     } catch (error) {
       console.error("Error updating user status:", error);
-      toast.error("Failed to update user status.");
-    }
-  };
-
-  const handleDeleteClick = (userId: string) => {
-    setUserToDelete(userId);
-    setShowFirstModal(true);
-  };
-
-  const handleFinalDelete = async () => {
-    if (!userToDelete) return;
-
-    try {
-      const response = await fetch("/api/usershow", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: userToDelete }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Error response:", errorText);
-        throw new Error(`API error: ${response.statusText}`);
-      }
-
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userToDelete));
-      toast.success("User deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("Failed to delete user.");
-    } finally {
-      setShowFirstModal(false);
-      setShowSecondModal(false);
-      setUserToDelete(null);
+      toast.error(t("toasts.banFailed"));
     }
   };
 
   if (isPending) {
-    return <p className="text-center text-xl p-10">Authenticating...</p>;
+    return <p className="text-center text-xl p-10">{t("status.authenticating")}</p>;
   }
 
   const getParentEmail = (user: User, users: User[]): string | null => {
@@ -662,26 +620,22 @@ export default function UsersTable() {
         break;
       case "markazadmin":
         parentUser = users.find((u) => u.role === "divisionadmin" && u.division === user.division);
-        if (!parentUser) {
-          parentUser = users.find((u) => u.role === "centraladmin");
-        }
+        if (!parentUser) parentUser = users.find((u) => u.role === "centraladmin");
         break;
       case "daye":
         parentUser = users.find((u) => u.role === "markazadmin" && u.markaz === user.markaz);
-        if (!parentUser) {
-          parentUser = users.find((u) => u.role === "centraladmin");
-        }
+        if (!parentUser) parentUser = users.find((u) => u.role === "centraladmin");
         break;
       default:
         return null;
     }
-    return parentUser ? `${parentUser.name} (${parentUser.role})` : null;
+    return parentUser ? `${parentUser.name} (${roleLabel(parentUser.role)})` : null;
   };
 
   return (
     <div className="w-full mx-auto p-2">
       <div>
-        <h1 className="text-2xl font-bold text-center mb-6">সকল এডমিন ও দায়ী দেখুন</h1>
+        <h1 className="text-2xl font-bold text-center mb-6">{t("title")}</h1>
 
         {/* Filters */}
         <div className="mb-4 grid grid-cols-3 md:grid-cols-6 gap-4">
@@ -690,63 +644,61 @@ export default function UsersTable() {
             onChange={(e) => handleFilterChange("role", e.target.value)}
             className="border border-slate-500 rounded-md px-4 py-2"
           >
-            <option value="">All Roles</option>
-            <option value="centraladmin">Central Admin</option>
-            <option value="divisionadmin">Division Admin</option>
-            <option value="districtadmin">District Admin</option>
-            <option value="upozilaadmin">Upazila Admin</option>
-            <option value="unionadmin">Union Admin</option>
-            <option value="daye">Da'ee</option>
-            <option value="AssistantDaeeList">সহযোগী দায়ী</option>
+            <option value="">{t("filters.allRoles")}</option>
+            <option value="centraladmin">{roleLabel("centraladmin")}</option>
+            <option value="divisionadmin">{roleLabel("divisionadmin")}</option>
+            <option value="districtadmin">{roleLabel("districtadmin")}</option>
+            <option value="upozilaadmin">{roleLabel("upozilaadmin")}</option>
+            <option value="unionadmin">{roleLabel("unionadmin")}</option>
+            <option value="daye">{roleLabel("daye")}</option>
+            <option value="AssistantDaeeList">{t("filters.roleOptions.assistantList")}</option>
           </select>
 
-          {Object.keys(filters)
-            .filter((key) => key !== "role")
-            .map((key) => (
-              <Input
-                key={key}
-                type="text"
-                placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
-                className="border-slate-500"
-                value={filters[key as keyof Filters]}
-                onChange={(e) => handleFilterChange(key as keyof Filters, e.target.value)}
-              />
-            ))}
+          {(["name", "division", "district", "upazila", "union"] as (keyof Filters)[]).map((key) => (
+            <Input
+              key={key}
+              type="text"
+              placeholder={t(`filters.placeholders.${key}`)}
+              className="border-slate-500"
+              value={filters[key]}
+              onChange={(e) => handleFilterChange(key, e.target.value)}
+            />
+          ))}
 
           {sessionUser?.role === "centraladmin" && filters.role !== "AssistantDaeeList" && (
             <TablePdfExporter
               tableData={{
                 headers: [
-                  "Name",
-                  "Email",
-                  "Role",
-                  "Division",
-                  "District",
-                  "Upazila",
-                  "Union",
-                  "Phone",
-                  "Markaz",
-                  "Admin Assigned",
-                  "Status",
+                  t("columns.name"),
+                  t("columns.email"),
+                  t("columns.role"),
+                  t("columns.division"),
+                  t("columns.district"),
+                  t("columns.upazila"),
+                  t("columns.union"),
+                  t("columns.phone"),
+                  t("columns.markaz"),
+                  t("columns.adminAssigned"),
+                  t("columns.status"),
                 ],
                 rows: filteredUsers.map((user) => ({
-                  Name: user.name,
-                  Email: user.email,
-                  Role: user.role,
-                  Division: user.division,
-                  District: user.district,
-                  Upazila: user.upazila,
-                  Union: user.union,
-                  Phone: user.phone,
-                  Markaz: user.markaz,
-                  "Admin Assigned": getParentEmail(user, users) || "N/A",
-                  Status: user.banned ? "Banned" : "Active",
+                  [t("columns.name")]: user.name,
+                  [t("columns.email")]: user.email,
+                  [t("columns.role")]: roleLabel(user.role),
+                  [t("columns.division")]: user.division,
+                  [t("columns.district")]: user.district,
+                  [t("columns.upazila")]: user.upazila,
+                  [t("columns.union")]: user.union,
+                  [t("columns.phone")]: user.phone,
+                  [t("columns.markaz")]: user.markaz,
+                  [t("columns.adminAssigned")]: getParentEmail(user, users) || "N/A",
+                  [t("columns.status")]: user.banned ? t("status.banned") : t("status.active"),
                 })),
-                title: "User Report",
-                description: `Generated on ${new Date().toLocaleDateString()}`,
+                title: t("export.title"),
+                description: t("export.generatedOn", { date: new Date().toLocaleDateString() }),
               }}
               fileName="users_report"
-              buttonText=" Download PDF"
+              buttonText={t("export.download")}
               buttonClassName="bg-[#155E75] text-white rounded-md px-4 py-2 hover:bg-[#0f4c6b]"
             />
           )}
@@ -759,18 +711,18 @@ export default function UsersTable() {
             <Table className="w-full">
               <TableHeader className="sticky top-0 z-50 bg-[#155E75] shadow-md border-b-2">
                 <TableRow className="text-white">
-                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">Name</TableHead>
-                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">Email</TableHead>
-                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">Role</TableHead>
-                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">Division</TableHead>
-                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">District</TableHead>
-                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">Upazila</TableHead>
-                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">Union</TableHead>
-                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">Phone</TableHead>
-                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">Markaz</TableHead>
-                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">Admin Assigned</TableHead>
-                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">Status</TableHead>
-                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">Actions</TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">{t("columns.name")}</TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">{t("columns.email")}</TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">{t("columns.role")}</TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">{t("columns.division")}</TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">{t("columns.district")}</TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">{t("columns.upazila")}</TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">{t("columns.union")}</TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">{t("columns.phone")}</TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">{t("columns.markaz")}</TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">{t("columns.adminAssigned")}</TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">{t("columns.status")}</TableHead>
+                  <TableHead className="border-r text-center border-gray-300 text-white font-bold">{t("columns.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -779,7 +731,7 @@ export default function UsersTable() {
                   <TableRow key={user.id} className="text-center">
                     <TableCell className="border-r font-semibold border-gray-300">{user.name}</TableCell>
                     <TableCell className="border-r border-gray-300">{user.email}</TableCell>
-                    <TableCell className="border-r border-gray-300">{user.role}</TableCell>
+                    <TableCell className="border-r border-gray-300">{roleLabel(user.role)}</TableCell>
                     <TableCell className="border-r border-gray-300">{user.division}</TableCell>
                     <TableCell className="border-r border-gray-300">{user.district}</TableCell>
                     <TableCell className="border-r border-gray-300">{user.upazila}</TableCell>
@@ -789,17 +741,17 @@ export default function UsersTable() {
                     <TableCell className="border-r border-gray-300 text-center">
                       {getParentEmail(user, users) || "N/A"}
                     </TableCell>
-                    <TableCell className="border-r border-gray-300">{user.banned ? "Banned" : "Active"}</TableCell>
+                    <TableCell className="border-r border-gray-300">{user.banned ? t("status.banned") : t("status.active")}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2 justify-center items-center">
                         <Button onClick={() => toggleBan(user.id, user.banned)} className={user.banned ? "bg-red-500" : "bg-green-500"}>
-                          {user.banned ? "Unban" : "Ban"}
+                          {user.banned ? t("actions.unban") : t("actions.ban")}
                         </Button>
                         <Button className="border-r font-semibold cursor-pointer hover:underline" onClick={() => setSelectedUser(user)}>
-                          Edit
+                          {t("actions.edit")}
                         </Button>
-                        <Button onClick={() => handleDeleteClick(user.id)} className="bg-red-800">
-                          Delete
+                        <Button onClick={() => { setUserToDelete(user.id); setShowFirstModal(true); }} className="bg-red-800">
+                          {t("actions.delete")}
                         </Button>
                       </div>
                     </TableCell>
@@ -810,11 +762,11 @@ export default function UsersTable() {
           </div>
         )}
 
-        {/* Delete confirmations */}
+        {/* Delete confirmations (1) */}
         {showFirstModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md text-center space-y-4">
-              <h3 className="text-lg font-semibold">আপনি কি নিশ্চিত যে আপনি এই ব্যবহারকারীকে মুছে ফেলতে চান?</h3>
+              <h3 className="text-lg font-semibold">{t("modals.deleteConfirmTitle")}</h3>
               <div className="flex justify-center gap-4">
                 <Button
                   onClick={() => {
@@ -823,7 +775,7 @@ export default function UsersTable() {
                   }}
                   className="bg-red-600"
                 >
-                  হ্যাঁ
+                  {t("modals.yes")}
                 </Button>
                 <Button
                   onClick={() => {
@@ -832,23 +784,46 @@ export default function UsersTable() {
                   }}
                   className="bg-green-600"
                 >
-                  না
+                  {t("modals.no")}
                 </Button>
               </div>
             </div>
           </div>
         )}
 
+        {/* Delete confirmations (2) */}
         {showSecondModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md text-center space-y-4">
               <h3 className="text-lg font-semibold">
-                আপনি যদি নিশ্চিত হন আপনি এই ব্যবহারকারীকে মুছে ফেলতে চান <br />
-                <span className="text-red-600 font-bold">প্রথমে developer এর সাথে যোগাযোগ করুন।</span>
+                {t("modals.deleteWarningTitle")} <br />
+                <span className="text-red-600 font-bold">{t("modals.firstContactDev")}</span>
               </h3>
               <div className="flex justify-center gap-4">
-                <Button onClick={handleFinalDelete} className="bg-red-600">
-                  মুছে ফেলুন
+                <Button
+                  onClick={async () => {
+                    if (!userToDelete) return;
+                    try {
+                      const response = await fetch("/api/usershow", {
+                        method: "DELETE",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ userId: userToDelete }),
+                      });
+                      if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+                      setUsers((prev) => prev.filter((u) => u.id !== userToDelete));
+                      toast.success(t("toasts.deleteSuccess"));
+                    } catch (err) {
+                      console.error(err);
+                      toast.error(t("toasts.deleteFailed"));
+                    } finally {
+                      setShowFirstModal(false);
+                      setShowSecondModal(false);
+                      setUserToDelete(null);
+                    }
+                  }}
+                  className="bg-red-600"
+                >
+                  {t("modals.delete")}
                 </Button>
                 <Button
                   onClick={() => {
@@ -858,7 +833,7 @@ export default function UsersTable() {
                   }}
                   className="bg-green-600"
                 >
-                  যোগাযোগ করুন
+                  {t("modals.contactDev")}
                 </Button>
               </div>
             </div>
@@ -869,39 +844,51 @@ export default function UsersTable() {
         {selectedUser && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white m-4 p-6 rounded-lg max-w-[80vh]">
-              <h2 className="text-xl font-bold mb-4">Edit User: {selectedUser.name}</h2>
+              <h2 className="text-xl font-bold mb-4">
+                {t("actions.edit")} {t("columns.name")}: {selectedUser.name}
+              </h2>
 
               <form id="edit-user-form" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label>Name</label>
+                    <label>{t("columns.name")}</label>
                     <Input name="name" defaultValue={selectedUser.name} readOnly={sessionUser?.role !== "centraladmin"} required />
                   </div>
 
                   <div>
-                    <label>Email</label>
+                    <label>{t("columns.email")}</label>
                     <Input name="email" type="email" defaultValue={selectedUser.email} readOnly={sessionUser?.role !== "centraladmin"} required />
                   </div>
 
                   <div>
-                    <label>Role</label>
-                    <select name="role" defaultValue={selectedUser.role} disabled={sessionUser?.role !== "centraladmin"} className="w-full p-2 border rounded-md" required>
-                      <option value="centraladmin">Central Admin</option>
-                      <option value="divisionadmin">Division Admin</option>
-                      <option value="districtadmin">District Admin</option>
-                      <option value="markaz">Markaz Admin (Not Avilable)</option>
-                      <option value="upozilaadmin">Upazila Admin</option>
-                      <option value="unionadmin">Union Admin</option>
-                      <option value="daye">Da'ee</option>
+                    <label>{t("columns.role")}</label>
+                    <select
+                      name="role"
+                      defaultValue={selectedUser.role}
+                      disabled={sessionUser?.role !== "centraladmin"}
+                      className="w-full p-2 border rounded-md"
+                      required
+                    >
+                      <option value="centraladmin">{roleLabel("centraladmin")}</option>
+                      <option value="divisionadmin">{roleLabel("divisionadmin")}</option>
+                      <option value="districtadmin">{roleLabel("districtadmin")}</option>
+                      <option value="markazadmin">{roleLabel("markazadmin")}</option>
+                      <option value="upozilaadmin">{roleLabel("upozilaadmin")}</option>
+                      <option value="unionadmin">{roleLabel("unionadmin")}</option>
+                      <option value="daye">{roleLabel("daye")}</option>
                     </select>
                   </div>
 
                   {["division", "district", "upazila", "union"].map((field) => (
                     <div key={field}>
-                      <label>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+                      <label>{t(`columns.${field as "division" | "district" | "upazila" | "union"}`)}</label>
                       <select
                         name={`${field}Id`}
-                        value={field === "division" ? divisionId : field === "district" ? districtId : field === "upazila" ? upazilaId : unionId}
+                        value={
+                          field === "division" ? divisionId :
+                          field === "district" ? districtId :
+                          field === "upazila" ? upazilaId : unionId
+                        }
                         onChange={(e) => handleLocationChange(`${field}Id`, e.target.value)}
                         disabled={
                           sessionUser?.role !== "centraladmin" ||
@@ -911,7 +898,7 @@ export default function UsersTable() {
                         }
                         className="w-full p-2 border rounded-md"
                       >
-                        <option value="">Select {field.charAt(0).toUpperCase() + field.slice(1)}</option>
+                        <option value="">{t(`filters.placeholders.${field as "division" | "district" | "upazila" | "union"}`)}</option>
                         {field === "division" &&
                           divisions.map((d) => (
                             <option key={d.value} value={d.value}>
@@ -944,13 +931,13 @@ export default function UsersTable() {
                   ))}
 
                   <div>
-                    <label>Phone</label>
+                    <label>{t("columns.phone")}</label>
                     <Input name="phone" defaultValue={selectedUser.phone} readOnly={sessionUser?.role !== "centraladmin"} required />
                   </div>
 
                   <div className="col-span-2">
                     <SelectField
-                      label="Markaz"
+                      label={t("columns.markaz")}
                       name="markaz"
                       value={selectedUser.markaz}
                       onChange={(e) => {
@@ -965,7 +952,7 @@ export default function UsersTable() {
 
                   {sessionUser?.role === "centraladmin" && (
                     <div className="col-span-2">
-                      <label>Note (Reason for Changes)</label>
+                      <label>{t("modals.editNoteLabel")}</label>
                       <textarea name="note" required className="w-full p-2 border rounded-md" />
                     </div>
                   )}
@@ -973,9 +960,9 @@ export default function UsersTable() {
 
                 <div className="mt-4 flex justify-end gap-2">
                   <Button type="button" onClick={() => setSelectedUser(null)} variant="outline">
-                    Cancel
+                    {t("modals.cancel")}
                   </Button>
-                  {sessionUser?.role === "centraladmin" && <Button type="submit">Save Changes</Button>}
+                  {sessionUser?.role === "centraladmin" && <Button type="submit">{t("modals.save")}</Button>}
                 </div>
               </form>
             </div>
@@ -985,18 +972,18 @@ export default function UsersTable() {
 
       {/* --------- UniversalTableShow-backed tabs (live DB) --------- */}
       <div className="mt-8">
-        <h3 className="text-center text-2xl font-semibold">সর্ব মোটডাটা দেখুন</h3>
+        <h3 className="text-center text-2xl font-semibold">{t("totalsTitle")}</h3>
         <div className="border border-[#155E75] lg:p-6 mt-4 rounded-xl overflow-y-auto">
           <Tabs defaultValue="moktob" className="w-full p-4">
             <TabsList className="grid grid-cols-2 md:grid-cols-4">
-              <TabsTrigger value="moktob">মক্তব বিষয়</TabsTrigger>
-              <TabsTrigger value="talim">মহিলাদের তালিম</TabsTrigger>
-              <TabsTrigger value="daye">সহযোগী দায়ী বিষয</TabsTrigger>
-              <TabsTrigger value="dawati">দাওয়াতি বিষয়</TabsTrigger>
-              <TabsTrigger value="dawatimojlish">দাওয়াতি মজলিশ</TabsTrigger>
-              <TabsTrigger value="jamat">জামাত বিষয়</TabsTrigger>
-              <TabsTrigger value="dinefera">দ্বীনে ফিরে এসেছে</TabsTrigger>
-              <TabsTrigger value="sofor">সফর বিষয়</TabsTrigger>
+              <TabsTrigger value="moktob">{t("tabs.moktob")}</TabsTrigger>
+              <TabsTrigger value="talim">{t("tabs.talim")}</TabsTrigger>
+              <TabsTrigger value="daye">{t("tabs.daye")}</TabsTrigger>
+              <TabsTrigger value="dawati">{t("tabs.dawati")}</TabsTrigger>
+              <TabsTrigger value="dawatimojlish">{t("tabs.dawatimojlish")}</TabsTrigger>
+              <TabsTrigger value="jamat">{t("tabs.jamat")}</TabsTrigger>
+              <TabsTrigger value="dinefera">{t("tabs.dinefera")}</TabsTrigger>
+              <TabsTrigger value="sofor">{t("tabs.sofor")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="moktob">
@@ -1005,11 +992,8 @@ export default function UsersTable() {
             <TabsContent value="talim">
               <AdminTable userData={talimData} emailList={emailList} />
             </TabsContent>
-            {/* সহযোগী দায়ী বিষয — this tab shows dayee's *counts* from /api/dayi? if you wish.
-                If you prefer the grouped assistants table, keep using the top filter "সহযোগী দায়ী"
-                which swaps the whole table to <AssistantDaeeList />. */}
+
             <TabsContent value="daye">
-              {/* Count of সহযোগী দায়ী তৈরি (sohojogiDayeToiri) per day */}
               <AdminTable
                 userData={{
                   records: (async () => {
@@ -1062,7 +1046,7 @@ export default function UsersTable() {
       {showSaveFirstModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md text-center space-y-4">
-            <h3 className="text-lg font-semibold">আপনি কি নিশ্চিত যে আপনি এই পরিবর্তনগুলি সংরক্ষণ করতে চান?</h3>
+            <h3 className="text-lg font-semibold">{t("modals.saveConfirmTitle")}</h3>
             <div className="flex justify-center gap-4">
               <Button
                 onClick={() => {
@@ -1071,10 +1055,10 @@ export default function UsersTable() {
                 }}
                 className="bg-red-600"
               >
-                হ্যাঁ
+                {t("modals.yes")}
               </Button>
               <Button onClick={() => setShowSaveFirstModal(false)} className="bg-green-600">
-                না
+                {t("modals.no")}
               </Button>
             </div>
           </div>
@@ -1085,12 +1069,12 @@ export default function UsersTable() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md text-center space-y-4">
             <h3 className="text-lg font-semibold">
-              আপনি যদি নিশ্চিত হন যে আপনি এই ব্যবহারকারীর তথ্য পরিবর্তন করতে চান তাহলে <br />
-              <span className="text-red-600 font-bold">প্রথমে developer এর সাথে যোগাযোগ করুন।</span>
+              {t("modals.saveWarningTitle")} <br />
+              <span className="text-red-600 font-bold">{t("modals.firstContactDev")}</span>
             </h3>
             <div className="flex justify-center gap-4">
               <Button onClick={handleFinalSubmit} className="bg-red-600">
-                পরিবর্তন করুন
+                {t("modals.saveConfirmProceed")}
               </Button>
               <Button
                 onClick={() => {
@@ -1099,7 +1083,7 @@ export default function UsersTable() {
                 }}
                 className="bg-green-600"
               >
-                যোগাযোগ করুন
+                {t("modals.contactDev")}
               </Button>
             </div>
           </div>

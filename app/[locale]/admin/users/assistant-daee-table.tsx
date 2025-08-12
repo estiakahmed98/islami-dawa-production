@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type Assistant = {
   id: string;
@@ -33,9 +32,7 @@ type DayeeRecord = {
   assistants: Assistant[];
 };
 
-type DayeeApiResponse = {
-  records: DayeeRecord[];
-};
+type DayeeApiResponse = { records: DayeeRecord[] };
 
 type User = {
   id: string;
@@ -52,10 +49,7 @@ type User = {
   banned: boolean;
 };
 
-type Props = {
-  emails: string[];
-  users: User[];
-};
+type Props = { emails: string[]; users: User[] };
 
 type FlatAssistant = Assistant & {
   parentUserId: string;
@@ -67,14 +61,13 @@ type FlatAssistant = Assistant & {
 const fmtDate = (iso?: string) => (iso ? new Date(iso).toLocaleDateString() : "-");
 
 const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
+  const t = useTranslations("assistantDaeeList");
+
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<FlatAssistant[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const userNameById = (id: string): string => {
-    const u = users.find((x) => x.id === id);
-    return u?.name || "(Unknown user)";
-  };
+  const userNameById = (id: string): string => users.find((x) => x.id === id)?.name || t("unknownUser");
 
   useEffect(() => {
     const run = async () => {
@@ -122,7 +115,7 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
         setRows(flat);
       } catch (e: any) {
         console.error(e);
-        setError(e?.message || "Failed to load assistants");
+        setError(e?.message || t("errors.loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -141,21 +134,39 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
     return m;
   }, [rows]);
 
+  const headers = [
+    t("table.headers.parent"),
+    t("table.headers.assistant"),
+    t("table.headers.phone"),
+    t("table.headers.email"),
+    t("table.headers.address"),
+    t("table.headers.division"),
+    t("table.headers.district"),
+    t("table.headers.upazila"),
+    t("table.headers.union"),
+    t("table.headers.date"),
+  ];
+
   const exportCSV = () => {
     if (!rows.length) return;
-    const headers = [
-      "Parent Name", "Assistant Name", "Phone", "Email", "Address",
-      "Division", "District", "Upazila", "Union", "Date of Record",
-    ];
     const BOM = "\uFEFF";
     const csv = BOM + [
       headers.join(","),
-      ...rows.map(r =>
+      ...rows.map((r) =>
         [
-          r.parentName, r.name, r.phone || "-", r.email || "-", r.address || "-",
-          r.division || "-", r.district || "-", r.upazila || "-", r.union || "-",
+          r.parentName,
+          r.name,
+          r.phone || "-",
+          r.email || "-",
+          r.address || "-",
+          r.division || "-",
+          r.district || "-",
+          r.upazila || "-",
+          r.union || "-",
           fmtDate(r.recordDate),
-        ].map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(",")
+        ]
+          .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
+          .join(",")
       ),
     ].join("\n");
 
@@ -168,7 +179,7 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
     URL.revokeObjectURL(url);
   };
 
-  // jsPDF + autoTable (fits all columns in one table on landscape A4)
+  // jsPDF + autoTable (fits columns on landscape A4)
   const exportPDF = async () => {
     if (!rows.length) return;
 
@@ -177,30 +188,19 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
 
     const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
 
-    // ---- OPTIONAL (Bangla font) ----
-    // doc.addFileToVFS("NotoSansBengali-Regular.ttf", "<BASE64_TTF_HERE>");
-    // doc.addFont("NotoSansBengali-Regular.ttf", "NotoSansBengali", "normal");
-    // doc.setFont("NotoSansBengali", "normal");
-
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 36; // 0.5 inch margins => usable ≈ 770pt
+    const margin = 36;
 
     // Header
     doc.setFontSize(14);
-    doc.setFont("NotoSansBengali", "bold");
-    doc.text("Assistant Da'ee Report", pageWidth / 2, 42, { align: "center" });
+    doc.text(t("pdf.title"), pageWidth / 2, 42, { align: "center" });
     doc.setFontSize(10);
-    doc.setFont("NotoSansBengali", "normal");
-    doc.text(`Total Parents: ${grouped.size}`, margin, 60);
-    doc.text(`Total Assistants: ${rows.length}`, margin + 150, 60);
-    doc.text(`Printed: ${new Date().toLocaleString()}`, pageWidth - margin, 60, { align: "right" });
+    doc.text(`${t("pdf.totalParents")}: ${grouped.size}`, margin, 60);
+    doc.text(`${t("pdf.totalAssistants")}: ${rows.length}`, margin + 150, 60);
+    doc.text(`${t("pdf.printed")}: ${new Date().toLocaleString()}`, pageWidth - margin, 60, { align: "right" });
 
-    // Head + Body
-    const head = [[
-      "Name of Daye", "Assistant Name", "Phone", "Email", "Address",
-      "Division", "District", "Upazila", "Union", "Date of Record",
-    ]];
+    const head = [headers];
 
     const body: any[] = [];
     Array.from(grouped.entries()).forEach(([, items]) => {
@@ -234,49 +234,33 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
       }
     });
 
-    // Carefully chosen widths that sum < usable width (~770pt)
-    // 90 + 95 + 70 + 110 + 90 + 60 + 70 + 60 + 60 + 60 = 765
     autoTable(doc, {
       startY: 76,
       head,
       body,
-      styles: {
-        fontSize: 8.5,
-        cellPadding: 4,
-        halign: "center",
-        valign: "top",
-        overflow: "linebreak",
-      },
-      headStyles: {
-        fillColor: [21, 94, 117],
-        textColor: 255,
-        fontStyle: "bold",
-        fontSize: 9,
-      },
+      styles: { fontSize: 8.5, cellPadding: 4, halign: "center", valign: "top", overflow: "linebreak" },
+      headStyles: { fillColor: [21, 94, 117], textColor: 255, fontStyle: "bold", fontSize: 9 },
       columnStyles: {
-        0: { cellWidth: 90 },   // Parent
-        1: { cellWidth: 95 },   // Assistant
-        2: { cellWidth: 70 },   // Phone
-        3: { cellWidth: 110 },  // Email
-        4: { cellWidth: 90 },   // Address
-        5: { cellWidth: 60 },   // Division
-        6: { cellWidth: 70 },   // District
-        7: { cellWidth: 60 },   // Upazila
-        8: { cellWidth: 60 },   // Union
-        9: { cellWidth: 60 },   // Date
+        0: { cellWidth: 90 },
+        1: { cellWidth: 95 },
+        2: { cellWidth: 70 },
+        3: { cellWidth: 110 },
+        4: { cellWidth: 90 },
+        5: { cellWidth: 60 },
+        6: { cellWidth: 70 },
+        7: { cellWidth: 60 },
+        8: { cellWidth: 60 },
+        9: { cellWidth: 60 },
       },
       margin: { left: margin, right: margin, top: margin, bottom: margin },
-      tableWidth: pageWidth - margin * 2, // force-fit table to page width
+      tableWidth: pageWidth - margin * 2,
       didDrawPage: () => {
         const pageCount = (doc as any).internal.getNumberOfPages();
         const pageCurrent = (doc as any).internal.getCurrentPageInfo().pageNumber;
         doc.setFontSize(9);
-        doc.text(
-          `Page ${pageCurrent} of ${pageCount}`,
-          pageWidth - margin,
-          pageHeight - 12,
-          { align: "right" }
-        );
+        doc.text(t("pdf.pageXofY", { current: pageCurrent, total: pageCount }), pageWidth - margin, pageHeight - 12, {
+          align: "right",
+        });
       },
     });
 
@@ -287,11 +271,15 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
         <div className="text-sm text-slate-700">
-          সহযোগী দায়ী তালিকা — মোট <b>{rows.length}</b> জন (Parent Daye: {grouped.size})
+          {t("summary", { total: rows.length, parents: grouped.size })}
         </div>
         <div className="flex gap-2">
-          <Button className="bg-[#155E75] hover:bg-[#1d809e] text-white" onClick={exportPDF}>Export PDF</Button>
-          <Button className="bg-[#155E75] hover:bg-[#1d809e] text-white" onClick={exportCSV}>Export CSV</Button>
+          <Button className="bg-[#155E75] hover:bg-[#1d809e] text-white" onClick={exportPDF}>
+            {t("buttons.exportPdf")}
+          </Button>
+          <Button className="bg-[#155E75] hover:bg-[#1d809e] text-white" onClick={exportCSV}>
+            {t("buttons.exportCsv")}
+          </Button>
         </div>
       </div>
 
@@ -299,16 +287,11 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
         <Table className="w-full">
           <TableHeader className="sticky top-0 z-40 bg-[#155E75] text-white">
             <TableRow>
-              <TableHead className="text-white border-r">Name of Daye</TableHead>
-              <TableHead className="text-white border-r">Assistant Name</TableHead>
-              <TableHead className="text-white border-r">Phone</TableHead>
-              <TableHead className="text-white border-r">Email</TableHead>
-              <TableHead className="text-white border-r">Address</TableHead>
-              <TableHead className="text-white border-r">Division</TableHead>
-              <TableHead className="text-white border-r">District</TableHead>
-              <TableHead className="text-white border-r">Upazila</TableHead>
-              <TableHead className="text-white border-r">Union</TableHead>
-              <TableHead className="text-white">Date of Record</TableHead>
+              {headers.map((h) => (
+                <TableHead key={h} className="text-white border-r">
+                  {h}
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
 
@@ -316,7 +299,7 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
             {loading && (
               <TableRow>
                 <TableCell colSpan={10} className="text-center py-6">
-                  Loading...
+                  {t("status.loading")}
                 </TableCell>
               </TableRow>
             )}
@@ -324,7 +307,7 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
             {!loading && rows.length === 0 && (
               <TableRow>
                 <TableCell colSpan={10} className="text-center py-6">
-                  No assistants found for the current filter.
+                  {t("empty.noRows")}
                 </TableCell>
               </TableRow>
             )}
@@ -356,7 +339,7 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
 
       {error && (
         <p className="mt-3 text-sm text-red-600">
-          {error} — কিছু ডেটা লোড করা যায়নি। বাকি অংশ দেখানো হয়েছে।
+          {error} — {t("errors.partial")}
         </p>
       )}
     </div>
