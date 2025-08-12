@@ -21,6 +21,7 @@ import { useSession } from "@/lib/auth-client";
 import moment from "moment-hijri";
 import { toast } from "sonner";
 import Loading from "@/app/[locale]/dashboard/loading"; // Assuming this path is correct
+import { useTranslations } from "next-intl";
 
 interface AmoliMuhasabaFormValues {
   tahajjud: number;
@@ -81,6 +82,8 @@ const validationSchema = Yup.object({
 
 const AmoliMuhasabaForm = () => {
   const router = useRouter();
+  const t = useTranslations("dashboard.UserDashboard.amoli");
+  const common = useTranslations("common");
   const { data: session } = useSession();
   const email = session?.user?.email || "";
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
@@ -185,11 +188,11 @@ const AmoliMuhasabaForm = () => {
           });
           setIsSubmittedToday(hasTodaySubmission);
         } else {
-          toast.error("Failed to check submission status.");
+          toast.error(common("failedToCheckSubmissionStatus"));
         }
       } catch (error) {
         console.error("Error checking submission status:", error);
-        toast.error("Error checking submission status.");
+        toast.error(common("errorCheckingSubmissionStatus"));
       } finally {
         setLoading(false); // Always set loading to false after check
       }
@@ -202,7 +205,7 @@ const AmoliMuhasabaForm = () => {
     { setSubmitting }: FormikHelpers<AmoliMuhasabaFormValues>
   ) => {
     if (!email) {
-      toast.error("User email is not set. Please log in.");
+      toast.error(common("userEmailIsNotSet"));
       setSubmitting(false);
       return;
     }
@@ -221,19 +224,19 @@ const AmoliMuhasabaForm = () => {
         });
 
         if (alreadySubmitted) {
-          toast.error("You have already submitted today. Try again tomorrow.");
+          toast.error(common("youHaveAlreadySubmittedToday"));
           setIsSubmittedToday(true); // update UI immediately
           setSubmitting(false);
           return;
         }
       } else {
-        toast.error("Failed to validate existing submissions.");
+        toast.error(common("failedToValidateExistingSubmissions"));
         setSubmitting(false);
         return;
       }
     } catch (error) {
       console.error("Error validating existing records:", error);
-      toast.error("An error occurred while checking for existing submissions.");
+      toast.error(common("errorValidatingExistingRecords"));
       setSubmitting(false);
       return;
     }
@@ -251,15 +254,15 @@ const AmoliMuhasabaForm = () => {
       });
 
       if (response.ok) {
-        toast.success("Submitted successfully!");
+        toast.success(common("submittedSuccessfully"));
         setIsSubmittedToday(true); // update UI state
         router.push("/dashboard");
       } else {
-        toast.error("Form submission failed! Try again.");
+        toast.error(common("formSubmissionFailed"));
       }
     } catch (error) {
       console.error("Form submission error:", error);
-      toast.error("An error occurred while submitting the form.");
+      toast.error(common("formSubmissionFailed"));
     }
 
     setSubmitting(false);
@@ -270,10 +273,10 @@ const AmoliMuhasabaForm = () => {
 
   return (
     <div className="mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
-      <h2 className="mb-2 text-2xl">আ’মলি মুহাসাবা</h2>
+      <h2 className="mb-2 text-2xl">{t("title")}</h2>
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
-          You have already submitted today.
+          {common("youHaveAlreadySubmittedToday")}
         </div>
       )}
       <Formik
@@ -285,7 +288,7 @@ const AmoliMuhasabaForm = () => {
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="mb-4">
-                <label className="mb-2 block text-gray-700">তাহাজ্জুদ</label>
+                <label className="mb-2 block text-gray-700">{t("tahajjud")}</label>
                 <Field
                   name="tahajjud"
                   type="number"
@@ -307,7 +310,7 @@ const AmoliMuhasabaForm = () => {
                 <div className="text-gray-600">Points: {points.tahajjud}</div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">জামাতে সালাত</label>
+                <label className="mb-2 block text-gray-700">{t("jamat")}</label>
                 <Field
                   name="jamat"
                   type="number"
@@ -330,9 +333,7 @@ const AmoliMuhasabaForm = () => {
                 <div className="text-gray-600">Points: {points.jamat}</div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">
-                  তিলাওয়াতুল কোরআন তাদাব্বুর
-                </label>
+                <label className="mb-2 block text-gray-700">{t("surah")}</label>
                 <Field
                   name="surah"
                   as="select"
@@ -344,7 +345,7 @@ const AmoliMuhasabaForm = () => {
                       | ChangeEvent<HTMLSelectElement>
                   ) => handleInputChange(e, "surah", setFieldValue)}
                 >
-                  <option value="">Select Option</option>
+                  <option value="">{common("selectOption")}</option>
                   {surahOptions.map((option) => (
                     <option key={option.value} value={option.label}>
                       {option.label}
@@ -359,7 +360,7 @@ const AmoliMuhasabaForm = () => {
                 <div className="text-gray-600">Points: {points.surah}</div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">আয়াত প্রদান</label>
+                <label className="mb-2 block text-gray-700">{t("ayat")}</label>
                 <Field
                   name="ayat"
                   type="text"
@@ -377,12 +378,10 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">Points: {points.ayat}</div>
+                <div className="text-gray-600">{common("points")}: {points.ayat}</div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">
-                  সকাল-সন্ধ্যা দোয়া ও জিকির
-                </label>
+                <label className="mb-2 block text-gray-700">{t("zikir")}</label>
                 <Field
                   name="zikir"
                   as="select"
@@ -394,7 +393,7 @@ const AmoliMuhasabaForm = () => {
                       | ChangeEvent<HTMLSelectElement>
                   ) => handleInputChange(e, "zikir", setFieldValue)}
                 >
-                  <option value="">Select Option</option>
+                  <option value="">{common("selectOption")}</option>
                   {zikirOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -409,9 +408,7 @@ const AmoliMuhasabaForm = () => {
                 <div className="text-gray-600">Points: {points.zikir}</div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">
-                  ইশরাক-আওয়াবীন-চাশ্ত
-                </label>
+                <label className="mb-2 block text-gray-700">{t("ishraq")}</label>
                 <Field
                   name="ishraq"
                   as="select"
@@ -423,7 +420,7 @@ const AmoliMuhasabaForm = () => {
                       | ChangeEvent<HTMLSelectElement>
                   ) => handleInputChange(e, "ishraq", setFieldValue)}
                 >
-                  <option value="">Select Option</option>
+                  <option value="">{common("selectOption")}</option>
                   {ishraqOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -435,12 +432,10 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">Points: {points.ishraq}</div>
+                <div className="text-gray-600">{common("points")}: {points.ishraq}</div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">
-                  সিরাত ও মাগফিরাত কিতাব পাঠ
-                </label>
+                <label className="mb-2 block text-gray-700">{t("sirat")}</label>
                 <Field
                   name="sirat"
                   type="text"
@@ -458,12 +453,10 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">Points: {points.sirat}</div>
+                <div className="text-gray-600">{common("points")}: {points.sirat}</div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">
-                  দু’আ আনাস ইবনে মালেক
-                </label>
+                <label className="mb-2 block text-gray-700">{t("dua")}</label>
                 <Field
                   name="Dua"
                   as="select"
@@ -475,7 +468,7 @@ const AmoliMuhasabaForm = () => {
                       | ChangeEvent<HTMLSelectElement>
                   ) => handleInputChange(e, "Dua", setFieldValue)}
                 >
-                  <option value="">Select Option</option>
+                  <option value="">{common("selectOption")}</option>
                   {duaOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -487,12 +480,10 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">Points: {points.Dua}</div>
+                <div className="text-gray-600">{common("points")}: {points.Dua}</div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">
-                  ইলমী ও আমলী কিতাব পাঠ
-                </label>
+                <label className="mb-2 block text-gray-700">{t("ilm")}</label>
                 <Field
                   name="ilm"
                   type="text"
@@ -510,12 +501,10 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">Points: {points.ilm}</div>
+                <div className="text-gray-600">{common("points")}: {points.ilm}</div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">
-                  তিন তাসবীহ (সকাল- সন্ধ্যা)
-                </label>
+                <label className="mb-2 block text-gray-700">{t("tasbih")}</label>
                 <Field
                   name="tasbih"
                   as="select"
@@ -527,7 +516,7 @@ const AmoliMuhasabaForm = () => {
                       | ChangeEvent<HTMLSelectElement>
                   ) => handleInputChange(e, "tasbih", setFieldValue)}
                 >
-                  <option value="">Select Option</option>
+                  <option value="">{common("selectOption")}</option>
                   {tasbihOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -539,10 +528,10 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">Points: {points.tasbih}</div>
+                <div className="text-gray-600">{common("points")}: {points.tasbih}</div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">দাঈ আমল</label>
+                <label className="mb-2 block text-gray-700">{t("dayeeAmol")}</label>
                 <Field
                   name="dayeeAmol"
                   as="select"
@@ -554,7 +543,7 @@ const AmoliMuhasabaForm = () => {
                       | ChangeEvent<HTMLSelectElement>
                   ) => handleInputChange(e, "dayeeAmol", setFieldValue)}
                 >
-                  <option value="">Select Option</option>
+                  <option value="">{common("selectOption")}</option>
                   {dayeeAmolOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -566,10 +555,10 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">Points: {points.dayeeAmol}</div>
+                <div className="text-gray-600">{common("points")}: {points.dayeeAmol}</div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">আমলী সূরা</label>
+                <label className="mb-2 block text-gray-700">{t("amoliSura")}</label>
                 <Field
                   name="amoliSura"
                   as="select"
@@ -581,7 +570,7 @@ const AmoliMuhasabaForm = () => {
                       | ChangeEvent<HTMLSelectElement>
                   ) => handleInputChange(e, "amoliSura", setFieldValue)}
                 >
-                  <option value="">Select Option</option>
+                  <option value="">{common("selectOption")}</option>
                   {amoliSuraOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -597,9 +586,7 @@ const AmoliMuhasabaForm = () => {
               </div>
               {showAyamRojaSection && (
                 <div className="mb-2">
-                  <label className="mb-2 block text-gray-700">
-                    আয়াম বীজ রোজা
-                  </label>
+                  <label className="mb-2 block text-gray-700">{t("ayamroja")}</label>
                   <Field
                     name="ayamroja"
                     as="select"
@@ -611,7 +598,7 @@ const AmoliMuhasabaForm = () => {
                         | ChangeEvent<HTMLSelectElement | HTMLInputElement>
                     ) => handleInputChange(e, "ayamroja", setFieldValue)}
                   >
-                    <option value="">Select Option</option>
+                    <option value="">{common("selectOption")}</option>
                     {AyamOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -623,11 +610,11 @@ const AmoliMuhasabaForm = () => {
                     component="div"
                     className="text-red-500"
                   />
-                  <div className="text-gray-600">Points: {points.ayamroja}</div>
+                  <div className="text-gray-600">{common("points")}: {points.ayamroja}</div>
                 </div>
               )}
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">হিজবুল বাহার</label>
+                <label className="mb-2 block text-gray-700">{t("hijbulBahar")}</label>
                 <Field
                   name="hijbulBahar"
                   as="select"
@@ -639,7 +626,7 @@ const AmoliMuhasabaForm = () => {
                       | ChangeEvent<HTMLSelectElement>
                   ) => handleInputChange(e, "hijbulBahar", setFieldValue)}
                 >
-                  <option value="">Select Option</option>
+                  <option value="">{common("selectOption")}</option>
                   {hijbulBaharOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -652,18 +639,16 @@ const AmoliMuhasabaForm = () => {
                   className="text-red-500"
                 />
                 <div className="text-gray-600">
-                  Points: {points.hijbulBahar}
+                  {common("points")}: {points.hijbulBahar}
                 </div>
               </div>
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700 mt-4 mb-2">
-                কারণ উল্লেখ করুন (Show Cause)
-              </label>
+              <label className="block text-gray-700 mt-4 mb-2">{common("editorContent")}</label>
               <Field
                 as="textarea"
                 name="editorContent"
-                placeholder="আপনার কারণ লিখুন..."
+                placeholder={common("editorContentPlaceholder")}
                 rows={6}
                 className="w-full rounded border border-gray-300 px-4 py-2"
                 disabled={isSubmittedToday}
@@ -676,7 +661,7 @@ const AmoliMuhasabaForm = () => {
             </div>
             <div className="mt-6 flex items-center justify-between">
               <div className="text-gray-600 text-lg">
-                Total Points:{" "}
+                {common("totalPoints")}:{" "}
                 <span className="text-emerald-600 font-semibold">
                   {totalPoints} / {maxPoints} ({percentage}%){" "}
                 </span>
@@ -690,7 +675,7 @@ const AmoliMuhasabaForm = () => {
                     : "bg-blue-500 hover:bg-blue-700"
                 } rounded`}
               >
-                {isSubmitting ? "Submitting..." : "Submit"}
+                {isSubmitting ? common("submitting") : common("submit")}
               </button>
             </div>
           </form>

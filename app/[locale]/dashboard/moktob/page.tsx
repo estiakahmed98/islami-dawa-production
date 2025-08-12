@@ -6,6 +6,7 @@ import { useSession } from "@/lib/auth-client"
 import UniversalTableShow from "@/components/TableShow"
 import MoktobBishoyForm from "@/components/MoktobBishoyForm"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 type RecordsByUserAndDate = {
   [email: string]: { [dateKey: string]: any }
@@ -32,17 +33,20 @@ const MoktobPage: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = React.useState<number>(new Date().getMonth())
   const [selectedYear, setSelectedYear] = React.useState<number>(new Date().getFullYear())
 
+  const t = useTranslations("dashboard.UserDashboard.moktob");
+  const common = useTranslations("common");
+
   const labelMap = React.useMemo(
     () => ({
-      notunMoktobChalu: "নতুন মক্তব চালু",
-      totalMoktob: "মোট মক্তব",
-      totalStudent: "মোট শিক্ষার্থী",
-      obhibhabokConference: "অভিভাবক সম্মেলন",
-      moktoThekeMadrasaAdmission: "মক্তব থেকে মাদরাসা ভর্তি",
-      notunBoyoskoShikkha: "নতুন বয়স্ক শিক্ষা",
-      totalBoyoskoShikkha: "মোট বয়স্ক শিক্ষা",
-      boyoskoShikkhaOnshogrohon: "বয়স্ক শিক্ষা অংশগ্রহণ",
-      newMuslimeDinerFikir: "নতুন মুসলিমের দীন চিন্তা",
+      notunMoktobChalu: t("notunMoktobChalu"),
+      totalMoktob: t("totalMoktob"),
+      totalStudent: t("totalStudent"),
+      obhibhabokConference: t("obhibhabokConference"),
+      moktoThekeMadrasaAdmission: t("moktoThekeMadrasaAdmission"),
+      notunBoyoskoShikkha: t("notunBoyoskoShikkha"),
+      totalBoyoskoShikkha: t("totalBoyoskoShikkha"),
+      boyoskoShikkhaOnshogrohon: t("boyoskoShikkhaOnshogrohon"),
+      newMuslimeDinerFikir: t("newMuslimeDinerFikir"),
     }),
     []
   )
@@ -92,7 +96,7 @@ const MoktobPage: React.FC = () => {
       } catch (err: any) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Failed to fetch Moktob data:", err)
-          toast.error("মক্তব তথ্য আনা যায়নি।")
+          toast.error(common("failedToFetchData"))
         }
       }
     })()
@@ -105,8 +109,8 @@ const MoktobPage: React.FC = () => {
       <Tabs defaultValue="dataForm" className="w-full p-2 lg:p-4">
         <div className="flex justify-between">
           <TabsList>
-            <TabsTrigger value="dataForm">তথ্য দিন</TabsTrigger>
-            <TabsTrigger value="report">প্রতিবেদন</TabsTrigger>
+            <TabsTrigger value="dataForm">{common("dataForm")}</TabsTrigger>
+            <TabsTrigger value="report">{common("report")}</TabsTrigger>
           </TabsList>
         </div>
 

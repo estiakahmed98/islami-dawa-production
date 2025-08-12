@@ -1,5 +1,6 @@
 // Faysal // Estiak
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/DawatiData";
@@ -9,8 +10,8 @@ import { useEffect, useState } from "react";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
 import Loading from "@/app/[locale]/dashboard/loading";
+import { useTranslations } from "next-intl";
 
-// Form values
 interface DawatiFormData {
   nonMuslimDawat: string;
   murtadDawat: string;
@@ -27,7 +28,11 @@ const DawatiForm: React.FC = () => {
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check if the user has already submitted today (Asia/Dhaka day)
+  const tDawati = useTranslations("dashboard.UserDashboard.dawati");
+  const tToast = useTranslations("dashboard.UserDashboard.toast");
+  const common = useTranslations("common");
+
+  // Check if already submitted today (server should return Asia/Dhaka aware flag)
   useEffect(() => {
     const checkToday = async () => {
       if (!email) {
@@ -36,29 +41,29 @@ const DawatiForm: React.FC = () => {
       }
       try {
         const res = await fetch(
-          `/api/dawati?email=${encodeURIComponent(email)}&mode=today`
+          `/api/dawati?email=${encodeURIComponent(email)}&mode=today`,
+          { cache: "no-store" }
         );
         if (!res.ok) throw new Error("Failed to check submission status");
         const data = await res.json();
         setIsSubmittedToday(Boolean(data?.isSubmittedToday));
       } catch (err) {
         console.error("Submission check error:", err);
-        toast.error("Could not verify today's submission.");
+        toast.error(tToast("errorFetchingData"));
       } finally {
         setLoading(false);
       }
     };
     checkToday();
-  }, [email]);
+  }, [email, tToast]);
 
   const handleSubmit = async (values: DawatiFormData) => {
     if (!email) {
-      toast.error("You are not logged in.");
+      toast.error(common("userEmailIsNotSet"));
       return;
     }
-
     if (isSubmittedToday) {
-      toast.error("You have already submitted today. Try again tomorrow.");
+      toast.error(common("youHaveAlreadySubmittedToday"));
       return;
     }
 
@@ -82,23 +87,20 @@ const DawatiForm: React.FC = () => {
       const json = await res.json().catch(() => ({}));
 
       if (res.status === 201) {
-        toast.success("Submitted successfully!");
+        toast.success(common("submittedSuccessfully"));
         setIsSubmittedToday(true);
         router.push("/dashboard");
         return;
       }
-
       if (res.status === 409) {
-        // unique violation (already submitted today)
         setIsSubmittedToday(true);
-        toast.error(json?.error || "Already submitted for today.");
+        toast.error(json?.error || common("youHaveAlreadySubmittedToday"));
         return;
       }
-
-      toast.error(json?.error || "Submission failed. Try again.");
+      toast.error(json?.error || common("formSubmissionFailed"));
     } catch (err) {
       console.error("Submission error:", err);
-      toast.error("Unexpected error during submission.");
+      toast.error(common("formSubmissionFailed"));
     }
   };
 
@@ -108,11 +110,11 @@ const DawatiForm: React.FC = () => {
     <div className="w-full mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
-          You already have submitted today.
+          {common("youHaveAlreadySubmittedToday")}
         </div>
       )}
 
-      <h2 className="mb-6 text-2xl">দাওয়াতি বিষয়</h2>
+      <h2 className="mb-6 text-2xl">{tDawati("title") ?? "Dawah Matters"}</h2>
 
       <Formik
         initialValues={{ ...initialFormData, editorContent: "" }}
@@ -124,85 +126,69 @@ const DawatiForm: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               <div>
                 <label className="mb-2 block text-gray-700">
-                  অনুসলিমকে দাওয়াত দেওয়া হয়েছে
+                  {tDawati("nonMuslimDawat")}
                 </label>
                 <Field
                   name="nonMuslimDawat"
                   type="number"
                   disabled={isSubmittedToday || isSubmitting}
-                  placeholder="Enter value"
+                  placeholder="0"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
-                <ErrorMessage
-                  name="nonMuslimDawat"
-                  component="div"
-                  className="text-red-500"
-                />
+                <ErrorMessage name="nonMuslimDawat" component="div" className="text-red-500" />
               </div>
 
               <div>
                 <label className="mb-2 block text-gray-700">
-                  মুরতাদ কে দাওয়াত দেওয়া হয়েছে
+                  {tDawati("murtadDawat")}
                 </label>
                 <Field
                   name="murtadDawat"
                   type="number"
                   disabled={isSubmittedToday || isSubmitting}
-                  placeholder="Enter Value"
+                  placeholder="0"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
-                <ErrorMessage
-                  name="murtadDawat"
-                  component="div"
-                  className="text-red-500"
-                />
+                <ErrorMessage name="murtadDawat" component="div" className="text-red-500" />
               </div>
 
               <div>
                 <label className="mb-2 block text-gray-700">
-                  আলেম উলামার সাথে দাওয়াতি বিষয়ে কথাবার্তা হয়েছে
+                  {tDawati("alemderSatheyMojlish")}
                 </label>
                 <Field
                   name="alemderSatheyMojlish"
                   type="number"
                   disabled={isSubmittedToday || isSubmitting}
-                  placeholder="Enter Value"
+                  placeholder="0"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
-                <ErrorMessage
-                  name="alemderSatheyMojlish"
-                  component="div"
-                  className="text-red-500"
-                />
+                <ErrorMessage name="alemderSatheyMojlish" component="div" className="text-red-500" />
               </div>
 
               <div>
                 <label className="mb-2 block text-gray-700">
-                  সাধারণ মুসলমানদের সাথে দাওয়াতি বিষয়ে কথাবার্তা হয়েছে
+                  {tDawati("publicSatheyMojlish")}
                 </label>
                 <Field
                   name="publicSatheyMojlish"
                   type="number"
                   disabled={isSubmittedToday || isSubmitting}
-                  placeholder="Enter Value"
+                  placeholder="0"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
-                <ErrorMessage
-                  name="publicSatheyMojlish"
-                  component="div"
-                  className="text-red-500"
-                />
+                <ErrorMessage name="publicSatheyMojlish" component="div" className="text-red-500" />
               </div>
 
               <div>
                 <label className="mb-2 block text-gray-700">
-                  অমুসলিমদের মাঝে সাপ্তাহিক গাস্ত হয়েছে
+                  {tDawati("nonMuslimSaptahikGasht")}
                 </label>
                 <Field
                   name="nonMuslimSaptahikGasht"
                   type="number"
                   disabled={isSubmittedToday || isSubmitting}
-                  placeholder="Enter Value"
+                  placeholder="0"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
                 <ErrorMessage
@@ -213,27 +199,21 @@ const DawatiForm: React.FC = () => {
               </div>
             </div>
 
-            <div>
-              <h1 className="pb-3">মতামত লিখুন</h1>
+            <div className="mt-4">
+              <label className="mb-2 block text-gray-700">{common("editorContent")}</label>
               <JoditEditorComponent
-                placeholder="আপনার মতামত লিখুন..."
+                placeholder={common("editorContentPlaceholder")}
                 initialValue=""
-                onContentChange={(content) =>
-                  setFieldValue("editorContent", content)
-                }
+                onContentChange={(content) => setFieldValue("editorContent", content)}
                 height="300px"
                 width="100%"
+                disabled={isSubmittedToday || isSubmitting}
               />
             </div>
 
             <div className="flex justify-end mt-4">
-              <Button
-                variant="ghost"
-                size="default"
-                type="submit"
-                disabled={isSubmittedToday || isSubmitting}
-              >
-                {isSubmitting ? "Submitting..." : "Submit"}
+              <Button type="submit" disabled={isSubmittedToday || isSubmitting}>
+                {common("submit")}
               </Button>
             </div>
           </Form>

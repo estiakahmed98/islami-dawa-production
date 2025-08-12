@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Formik, Form } from "formik";
@@ -9,20 +9,9 @@ import { useEffect, useState } from "react";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
 import Loading from "@/app/[locale]/dashboard/loading";
+import { useTranslations } from "next-intl";
 
 type FormValues = typeof initialFormData & { editorContent: string };
-
-const FIELDS: { name: keyof FormValues; label: string }[] = [
-  { name: "notunMoktobChalu", label: "নতুন মক্তব চালু হয়েছে" },
-  { name: "totalMoktob", label: "মোট মক্তব চালু আছে" },
-  { name: "totalStudent", label: "মোট শিক্ষার্থী" },
-  { name: "obhibhabokConference", label: "অভিভাবক সম্মেলন" },
-  { name: "moktoThekeMadrasaAdmission", label: "মক্তব থেকে মাদরাসায় ভর্তি" },
-  { name: "notunBoyoskoShikkha", label: "নতুন বয়স্ক কোরআন শিক্ষা" },
-  { name: "totalBoyoskoShikkha", label: "মোট বয়স্ক কোরআন শিক্ষা" },
-  { name: "boyoskoShikkhaOnshogrohon", label: "বয়স্ক শিক্ষায় অংশগ্রহণ" },
-  { name: "newMuslimeDinerFikir", label: "নব মুসলিমের দীন ফিকির" },
-];
 
 /** Format a date to YYYY-MM-DD in Dhaka time */
 function dhakaYMD(d: Date) {
@@ -49,6 +38,24 @@ const MoktobBishoyForm = () => {
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // i18n
+  const tMoktob = useTranslations("dashboard.UserDashboard.moktob");
+  const tToast = useTranslations("dashboard.UserDashboard.toast");
+  const common = useTranslations("common");
+
+  // Build field list *after* hooks so tMoktob is defined
+  const FIELDS: { name: keyof FormValues; label: string }[] = [
+    { name: "notunMoktobChalu", label: tMoktob("notunMoktobChalu") },
+    { name: "totalMoktob", label: tMoktob("totalMoktob") },
+    { name: "totalStudent", label: tMoktob("totalStudent") },
+    { name: "obhibhabokConference", label: tMoktob("obhibhabokConference") },
+    { name: "moktoThekeMadrasaAdmission", label: tMoktob("moktoThekeMadrasaAdmission") },
+    { name: "notunBoyoskoShikkha", label: tMoktob("notunBoyoskoShikkha") },
+    { name: "totalBoyoskoShikkha", label: tMoktob("totalBoyoskoShikkha") },
+    { name: "boyoskoShikkhaOnshogrohon", label: tMoktob("boyoskoShikkhaOnshogrohon") },
+    { name: "newMuslimeDinerFikir", label: tMoktob("newMuslimeDinerFikir") },
+  ];
+
   // Check if user already submitted today
   useEffect(() => {
     if (!email) {
@@ -60,10 +67,10 @@ const MoktobBishoyForm = () => {
     const ac = new AbortController();
     (async () => {
       try {
-        const res = await fetch(
-          `/api/moktob?email=${encodeURIComponent(email)}`,
-          { cache: "no-store", signal: ac.signal }
-        );
+        const res = await fetch(`/api/moktob?email=${encodeURIComponent(email)}`, {
+          cache: "no-store",
+          signal: ac.signal,
+        });
         if (!res.ok) throw new Error("Failed to fetch records");
         const json = await res.json();
         const records: Array<{ date: string | Date }> = Array.isArray(json)
@@ -74,7 +81,7 @@ const MoktobBishoyForm = () => {
       } catch (err: any) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Today check error:", err);
-          toast.error("আজকের সাবমিশন স্ট্যাটাস চেক করা যায়নি।");
+          toast.error(tToast("errorFetchingData")); // from dashboard.UserDashboard.toast
         }
       } finally {
         setLoading(false);
@@ -82,16 +89,16 @@ const MoktobBishoyForm = () => {
     })();
 
     return () => ac.abort();
-  }, [email]);
+  }, [email, tToast]);
 
   const handleSubmit = async (values: FormValues) => {
     if (!email) {
-      toast.error("You are not logged in.");
+      toast.error(common("userEmailIsNotSet"));
       return;
     }
 
     if (isSubmittedToday) {
-      toast.error("You have already submitted today.");
+      toast.error(common("youHaveAlreadySubmittedToday"));
       return;
     }
 
@@ -119,15 +126,15 @@ const MoktobBishoyForm = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Submission failed");
+        throw new Error(data.error || common("formSubmissionFailed"));
       }
 
-      toast.success("Submitted successfully...");
+      toast.success(common("submittedSuccessfully"));
       setIsSubmittedToday(true);
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Submit error:", error);
-      toast.error(error.message || "Submission failed");
+      toast.error(error.message || common("formSubmissionFailed"));
     }
   };
 
@@ -137,10 +144,11 @@ const MoktobBishoyForm = () => {
     <div className="w-full mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
-          You have already submitted today.
+          {common("youHaveAlreadySubmittedToday")}
         </div>
       )}
-      <h2 className="mb-6 text-2xl">মক্তব বিষয়</h2>
+      <h2 className="mb-6 text-2xl">{tMoktob("title")}</h2>
+
       <Formik<FormValues>
         initialValues={{ ...initialFormData, editorContent: "" }}
         validationSchema={validationSchema}
@@ -149,17 +157,17 @@ const MoktobBishoyForm = () => {
         {({ setFieldValue, isSubmitting }) => (
           <Form className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {FIELDS.map((f) => (
-              <div key={f.name as string}>
+              <div key={String(f.name)}>
                 <label className="mb-2 block text-gray-700">{f.label}</label>
                 <Field
-                  name={f.name as string}
+                  name={String(f.name)}
                   type="number"
-                  placeholder="Enter value"
+                  placeholder="0"
                   disabled={isSubmittedToday || isSubmitting}
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-2"
                 />
                 <ErrorMessage
-                  name={f.name as string}
+                  name={String(f.name)}
                   component="div"
                   className="text-red-500"
                 />
@@ -167,13 +175,13 @@ const MoktobBishoyForm = () => {
             ))}
 
             <div className="col-span-full">
-              <label className="block text-gray-700 mb-2">মতামত</label>
+              <label className="block text-gray-700 mb-2">
+                {common("editorContent")}
+              </label>
               <JoditEditorComponent
-                placeholder="আপনার মতামত লিখুন..."
+                placeholder={common("editorContentPlaceholder")}
                 initialValue=""
-                onContentChange={(content) =>
-                  setFieldValue("editorContent", content)
-                }
+                onContentChange={(content) => setFieldValue("editorContent", content)}
                 height="300px"
                 width="100%"
                 disabled={isSubmittedToday || isSubmitting}
@@ -186,7 +194,7 @@ const MoktobBishoyForm = () => {
                 disabled={isSubmittedToday || isSubmitting}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                {isSubmitting ? "Submitting..." : "Submit"}
+                {common("submit")}
               </Button>
             </div>
           </Form>

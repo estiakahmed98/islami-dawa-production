@@ -4,6 +4,7 @@ import Image from "next/image";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 interface Props {
   children: React.ReactNode;
@@ -17,7 +18,11 @@ const AuthLayout = async ({ children, params }: Props) => {
     notFound();
   }
 
+  // Inform next-intl about the active locale for this request
+  setRequestLocale(locale);
+
   const messages = (await import(`@/locale/${locale}.json`)).default;
+  const t = await getTranslations("header");
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
@@ -31,7 +36,7 @@ const AuthLayout = async ({ children, params }: Props) => {
               alt="logo"
               priority
             />
-            <h1 className="text-xl font-bold text-center text-white">ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ </h1>
+            <h1 className="text-xl font-bold text-center text-white">{t("instituteName")}</h1>
           </div>
           {children}
         </main>

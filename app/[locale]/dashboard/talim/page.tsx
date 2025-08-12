@@ -1,26 +1,30 @@
-"use client";
+'use client';
 
-import React from "react";
-import TalimForm from "@/components/TalimForm";
-import UniversalTableShow from "@/components/TableShow";
-import { useSession } from "@/lib/auth-client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton";
-import { toast } from "sonner";
+import React from 'react';
+import TalimForm from '@/components/TalimForm';
+import UniversalTableShow from '@/components/TableShow';
+import { useSession } from '@/lib/auth-client';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/TabButton';
+import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
-/** Format a date to YYYY-MM-DD in Dhaka time (safe) */
 function dhakaYMD(d: Date) {
-  if (!(d instanceof Date) || isNaN(d.getTime())) return "";
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Dhaka",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
+  if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Dhaka',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
   }).format(d);
 }
 
 const TalimPage: React.FC = () => {
   const { data: session } = useSession();
-  const userEmail = session?.user?.email ?? "";
+  const userEmail = session?.user?.email ?? '';
+
+  const tCommon = useTranslations('common');
+  const tTalim = useTranslations('dashboard.UserDashboard.talim');
+  const tToast = useTranslations('dashboard.UserDashboard.toast');
 
   const [userData, setUserData] = React.useState<any>({ records: {} });
   const [selectedMonth, setSelectedMonth] = React.useState<number>(new Date().getMonth());
@@ -29,10 +33,10 @@ const TalimPage: React.FC = () => {
 
   const labelMap = React.useMemo(
     () => ({
-      mohilaTalim: "মহিলা তালিম",
-      mohilaOnshogrohon: "মহিলা অংশগ্রহণ",
+      mohilaTalim: tTalim('mohilaTalim'),
+      mohilaOnshogrohon: tTalim('mohilaOnshogrohon'),
     }),
-    []
+    [tTalim]
   );
 
   React.useEffect(() => {
@@ -43,18 +47,15 @@ const TalimPage: React.FC = () => {
     }
 
     const ac = new AbortController();
-
     (async () => {
       try {
         const res = await fetch(`/api/talim?email=${encodeURIComponent(userEmail)}`, {
-          cache: "no-store",
+          cache: 'no-store',
           signal: ac.signal,
         });
-        if (!res.ok) throw new Error("Failed to fetch talim records");
+        if (!res.ok) throw new Error('Failed to fetch talim records');
 
-        // Expected shape: { isSubmittedToday, today, records }
         const json = await res.json();
-
         setIsSubmittedToday(!!json.isSubmittedToday);
 
         const all: Array<any> = Array.isArray(json.records) ? json.records : [];
@@ -72,23 +73,23 @@ const TalimPage: React.FC = () => {
 
         setUserData({ records: transformed, labelMap });
       } catch (err: any) {
-        if (!(err instanceof DOMException && err.name === "AbortError")) {
-          console.error("Failed to fetch Talim data:", err);
-          toast.error("তালিম তথ্য আনা যায়নি।");
+        if (!(err instanceof DOMException && err.name === 'AbortError')) {
+          console.error('Failed to fetch Talim data:', err);
+          toast.error(tToast('errorFetchingData'));
         }
       }
     })();
 
     return () => ac.abort();
-  }, [userEmail, labelMap]);
+  }, [userEmail, labelMap, tToast]);
 
   return (
     <div>
       <Tabs defaultValue="dataForm" className="w-full p-2 lg:p-4">
         <div className="flex justify-between">
           <TabsList>
-            <TabsTrigger value="dataForm">তথ্য দিন</TabsTrigger>
-            <TabsTrigger value="report">প্রতিবেদন</TabsTrigger>
+            <TabsTrigger value="dataForm">{tCommon('dataForm')}</TabsTrigger>
+            <TabsTrigger value="report">{tCommon('report')}</TabsTrigger>
           </TabsList>
         </div>
 

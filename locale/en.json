@@ -125,7 +125,9 @@
         "dayeeAmol": "Daee A'mal",
         "amoliSura": "Amali Surah",
         "ayamroja": "Ayyam Fasting",
-        "hijbulBahar": "Hizb al-Bahr"
+        "hijbulBahar": "Hizb al-Bahr",
+        "percentage": "Percentage",
+        "title": "A'mali Muhasaba"
       },
       "moktob": {
         "notunMoktobChalu": "New Maktab Started",
@@ -136,22 +138,37 @@
         "notunBoyoskoShikkha": "New Adult Education",
         "totalBoyoskoShikkha": "Total Adult Education",
         "boyoskoShikkhaOnshogrohon": "Participation in Adult Education",
-        "newMuslimeDinerFikir": "Care for New Muslims"
+        "newMuslimeDinerFikir": "Care for New Muslims",
+        "title": "Maktab Matters"
       },
       "talim": {
         "mohilaTalim": "Women's Taleem Held",
-        "mohilaOnshogrohon": "Women's Participation"
+        "mohilaOnshogrohon": "Women's Participation",
+        "title": "Women's Taleem"
       },
       "dayi": {
         "sohojogiDayeToiri": "Assistant Daee Created",
-        "assistantsList": "Assistant Daee List"
+        "assistantsList": "Assistant Daee List",
+        "title": "Assistant Daee", 
+        "assistant": "Assistant",
+        "name": "Name",
+        "phone": "Phone",
+        "address": "Address",
+        "email": "Email",
+        "description": "Description",
+        "division": "Division",
+        "district": "District",
+        "upazila": "Upazila",
+        "union": "Union",
+        "submit": "Submit"
       },
       "dawati": {
         "nonMuslimDawat": "Dawah to Non-Muslims",
         "murtadDawat": "Dawah to Apostates",
         "alemderSatheyMojlish": "Majlis with Scholars",
         "publicSatheyMojlish": "Majlis with Public",
-        "nonMuslimSaptahikGasht": "Weekly Outreach with Non-Muslims"
+        "nonMuslimSaptahikGasht": "Weekly Outreach with Non-Muslims",
+        "title": "Dawah Matters"
       },
       "dawatiMojlish": {
         "dawatterGuruttoMojlish": "Majlis on Importance of Dawah",
@@ -160,22 +177,26 @@
         "prosikkhonOnshogrohon": "Participation in Training",
         "jummahAlochona": "Jumu'ah Talk",
         "dhormoSova": "Religious Assembly",
-        "mashwaraPoint": "Mashwara Points"
+        "mashwaraPoint": "Mashwara Points",
+        "title": "Dawah Majlis"
       },
       "jamat": {
         "jamatBerHoise": "Jamaat Dispatched",
-        "jamatSathi": "Jamaat Companions"
+        "jamatSathi": "Jamaat Companions",
+        "title": "Jamaat Matters"
       },
       "dineFera": {
         "nonMuslimMuslimHoise": "Non-Muslim Became Muslim",
-        "murtadIslamFireche": "Apostate Returned to Islam"
+        "murtadIslamFireche": "Apostate Returned to Islam",
+        "title": "Returned to Islam"
       },
       "soforbisoy": {
         "moktobVisit": "Ongoing Maktab Visited",
         "madrasaVisit": "Madrasa Visited",
         "schoolCollegeVisit": "School/College Visited",
         "madrasaVisitList": "Madrasa List",
-        "schoolCollegeVisitList": "School/College List"
+        "schoolCollegeVisitList": "School/College List",
+        "title": "Travel Matters"
       }
     },
     "adminDashboard": {
@@ -208,7 +229,8 @@
         "dawatiMojlish": "Dawah Majlis",
         "jamatSubject": "Jamaat Matters",
         "dineFera": "Returned to Islam",
-        "soforSubject": "Travel Matters"
+        "soforSubject": "Travel Matters",
+        "title": "Dashboard"
       },
       "modalTitle": {
         "assistants": "Assistant Daee Details",
@@ -360,5 +382,40 @@
       "loginSuccessful": "Login Successful",
       "googleLoginFailed": "Google Login Failed. Try again."
     }
-  }
+  },
+  "common": {
+    "percentage": "Percentage",
+    "dataForm": "Data Form",
+    "report": "Report",
+    "points": "Points",
+    "submit":"Submit",
+    "editorContent":"Editor Content",
+    "editorTitle":"Editor Title",
+    "editorContentPlaceholder":"Editor Content Placeholder",
+    "selectOption": "Select Option",
+    "youHaveAlreadySubmittedToday": "You have already submitted today",
+    "userEmailIsNotSet": "User email is not set",
+    "failedToValidateExistingSubmissions": "Failed to validate existing submissions",
+    "errorValidatingExistingRecords": "Error validating existing records",
+    "submittedSuccessfully": "Submitted successfully",
+    "formSubmissionFailed": "Form submission failed",
+    "youCannotRequestEditsForFutureDates": "You cannot request edits for future dates",
+    "editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval": "Edit request submitted successfully. Please wait for admin approval.",
+    "failedToSubmitEditRequestPleaseTryAgain": "Failed to submit edit request. Please try again.",
+    "editRequestFailed": "Edit request failed",
+    "totalPoints":"Total Points",
+    "close":"Close",
+    "cancel":"Cancel",
+    "save":"Save"
+  },
+  "editRequest": {
+  "title": "Request Edit Permission",
+  "description": "You need admin approval to edit data for Day {day}. Please explain why you need to make changes.",
+  "reasonLabel": "Reason for Edit",
+  "reasonPlaceholder": "Please explain why you need to edit this data...",
+  "reasonRequired": "Please provide a reason for your edit request",
+  "submit": "Submit Request",
+  "cancel": "Cancel",
+  "close": "Close"
+}
 }

@@ -11,12 +11,15 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/TabButton";
+import { useTranslations } from "next-intl";
 
 const AmoliMuhasabaPage: React.FC = () => {
   const { data: session } = useSession();
   const [userData, setUserData] = useState<any>({ records: [] });
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const t = useTranslations("dashboard.UserDashboard.amoli");
+  const common = useTranslations("common");
 
   const userEmail = session?.user?.email;
 
@@ -55,21 +58,21 @@ const AmoliMuhasabaPage: React.FC = () => {
             }, {})
           },
           labelMap: {
-            tahajjud: "তাহাজ্জুদ",
-            surah: "সুরাহ",
-            ayat: "আয়াত",
-            zikir: "যিকির",
-            ishraq: "ইশরাক",
-            jamat: "জামাত",
-            sirat: "সীরাত",
-            Dua: "দোয়া",
-            ilm: "ইলম",
-            tasbih: "তাসবিহ",
-            dayeeAmol: "দায়ী আমল",
-            amoliSura: "আমলী সূরা",
-            ayamroja: "আয়ামে বীজ",
-            hijbulBahar: "হিজবুল বাহার",
-            percentage: "শতকরা হার",
+            tahajjud: t("tahajjud"),
+            surah: t("surah"),
+            ayat: t("ayat"),
+            zikir: t("zikir"),
+            ishraq: t("ishraq"),
+            jamat: t("jamat"),
+            sirat: t("sirat"),
+            Dua: t("dua"),
+            ilm: t("ilm"),
+            tasbih: t("tasbih"),
+            dayeeAmol: t("dayeeAmol"),
+            amoliSura: t("amoliSura"),
+            ayamroja: t("ayamroja"),
+            hijbulBahar: t("hijbulBahar"),
+            percentage: t("percentage"),
           }
         };
         
@@ -87,8 +90,8 @@ const AmoliMuhasabaPage: React.FC = () => {
       <Tabs defaultValue="dataForm" className="w-full p-2 lg:p-4">
         <div className="flex justify-between">
           <TabsList>
-            <TabsTrigger value="dataForm">তথ্য দিন</TabsTrigger>
-            <TabsTrigger value="report">প্রতিবেদন</TabsTrigger>
+            <TabsTrigger value="dataForm">{common("dataForm")}</TabsTrigger>
+            <TabsTrigger value="report">{common("report")}</TabsTrigger>
           </TabsList>
         </div>
 

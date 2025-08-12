@@ -124,7 +124,10 @@
         "dayeeAmol": "দায়ী আমল",
         "amoliSura": "আমলি সুরা",
         "ayamroja": "আইয়ামে রোজা",
-        "hijbulBahar": "হিজবুল বাহার"
+        "hijbulBahar": "হিজবুল বাহার",
+        "percentage": "পরিশেট",
+        "title": "আ'মলি মুহাসাবা"
+
       },
       "moktob": {
         "notunMoktobChalu": "নতুন মক্তব চালু হয়েছে",
@@ -135,22 +138,37 @@
         "notunBoyoskoShikkha": "নতুন বয়স্ক শিক্ষা",
         "totalBoyoskoShikkha": "মোট বয়স্ক শিক্ষা",
         "boyoskoShikkhaOnshogrohon": "বয়স্ক শিক্ষায় অংশগ্রহণ",
-        "newMuslimeDinerFikir": "নতুন মুসলিমদের ফিকির"
-      },
+        "newMuslimeDinerFikir": "নতুন মুসলিমদের ফিকির",
+        "title": "মক্তব বিষয়"
+        },
       "talim": {
         "mohilaTalim": "মহিলাদের তালিম হয়েছে",
-        "mohilaOnshogrohon": "মহিলাদের অংশগ্রহণ"
+        "mohilaOnshogrohon": "মহিলাদের অংশগ্রহণ",
+        "title": "মহিলাদের তালিম"
       },
       "dayi": {
         "sohojogiDayeToiri": "সহযোগী দায়ী তৈরি হয়েছে",
-        "assistantsList": "সহযোগী দায়ীর তালিকা"
+        "assistantsList": "সহযোগী দায়ীর তালিকা",
+        "title": "সহযোগী দায়ী",
+        "assistant": "সহযোগী দায়ী",
+        "name": "নাম",
+        "phone": "ফোন",
+        "address": "ঠিকানা",
+        "email": "ইমেল",
+        "description": "বিবরণ",
+        "division": "বিভাগ",
+        "district": "জেলা",
+        "upazila": "উপজেলা",
+        "union": "ইউনিয়ন",
+        "submit": "সাবমিট"
       },
       "dawati": {
         "nonMuslimDawat": "অমুসলিমদের দাওয়াত",
         "murtadDawat": "মুরতাদদের দাওয়াত",
         "alemderSatheyMojlish": "আলেমদের সাথে মজলিশ",
         "publicSatheyMojlish": "পাবলিকের সাথে মজলিশ",
-        "nonMuslimSaptahikGasht": "অমুসলিমদের সাথে সাপ্তাহিক গাশ্ত"
+        "nonMuslimSaptahikGasht": "অমুসলিমদের সাথে সাপ্তাহিক গাশ্ত",
+        "title": "দাওয়াতি বিষয়"
       },
       "dawatiMojlish": {
         "dawatterGuruttoMojlish": "দাওয়াতের গুরুত্ব মজলিশ",
@@ -159,22 +177,26 @@
         "prosikkhonOnshogrohon": "প্রশিক্ষণে অংশগ্রহণ",
         "jummahAlochona": "জুম্মার আলোচনা",
         "dhormoSova": "ধর্ম সংসভা",
-        "mashwaraPoint": "মাশওয়ারা পয়েন্ট"
+        "mashwaraPoint": "মাশওয়ারা পয়েন্ট",
+        "title": "দাওয়াতি মজলিশ"
       },
       "jamat": {
         "jamatBerHoise": "জামাত বের হয়েছে",
-        "jamatSathi": "জামাত সাথী"
+        "jamatSathi": "জামাত সাথী",
+        "title": "জামাত বিষয়"
       },
       "dineFera": {
         "nonMuslimMuslimHoise": "অমুসলিম মুসলিম হয়েছে",
-        "murtadIslamFireche": "মুরতাদ ইসলামে ফিরেছে"
+        "murtadIslamFireche": "মুরতাদ ইসলামে ফিরেছে",
+        "title": "দিনের ফিরা"
       },
       "soforbisoy": {
         "moktobVisit": "চলমান মক্তব পরিদর্শন হয়েছে",
         "madrasaVisit": "মাদ্রাসা সফর হয়েছে",
         "schoolCollegeVisit": "স্কুল/কলেজ সফর হয়েছে",
         "madrasaVisitList": "মাদ্রাসার তালিকা",
-        "schoolCollegeVisitList": "স্কুল/কলেজ তালিকা"
+        "schoolCollegeVisitList": "স্কুল/কলেজ তালিকা",
+        "title": "সফর বিষয়"
       }
     },
     "adminDashboard": {
@@ -359,5 +381,41 @@
       "loginSuccessful": "লগইন সফল হয়েছে",
       "googleLoginFailed": "গুগল লগইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"
     }
-  }
+  },
+  "common": {
+    "comment": "মতামত",
+    "percentage": "পরিশেট",
+    "dataForm": "তথ্য দিন",
+    "report": "প্রতিবেদন",
+    "selectOption": "অপশন নির্বাচন",
+    "points": "পয়েন্ট",
+    "editorContent": "এডিটর বিষয়",
+    "editorTitle": "এডিটর শিরোনাম",
+    "editorContentPlaceholder": "এডিটর বিষয় লিখুন",
+    "youHaveAlreadySubmittedToday": "আজ আপডেট করা হয়েছে",
+    "userEmailIsNotSet": "ব্যবহারকারী ইমেইল নির্বাচন করা হয়েছে",
+    "failedToValidateExistingSubmissions": "পূর্বের আপডেট ব্যর্থ হয়েছে",
+    "errorValidatingExistingRecords": "পূর্বের আপডেট ব্যর্থ হয়েছে",
+    "submittedSuccessfully": "সফলভাবে আপডেট হয়েছে",
+    "formSubmissionFailed": "আপডেট ব্যর্থ হয়েছে",
+    "youCannotRequestEditsForFutureDates": "ভবিষ্যতের তারিখের জন্য এডিট রিকোয়েস্ট করা যাবে না",
+    "editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval": "এডিট রিকোয়েস্ট সফলভাবে জমা হয়েছে। অ্যাডমিন অনুমোদনের জন্য অপেক্ষা করুন।",
+    "failedToSubmitEditRequestPleaseTryAgain": "এডিট রিকোয়েস্ট জমা ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
+    "editRequestFailed": "এডিট রিকোয়েস্ট ব্যর্থ হয়েছে",
+    "totalPoints":"সর্বমোট পয়েন্ট",
+    "submit":"জমা দিন ",
+    "close": "বন্ধ করুন",
+    "cancel": "বাতিল",
+    "save": "সংরক্ষণ"
+  },
+  "editRequest": {
+  "title": "সম্পাদনার অনুমতি অনুরোধ",
+  "description": "দিন {day}-এর তথ্য সম্পাদনা করতে আপনার প্রশাসকের অনুমতি প্রয়োজন। দয়া করে ব্যাখ্যা করুন কেন আপনি পরিবর্তন করতে চান।",
+  "reasonLabel": "সম্পাদনার কারণ",
+  "reasonPlaceholder": "দয়া করে ব্যাখ্যা করুন কেন আপনি এই তথ্য সম্পাদনা করতে চান...",
+  "reasonRequired": "দয়া করে আপনার সম্পাদনার অনুরোধের কারণ লিখুন",
+  "submit": "অনুরোধ জমা দিন",
+  "cancel": "বাতিল করুন",
+  "close": "বন্ধ করুন"
+}
 }
