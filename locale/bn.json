@@ -125,7 +125,7 @@
         "amoliSura": "আমলি সুরা",
         "ayamroja": "আইয়ামে রোজা",
         "hijbulBahar": "হিজবুল বাহার",
-        "percentage": "পরিশেট",
+        "percentage": "শতাংশ",
         "title": "আ'মলি মুহাসাবা"
       },
       "moktob": {
@@ -383,8 +383,9 @@
   },
   "common": {
     "comment": "মতামত",
-    "percentage": "পরিশেট",
+    "percentage": "শতাংশ",
     "dataForm": "তথ্য দিন",
+    "submitting": "জমা হচ্ছে...",
     "report": "প্রতিবেদন",
     "selectOption": "অপশন নির্বাচন",
     "points": "পয়েন্ট",
