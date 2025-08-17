@@ -292,7 +292,7 @@ export function UserLeaveTable({ userEmail, refetch }: UserLeaveTableProps) {
 
       {/* Rejection reason modal */}
       {reasonModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 w-[80vw] h-[80vh] z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-lg rounded-md bg-white shadow-xl">
             <div className="flex items-center justify-between border-b px-4 py-3">
               <h2 className="text-base font-semibold text-gray-900">{t("rejectionModal.title")}</h2>

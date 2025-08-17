@@ -152,7 +152,7 @@ export function LeaveRequestForm({
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "grid gap-6 rounded-2xl bg-muted/30 p-5 md:p-6",
+        "grid gap-6 h-[80vh] overflow-y-auto rounded-2xl bg-muted/30 p-5 md:p-6",
         "shadow-sm ring-1 ring-border"
       )}
       aria-label={t("title")}
