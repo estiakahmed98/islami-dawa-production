@@ -2,22 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { createAuthClient } from "better-auth/react";
-import { inferAdditionalFields, adminClient } from "better-auth/client/plugins";
 import { auth } from "@/lib/auth";
-
-export const {
-  signIn,
-  signUp,
-  signOut,
-  useSession,
-  admin,
-  updateUser,
-  changeEmail,
-  changePassword,
-} = createAuthClient({
-  plugins: [inferAdditionalFields<typeof auth>(), adminClient()],
-});
 
 export async function GET() {
   try {

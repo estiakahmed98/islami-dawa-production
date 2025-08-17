@@ -26,12 +26,12 @@ interface User {
   name: string;
   email: string;
   role: string;
-  markaz: string;
-  division?: string;
-  district?: string;
-  upazila?: string;
-  union?: string;
-  phone?: string;
+  markaz?: string | null;  
+  division?: string | null;
+  district?: string | null;
+  upazila?: string | null;
+  union?: string | null;
+  phone?: string | null;
 }
 
 interface TreeNode {
@@ -52,7 +52,6 @@ const MuiTreeView: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const router = useRouter();
   const { data: session } = useSession();
-  const userEmail = session?.user?.email || "";
 
   useEffect(() => {
     const fetchUsers = async () => {

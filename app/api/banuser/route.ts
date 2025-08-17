@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
-import { admin } from "@/lib/auth-client";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,16 +25,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Access admin actions from BetterAuth via plugin (types may not expose .admin)
+    const adminApi = (auth as any).admin;
+
     if (banned) {
-      // Ban the user using BetterAuth
-      await admin.banUser({
+      // Ban the user using BetterAuth (server-side admin API)
+      await adminApi.banUser({
         userId,
         banReason: "Violation of rules",
         banExpiresIn: 60 * 60 * 24 * 7, // Ban for 7 days (optional)
       });
     } else {
-      // Unban the user using BetterAuth
-      await admin.unbanUser({ userId });
+      // Unban the user using BetterAuth (server-side admin API)
+      await adminApi.unbanUser({ userId });
     }
 
     // Update the ban status in the database
