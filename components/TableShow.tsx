@@ -253,7 +253,7 @@ const UniversalTableShow: React.FC<Props> = ({
 
   const convertToCSV = () => {
     const BOM = "\uFEFF"
-    const headers = ["Label", ...monthDays.map((day) => `Day ${day}`)]
+    const headers = [t("label"), ...monthDays.map((day) => `${t("day")} ${day}`)]
     const rows = filteredData.map((row) => [row.label, ...monthDays.map((day) => stripHtmlForCSV(row[day] ?? "-"))])
     const csvContent = BOM + [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
     const filename = `report_of_${session?.user?.name || "user"}.csv`
@@ -361,7 +361,7 @@ const UniversalTableShow: React.FC<Props> = ({
                   .join("")
                 return `
                   <tr>
-                    <td class="row-label">${day}</td>
+                    <td class="row-label">${t("day")} ${day}</td>
                     ${dayCells}
                   </tr>
                 `

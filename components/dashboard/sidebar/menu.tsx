@@ -44,10 +44,7 @@ const SidebarMenu = () => {
     "centraladmin",
     "superadmin",
     "divisionadmin",
-    "districtadmin",
-    "areaadmin",
-    "upozilaadmin",
-    "unionadmin",
+    "markazadmin",
   ];
 
   const isAdmin = adminRoles.includes(userRole as string);

@@ -102,7 +102,7 @@ const ImpersonateSidebar: React.FC = () => {
       href: "/admin",
       icon: <LuLayoutDashboard className="size-6" />,
       label: `${t("dashBoard")} (${t2(`roles.${userRole}`)})`,
-      roles: ["centraladmin", "divisionadmin", "districtadmin", "areaadmin", "upozilaadmin", "user"],
+      roles: ["centraladmin", "divisionadmin", "markazadmin"],
     },
     {
       href: "/admin/register",
@@ -114,13 +114,13 @@ const ImpersonateSidebar: React.FC = () => {
       href: "/admin/users",
       icon: <MdPeople className="size-6" />,
       label: t("viewDayi"),
-      roles: ["centraladmin"],
+      roles: ["centraladmin", "divisionadmin", "markazadmin"],
     },
     {
       href: "/admin/leave",
       icon: <FcAcceptDatabase className="size-6" />,
       label: t("leaveMatters"),
-      roles: ["centraladmin"],
+      roles: ["centraladmin", "divisionadmin", "markazadmin"],
       notificationCount: pendingLeaveCount,
       showNotification: true,
     },
@@ -128,7 +128,7 @@ const ImpersonateSidebar: React.FC = () => {
       href: "/admin/RealTree",
       icon: <FaTree className="size-6" />,
       label: t("realTree"),
-      roles: ["centraladmin", "divisionadmin", "districtadmin", "areaadmin", "upozilaadmin"],
+      roles: ["centraladmin", "divisionadmin", "markazadmin"],
     },
     {
       href: "/admin/edit-request",

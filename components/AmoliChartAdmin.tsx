@@ -44,14 +44,6 @@ const AmoliChartAdmin: React.FC<AmoliChartProps> = ({
     return vals;
   }, [data, emailList]);
 
-  if (percentages.length === 0) {
-    return (
-      <div className="text-center text-red-500 font-semibold">
-        {tChart("noDataUsers")}
-      </div>
-    );
-  }
-
   const average =
     percentages.reduce((sum, v) => sum + v, 0) / Math.max(1, percentages.length);
 
@@ -71,26 +63,32 @@ const AmoliChartAdmin: React.FC<AmoliChartProps> = ({
       </div>
 
       <div className="max-w-sm mx-auto relative p-6 rounded-b-lg">
-        <ResponsiveContainer width="100%" height={400}>
-          <PieChart className="p-4">
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              innerRadius={innerRadius}
-              outerRadius={outerRadius}
-              dataKey="value"
-              startAngle={startAngle}
-              endAngle={endAngle}
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip formatter={(value: number) => [`${value}%`, ""]} />
-            <Legend align="center" verticalAlign="bottom" height={36} content={renderLegend} />
-          </PieChart>
-        </ResponsiveContainer>
+        {percentages.length === 0 ? (
+          <div className="text-center text-red-500 font-semibold">
+            {tChart("noDataUsers")}
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={400}>
+            <PieChart className="p-4">
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                innerRadius={innerRadius}
+                outerRadius={outerRadius}
+                dataKey="value"
+                startAngle={startAngle}
+                endAngle={endAngle}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value: number) => [`${value}%`, ""]} />
+              <Legend align="center" verticalAlign="bottom" height={36} content={renderLegend} />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

@@ -143,7 +143,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
   const convertToCSV = () => {
     const BOM = "\uFEFF";
     const monthName = months[selectedMonth];
-    const headers = [t("label"), ...monthDays.map((d) => `${d}`)];
+    const headers = [t("label"), ...monthDays.map((d) => `${t("day")} ${d}`)];
     const rows = filteredData.map((row) => [row.label, ...monthDays.map((d) => row[d] ?? "-")]);
     const csv = BOM + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
     const safeName = (selectedUserData?.name || "User").replace(/[\/\\:?*"<>|]/g, "_");
@@ -211,7 +211,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
         .map(
           (day) => `
                     <tr>
-                      <td class="row-label">${day}</td>
+                      <td class="row-label">${t("day")} ${day}</td>
                       ${printableRows.map((row) => `<td>${row[day] ?? "-"}</td>`).join("")}
                     </tr>
                   `
@@ -323,7 +323,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
               <th className="border border-gray-300 px-4 py-2 text-left">{t("label")}</th>
               {monthDays.map((day) => (
                 <th key={day} className="border border-gray-300 px-6 py-2 text-center text-nowrap">
-                  {t("day", { day })}
+                  {t("day")} {day}
                 </th>
               ))}
             </tr>
