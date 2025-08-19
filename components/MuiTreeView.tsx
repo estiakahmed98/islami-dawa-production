@@ -14,19 +14,14 @@ import { ScrollArea } from "./ui/scroll-area";
 import { PiTreeViewBold } from "react-icons/pi";
 import { useTranslations } from "next-intl";
 
-export const roleList = [
-  "centraladmin",
-  "divisionadmin",
-  "markazadmin",
-  "daye",
-];
+export const roleList = ["centraladmin", "divisionadmin", "markazadmin", "daye"];
 
 interface User {
   id: string;
   name: string;
   email: string;
   role: string;
-  markaz?: string | null;  
+  markaz?: string | null;
   division?: string | null;
   district?: string | null;
   upazila?: string | null;
@@ -61,12 +56,12 @@ const MuiTreeView: React.FC = () => {
 
         const usersData: User[] = await response.json();
         setUsers(usersData);
-        const tree = buildTree(
-          usersData,
-          session?.user
-            ? { ...session.user, role: session.user.role || "" }
-            : null
-        );
+
+        const loggedInUser: User | null = session?.user
+          ? { ...(session.user as unknown as User), role: (session.user as any).role || "" }
+          : null;
+
+        const tree = buildTree(usersData, loggedInUser);
         setTreeData(tree);
         setFilteredTree(tree);
       } catch (error) {
@@ -77,10 +72,8 @@ const MuiTreeView: React.FC = () => {
     fetchUsers();
   }, [session?.user, t]);
 
+  // ---------- FIXED: buildTree shows only the logged-in centraladmin as root ----------
   const buildTree = (users: User[], loggedInUser: User | null): TreeNode[] => {
-    if (loggedInUser) {
-      loggedInUser.role = loggedInUser.role || "";
-    }
     const userMap = new Map<string, TreeNode>();
 
     users.forEach((user) => {
@@ -93,49 +86,71 @@ const MuiTreeView: React.FC = () => {
     });
 
     users.forEach((user) => {
-      const parentEmail = getParentEmail(user, users);
-      if (parentEmail && userMap.has(parentEmail)) {
-        userMap.get(parentEmail)!.children?.push(userMap.get(user.email)!);
+      const parentEmail = getParentEmail(user, users, loggedInUser);
+      if (parentEmail && userMap.has(parentEmail) && userMap.has(user.email)) {
+        userMap.get(parentEmail)!.children!.push(userMap.get(user.email)!);
       }
     });
 
     if (loggedInUser) {
-      if (loggedInUser.role === "centraladmin") {
-        return users
-          .filter((u) => u.role === "centraladmin")
-          .map((u) => userMap.get(u.email)!);
-      } else {
-        return [userMap.get(loggedInUser.email)!];
-      }
+      // If centraladmin: only your own node as the single root.
+      // If not centraladmin: only your own subtree as before.
+      const selfNode = userMap.get(loggedInUser.email);
+      return selfNode ? [selfNode] : [];
     }
+
     return [];
   };
 
-  const getParentEmail = (user: User, users: User[]): string | null => {
+  // ---------- FIXED: parent fallback prefers the LOGGED-IN centraladmin ----------
+  const getParentEmail = (
+    user: User,
+    users: User[],
+    loggedInUser: User | null
+  ): string | null => {
     let parentUser: User | undefined;
+
     switch (user.role) {
-      case "divisionadmin":
-        parentUser = users.find((u) => u.role === "centraladmin");
+      case "divisionadmin": {
+        // divisionadmin -> centraladmin (prefer logged-in centraladmin)
+        if (loggedInUser?.role === "centraladmin") {
+          parentUser = loggedInUser;
+        } else {
+          parentUser = users.find((u) => u.role === "centraladmin");
+        }
         break;
-      case "markazadmin":
+      }
+
+      case "markazadmin": {
+        // markazadmin -> divisionadmin (same division), else fallback to logged-in centraladmin
         parentUser = users.find(
           (u) => u.role === "divisionadmin" && u.division === user.division
         );
         if (!parentUser) {
-          parentUser = users.find((u) => u.role === "centraladmin");
+          parentUser =
+            (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
+            users.find((u) => u.role === "centraladmin");
         }
         break;
-      case "daye":
+      }
+
+      case "daye": {
+        // daye -> markazadmin (same markaz), else fallback to logged-in centraladmin
         parentUser = users.find(
           (u) => u.role === "markazadmin" && u.markaz === user.markaz
         );
         if (!parentUser) {
-          parentUser = users.find((u) => u.role === "centraladmin");
+          parentUser =
+            (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
+            users.find((u) => u.role === "centraladmin");
         }
         break;
+      }
+
       default:
         return null;
     }
+
     return parentUser ? parentUser.email : null;
   };
 
@@ -158,6 +173,7 @@ const MuiTreeView: React.FC = () => {
     }
 
     const lowerCaseQuery = searchQuery.toLowerCase();
+
     const filterNodes = (nodes: TreeNode[]): TreeNode[] =>
       nodes
         .filter(
@@ -171,8 +187,9 @@ const MuiTreeView: React.FC = () => {
           children: node.children ? filterNodes(node.children) : [],
         }));
 
-    setFilteredTree(filterNodes(treeData));
-    setExpanded(getAllIds(filterNodes(treeData)));
+    const next = filterNodes(treeData);
+    setFilteredTree(next);
+    setExpanded(getAllIds(next));
   }, [searchQuery, treeData]);
 
   const highlightMatch = (text: string, query: string): JSX.Element => {
@@ -186,7 +203,7 @@ const MuiTreeView: React.FC = () => {
               {part}
             </span>
           ) : (
-            part
+            <span key={index}>{part}</span>
           )
         )}
       </>
