@@ -256,7 +256,7 @@ const AmoliMuhasabaForm = () => {
       if (response.ok) {
         toast.success(common("submittedSuccessfully"));
         setIsSubmittedToday(true); // update UI state
-        router.push("/dashboard");
+        window.location.reload();
       } else {
         toast.error(common("formSubmissionFailed"));
       }

@@ -89,7 +89,7 @@ const DawatiForm: React.FC = () => {
       if (res.status === 201) {
         toast.success(common("submittedSuccessfully"));
         setIsSubmittedToday(true);
-        router.push("/dashboard");
+        window.location.reload();
         return;
       }
       if (res.status === 409) {

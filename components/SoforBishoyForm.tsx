@@ -158,7 +158,7 @@ const SoforBishoyForm: React.FC<Props> = ({
             toast.success(tCommon("submittedSuccessfully"));
             resetForm();
             setEffectiveSubmitted(true);
-            router.push("/dashboard");
+            window.location.reload();
           } catch (err) {
             console.error("Submit error:", err);
             toast.error(tCommon("formSubmissionFailed"));

@@ -142,7 +142,7 @@ const DayeeBishoyForm: React.FC = () => {
 
       toast.success(common('submittedSuccessfully'));
       setIsSubmittedToday(true);
-      router.push('/dashboard');
+      window.location.reload();
     } catch (error: any) {
       console.error('Submission error:', error);
       toast.error(error.message || common('formSubmissionFailed'));

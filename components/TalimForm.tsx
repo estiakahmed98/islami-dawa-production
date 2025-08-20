@@ -96,7 +96,7 @@ const TalimForm: React.FC<{
       setIsSubmittedToday(true);
       setSubmittedProp?.(true);
       toast.success(common('submittedSuccessfully'));
-      router.push('/dashboard');
+      window.location.reload();
     } catch (error: any) {
       console.error('Error during submission:', error);
       toast.error(error.message || common('formSubmissionFailed'));

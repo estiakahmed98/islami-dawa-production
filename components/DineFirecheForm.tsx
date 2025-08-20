@@ -93,7 +93,7 @@ const DineFirecheForm: React.FC = () => {
 
       toast.success(common("submittedSuccessfully"));
       setIsSubmittedToday(true);
-      router.push("/dashboard");
+      window.location.reload();
     } catch (error) {
       console.error("Submit error:", error);
       toast.error(common("formSubmissionFailed"));

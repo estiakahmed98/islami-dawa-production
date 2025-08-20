@@ -131,7 +131,7 @@ const MoktobBishoyForm = () => {
 
       toast.success(common("submittedSuccessfully"));
       setIsSubmittedToday(true);
-      router.push("/dashboard");
+      window.location.reload();
     } catch (error: any) {
       console.error("Submit error:", error);
       toast.error(error.message || common("formSubmissionFailed"));
