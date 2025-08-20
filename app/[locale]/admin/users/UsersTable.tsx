@@ -122,6 +122,11 @@ const TALIM_LABELS: Record<string, string> = {
   editorContent: "মতামত",
 };
 
+const DAYE_LABELS: Record<string, string> = {
+  sohojogiDayeToiri: "সহযোগী দায়ী তৈরি",
+  editorContent: "মতামত",
+};
+
 const DAWATI_LABELS: Record<string, string> = {
   nonMuslimDawat: "অমুসলিমকে দাওয়াত",
   murtadDawat: "মুরতাদকে দাওয়াত",
@@ -239,6 +244,24 @@ async function fetchTalim(emails: string[]): Promise<UserDataForAdminTable> {
     })
   );
   return { records, labelMap: TALIM_LABELS };
+}
+
+async function fetchDaye(emails: string[]): Promise<UserDataForAdminTable> {
+  const records: RecordsByEmail = {};
+  await Promise.all(
+    emails.map(async (email) => {
+      const res = await fetch(`/api/dayi?email=${encodeURIComponent(email)}`);
+      if (!res.ok) return;
+      const json = await res.json();
+      (json.records || []).forEach((r: any) => {
+        const dateKey = toDateKey(r.date);
+        const slot = ensureEmailDateSlot(records, email, dateKey);
+        slot.sohojogiDayeToiri = r.sohojogiDayeToiri ?? "-";
+        slot.editorContent = r.editorContent || "";
+      });
+    })
+  );
+  return { records, labelMap: DAYE_LABELS };
 }
 
 async function fetchDawati(emails: string[]): Promise<UserDataForAdminTable> {
@@ -385,6 +408,7 @@ export default function UsersTable() {
   const [amoliData, setAmoliData] = useState<UserDataForAdminTable>({ records: {}, labelMap: AMOLI_LABELS });
   const [moktobData, setMoktobData] = useState<UserDataForAdminTable>({ records: {}, labelMap: MOKTOB_LABELS });
   const [talimData, setTalimData] = useState<UserDataForAdminTable>({ records: {}, labelMap: TALIM_LABELS });
+  const [dayeData, setDayeData] = useState<UserDataForAdminTable>({ records: {}, labelMap: DAYE_LABELS });
   const [dawatiData, setDawatiData] = useState<UserDataForAdminTable>({ records: {}, labelMap: DAWATI_LABELS });
   const [dawatiMojlishData, setDawatiMojlishData] = useState<UserDataForAdminTable>({ records: {}, labelMap: DAWATI_MOJLISH_LABELS });
   const [jamatData, setJamatData] = useState<UserDataForAdminTable>({ records: {}, labelMap: JAMAT_LABELS });
@@ -436,6 +460,7 @@ export default function UsersTable() {
         setAmoliData({ records: {}, labelMap: AMOLI_LABELS });
         setMoktobData({ records: {}, labelMap: MOKTOB_LABELS });
         setTalimData({ records: {}, labelMap: TALIM_LABELS });
+        setDayeData({ records: {}, labelMap: DAYE_LABELS });
         setDawatiData({ records: {}, labelMap: DAWATI_LABELS });
         setDawatiMojlishData({ records: {}, labelMap: DAWATI_MOJLISH_LABELS });
         setJamatData({ records: {}, labelMap: JAMAT_LABELS });
@@ -444,10 +469,11 @@ export default function UsersTable() {
         return;
       }
       try {
-        const [amoli, moktob, talim, dawati, dawatiMojlish, jamat, dineFera, sofor] = await Promise.allSettled([
+        const [amoli, moktob, talim, daye, dawati, dawatiMojlish, jamat, dineFera, sofor] = await Promise.allSettled([
           fetchAmoli(emailList),
           fetchMoktob(emailList),
           fetchTalim(emailList),
+          fetchDaye(emailList),
           fetchDawati(emailList),
           fetchDawatiMojlish(emailList),
           fetchJamat(emailList),
@@ -459,6 +485,7 @@ export default function UsersTable() {
           if (amoli.status === "fulfilled") setAmoliData(amoli.value);
           if (moktob.status === "fulfilled") setMoktobData(moktob.value);
           if (talim.status === "fulfilled") setTalimData(talim.value);
+          if (daye.status === "fulfilled") setDayeData(daye.value);
           if (dawati.status === "fulfilled") setDawatiData(dawati.value);
           if (dawatiMojlish.status === "fulfilled") setDawatiMojlishData(dawatiMojlish.value);
           if (jamat.status === "fulfilled") setJamatData(jamat.value);
@@ -994,29 +1021,7 @@ export default function UsersTable() {
             </TabsContent>
 
             <TabsContent value="daye">
-              <AdminTable
-                userData={{
-                  records: (async () => {
-                    const records: RecordsByEmail = {};
-                    await Promise.all(
-                      emailList.map(async (email) => {
-                        const res = await fetch(`/api/dayi?email=${encodeURIComponent(email)}`);
-                        if (!res.ok) return;
-                        const json = await res.json();
-                        (json.records || []).forEach((r: any) => {
-                          const dateKey = toDateKey(r.date);
-                          const slot = ensureEmailDateSlot(records, email, dateKey);
-                          slot.sohojogiDayeToiri = r.sohojogiDayeToiri ?? "-";
-                          slot.editorContent = r.editorContent || "";
-                        });
-                      })
-                    );
-                    return records;
-                  })(),
-                  labelMap: { sohojogiDayeToiri: "সহযোগী দায়ী তৈরি", editorContent: "মতামত" },
-                }}
-                emailList={emailList}
-              />
+              <AdminTable userData={dayeData} emailList={emailList} />
             </TabsContent>
 
             <TabsContent value="dawati">

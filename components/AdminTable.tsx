@@ -288,21 +288,6 @@ const AdminTable: React.FC<AdminTableProps> = ({
                 <option key={y} value={y}>{y}</option>
               ))}
             </select>
-
-            <input
-              type="text"
-              placeholder="Filter label…"
-              value={filterLabel}
-              onChange={(e) => setFilterLabel(e.target.value)}
-              className="px-3 py-2 border rounded-md text-sm"
-            />
-            <input
-              type="text"
-              placeholder="Filter value…"
-              value={filterValue}
-              onChange={(e) => setFilterValue(e.target.value)}
-              className="px-3 py-2 border rounded-md text-sm"
-            />
           </div>
 
           <div className="flex gap-4">

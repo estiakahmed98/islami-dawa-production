@@ -1,3 +1,5 @@
+"use client";
+
 import { createAuthClient } from "better-auth/react";
 import { inferAdditionalFields, adminClient } from "better-auth/client/plugins";
 import { auth } from "./auth";

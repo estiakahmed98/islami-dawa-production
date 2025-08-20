@@ -1,5 +1,6 @@
+"use client";
+
 import React from "react";
-import html2pdf from "html2pdf.js";
 
 interface TablePdfExporterProps {
   tableData: {
@@ -19,7 +20,9 @@ export const TablePdfExporter: React.FC<TablePdfExporterProps> = ({
   buttonText = "Download PDF",
   buttonClassName = "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded",
 }) => {
-  const exportToPdf = () => {
+  const exportToPdf = async () => {
+    if (typeof window === "undefined") return;
+
     // Create HTML structure for the PDF
     const html = `
             <html>
@@ -107,6 +110,7 @@ export const TablePdfExporter: React.FC<TablePdfExporterProps> = ({
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
     };
 
+    const html2pdf = (await import("html2pdf.js")).default as any;
     html2pdf().set(opt).from(element).save();
   };
 
