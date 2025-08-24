@@ -94,6 +94,7 @@ const DawatiMojlishForm: React.FC = () => {
       if (res.status === 201) {
         toast.success(common("submittedSuccessfully"));
         setIsSubmittedToday(true);
+        window.location.reload();
         return;
       }
       if (res.status === 409) {
