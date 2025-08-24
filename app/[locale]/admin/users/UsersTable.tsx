@@ -659,20 +659,50 @@ export default function UsersTable() {
     return <p className="text-center text-xl p-10">{t("status.authenticating")}</p>;
   }
 
+  // Helpers to normalize/compare Markaz (works with string or relation array)
+  const getMarkazIds = (u: any): string[] => {
+    const m = u?.markaz;
+    return Array.isArray(m) ? m.map((x: any) => x?.id).filter(Boolean) : [];
+  };
+  const getMarkazNames = (u: any): string[] => {
+    const m = u?.markaz;
+    if (Array.isArray(m)) return m.map((x: any) => x?.name).filter(Boolean);
+    if (typeof m === "string" && m.trim()) return [m.trim()];
+    return [];
+  };
+  const shareMarkaz = (a: any, b: any): boolean => {
+    const aIds = getMarkazIds(a);
+    const bIds = getMarkazIds(b);
+    if (aIds.length && bIds.length) return aIds.some((id) => bIds.includes(id));
+    const aNames = getMarkazNames(a);
+    const bNames = getMarkazNames(b);
+    if (aNames.length && bNames.length) return aNames.some((n) => bNames.includes(n));
+    return false;
+  };
+
   const getParentEmail = (user: User, users: User[]): string | null => {
     let parentUser: User | undefined;
     switch (user.role) {
-      case "divisionadmin":
-        parentUser = users.find((u) => u.role === "centraladmin");
+      case "divisionadmin": {
+        parentUser =
+          (sessionUser?.role === "centraladmin" ? (sessionUser as any) : undefined) ||
+          users.find((u) => u.role === "centraladmin");
         break;
-      case "markazadmin":
-        parentUser = users.find((u) => u.role === "divisionadmin" && u.division === user.division);
-        if (!parentUser) parentUser = users.find((u) => u.role === "centraladmin");
+      }
+      case "markazadmin": {
+        parentUser =
+          users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+          (sessionUser?.role === "centraladmin" ? (sessionUser as any) : undefined) ||
+          users.find((u) => u.role === "centraladmin");
         break;
-      case "daye":
-        parentUser = users.find((u) => u.role === "markazadmin" && u.markaz === user.markaz);
-        if (!parentUser) parentUser = users.find((u) => u.role === "centraladmin");
+      }
+      case "daye": {
+        parentUser =
+          users.find((u) => u.role === "markazadmin" && shareMarkaz(u, user)) ||
+          (sessionUser?.role === "centraladmin" ? (sessionUser as any) : undefined) ||
+          users.find((u) => u.role === "centraladmin");
         break;
+      }
       default:
         return null;
     }

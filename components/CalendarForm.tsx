@@ -12,7 +12,8 @@ interface User {
   district?: string;
   upazila?: string;
   union?: string;
-  markaz?: string;
+  // markaz can be a legacy string or relation array
+  markaz?: string | null | { id: string; name: string }[];
   phone?: string;
 }
 
@@ -78,7 +79,7 @@ const CalendarEventForm = ({
       const findChildEmails = (parentEmail: string) => {
         users.forEach((user) => {
           if (
-            getParentEmail(user, users) === parentEmail &&
+            getParentEmail(user, users, loggedInUser) === parentEmail &&
             !collectedEmails.has(user.email)
           ) {
             collectedEmails.add(user.email);
@@ -176,29 +177,55 @@ const CalendarEventForm = ({
     }
   };
 
-  const getParentEmail = (user: User, users: User[]): string | null => {
+  // --- Helpers to normalize markaz relation (mirrors AdminDashboard/MuiTreeView) ---
+  const getMarkazIds = (u?: User): string[] => {
+    if (!u?.markaz) return [];
+    if (Array.isArray(u.markaz)) return u.markaz.map((m) => m.id).filter(Boolean);
+    return [];
+  };
+  const getMarkazNames = (u?: User): string[] => {
+    if (!u?.markaz) return [];
+    if (Array.isArray(u.markaz)) return u.markaz.map((m) => m.name).filter(Boolean);
+    if (typeof u.markaz === "string" && u.markaz.trim()) return [u.markaz.trim()];
+    return [];
+  };
+  const shareMarkaz = (a: User, b: User): boolean => {
+    const aIds = getMarkazIds(a);
+    const bIds = getMarkazIds(b);
+    if (aIds.length && bIds.length) return aIds.some((id) => bIds.includes(id));
+    const aNames = getMarkazNames(a);
+    const bNames = getMarkazNames(b);
+    if (aNames.length && bNames.length) return aNames.some((n) => bNames.includes(n));
+    return false;
+  };
+
+  const getParentEmail = (
+    user: User,
+    users: User[],
+    loggedInUser: User | null
+  ): string | null => {
     let parentUser: User | undefined;
     switch (user.role) {
-      case "divisionadmin":
-        parentUser = users.find((u) => u.role === "centraladmin");
+      case "divisionadmin": {
+        parentUser =
+          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
+          users.find((u) => u.role === "centraladmin");
         break;
-      case "markazadmin":
-        parentUser = users.find(
-          (u) => u.role === "divisionadmin" && u.division === user.division
-        );
-        if (!parentUser) {
-          parentUser = users.find((u) => u.role === "centraladmin");
-        }
+      }
+      case "markazadmin": {
+        parentUser =
+          users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
+          users.find((u) => u.role === "centraladmin");
         break;
-      case "daye":
-        parentUser = users.find(
-          (u) => u.role === "markazadmin" && u.markaz === user.markaz
-        );
-        if (!parentUser) {
-          parentUser = users.find((u) => u.role === "centraladmin");
-        }
+      }
+      case "daye": {
+        parentUser =
+          users.find((u) => u.role === "markazadmin" && shareMarkaz(u, user)) ||
+          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
+          users.find((u) => u.role === "centraladmin");
         break;
-
+      }
       default:
         return null;
     }
