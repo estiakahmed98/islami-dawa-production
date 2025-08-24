@@ -9,7 +9,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
-import markazList from "@/app/data/markazList";
 import AdminTable from "@/components/AdminTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton";
 import { TablePdfExporter } from "@/components/TablePdfExporter";
@@ -403,6 +402,27 @@ export default function UsersTable() {
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [showSaveFirstModal, setShowSaveFirstModal] = useState(false);
   const [showSaveSecondModal, setShowSaveSecondModal] = useState(false);
+
+  const [markazOptions, setMarkazOptions] = useState<{ value: string; title: string }[]>([]);
+
+  // Load Markaz list for selects
+  useEffect(() => {
+    let aborted = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/markaz-masjid?pageSize=1000`, { cache: "no-store" });
+        const j = await res.json();
+        if (!res.ok) throw new Error(j?.error || "Failed to load markaz");
+        const opts = Array.isArray(j?.data)
+          ? j.data.map((m: any) => ({ value: m.name as string, title: m.name as string }))
+          : [];
+        if (!aborted) setMarkazOptions(opts);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+    return () => { aborted = true; };
+  }, []);
 
   // LIVE datasets for AdminTable (loaded from DB)
   const [amoliData, setAmoliData] = useState<UserDataForAdminTable>({ records: {}, labelMap: AMOLI_LABELS });
@@ -970,10 +990,7 @@ export default function UsersTable() {
                       onChange={(e) => {
                         setSelectedUser((prev) => (prev ? { ...prev, markaz: e.target.value } : null));
                       }}
-                      options={markazList.map(({ name }) => ({
-                        value: name,
-                        title: name,
-                      }))}
+                      options={markazOptions}
                     />
                   </div>
 

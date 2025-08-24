@@ -1,11 +1,9 @@
-// components/Register.tsx
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
 import { admin, useSession } from "@/lib/auth-client";
-import markazList from "@/app/data/markazList";
 import * as yup from "yup";
 import { useTranslations } from "next-intl";
 
@@ -32,12 +30,34 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
     district: "",
     upazila: "",
     union: "",
-    markaz: "",
+    markazId: "", // <-- use Markaz ID (relation)
     phone: "",
     email: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
+
+  // Markaz options now use ID as value so we can connect by id
+  const [markazOptions, setMarkazOptions] = useState<{ value: string; title: string }[]>([]);
+  useEffect(() => {
+    let aborted = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/markaz-masjid?pageSize=1000`, { cache: "no-store" });
+        const j = await res.json();
+        if (!res.ok) throw new Error(j?.error || "Failed to load markaz");
+        const opts = Array.isArray(j?.data)
+          ? j.data.map((m: any) => ({ value: m.id as string, title: m.name as string })) // <-- id
+          : [];
+        if (!aborted) setMarkazOptions(opts);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+    return () => {
+      aborted = true;
+    };
+  }, []);
 
   const signUpSchemaUser = yup.object().shape({
     name: yup.string().required(t("errors.nameRequired")),
@@ -45,11 +65,9 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
     password: yup.string().min(8, t("errors.passwordMin")).required(t("errors.passwordRequired")),
     role: yup.string().required(t("errors.roleRequired")),
     phone: yup.string().required(t("errors.phoneRequired")),
+    // we can enforce markazId by role if you want; currently HTML "required" handles it
   });
 
-  // Role visibility:
-  // - standard: centraladmin can create centraladmin too
-  // - special: centraladmin cannot create centraladmin (only division/markaz/daye)
   const roleHierarchy: Record<string, string[]> = {
     centraladmin: variant === "standard"
       ? ["centraladmin", "divisionadmin", "markazadmin", "daye"]
@@ -64,7 +82,6 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
     return allowed.map((r) => ({ value: r, title: getRoleTitle(r, t) }));
   }, [loggedInUserRole, t, variant]);
 
-  // Geo lists
   const districtsList: LocationOption[] = formData.divisionId ? (districts[formData.divisionId] || []) : [];
   const upazilasList: LocationOption[] = formData.districtId ? (upazilas[formData.districtId] || []) : [];
   const unionsList: LocationOption[] = formData.upazilaId ? (unions[formData.upazilaId] || []) : [];
@@ -113,6 +130,7 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
           const found = unionsList.find((item) => String(item.value) === String(value));
           return { ...prev, unionId: value, union: found?.title || "" };
         }
+        // markazId & others fall through here
         return { ...prev, [name]: value };
       });
     },
@@ -121,8 +139,6 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
 
   const { role } = formData;
 
-  // In standard mode we hide geo inputs based on role (old behavior).
-  // In special mode we keep them visible always.
   const geoAlwaysVisible = variant === "special";
   const hideDivision = !geoAlwaysVisible && role === "centraladmin";
   const hideDistrict = !geoAlwaysVisible && role === "divisionadmin";
@@ -137,20 +153,28 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
     try {
       await signUpSchemaUser.validate(formData, { abortEarly: false });
 
+      // Build nested data for Prisma create via Better Auth
+      const extraData: any = {
+        division: formData.division,
+        district: formData.district,
+        upazila: formData.upazila,
+        union: formData.union,
+        phone: formData.phone,
+      };
+
+      // attach relation only if markaz is selected
+      if (formData.markazId) {
+        // many-to-many: use connect with array
+        extraData.markaz = { connect: [{ id: formData.markazId }] };
+      }
+
       await admin.createUser(
         {
           name: formData.name,
           email: formData.email,
           password: formData.password,
           role: formData.role,
-          data: {
-            division: formData.division,
-            district: formData.district,
-            upazila: formData.upazila,
-            union: formData.union,
-            markaz: formData.markaz,
-            phone: formData.phone,
-          },
+          data: extraData,
         },
         {
           onSuccess: () => {
@@ -166,7 +190,7 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
               district: "",
               upazila: "",
               union: "",
-              markaz: "",
+              markazId: "",
               phone: "",
               email: "",
               password: "",
@@ -258,15 +282,14 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
             />
           )}
 
-          {/* Markaz: always visible in special, otherwise like before */}
           {(variant === "special" || !hideDivision) && (
             <SelectField
               label={t("fields.markaz")}
-              name="markaz"
-              value={formData.markaz}
+              name="markazId" // <-- use ID
+              value={formData.markazId}
               onChange={handleChange}
-              options={markazList.map(({ name }) => ({ value: name, title: name }))}
-              required={variant !== "special" ? true : false}
+              options={markazOptions}
+              required={variant !== "special"}
               placeholder={t("select")}
             />
           )}
