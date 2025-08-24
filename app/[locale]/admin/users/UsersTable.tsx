@@ -722,11 +722,8 @@ export default function UsersTable() {
             className="border border-slate-500 rounded-md px-4 py-2"
           >
             <option value="">{t("filters.allRoles")}</option>
-            <option value="centraladmin">{roleLabel("centraladmin")}</option>
             <option value="divisionadmin">{roleLabel("divisionadmin")}</option>
-            <option value="districtadmin">{roleLabel("districtadmin")}</option>
-            <option value="upozilaadmin">{roleLabel("upozilaadmin")}</option>
-            <option value="unionadmin">{roleLabel("unionadmin")}</option>
+            <option value="markazadmin">{roleLabel("markazadmin")}</option>
             <option value="daye">{roleLabel("daye")}</option>
             <option value="AssistantDaeeList">{t("filters.roleOptions.assistantList")}</option>
           </select>

@@ -121,7 +121,7 @@ const ImpersonateSidebar: React.FC = () => {
       href: "/admin/leave",
       icon: <FcAcceptDatabase className="size-6" />,
       label: t("leaveMatters"),
-      roles: ["centraladmin", "divisionadmin", "markazadmin"],
+      roles: ["centraladmin"],
       notificationCount: pendingLeaveCount,
       showNotification: true,
     },

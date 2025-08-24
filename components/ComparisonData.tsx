@@ -4,16 +4,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
-
-import { userMoktobBisoyData } from "@/app/data/moktobBisoyUserData";
-import { userDawatiBisoyData } from "@/app/data/dawatiBisoyUserData";
-import { userDawatiMojlishData } from "@/app/data/dawatiMojlishUserData";
-import { userJamatBisoyData } from "@/app/data/jamatBisoyUserData";
-import { userDineFeraData } from "@/app/data/dineferaUserData";
-import { userSoforBishoyData } from "@/app/data/soforBishoyUserData";
-import { userDayeData } from "@/app/data/dayiUserData";
-import { userTalimBisoyData } from "@/app/data/talimBisoyUserData";
-import { userAmoliData } from "@/app/data/amoliMuhasabaUserData";
 import ComparisonTallyCard from "@/components/ComparisonTallyCard";
 import { useTranslations } from "next-intl";
 
@@ -96,6 +86,100 @@ const ComparisonDataComponent: React.FC = () => {
   const [comparisonData, setComparisonData] = useState<any[]>([]);
   const t = useTranslations('comparison');
 
+  // --- Label maps (mirrors UsersTable) ---
+  const AMOLI_LABELS: Record<string, string> = {
+    tahajjud: "তাহাজ্জুদ (মিনিট/রাকাআত)",
+    surah: "সূরা",
+    ayat: "আয়াত",
+    zikir: "যিকির",
+    ishraq: "ইশরাক/আওয়াবীন/চাশ্ত",
+    jamat: "জামাতে নামাজ",
+    sirat: "সীরাত/হাদীস পাঠ",
+    Dua: "দোয়া",
+    ilm: "ইলম",
+    tasbih: "তাসবিহ",
+    dayeeAmol: "দায়ীর আমল",
+    amoliSura: "আমলী সূরা",
+    ayamroja: "আয়াম-এ-বিদ",
+    hijbulBahar: "হিজবুল বাহর",
+    percentage: "পারসেন্টেজ",
+    editorContent: "মতামত",
+  };
+  const MOKTOB_LABELS: Record<string, string> = {
+    notunMoktobChalu: "নতুন মক্তব চালু",
+    totalMoktob: "মোট মক্তব",
+    totalStudent: "মোট ছাত্র",
+    obhibhabokConference: "অভিভাবক কনফারেন্স",
+    moktoThekeMadrasaAdmission: "মক্তব থেকে মাদরাসায় ভর্তি",
+    notunBoyoskoShikkha: "নতুন বয়স্ক শিক্ষা",
+    totalBoyoskoShikkha: "মোট বয়স্ক শিক্ষা",
+    boyoskoShikkhaOnshogrohon: "বয়স্ক শিক্ষায় অংশগ্রহণ",
+    newMuslimeDinerFikir: "নতুন মুসলিমের দিনের ফিকির",
+    editorContent: "মতামত",
+  };
+  const TALIM_LABELS: Record<string, string> = {
+    mohilaTalim: "মহিলাদের তালিম",
+    mohilaOnshogrohon: "মহিলাদের অংশগ্রহণ",
+    editorContent: "মতামত",
+  };
+  const DAYE_LABELS: Record<string, string> = {
+    sohojogiDayeToiri: "সহযোগী দায়ী তৈরি",
+    editorContent: "মতামত",
+  };
+  const DAWATI_LABELS: Record<string, string> = {
+    nonMuslimDawat: "অমুসলিমকে দাওয়াত",
+    murtadDawat: "মুরতাদকে দাওয়াত",
+    alemderSatheyMojlish: "আলেমদের সাথে মজলিশ",
+    publicSatheyMojlish: "জনসাধারণের সাথে মজলিশ",
+    nonMuslimSaptahikGasht: "অমুসলিম সাপ্তাহিক গাশত",
+    editorContent: "মতামত",
+  };
+  const DAWATI_MOJLISH_LABELS: Record<string, string> = {
+    dawatterGuruttoMojlish: "দাওয়াতের গুরুত্ব মজলিশ",
+    mojlisheOnshogrohon: "মজলিশে অংশগ্রহণ",
+    prosikkhonKormoshalaAyojon: "প্রশিক্ষণ কর্মশালা আয়োজন",
+    prosikkhonOnshogrohon: "প্রশিক্ষণে অংশগ্রহণ",
+    jummahAlochona: "জুম্মাহ আলােচনা",
+    dhormoSova: "ধর্মসভা",
+    mashwaraPoint: "মাশওয়ারা পয়েন্ট",
+    editorContent: "মতামত",
+  };
+  const JAMAT_LABELS: Record<string, string> = {
+    jamatBerHoise: "জামাত বের হয়েছে",
+    jamatSathi: "জামাত সাথী",
+    editorContent: "মতামত",
+  };
+  const DINEFERA_LABELS: Record<string, string> = {
+    nonMuslimMuslimHoise: "অমুসলিম মুসলিম হয়েছে",
+    murtadIslamFireche: "মুরতাদ ইসলাম ফিরেছে",
+    editorContent: "মতামত",
+  };
+  const SOFOR_LABELS: Record<string, string> = {
+    madrasaVisit: "মাদ্রাসা ভিজিট",
+    madrasaVisitList: "মাদ্রাসা ভিজিট তালিকা",
+    moktobVisit: "মক্তব ভিজিট",
+    schoolCollegeVisit: "স্কুল/কলেজ ভিজিট",
+    schoolCollegeVisitList: "স্কুল/কলেজ ভিজিট তালিকা",
+    editorContent: "মতামত",
+  };
+
+  type RecordsByEmail = Record<string, Record<string, Record<string, any>>>;
+  type UserDataForAdminTable = { records: RecordsByEmail; labelMap: Record<string, string> };
+
+  const toDateKey = (iso: string) => {
+    const d = new Date(iso);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const ensureEmailDateSlot = (records: RecordsByEmail, email: string, dateKey: string) => {
+    if (!records[email]) records[email] = {};
+    if (!records[email][dateKey]) records[email][dateKey] = {};
+    return records[email][dateKey];
+  };
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -137,29 +221,233 @@ const ComparisonDataComponent: React.FC = () => {
   }, [users, userEmail]);
 
   // Handle comparison button click
-  const handleCompare = () => {
+  const handleCompare = async () => {
     if (!from || !to) {
       alert(t("messages.invalidRange"));
       return;
     }
 
-    const allData = [
-      userAmoliData,
-      userMoktobBisoyData,
-      userDawatiBisoyData,
-      userDawatiMojlishData,
-      userJamatBisoyData,
-      userDineFeraData,
-      userTalimBisoyData,
-      userSoforBishoyData,
-      userDayeData,
-    ];
+    // Fetch from DB for all selected emails
+    const fetchAmoli = async (emails: string[]): Promise<UserDataForAdminTable> => {
+      const records: RecordsByEmail = {};
+      await Promise.all(
+        emails.map(async (email) => {
+          const res = await fetch(`/api/amoli?email=${encodeURIComponent(email)}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          (json.records || []).forEach((r: any) => {
+            const dateKey = toDateKey(r.date);
+            const slot = ensureEmailDateSlot(records, email, dateKey);
+            slot.tahajjud = r.tahajjud ?? "-";
+            slot.surah = r.surah ?? "-";
+            slot.ayat = r.ayat ?? "-";
+            slot.zikir = r.zikir ?? "-";
+            slot.ishraq = r.ishraq ?? "-";
+            slot.jamat = r.jamat ?? "-";
+            slot.sirat = r.sirat ?? "-";
+            slot.Dua = r.Dua ?? "-";
+            slot.ilm = r.ilm ?? "-";
+            slot.tasbih = r.tasbih ?? "-";
+            slot.dayeeAmol = r.dayeeAmol ?? "-";
+            slot.amoliSura = r.amoliSura ?? "-";
+            slot.ayamroja = r.ayamroja ?? "-";
+            slot.hijbulBahar = r.hijbulBahar ?? "-";
+            slot.percentage = r.percentage ?? "-";
+            slot.editorContent = r.editorContent || "";
+          });
+        })
+      );
+      return { records, labelMap: AMOLI_LABELS };
+    };
 
-    const combinedData = allData.flatMap((data) =>
-      fetchUserComparisonData(data, comparisonType, from, to)
-    );
+    const fetchMoktob = async (emails: string[]): Promise<UserDataForAdminTable> => {
+      const records: RecordsByEmail = {};
+      await Promise.all(
+        emails.map(async (email) => {
+          const res = await fetch(`/api/moktob?email=${encodeURIComponent(email)}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          (json.records || []).forEach((r: any) => {
+            const dateKey = toDateKey(r.date);
+            const slot = ensureEmailDateSlot(records, email, dateKey);
+            slot.notunMoktobChalu = r.notunMoktobChalu ?? "-";
+            slot.totalMoktob = r.totalMoktob ?? "-";
+            slot.totalStudent = r.totalStudent ?? "-";
+            slot.obhibhabokConference = r.obhibhabokConference ?? "-";
+            slot.moktoThekeMadrasaAdmission = r.moktoThekeMadrasaAdmission ?? "-";
+            slot.notunBoyoskoShikkha = r.notunBoyoskoShikkha ?? "-";
+            slot.totalBoyoskoShikkha = r.totalBoyoskoShikkha ?? "-";
+            slot.boyoskoShikkhaOnshogrohon = r.boyoskoShikkhaOnshogrohon ?? "-";
+            slot.newMuslimeDinerFikir = r.newMuslimeDinerFikir ?? "-";
+            slot.editorContent = r.editorContent || "";
+          });
+        })
+      );
+      return { records, labelMap: MOKTOB_LABELS };
+    };
 
-    setComparisonData(combinedData);
+    const fetchTalim = async (emails: string[]): Promise<UserDataForAdminTable> => {
+      const records: RecordsByEmail = {};
+      await Promise.all(
+        emails.map(async (email) => {
+          const res = await fetch(`/api/talim?email=${encodeURIComponent(email)}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          (json.records || []).forEach((r: any) => {
+            const dateKey = toDateKey(r.date);
+            const slot = ensureEmailDateSlot(records, email, dateKey);
+            slot.mohilaTalim = r.mohilaTalim ?? "-";
+            slot.mohilaOnshogrohon = r.mohilaOnshogrohon ?? "-";
+            slot.editorContent = r.editorContent || "";
+          });
+        })
+      );
+      return { records, labelMap: TALIM_LABELS };
+    };
+
+    const fetchDaye = async (emails: string[]): Promise<UserDataForAdminTable> => {
+      const records: RecordsByEmail = {};
+      await Promise.all(
+        emails.map(async (email) => {
+          const res = await fetch(`/api/dayi?email=${encodeURIComponent(email)}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          (json.records || []).forEach((r: any) => {
+            const dateKey = toDateKey(r.date);
+            const slot = ensureEmailDateSlot(records, email, dateKey);
+            slot.sohojogiDayeToiri = r.sohojogiDayeToiri ?? "-";
+            slot.editorContent = r.editorContent || "";
+          });
+        })
+      );
+      return { records, labelMap: DAYE_LABELS };
+    };
+
+    const fetchDawati = async (emails: string[]): Promise<UserDataForAdminTable> => {
+      const records: RecordsByEmail = {};
+      await Promise.all(
+        emails.map(async (email) => {
+          const res = await fetch(`/api/dawati?email=${encodeURIComponent(email)}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          (json.records || []).forEach((r: any) => {
+            const dateKey = toDateKey(r.date);
+            const slot = ensureEmailDateSlot(records, email, dateKey);
+            slot.nonMuslimDawat = r.nonMuslimDawat ?? "-";
+            slot.murtadDawat = r.murtadDawat ?? "-";
+            slot.alemderSatheyMojlish = r.alemderSatheyMojlish ?? "-";
+            slot.publicSatheyMojlish = r.publicSatheyMojlish ?? "-";
+            slot.nonMuslimSaptahikGasht = r.nonMuslimSaptahikGasht ?? "-";
+            slot.editorContent = r.editorContent || "";
+          });
+        })
+      );
+      return { records, labelMap: DAWATI_LABELS };
+    };
+
+    const fetchDawatiMojlish = async (emails: string[]): Promise<UserDataForAdminTable> => {
+      const records: RecordsByEmail = {};
+      await Promise.all(
+        emails.map(async (email) => {
+          const res = await fetch(`/api/dawatimojlish?email=${encodeURIComponent(email)}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          (json.records || []).forEach((r: any) => {
+            const dateKey = toDateKey(r.date);
+            const slot = ensureEmailDateSlot(records, email, dateKey);
+            slot.dawatterGuruttoMojlish = r.dawatterGuruttoMojlish ?? "-";
+            slot.mojlisheOnshogrohon = r.mojlisheOnshogrohon ?? "-";
+            slot.prosikkhonKormoshalaAyojon = r.prosikkhonKormoshalaAyojon ?? "-";
+            slot.prosikkhonOnshogrohon = r.prosikkhonOnshogrohon ?? "-";
+            slot.jummahAlochona = r.jummahAlochona ?? "-";
+            slot.dhormoSova = r.dhormoSova ?? "-";
+            slot.mashwaraPoint = r.mashwaraPoint ?? "-";
+            slot.editorContent = r.editorContent || "";
+          });
+        })
+      );
+      return { records, labelMap: DAWATI_MOJLISH_LABELS };
+    };
+
+    const fetchJamat = async (emails: string[]): Promise<UserDataForAdminTable> => {
+      const records: RecordsByEmail = {};
+      await Promise.all(
+        emails.map(async (email) => {
+          const res = await fetch(`/api/jamat?email=${encodeURIComponent(email)}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          (json.records || []).forEach((r: any) => {
+            const dateKey = toDateKey(r.date);
+            const slot = ensureEmailDateSlot(records, email, dateKey);
+            slot.jamatBerHoise = r.jamatBerHoise ?? "-";
+            slot.jamatSathi = r.jamatSathi ?? "-";
+            slot.editorContent = r.editorContent || "";
+          });
+        })
+      );
+      return { records, labelMap: JAMAT_LABELS };
+    };
+
+    const fetchDineFera = async (emails: string[]): Promise<UserDataForAdminTable> => {
+      const records: RecordsByEmail = {};
+      await Promise.all(
+        emails.map(async (email) => {
+          const res = await fetch(`/api/dinefera?email=${encodeURIComponent(email)}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          (json.records || []).forEach((r: any) => {
+            const dateKey = toDateKey(r.date);
+            const slot = ensureEmailDateSlot(records, email, dateKey);
+            slot.nonMuslimMuslimHoise = r.nonMuslimMuslimHoise ?? "-";
+            slot.murtadIslamFireche = r.murtadIslamFireche ?? "-";
+            slot.editorContent = r.editorContent || "";
+          });
+        })
+      );
+      return { records, labelMap: DINEFERA_LABELS };
+    };
+
+    const fetchSofor = async (emails: string[]): Promise<UserDataForAdminTable> => {
+      const records: RecordsByEmail = {};
+      await Promise.all(
+        emails.map(async (email) => {
+          const res = await fetch(`/api/soforbisoy?email=${encodeURIComponent(email)}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          (json.records || []).forEach((r: any) => {
+            const dateKey = toDateKey(r.date);
+            const slot = ensureEmailDateSlot(records, email, dateKey);
+            slot.madrasaVisit = r.madrasaVisit ?? "-";
+            slot.madrasaVisitList = Array.isArray(r.madrasaVisitList) ? r.madrasaVisitList.join(", ") : (r.madrasaVisitList || "");
+            slot.moktobVisit = r.moktobVisit ?? "-";
+            slot.schoolCollegeVisit = r.schoolCollegeVisit ?? "-";
+            slot.schoolCollegeVisitList = Array.isArray(r.schoolCollegeVisitList) ? r.schoolCollegeVisitList.join(", ") : (r.schoolCollegeVisitList || "");
+            slot.editorContent = r.editorContent || "";
+          });
+        })
+      );
+      return { records, labelMap: SOFOR_LABELS };
+    };
+
+    try {
+      const [amoli, moktob, talim, daye, dawati, dawatiMojlish, jamat, dineFera, sofor] = await Promise.all([
+        fetchAmoli(emailList),
+        fetchMoktob(emailList),
+        fetchTalim(emailList),
+        fetchDaye(emailList),
+        fetchDawati(emailList),
+        fetchDawatiMojlish(emailList),
+        fetchJamat(emailList),
+        fetchDineFera(emailList),
+        fetchSofor(emailList),
+      ]);
+
+      const allData = [amoli, moktob, dawati, dawatiMojlish, jamat, dineFera, talim, sofor, daye];
+      const combinedData = allData.flatMap((data) => fetchUserComparisonData(data, comparisonType, from, to));
+      setComparisonData(combinedData);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   // Fetch comparison data for all users in emailList
@@ -340,7 +628,7 @@ const ComparisonDataComponent: React.FC = () => {
 
   return (
     <div className="p-2 lg:p-6 bg-white shadow-md rounded-lg">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">{t("title")}</h1>
+      {/* <h1 className="text-2xl font-bold text-gray-800 mb-4">{t("title")}</h1> */}
       <div className="grid lg:flex lg:flex-wrap gap-4 mb-6">
         <select
           value={comparisonType}

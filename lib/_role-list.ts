@@ -3,4 +3,5 @@ export const roleList = [
   "centraladmin",
   "divisionadmin",
   "markazadmin",
+  "daye",
 ];
