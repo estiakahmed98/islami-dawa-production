@@ -27,6 +27,8 @@ import { IoPersonAddSharp } from "react-icons/io5";
 import MuiTreeView from "@/components/MuiTreeView";
 import { useLocale, useTranslations } from "next-intl";
 import { FiEdit3 } from "react-icons/fi";
+import { PiMosqueDuotone } from "react-icons/pi";
+
 
 const SidebarMenu = () => {
   const t = useTranslations("dashboard.sideBar");
@@ -235,7 +237,12 @@ const SidebarMenu = () => {
       title: t("editRequest"),
       notificationCount: pendingEditCount,
       showNotification: true,
+    },{
+      url: "/admin/markaz",
+      icon: <PiMosqueDuotone className="size-5" />,
+      title: t("markaz"),
     }
+
   ];
 
   return (

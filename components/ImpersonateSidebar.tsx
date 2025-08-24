@@ -15,6 +15,7 @@ import { FiEdit3 } from "react-icons/fi";
 import { LuArrowLeftFromLine, LuArrowRightToLine, LuLayoutDashboard } from "react-icons/lu";
 import { Bell } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { PiMosqueDuotone } from "react-icons/pi";
 
 const ImpersonateSidebar: React.FC = () => {
   const t = useTranslations("dashboard.sideBar");
@@ -138,6 +139,12 @@ const ImpersonateSidebar: React.FC = () => {
       notificationCount: pendingEditCount,
       showNotification: true,
     },
+    {
+      href: "/admin/markaz",
+      icon: <PiMosqueDuotone className="size-5" />,
+      label: t("markaz"),
+      roles: ["centraladmin"],
+    }
   ];
 
   return (
