@@ -932,5 +932,57 @@
       "generatedAt": "Generated:",
       "totalUsers": "Total users:"
     }
+  },
+  "markaz": {
+    "title": "Markaz Masjid",
+    "searchPlaceholder": "Search here...",
+    "buttons": {
+      "add": "Add Markaz",
+      "search": "Search",
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "create": "Create",
+      "update": "Update"
+    },
+    "table": {
+      "name": "Name",
+      "division": "Division",
+      "district": "District",
+      "upazila": "Upazila",
+      "union": "Union",
+      "users": "Users",
+      "actions": "Actions"
+    },
+    "dialogs": {
+      "createTitle": "Create Markaz",
+      "editTitle": "Edit Markaz",
+      "deleteTitle": "Delete Markaz",
+      "deleteConfirm": "Are you sure you want to delete <b>{name}</b>? This action cannot be undone."
+    },
+    "messages": {
+      "loading": "Loading...",
+      "noData": "No data",
+      "fetchFailed": "Failed to fetch",
+      "loadFailed": "Failed to load",
+      "saveFailed": "Failed to save",
+      "created": "Created",
+      "updated": "Updated",
+      "deleted": "Deleted"
+    },
+    "labels": {
+      "name": "Name",
+      "division": "Division",
+      "district": "District",
+      "upazila": "Upazila",
+      "union": "Union",
+      "selectDivision": "Select division",
+      "selectDistrict": "Select district",
+      "selectUpazila": "Select upazila",
+      "selectUnion": "Select union"
+    },
+    "validation": {
+      "required": "Required"
+    }
   }
 }

@@ -931,5 +931,58 @@
       "generatedAt": "তৈরি করা হয়েছে:",
       "totalUsers": "মোট ব্যবহারকারী:"
     }
+  },
+
+"markaz": {
+    "title": "মারকায মসজিদ",
+    "searchPlaceholder": "এখানে খুঁজুন...",
+    "buttons": {
+      "add": "মারকায যোগ করুন",
+      "search": "খুঁজুন",
+      "edit": "সম্পাদনা",
+      "delete": "মুছে ফেলুন",
+      "cancel": "বাতিল",
+      "create": "তৈরি করুন",
+      "update": "আপডেট করুন"
+    },
+    "table": {
+      "name": "নাম",
+      "division": "বিভাগ",
+      "district": "জেলা",
+      "upazila": "উপজেলা",
+      "union": "ইউনিয়ন",
+      "users": "ব্যবহারকারী",
+      "actions": "অ্যাকশন"
+    },
+    "dialogs": {
+      "createTitle": "মারকায তৈরি",
+      "editTitle": "মারকায সম্পাদনা",
+      "deleteTitle": "মারকায মুছে ফেলা",
+      "deleteConfirm": "আপনি কি নিশ্চিত যে <b>{name}</b> মুছে ফেলতে চান? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।"
+    },
+    "messages": {
+      "loading": "লোড হচ্ছে...",
+      "noData": "কোনো তথ্য নেই",
+      "fetchFailed": "ডেটা আনা ব্যর্থ হয়েছে",
+      "loadFailed": "লোড ব্যর্থ",
+      "saveFailed": "সংরক্ষণ ব্যর্থ",
+      "created": "তৈরি হয়েছে",
+      "updated": "আপডেট হয়েছে",
+      "deleted": "মুছে ফেলা হয়েছে"
+    },
+    "labels": {
+      "name": "নাম",
+      "division": "বিভাগ",
+      "district": "জেলা",
+      "upazila": "উপজেলা",
+      "union": "ইউনিয়ন",
+      "selectDivision": "বিভাগ নির্বাচন করুন",
+      "selectDistrict": "জেলা নির্বাচন করুন",
+      "selectUpazila": "উপজেলা নির্বাচন করুন",
+      "selectUnion": "ইউনিয়ন নির্বাচন করুন"
+    },
+    "validation": {
+      "required": "আবশ্যক"
+    }
   }
 }

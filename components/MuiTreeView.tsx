@@ -16,12 +16,15 @@ import { useTranslations } from "next-intl";
 
 export const roleList = ["centraladmin", "divisionadmin", "markazadmin", "daye"];
 
+type MarkazRef = { id: string; name: string };
+
 interface User {
   id: string;
   name: string;
   email: string;
   role: string;
-  markaz?: string | null;
+  // markaz can be a string (legacy), null/undefined, or relation array
+  markaz?: string | null | MarkazRef[];
   division?: string | null;
   district?: string | null;
   upazila?: string | null;
@@ -48,9 +51,33 @@ const MuiTreeView: React.FC = () => {
   const router = useRouter();
   const { data: session } = useSession();
 
+  // --- Helpers to normalize markaz relation ---
+  const getMarkazIds = (u?: User): string[] => {
+    if (!u?.markaz) return [];
+    if (Array.isArray(u.markaz)) return u.markaz.map((m) => m.id).filter(Boolean);
+    return []; // legacy string has no ID
+  };
+  const getMarkazNames = (u?: User): string[] => {
+    if (!u?.markaz) return [];
+    if (Array.isArray(u.markaz)) return u.markaz.map((m) => m.name).filter(Boolean);
+    if (typeof u.markaz === "string" && u.markaz.trim()) return [u.markaz.trim()];
+    return [];
+  };
+  const shareMarkaz = (a: User, b: User): boolean => {
+    const aIds = getMarkazIds(a);
+    const bIds = getMarkazIds(b);
+    if (aIds.length && bIds.length) return aIds.some((id) => bIds.includes(id));
+    // fallback by name if ids missing
+    const aNames = getMarkazNames(a);
+    const bNames = getMarkazNames(b);
+    if (aNames.length && bNames.length) return aNames.some((n) => bNames.includes(n));
+    return false;
+  };
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        // This route should now return markaz relation as [{id,name}] for each user
         const response = await fetch("/api/users", { cache: "no-store" });
         if (!response.ok) throw new Error(t("fetchError"));
 
@@ -72,7 +99,7 @@ const MuiTreeView: React.FC = () => {
     fetchUsers();
   }, [session?.user, t]);
 
-  // ---------- FIXED: buildTree shows only the logged-in centraladmin as root ----------
+  // Build tree; centraladmin sees themselves as root so children hang under them
   const buildTree = (users: User[], loggedInUser: User | null): TreeNode[] => {
     const userMap = new Map<string, TreeNode>();
 
@@ -93,16 +120,13 @@ const MuiTreeView: React.FC = () => {
     });
 
     if (loggedInUser) {
-      // If centraladmin: only your own node as the single root.
-      // If not centraladmin: only your own subtree as before.
       const selfNode = userMap.get(loggedInUser.email);
       return selfNode ? [selfNode] : [];
     }
-
     return [];
   };
 
-  // ---------- FIXED: parent fallback prefers the LOGGED-IN centraladmin ----------
+  // Parent resolution updated for markaz relation
   const getParentEmail = (
     user: User,
     users: User[],
@@ -112,17 +136,12 @@ const MuiTreeView: React.FC = () => {
 
     switch (user.role) {
       case "divisionadmin": {
-        // divisionadmin -> centraladmin (prefer logged-in centraladmin)
-        if (loggedInUser?.role === "centraladmin") {
-          parentUser = loggedInUser;
-        } else {
-          parentUser = users.find((u) => u.role === "centraladmin");
-        }
+        parentUser =
+          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
+          users.find((u) => u.role === "centraladmin");
         break;
       }
-
       case "markazadmin": {
-        // markazadmin -> divisionadmin (same division), else fallback to logged-in centraladmin
         parentUser = users.find(
           (u) => u.role === "divisionadmin" && u.division === user.division
         );
@@ -133,20 +152,14 @@ const MuiTreeView: React.FC = () => {
         }
         break;
       }
-
       case "daye": {
-        // daye -> markazadmin (same markaz), else fallback to logged-in centraladmin
-        parentUser = users.find(
-          (u) => u.role === "markazadmin" && u.markaz === user.markaz
-        );
-        if (!parentUser) {
-          parentUser =
-            (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-            users.find((u) => u.role === "centraladmin");
-        }
+        // Find a markazadmin who shares at least one Markaz (by id first, name fallback)
+        parentUser =
+          users.find((u) => u.role === "markazadmin" && shareMarkaz(u, user)) ||
+          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
+          users.find((u) => u.role === "centraladmin");
         break;
       }
-
       default:
         return null;
     }
