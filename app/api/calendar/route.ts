@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Create Event Error:", error);
     return NextResponse.json(
-      { error: error?.message || "Failed to create event." },
+      { error: (error as Error)?.message || "Failed to create event." },
       { status: 500 }
     );
   }
