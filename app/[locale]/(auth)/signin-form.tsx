@@ -25,12 +25,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { signIn } from "@/lib/auth-client";
 import { FormError } from "@/components/FormError";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
+import { signIn } from "@/lib/auth-client";
 import { FcGoogle } from "react-icons/fc";
 import { Loader2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -104,14 +103,14 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
     setIsGoogleLoading(true);
     setFormError("");
     try {
-      await authClient.signIn.social(
+      await signIn.social(
         { provider: "google", callbackURL: `/${locale}/admin` },
         {
           onSuccess: () => {
             router.refresh();
             toast.success(t("toasts.loginSuccessful"));
           },
-          onError: (ctx) => setFormError(ctx.error.message),
+          onError: (ctx: any) => setFormError(ctx.error.message),
         }
       );
     } catch (err) {

@@ -24,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { signUp } from "@/lib/auth-client";
+import { signUp, signIn } from "@/lib/auth-client";
 import { FormError } from "@/components/FormError";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -68,11 +68,17 @@ const SignupForm = () => {
           setFormError("");
           toast.loading("Signing up...");
         },
-        onSuccess: () => {
-          toast.success("Sign up successful!");
-          router.push("/admin");
+        onSuccess: async () => {
+          toast.success("Sign up successful! Logging you in...");
+          await signIn.email(
+            { email: values.email, password: values.password },
+            {
+              onError: (ctx: any) => toast.error(ctx.error.message),
+            }
+          );
+          router.push("/dashboard");
         },
-        onError: (ctx) => {
+        onError: (ctx: { error: { message: string } }) => {
           setFormError(ctx.error.message);
           toast.error(ctx.error.message);
         },

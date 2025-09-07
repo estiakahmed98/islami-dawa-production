@@ -1,15 +1,12 @@
-//Faysal Updated by //Estiak
-
+// app/api/profile/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { getServerAuthSession } from "@/lib/auth"; // <- make sure this exists
 
 export async function GET() {
   try {
-    const request = new Request("/api/auth/session");
-    const response = await auth.handler(request);
-    const session = await response.json();
-    if (!session || !session.user?.email) {
+    const session = await getServerAuthSession();
+    if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -24,9 +21,9 @@ export async function GET() {
         area: true,
         upazila: true,
         union: true,
-        markaz: true,
         phone: true,
         image: true,
+        // markaz: true, // ← uncomment only if this relation exists in your Prisma model
       },
     });
 
@@ -34,7 +31,7 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json(user);
+    return NextResponse.json(user, { status: 200 });
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return NextResponse.json(

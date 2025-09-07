@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Anek_Bangla, Tiro_Bangla } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
+import AppSessionProvider from "@/providers/session-provider";
 import { Toaster } from "@/components/ui/sonner";
 import TreeProvider from "@/providers/treeProvider";
 import { getLocale } from "next-intl/server";
@@ -46,14 +47,16 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${anekBangla.className} ${tiroBangla.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          disableTransitionOnChange
-        >
-          <TreeProvider>{children}</TreeProvider>
-          <Toaster />
-        </ThemeProvider>
+        <AppSessionProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            disableTransitionOnChange
+          >
+            <TreeProvider>{children}</TreeProvider>
+            <Toaster />
+          </ThemeProvider>
+        </AppSessionProvider>
       </body>
     </html>
   );

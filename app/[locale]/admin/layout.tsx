@@ -2,8 +2,7 @@ import Header from "@/components/dashboard/header";
 import ImpersonateSidebar from "@/components/ImpersonateSidebar";
 import { SidebarProvider } from "@/providers/sidebar-provider";
 import { roleList } from "@/lib/_role-list";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { auth, getServerAuthSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
@@ -24,9 +23,7 @@ const AdmindLayout = async ({ children, params }: Props) => {
   // Load translation messages for the locale so all namespaces (e.g., 'treeView') are available
   const messages = (await import(`@/locale/${locale}.json`)).default;
 
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getServerAuthSession();
 
   if (!roleList.includes(session?.user?.role as string)) {
     redirect("/dashboard");

@@ -1,9 +1,8 @@
-//Estiak
-
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { nextAuthOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { hash } from "bcryptjs";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +10,7 @@ export async function POST(req: NextRequest) {
     if (!session || !session.user)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
+    // Only allow users with admin-like roles
     const role = (session.user as any).role;
     const allowed = [
       "centraladmin",
@@ -21,36 +21,41 @@ export async function POST(req: NextRequest) {
     if (!allowed.includes(role))
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
 
-    const { userId, banned } = await req.json(); // Parse request body
-    if (typeof userId !== "string" || typeof banned !== "boolean") {
+    const body = await req.json();
+    const { name, email, password, role: newRole, data } = body;
+    if (!email || !password || !newRole)
+      return NextResponse.json({ message: "Missing fields" }, { status: 400 });
+
+    const existing = await db.users.findUnique({ where: { email } });
+    if (existing)
       return NextResponse.json(
-        { message: "Invalid request body" },
+        { message: "User already exists" },
         { status: 400 }
       );
-    }
 
-    const data: any = { banned };
-    if (banned) {
-      data.banReason = "Violation of rules";
-      data.banExpires = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7; // epoch seconds
-    } else {
-      data.banReason = null;
-      data.banExpires = null;
-    }
+    const hashed = await hash(password, 10);
 
-    const updatedUser = await db.users.update({ where: { id: userId }, data });
+    const createData: any = {
+      name,
+      email,
+      password: hashed,
+      role: newRole,
+      emailVerified: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...data,
+    };
+
+    const user = await db.users.create({ data: createData });
 
     return NextResponse.json(
-      { message: "User status updated successfully", user: updatedUser },
-      { status: 200 }
+      { message: "User created", user },
+      { status: 201 }
     );
   } catch (error: any) {
-    console.error("Error updating user status:", error);
+    console.error(error);
     return NextResponse.json(
-      {
-        message: "Error updating user status",
-        error: error?.message || "Unknown",
-      },
+      { message: error?.message || "Error" },
       { status: 500 }
     );
   }

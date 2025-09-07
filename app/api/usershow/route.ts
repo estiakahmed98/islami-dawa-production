@@ -1,6 +1,6 @@
+// app/api/users/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getServerAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 
 /**
@@ -9,7 +9,22 @@ import { db } from "@/lib/db";
  */
 export async function GET(req: NextRequest) {
   try {
+    const session = await getServerAuthSession();
+    if (!session?.user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
     const url = new URL(req.url);
+
+    // tri-state parse for "banned": true | false | undefined
+    const bannedParam = url.searchParams.get("banned");
+    const bannedParsed =
+      bannedParam === "true"
+        ? true
+        : bannedParam === "false"
+          ? false
+          : undefined;
+
     const filters = {
       role: url.searchParams.get("role") || "",
       name: url.searchParams.get("name") || "",
@@ -20,15 +35,17 @@ export async function GET(req: NextRequest) {
       area: url.searchParams.get("area") || "",
       email: url.searchParams.get("email") || "",
       phone: url.searchParams.get("phone") || "",
-      banned: url.searchParams.get("banned") === "true" ? true : undefined,
+      banned: bannedParsed as boolean | undefined,
     };
 
+    // Build Prisma where
     const where: Record<string, any> = {};
     for (const [key, value] of Object.entries(filters)) {
-      if (value && typeof value === "string" && value.trim() !== "") {
+      if (key === "banned" && typeof value === "boolean") {
+        where.banned = value;
+      } else if (typeof value === "string" && value.trim() !== "") {
+        // partial, case-insensitive match for strings
         where[key] = { contains: value.trim(), mode: "insensitive" };
-      } else if (key === "banned" && typeof value === "boolean") {
-        where[key] = value;
       }
     }
 
@@ -47,8 +64,9 @@ export async function GET(req: NextRequest) {
         phone: true,
         banned: true,
         note: true,
-        markaz: { select: { id: true, name: true } }, // relation safely selected here
+        markaz: { select: { id: true, name: true } }, // Many-to-many relation
       },
+      orderBy: { createdAt: "desc" }, // optional, remove if not present in schema
     });
 
     const users = rows.map((u) => ({
@@ -64,7 +82,7 @@ export async function GET(req: NextRequest) {
       phone: u.phone,
       banned: u.banned,
       note: u.note,
-      // keep UI contract: single string
+      // keep UI contract: flatten to a single name (first markaz if any)
       markaz: Array.isArray(u.markaz) ? (u.markaz[0]?.name ?? "") : "",
     }));
 
@@ -72,20 +90,23 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("Error fetching users:", msg);
-    return NextResponse.json({ message: "Failed to fetch users.", error: msg }, { status: 500 });
+    return NextResponse.json(
+      { message: "Failed to fetch users.", error: msg },
+      { status: 500 }
+    );
   }
 }
 
 /**
  * PUT: Update user (Central Admin only).
  * Body: { userId: string, updates: {..., markaz?: string}, note?: string }
- * - updates.markaz === ""  -> clear relation
- * - updates.markaz === "Name" -> set to that one Markaz
+ * - updates.markaz === ""         -> clear all markaz relations
+ * - updates.markaz === "Name"     -> set to that one Markaz by name
  */
 export async function PUT(req: NextRequest) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (!session?.user) {
+    const session = await getServerAuthSession();
+    if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -96,7 +117,10 @@ export async function PUT(req: NextRequest) {
 
     const body = await req.json().catch(() => null as any);
     if (!body || typeof body !== "object") {
-      return NextResponse.json({ message: "Invalid request body" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid request body" },
+        { status: 400 }
+      );
     }
 
     const { userId, updates, note } = body as {
@@ -106,7 +130,10 @@ export async function PUT(req: NextRequest) {
     };
 
     if (!userId || !updates || typeof updates !== "object") {
-      return NextResponse.json({ message: "Invalid request data" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid request data" },
+        { status: 400 }
+      );
     }
 
     const { markaz, ...scalar } = updates;
@@ -154,57 +181,75 @@ export async function PUT(req: NextRequest) {
 
     const shaped = {
       ...updated,
-      markaz: Array.isArray(updated.markaz) ? (updated.markaz[0]?.name ?? "") : "",
+      markaz: Array.isArray(updated.markaz)
+        ? (updated.markaz[0]?.name ?? "")
+        : "",
     };
 
     return NextResponse.json({ user: shaped }, { status: 200 });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("Update error:", msg);
-    return NextResponse.json({ message: "Internal server error", error: msg }, { status: 500 });
+    return NextResponse.json(
+      { message: "Internal server error", error: msg },
+      { status: 500 }
+    );
   }
 }
 
 /**
  * DELETE: Remove a user (Central Admin only)
+ * Body: { userId: string }
  */
 export async function DELETE(req: NextRequest) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (!session?.user) {
+    const session = await getServerAuthSession();
+    if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
+    const me = await db.users.findUnique({ where: { id: session.user.id } });
+    if (me?.role !== "centraladmin") {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     const { userId } = await req.json();
-    if (typeof userId !== "string") {
+    if (typeof userId !== "string" || !userId) {
       return NextResponse.json(
         { message: "Invalid request body: userId is required" },
         { status: 400 }
       );
     }
 
-    const user = await db.users.findUnique({ where: { id: userId } });
-    if (!user) {
+    const exists = await db.users.findUnique({ where: { id: userId } });
+    if (!exists) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     await db.users.delete({ where: { id: userId } });
 
-    return NextResponse.json({ message: "User deleted successfully" }, { status: 200 });
+    return NextResponse.json(
+      { message: "User deleted successfully" },
+      { status: 200 }
+    );
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("Error deleting user:", msg);
-    return NextResponse.json({ message: "Error deleting user", error: msg }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error deleting user", error: msg },
+      { status: 500 }
+    );
   }
 }
 
 /**
  * POST: Ban/Unban a user (Central Admin only)
+ * Body: { userId: string, banned: boolean }
  */
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (!session?.user) {
+    const session = await getServerAuthSession();
+    if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -215,7 +260,10 @@ export async function POST(req: NextRequest) {
 
     const { userId, banned } = await req.json();
     if (!userId || typeof banned !== "boolean") {
-      return NextResponse.json({ message: "Invalid request data" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid request data" },
+        { status: 400 }
+      );
     }
 
     const updated = await db.users.update({
@@ -240,16 +288,24 @@ export async function POST(req: NextRequest) {
 
     const shaped = {
       ...updated,
-      markaz: Array.isArray(updated.markaz) ? (updated.markaz[0]?.name ?? "") : "",
+      markaz: Array.isArray(updated.markaz)
+        ? (updated.markaz[0]?.name ?? "")
+        : "",
     };
 
     return NextResponse.json(
-      { message: `User ${banned ? "banned" : "unbanned"} successfully!`, user: shaped },
+      {
+        message: `User ${banned ? "banned" : "unbanned"} successfully!`,
+        user: shaped,
+      },
       { status: 200 }
     );
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error("Ban/unban error:", msg);
-    return NextResponse.json({ message: "Internal server error", error: msg }, { status: 500 });
+    return NextResponse.json(
+      { message: "Internal server error", error: msg },
+      { status: 500 }
+    );
   }
 }

@@ -2,6 +2,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import createIntlMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
+import { getToken } from "next-auth/jwt";
 
 const DEVICE_COOKIE = "boe_device_id";
 
@@ -41,24 +42,8 @@ export default async function authMiddleware(request: NextRequest) {
 
   const deviceId = ensureDeviceIdCookie(request, response);
 
-  let session: any = null;
-  try {
-    const sessRes = await fetch(
-      `${process.env.BETTER_AUTH_URL}/api/auth/get-session`,
-      {
-        headers: { cookie: request.headers.get("cookie") || "" },
-      }
-    );
-
-    if (sessRes.ok) {
-      session = await sessRes.json();
-      if (session && session.session == null && session.id) {
-        session = { session, user: session.user };
-      }
-    }
-  } catch {
-    // Ignore errors
-  }
+  // Read NextAuth JWT (does not trigger any network call)
+  const token = await getToken({ req: request as any, secret: process.env.NEXTAUTH_SECRET });
 
   const redirectWithError = (url: string, error: string) => {
     const u = new URL(url, request.url);
@@ -67,12 +52,11 @@ export default async function authMiddleware(request: NextRequest) {
   };
 
   if (protectedRoute) {
-    if (!session || !session.session || !session.user) {
+    if (!token) {
       return NextResponse.redirect(new URL("/", request.url));
     }
-    const userId = session.user.id ?? session.user.userId ?? session.user.email;
-    const sessionId =
-      session.session.id ?? session.session.sessionId ?? session.session.jti;
+    const userId = (token as any).id || (token as any).sub || (token as any).email;
+    const sessionId = (token as any).jti || String((token as any).iat || "");
 
     const lockRes = await fetch(
       `${request.nextUrl.origin}/api/session-lock?userId=${encodeURIComponent(
@@ -118,8 +102,8 @@ export default async function authMiddleware(request: NextRequest) {
   }
 
   if (authRoute) {
-    if (session && session.session && session.user) {
-      const userId = session.user.id ?? session.user.userId ?? session.user.email;
+    if (token) {
+      const userId = (token as any).id || (token as any).sub || (token as any).email;
       const lockRes = await fetch(
         `${request.nextUrl.origin}/api/session-lock?userId=${encodeURIComponent(
           String(userId)
@@ -135,10 +119,7 @@ export default async function authMiddleware(request: NextRequest) {
 
         if (!data.activeDeviceId || data.activeDeviceId === deviceId) {
           if (!data.activeDeviceId) {
-            const sessionId =
-              session.session.id ??
-              session.session.sessionId ??
-              session.session.jti;
+            const sessionId = (token as any).jti || String((token as any).iat || "");
             await fetch(`${request.nextUrl.origin}/api/session-lock`, {
               method: "POST",
               headers: {

@@ -11,9 +11,9 @@ import { getGoogleAuthClient } from "@/lib/google-calendar";
  */
 async function getAuthenticatedClient(req: NextRequest) {
   const session = await auth.api.getSession({ headers: req.headers });
-  if (!session?.user) {
-    throw new Error("Unauthorized");
-  }
+  const session = await getServerAuthSession();
+  if (!session?.user)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   return await getGoogleAuthClient(session.user.id);
 }
 
