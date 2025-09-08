@@ -29,7 +29,7 @@ import { FormError } from "@/components/FormError";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { signIn } from "@/lib/auth-client";
+import { signIn, getSession } from "@/lib/auth-client";
 import { FcGoogle } from "react-icons/fc";
 import { Loader2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -86,9 +86,12 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
           setIsLoading(true);
           setFormError("");
         },
-        onSuccess: () => {
+        onSuccess: async () => {
           toast.success(t("toasts.loginSuccessful"));
-          router.push(`/${locale}/admin`);
+          const s = await getSession();
+          const role = (s?.user as any)?.role as string | undefined;
+          const target = role === "daye" ? `/${locale}/dashboard` : `/${locale}/admin`;
+          router.push(target);
           router.refresh();
         },
         onError: (ctx) => {
@@ -106,9 +109,13 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
       await signIn.social(
         { provider: "google", callbackURL: `/${locale}/admin` },
         {
-          onSuccess: () => {
-            router.refresh();
+          onSuccess: async () => {
+            const s = await getSession();
+            const role = (s?.user as any)?.role as string | undefined;
+            const target = role === "daye" ? `/${locale}/dashboard` : `/${locale}/admin`;
             toast.success(t("toasts.loginSuccessful"));
+            router.push(target);
+            router.refresh();
           },
           onError: (ctx: any) => setFormError(ctx.error.message),
         }

@@ -29,11 +29,13 @@ export const signIn = {
   social: async (opts: any, hooks?: any) => {
     try {
       hooks?.onRequest?.();
-      // provider is expected to be "google"
-      await nextSignIn(opts.provider || "google", {
+      // provider is expected to be "google"; do not auto-redirect so caller can route by role
+      const res = await nextSignIn(opts.provider || "google", {
+        redirect: false,
         callbackUrl: opts.callbackURL || "/",
       });
-      hooks?.onSuccess?.();
+      if (res?.error) hooks?.onError?.({ error: { message: res.error } });
+      else hooks?.onSuccess?.(res);
     } catch (err: any) {
       hooks?.onError?.({
         error: { message: err.message || "Social signin failed" },
