@@ -21,8 +21,46 @@ export async function POST(req: NextRequest) {
     if (!allowed.includes(role))
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
 
-    const body = await req.json();
-    const { name, email, password, role: newRole, data } = body;
+    // Parse JSON body (do not rely on Content-Length which may be absent with chunked encoding)
+    const contentType = req.headers.get("content-type") || "";
+    if (contentType && !contentType.includes("application/json")) {
+      return NextResponse.json(
+        { message: "Content-Type must be application/json" },
+        { status: 415 }
+      );
+    }
+    
+    let body: any;
+    try {
+      body = await req.json();
+    } catch (e: any) {
+      return NextResponse.json(
+        { message: "Invalid JSON body" },
+        { status: 400 }
+      );
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json(
+        { message: "Request body must be a JSON object" },
+        { status: 400 }
+      );
+    }
+    // Destructure with sensible defaults and basic type guards
+    const {
+      name,
+      email,
+      password,
+      role: newRole,
+      data = {},
+    }: {
+      name?: string;
+      email?: string;
+      password?: string;
+      role?: string;
+      data?: unknown;
+    } = body ?? {};
+    const safeExtraData =
+      data && typeof data === "object" && !Array.isArray(data) ? (data as object) : {};
     if (!email || !password || !newRole)
       return NextResponse.json({ message: "Missing fields" }, { status: 400 });
 
@@ -38,12 +76,24 @@ export async function POST(req: NextRequest) {
     const createData: any = {
       name,
       email,
-      password: hashed,
       role: newRole,
       emailVerified: false,
       createdAt: new Date(),
       updatedAt: new Date(),
-      ...data,
+      // Create credentials account for this user
+      accounts: {
+        create: [
+          {
+            accountId: email,
+            providerId: "credentials",
+            password: hashed,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+      },
+      // Only spread validated extra object fields
+      ...(safeExtraData as Record<string, unknown>),
     };
 
     const user = await db.users.create({ data: createData });
@@ -53,7 +103,6 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error: any) {
-    console.error(error);
     return NextResponse.json(
       { message: error?.message || "Error" },
       { status: 500 }

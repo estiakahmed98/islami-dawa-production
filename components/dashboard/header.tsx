@@ -155,15 +155,16 @@ const Header = () => {
               </DropdownMenuItem>
 
               <DropdownMenuItem
-                onClick={() => {
-                  signOut({
-                    fetchOptions: {
-                      onSuccess: () => {
-                        router.replace("/");
-                        router.refresh();
-                      },
-                    },
-                  });
+                onClick={async () => {
+                  try {
+                    const res = await signOut({ redirect: false, callbackUrl: "/" });
+                    const url = (res as any)?.url || "/";
+                    router.replace(url);
+                    router.refresh();
+                  } catch (e) {
+                    router.replace("/");
+                    router.refresh();
+                  }
                 }}
                 className="text-red-600 focus:text-red-700"
               >
