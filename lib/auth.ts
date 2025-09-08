@@ -58,60 +58,85 @@ export const nextAuthOptions: NextAuthOptions = {
         token.role = (user as any).role ?? null;
       }
 
-      // For Google sign-in, ensure a corresponding user exists in our `users` table
-      if (account?.provider === "google" && profile && token?.email) {
+      // For Google sign-in, ensure a corresponding user exists and link to existing credentials user by email
+      if (account?.provider === "google") {
         try {
-          const existing = await (db as any).users.findUnique({
-            where: { email: token.email },
+          // Resolve email from profile/user/token
+          const resolvedEmail =
+            (profile as any)?.email ||
+            (user as any)?.email ||
+            (token as any)?.email ||
+            (token as any)?.user?.email ||
+            token?.email ||
+            null;
+
+          if (!resolvedEmail) return token;
+
+          // Find or create user with this email (so Google links to the same row)
+          let existing = await (db as any).users.findUnique({
+            where: { email: resolvedEmail },
           });
           if (!existing) {
-            const created = await (db as any).users.create({
+            existing = await (db as any).users.create({
               data: {
-                email: token.email,
-                name: (profile as any).name ?? null,
-                image: (profile as any).picture ?? null,
+                email: resolvedEmail,
+                name: (profile as any)?.name ?? null,
+                image: (profile as any)?.picture ?? null,
                 emailVerified: true,
                 createdAt: new Date(),
                 updatedAt: new Date(),
               },
             });
-            token.id = created.id;
-            token.role = created.role ?? null;
-          } else {
-            token.id = existing.id;
-            token.role = existing.role ?? null;
           }
-          // Persist Google OAuth tokens to accounts table for Calendar access
-          if ((account as any).access_token || (account as any).refresh_token) {
-            const userId = (token as any).id as string;
-            const providerId = "google";
-            const accessToken = (account as any).access_token || null;
-            const refreshToken = (account as any).refresh_token || null;
-            // Update existing account row or create one
-            const existingAccount = await (db as any).accounts.findFirst({
-              where: { userId, providerId },
+
+          // Ensure token.id reflects the linked user
+          token.id = existing.id;
+          token.role = existing.role ?? null;
+
+          // Persist Google OAuth tokens and metadata to accounts table for Calendar access
+          const userId = existing.id as string;
+          const providerId = "google";
+          const accessToken = (account as any).access_token || null;
+          const refreshToken = (account as any).refresh_token || null;
+          const idToken = (account as any).id_token || null;
+          const scope = (account as any).scope || null;
+          const providerAccountId = (account as any).providerAccountId || (profile as any)?.sub || resolvedEmail || "";
+          const expiresAt = (account as any).expires_at
+            ? new Date(((account as any).expires_at as number) * 1000)
+            : null;
+
+          const existingAccount = await (db as any).accounts.findFirst({
+            where: { userId, providerId },
+          });
+
+          if (existingAccount) {
+            await (db as any).accounts.update({
+              where: { id: existingAccount.id },
+              data: {
+                accountId: providerAccountId || existingAccount.accountId,
+                accessToken: accessToken ?? existingAccount.accessToken,
+                refreshToken: refreshToken ?? existingAccount.refreshToken,
+                idToken: idToken ?? existingAccount.idToken,
+                scope: scope ?? existingAccount.scope,
+                accessTokenExpiresAt: expiresAt ?? existingAccount.accessTokenExpiresAt,
+                updatedAt: new Date(),
+              },
             });
-            if (existingAccount) {
-              await (db as any).accounts.update({
-                where: { id: existingAccount.id },
-                data: {
-                  accessToken: accessToken ?? existingAccount.accessToken,
-                  refreshToken: refreshToken ?? existingAccount.refreshToken,
-                  updatedAt: new Date(),
-                },
-              });
-            } else {
-              await (db as any).accounts.create({
-                data: {
-                  userId,
-                  providerId,
-                  accessToken,
-                  refreshToken,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                },
-              });
-            }
+          } else {
+            await (db as any).accounts.create({
+              data: {
+                userId,
+                providerId,
+                accountId: providerAccountId,
+                accessToken,
+                refreshToken,
+                idToken,
+                scope,
+                accessTokenExpiresAt: expiresAt,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            });
           }
         } catch (e) {
           // ignore upsert errors to not block auth flow
@@ -127,21 +152,10 @@ export const nextAuthOptions: NextAuthOptions = {
       }
       return session;
     },
-    async signIn({ account, profile, user, credentials }) {
-      // For credentials sign-in we already validated via authorize
+    async signIn({ account }) {
+      // Allow both providers; jwt callback will link Google to existing user by email
       if (account?.provider === "credentials") return true;
-
-      // For Google, allow only if email exists or was just created in jwt callback
-      if (account?.provider === "google") {
-        try {
-          const found = await (db as any).users.findUnique({
-            where: { email: (profile as any)?.email || user?.email || "" },
-          });
-          return !!found;
-        } catch {
-          return false;
-        }
-      }
+      if (account?.provider === "google") return true;
       return true;
     },
   },

@@ -77,7 +77,7 @@ export default function GoogleCalendar() {
       const timeMin = start.toISOString();
       const timeMax = end.toISOString();
 
-      const response = await fetch(`/api/calendar?timeMin=${timeMin}&timeMax=${timeMax}`);
+      const response = await fetch(`/api/calendar?calendarId=primary&timeMin=${timeMin}&timeMax=${timeMax}`);
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
         if (response.status === 401) {
@@ -173,7 +173,7 @@ export default function GoogleCalendar() {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // Let the API choose default calendar from env if not provided
+          calendarId: "primary",
           eventId: selectedEvent?.id,
           event: {
             title: eventData.title,

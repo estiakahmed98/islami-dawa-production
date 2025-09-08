@@ -31,22 +31,40 @@ export async function POST(req: NextRequest) {
       );
     }
     const calendar = google.calendar({ version: "v3", auth: oAuthClient });
-    const response = await calendar.events.insert({
-      calendarId,
-      requestBody: {
-        summary: event.title,
-        description: event.description || "",
-        start: {
-          dateTime: new Date(event.start).toISOString(),
-          timeZone: "UTC",
+    let response;
+    try {
+      response = await calendar.events.insert({
+        calendarId,
+        requestBody: {
+          summary: event.title,
+          description: event.description || "",
+          start: {
+            dateTime: new Date(event.start).toISOString(),
+            timeZone: "UTC",
+          },
+          end: { dateTime: new Date(event.end).toISOString(), timeZone: "UTC" },
+          attendees: event.attendees,
+          reminders: { useDefault: true },
         },
-        end: { dateTime: new Date(event.end).toISOString(), timeZone: "UTC" },
-        attendees: event.attendees,
-        reminders: {
-          useDefault: true,
-        },
-      },
-    });
+      });
+    } catch (e: any) {
+      // Fallback to primary on 404 calendar not found
+      if ((e?.response?.status || e?.code) === 404 && calendarId !== "primary") {
+        response = await calendar.events.insert({
+          calendarId: "primary",
+          requestBody: {
+            summary: event.title,
+            description: event.description || "",
+            start: { dateTime: new Date(event.start).toISOString(), timeZone: "UTC" },
+            end: { dateTime: new Date(event.end).toISOString(), timeZone: "UTC" },
+            attendees: event.attendees,
+            reminders: { useDefault: true },
+          },
+        });
+      } else {
+        throw e;
+      }
+    }
     return NextResponse.json(response.data);
   } catch (error: any) {
     if (error?.message === "UNAUTHORIZED") {
@@ -81,29 +99,61 @@ export async function GET(req: NextRequest) {
     const timeMax = searchParams.get("timeMax");
 
     const calendar = google.calendar({ version: "v3", auth: oAuthClient });
-    const response = await calendar.events.list({
-      calendarId,
-      timeMin: timeMin ? new Date(timeMin).toISOString() : undefined,
-      timeMax: timeMax ? new Date(timeMax).toISOString() : undefined,
-      singleEvents: true,
-      orderBy: "startTime",
-      fields:
-        "items(id,summary,description,start,end,attendees,creator,visibility)",
-    });
+    let response;
+    try {
+      response = await calendar.events.list({
+        calendarId,
+        timeMin: timeMin ? new Date(timeMin).toISOString() : undefined,
+        timeMax: timeMax ? new Date(timeMax).toISOString() : undefined,
+        singleEvents: true,
+        orderBy: "startTime",
+        fields: "items(id,summary,description,start,end,attendees,creator,visibility)",
+      });
+    } catch (e: any) {
+      if ((e?.response?.status || e?.code) === 404 && calendarId !== "primary") {
+        response = await calendar.events.list({
+          calendarId: "primary",
+          timeMin: timeMin ? new Date(timeMin).toISOString() : undefined,
+          timeMax: timeMax ? new Date(timeMax).toISOString() : undefined,
+          singleEvents: true,
+          orderBy: "startTime",
+          fields: "items(id,summary,description,start,end,attendees,creator,visibility)",
+        });
+      } else {
+        throw e;
+      }
+    }
 
     return NextResponse.json(response.data.items);
   } catch (error: any) {
     if (error?.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if (error?.code === 401 || /Invalid Credentials/i.test(String(error?.message || ""))) {
+    const status = error?.response?.status || error?.code;
+    const gMessage = error?.response?.data?.error?.message || error?.message || "";
+    if (status === 401 || /Invalid Credentials/i.test(String(gMessage))) {
       return NextResponse.json(
         { error: "Google credentials invalid or expired. Please sign in with Google again to reconnect Calendar." },
         { status: 403 }
       );
     }
+    if (status === 403) {
+      return NextResponse.json(
+        { error: "Forbidden: Your Google account does not have access to the configured calendar. Share the calendar with your account or remove GOOGLE_CALENDAR_ID to use your primary calendar." },
+        { status: 403 }
+      );
+    }
+    if (status === 404) {
+      return NextResponse.json(
+        { error: "Calendar not found. Check GOOGLE_CALENDAR_ID or remove it to use your primary calendar." },
+        { status: 404 }
+      );
+    }
     if (String(error?.message || "").includes("No Google account linked")) {
       return NextResponse.json({ error: "No Google account linked to this user" }, { status: 403 });
+    }
+    if (String(error?.message || "").includes("No Google credentials stored")) {
+      return NextResponse.json({ error: "No Google credentials stored. Please sign in with Google to connect Calendar." }, { status: 403 });
     }
     console.error("Get Events Error:", error);
     return NextResponse.json(
@@ -130,20 +180,36 @@ export async function PUT(req: NextRequest) {
     }
 
     const calendar = google.calendar({ version: "v3", auth: oAuthClient });
-    const response = await calendar.events.update({
-      calendarId,
-      eventId,
-      requestBody: {
-        summary: event.title,
-        description: event.description || "",
-        start: {
-          dateTime: new Date(event.start).toISOString(),
-          timeZone: "UTC",
+    let response;
+    try {
+      response = await calendar.events.update({
+        calendarId,
+        eventId,
+        requestBody: {
+          summary: event.title,
+          description: event.description || "",
+          start: { dateTime: new Date(event.start).toISOString(), timeZone: "UTC" },
+          end: { dateTime: new Date(event.end).toISOString(), timeZone: "UTC" },
+          attendees: event.attendees,
         },
-        end: { dateTime: new Date(event.end).toISOString(), timeZone: "UTC" },
-        attendees: event.attendees,
-      },
-    });
+      });
+    } catch (e: any) {
+      if ((e?.response?.status || e?.code) === 404 && calendarId !== "primary") {
+        response = await calendar.events.update({
+          calendarId: "primary",
+          eventId,
+          requestBody: {
+            summary: event.title,
+            description: event.description || "",
+            start: { dateTime: new Date(event.start).toISOString(), timeZone: "UTC" },
+            end: { dateTime: new Date(event.end).toISOString(), timeZone: "UTC" },
+            attendees: event.attendees,
+          },
+        });
+      } else {
+        throw e;
+      }
+    }
 
     return NextResponse.json(response.data);
   } catch (error: any) {
@@ -179,7 +245,15 @@ export async function DELETE(req: NextRequest) {
     }
 
     const calendar = google.calendar({ version: "v3", auth: oAuthClient });
-    await calendar.events.delete({ calendarId, eventId });
+    try {
+      await calendar.events.delete({ calendarId, eventId });
+    } catch (e: any) {
+      if ((e?.response?.status || e?.code) === 404 && calendarId !== "primary") {
+        await calendar.events.delete({ calendarId: "primary", eventId });
+      } else {
+        throw e;
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
