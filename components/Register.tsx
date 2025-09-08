@@ -67,6 +67,23 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
     phone: yup.string().required(t("errors.phoneRequired")),
     // we can enforce markazId by role if you want; currently HTML "required" handles it
   });
+  
+  // Separate schemas for standard vs special
+  const signUpSchemaStandard = signUpSchemaUser;
+  const signUpSchemaSpecial = yup.object().shape({
+    name: yup.string().required(t("errors.nameRequired")),
+    email: yup
+      .string()
+      .email(t("errors.emailInvalid"))
+      .required(t("errors.emailRequired")),
+    password: yup
+      .string()
+      .min(8, t("errors.passwordMin"))
+      .required(t("errors.passwordRequired")),
+    phone: yup.string().required(t("errors.phoneRequired")),
+    // role optional in special (defaults to "daye" if omitted)
+    role: yup.string().optional(),
+  });
 
   const roleHierarchy: Record<string, string[]> = {
     centraladmin: variant === "standard"
@@ -151,7 +168,8 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await signUpSchemaUser.validate(formData, { abortEarly: false });
+      const schema = variant === "special" ? signUpSchemaSpecial : signUpSchemaStandard;
+      await schema.validate(formData, { abortEarly: false });
 
       // Build nested data for Prisma create via Better Auth
       const extraData: any = {
@@ -168,12 +186,13 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
         extraData.markaz = { connect: [{ id: formData.markazId }] };
       }
 
+      const roleToSend = formData.role || (variant === "special" ? "daye" : formData.role);
       await admin.createUser(
         {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          role: formData.role,
+          role: roleToSend,
           data: extraData,
         },
         {
@@ -196,7 +215,7 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
               password: "",
             });
           },
-          onError: (ctx) => toast.error(ctx.error.message),
+          onError: (ctx: { error: { message: string } }) => toast.error(ctx.error.message),
         }
       );
     } catch (error: any) {
@@ -227,7 +246,7 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
             value={formData.role}
             onChange={handleChange}
             options={roleOptions}
-            required
+            required={variant !== "special"}
             placeholder={t("select")}
           />
 
@@ -238,7 +257,7 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
               value={formData.divisionId}
               onChange={handleChange}
               options={divisions}
-              required
+              required={variant !== "special"}
               placeholder={t("select")}
             />
           )}
@@ -251,7 +270,7 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
               onChange={handleChange}
               options={districtsList}
               disabled={!districtsList.length}
-              required
+              required={variant !== "special"}
               placeholder={t("select")}
             />
           )}
@@ -264,7 +283,7 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
               onChange={handleChange}
               options={upazilasList}
               disabled={!upazilasList.length}
-              required
+              required={variant !== "special"}
               placeholder={t("select")}
             />
           )}
@@ -277,7 +296,7 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
               onChange={handleChange}
               options={unionsList}
               disabled={!unionsList.length}
-              required
+              required={variant !== "special"}
               placeholder={t("select")}
             />
           )}

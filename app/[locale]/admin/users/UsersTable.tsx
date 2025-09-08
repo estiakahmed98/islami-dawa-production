@@ -934,6 +934,18 @@ export default function UsersTable() {
                     <Input name="email" type="email" defaultValue={selectedUser.email} readOnly={sessionUser?.role !== "centraladmin"} required />
                   </div>
 
+                  <div className="col-span-2">
+                    <SelectField
+                      label={t("columns.markaz")}
+                      name="markaz"
+                      value={selectedUser.markaz}
+                      onChange={(e) => {
+                        setSelectedUser((prev) => (prev ? { ...prev, markaz: e.target.value } : null));
+                      }}
+                      options={markazOptions}
+                    />
+                  </div>
+
                   <div>
                     <label>{t("columns.role")}</label>
                     <select
@@ -945,10 +957,7 @@ export default function UsersTable() {
                     >
                       <option value="centraladmin">{roleLabel("centraladmin")}</option>
                       <option value="divisionadmin">{roleLabel("divisionadmin")}</option>
-                      <option value="districtadmin">{roleLabel("districtadmin")}</option>
                       <option value="markazadmin">{roleLabel("markazadmin")}</option>
-                      <option value="upozilaadmin">{roleLabel("upozilaadmin")}</option>
-                      <option value="unionadmin">{roleLabel("unionadmin")}</option>
                       <option value="daye">{roleLabel("daye")}</option>
                     </select>
                   </div>
@@ -1007,18 +1016,6 @@ export default function UsersTable() {
                   <div>
                     <label>{t("columns.phone")}</label>
                     <Input name="phone" defaultValue={selectedUser.phone} readOnly={sessionUser?.role !== "centraladmin"} required />
-                  </div>
-
-                  <div className="col-span-2">
-                    <SelectField
-                      label={t("columns.markaz")}
-                      name="markaz"
-                      value={selectedUser.markaz}
-                      onChange={(e) => {
-                        setSelectedUser((prev) => (prev ? { ...prev, markaz: e.target.value } : null));
-                      }}
-                      options={markazOptions}
-                    />
                   </div>
 
                   {sessionUser?.role === "centraladmin" && (

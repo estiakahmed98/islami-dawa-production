@@ -94,7 +94,7 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
           router.push(target);
           router.refresh();
         },
-        onError: (ctx) => {
+        onError: (ctx: { error: { message: string } }) => {
           setFormError(ctx.error.message);
         },
         onFinally: () => setIsLoading(false),
@@ -117,7 +117,7 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
             router.push(target);
             router.refresh();
           },
-          onError: (ctx: any) => setFormError(ctx.error.message),
+          onError: (ctx: { error: { message: string } }) => setFormError(ctx.error.message),
         }
       );
     } catch (err) {
