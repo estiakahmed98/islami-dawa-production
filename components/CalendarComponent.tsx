@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay } from "date-fns";
+import { format, parse, startOfWeek, getDay, Locale } from "date-fns";
 import { enUS, bn as bnLocale } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import CalendarEventForm from "./CalendarForm";
@@ -46,6 +46,7 @@ export default function GoogleCalendar() {
   const [selectedEvent, setSelectedEvent] = useState<GoogleEvent | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string>("");
 
   const { data: session } = useSession();
   const locale = useLocale();
@@ -72,11 +73,23 @@ export default function GoogleCalendar() {
 
   const fetchEvents = async (start: Date, end: Date) => {
     try {
+      setErrorMsg("");
       const timeMin = start.toISOString();
       const timeMax = end.toISOString();
 
       const response = await fetch(`/api/calendar?timeMin=${timeMin}&timeMax=${timeMax}`);
-      if (!response.ok) throw new Error("Failed to fetch events");
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          setErrorMsg(t("errors.unauthorized"));
+        } else if (response.status === 403) {
+          setErrorMsg(payload?.error || t("errors.noGoogleLinked"));
+        } else {
+          setErrorMsg(payload?.error || t("errors.generic"));
+        }
+        setEvents([]);
+        return;
+      }
 
       const googleEvents = await response.json();
 
@@ -110,6 +123,7 @@ export default function GoogleCalendar() {
       setEvents(formattedEvents);
     } catch (error) {
       console.error("Error fetching events:", error);
+      setErrorMsg(t("errors.generic"));
     }
   };
 
@@ -159,7 +173,7 @@ export default function GoogleCalendar() {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          calendarId: "primary",
+          // Let the API choose default calendar from env if not provided
           eventId: selectedEvent?.id,
           event: {
             title: eventData.title,
@@ -171,13 +185,24 @@ export default function GoogleCalendar() {
         }),
       });
 
-      if (!response.ok) throw new Error("Operation failed");
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          setErrorMsg(t("errors.unauthorized"));
+        } else if (response.status === 403) {
+          setErrorMsg(payload?.error || t("errors.noGoogleLinked"));
+        } else {
+          setErrorMsg(payload?.error || t("errors.generic"));
+        }
+        return;
+      }
 
       fetchEvents(currentDateRange.start, currentDateRange.end);
       setIsFormOpen(false);
       setSelectedEvent(null);
     } catch (error) {
       console.error("Error saving event:", error);
+      setErrorMsg(t("errors.generic"));
     }
   };
 
@@ -205,6 +230,11 @@ export default function GoogleCalendar() {
 
   return (
     <div className="relative h-[800px]">
+      {errorMsg ? (
+        <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {errorMsg}
+        </div>
+      ) : null}
       <Calendar
         culture={culture}
         localizer={localizer}

@@ -66,15 +66,50 @@ export function LeaveRequestForm({
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Autofill name/phone from session once
+  // Normalize BD phone (keep digits, ensure leading 0 if starts with 1)
+  const normalizeBDPhone = (raw?: string | null) => {
+    if (!raw) return "";
+    const digits = String(raw).replace(/\D+/g, "");
+    if (!digits) return "";
+    // Accept already-correct BD numbers or add leading 0 for patterns like 1XXXXXXXXX
+    if (/^01[3-9]\d{8}$/.test(digits)) return digits;
+    if (/^[1-9]\d{9}$/.test(digits)) return `0${digits}`;
+    return digits;
+  };
+
+  // Autofill name/phone: prefer session, fallback to /api/profile
   useEffect(() => {
-    if (user) {
-      setName((prev) => (prev?.trim() ? prev : user.name ?? ""));
-      setPhone((prev) =>
-        prev?.trim() ? prev : ((user as any)?.phone as string) ?? ""
-      );
+    let cancelled = false;
+
+    const fillFromSession = () => {
+      const sessionName = (user?.name ?? "").trim();
+      const sessionPhone = normalizeBDPhone((user as any)?.phone as string | undefined);
+      setName((prev) => (prev?.trim() ? prev : sessionName));
+      setPhone((prev) => (prev?.trim() ? prev : sessionPhone));
+    };
+
+    const fillFromProfile = async () => {
+      try {
+        const res = await fetch("/api/profile", { cache: "no-store" });
+        if (!res.ok) return;
+        const profile = await res.json();
+        if (cancelled) return;
+        setName((prev) => (prev?.trim() ? prev : (profile?.name ?? "")));
+        setPhone((prev) => (prev?.trim() ? prev : normalizeBDPhone(profile?.phone)));
+      } catch {}
+    };
+
+    fillFromSession();
+    // If still missing, try API profile
+    if (!name?.trim() || !phone?.trim()) {
+      fillFromProfile();
     }
-  }, [user]);
+
+    return () => {
+      cancelled = true;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.name, (user as any)?.phone]);
 
   const calculatedDays = useMemo(
     () => getInclusiveDays(fromDate, toDate),
@@ -98,6 +133,14 @@ export function LeaveRequestForm({
     }
     if (!reason.trim()) {
       toast.error(t("errors.reasonRequired"));
+      return;
+    }
+    if (!name.trim()) {
+      toast.error(t("errors.nameRequired"));
+      return;
+    }
+    if (!/^01[3-9]\d{8}$/.test(phone)) {
+      toast.error(t("phonePatternTitle"));
       return;
     }
 

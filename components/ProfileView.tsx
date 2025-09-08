@@ -22,6 +22,16 @@ import {
   MapPinIcon,
   Home,
 } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
+
+function getInitials(name?: string | null, email?: string | null) {
+  if (name && name.trim()) {
+    const parts = name.trim().split(/\s+/);
+    return ((parts[0]?.[0] || "") + (parts[parts.length - 1]?.[0] || "")).toUpperCase();
+  }
+  if (email && email.length) return email[0]!.toUpperCase();
+  return "";
+}
 
 interface UserProfile {
   id?: string;
@@ -123,6 +133,7 @@ const Profile: React.FC = () => {
   const [formData, setFormData] = useState<UserProfile>({});
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
 
   const fetchProfile = async () => {
     try {
@@ -217,7 +228,7 @@ const Profile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-25 via-indigo-25 to-purple-25 py-6 px-4">
-      <div className="max-w-6xl mx-auto">
+      <div>
         {/* Single Card Container */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/40 overflow-hidden">
           {/* Header Section */}
@@ -226,15 +237,26 @@ const Profile: React.FC = () => {
               {/* Profile Image */}
               <div className="relative group">
                 <div className="w-24 h-24 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center border-3 border-white/50">
-                  {formData.image ? (
-                    <img
-                      src={formData.image}
-                      alt="Profile"
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <UserCircle className="w-16 h-16 text-gray-400" />
-                  )}
+                  {(() => {
+                    const displayImage = (formData.image as string | undefined) || (session?.user?.image as string | undefined);
+                    if (displayImage) {
+                      return (
+                        <img
+                          src={displayImage}
+                          alt="Profile"
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      );
+                    }
+                    const initials = getInitials(formData.name || session?.user?.name, formData.email || session?.user?.email);
+                    return initials ? (
+                      <span className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-600 to-cyan-600 text-white flex items-center justify-center text-lg font-semibold">
+                        {initials}
+                      </span>
+                    ) : (
+                      <UserCircle className="w-16 h-16 text-gray-400" />
+                    );
+                  })()}
                 </div>
                 {isEditing && (
                   <button className="absolute bottom-1 right-1 w-7 h-7 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200">

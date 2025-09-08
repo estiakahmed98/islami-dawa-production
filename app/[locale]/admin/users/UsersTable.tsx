@@ -764,7 +764,7 @@ export default function UsersTable() {
                   [t("columns.upazila")]: user.upazila,
                   [t("columns.union")]: user.union,
                   [t("columns.phone")]: user.phone,
-                  [t("columns.markaz")]: user.markaz,
+                  [t("columns.markaz")]: getMarkazNames(user).join(", ") || "N/A",
                   [t("columns.adminAssigned")]: getParentEmail(user, users) || "N/A",
                   [t("columns.status")]: user.banned ? t("status.banned") : t("status.active"),
                 })),
@@ -811,7 +811,7 @@ export default function UsersTable() {
                     <TableCell className="border-r border-gray-300">{user.upazila}</TableCell>
                     <TableCell className="border-r border-gray-300">{user.union}</TableCell>
                     <TableCell className="border-r border-gray-300">{user.phone}</TableCell>
-                    <TableCell className="border-r border-gray-300">{user.markaz}</TableCell>
+                    <TableCell className="border-r border-gray-300">{getMarkazNames(user).join(", ") || "N/A"}</TableCell>
                     <TableCell className="border-r border-gray-300 text-center">
                       {getParentEmail(user, users) || "N/A"}
                     </TableCell>

@@ -33,8 +33,17 @@ export async function GET() {
         upazila: true,
         union: true,
         area: true,
-        markaz: true,
-        // ... any additional fields
+        // get only markaz names to avoid sending objects to the client UI
+        markaz: { select: { name: true } },
+        parent: true,
+        emailVerified: true,
+        image: true,
+        createdAt: true,
+        updatedAt: true,
+        banned: true,
+        banReason: true,
+        banExpires: true,
+        note: true,
       },
     });
 
@@ -42,8 +51,15 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // 3) Return the user info
-    return NextResponse.json(user, { status: 200 });
+    // 3) Normalize shape for client (ProfileView expects scalar markaz)
+    const markazNames = Array.isArray(user.markaz)
+      ? user.markaz.map((m: any) => m?.name).filter(Boolean)
+      : [];
+    const responseBody = {
+      ...user,
+      markaz: markazNames.join(", "),
+    };
+    return NextResponse.json(responseBody, { status: 200 });
   } catch (error) {
     console.error("GET /api/profile error:", error);
     return NextResponse.json(
@@ -81,7 +97,8 @@ export async function PUT(req: Request) {
         upazila: data.upazila,
         union: data.union,
         area: data.area,
-        markaz: data.markaz,
+        // markaz is a relation; updating it requires a connect/disconnect payload.
+        // Intentionally omitted here to avoid runtime errors when the client sends a scalar string.
       },
     });
 

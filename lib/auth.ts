@@ -13,6 +13,9 @@ export const nextAuthOptions: NextAuthOptions = {
         params: {
           scope:
             "openid email profile https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events",
+          // Request refresh token; 'consent' ensures refresh_token on each auth
+          access_type: "offline",
+          prompt: "consent",
         },
       },
     }),
@@ -77,6 +80,38 @@ export const nextAuthOptions: NextAuthOptions = {
           } else {
             token.id = existing.id;
             token.role = existing.role ?? null;
+          }
+          // Persist Google OAuth tokens to accounts table for Calendar access
+          if ((account as any).access_token || (account as any).refresh_token) {
+            const userId = (token as any).id as string;
+            const providerId = "google";
+            const accessToken = (account as any).access_token || null;
+            const refreshToken = (account as any).refresh_token || null;
+            // Update existing account row or create one
+            const existingAccount = await (db as any).accounts.findFirst({
+              where: { userId, providerId },
+            });
+            if (existingAccount) {
+              await (db as any).accounts.update({
+                where: { id: existingAccount.id },
+                data: {
+                  accessToken: accessToken ?? existingAccount.accessToken,
+                  refreshToken: refreshToken ?? existingAccount.refreshToken,
+                  updatedAt: new Date(),
+                },
+              });
+            } else {
+              await (db as any).accounts.create({
+                data: {
+                  userId,
+                  providerId,
+                  accessToken,
+                  refreshToken,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                },
+              });
+            }
           }
         } catch (e) {
           // ignore upsert errors to not block auth flow

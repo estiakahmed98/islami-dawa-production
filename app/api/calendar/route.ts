@@ -2,18 +2,16 @@
 //Estiak
 
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { google } from "googleapis";
 import { getGoogleAuthClient } from "@/lib/google-calendar";
+import { getServerAuthSession } from "@/lib/auth";
 
 /**
  * Helper function to verify session and get OAuth client
  */
 async function getAuthenticatedClient(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: req.headers });
   const session = await getServerAuthSession();
-  if (!session?.user)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user) throw new Error("UNAUTHORIZED");
   return await getGoogleAuthClient(session.user.id);
 }
 
@@ -23,7 +21,8 @@ async function getAuthenticatedClient(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const oAuthClient = await getAuthenticatedClient(req);
-    const { calendarId = "primary", event } = await req.json();
+    const defaultCal = process.env.GOOGLE_CALENDAR_ID || "primary";
+    const { calendarId = defaultCal, event } = await req.json();
 
     if (!event?.title || !event?.start || !event?.end) {
       return NextResponse.json(
@@ -49,7 +48,19 @@ export async function POST(req: NextRequest) {
       },
     });
     return NextResponse.json(response.data);
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.message === "UNAUTHORIZED") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (error?.code === 401 || /Invalid Credentials/i.test(String(error?.message || ""))) {
+      return NextResponse.json(
+        { error: "Google credentials invalid or expired. Please sign in with Google again to reconnect Calendar." },
+        { status: 403 }
+      );
+    }
+    if (String(error?.message || "").includes("No Google account linked")) {
+      return NextResponse.json({ error: "No Google account linked to this user" }, { status: 403 });
+    }
     console.error("Create Event Error:", error);
     return NextResponse.json(
       { error: (error as Error)?.message || "Failed to create event." },
@@ -65,7 +76,7 @@ export async function GET(req: NextRequest) {
   try {
     const oAuthClient = await getAuthenticatedClient(req);
     const { searchParams } = new URL(req.url);
-    const calendarId = searchParams.get("calendarId") || "primary";
+    const calendarId = searchParams.get("calendarId") || process.env.GOOGLE_CALENDAR_ID || "primary";
     const timeMin = searchParams.get("timeMin");
     const timeMax = searchParams.get("timeMax");
 
@@ -81,7 +92,19 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json(response.data.items);
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.message === "UNAUTHORIZED") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (error?.code === 401 || /Invalid Credentials/i.test(String(error?.message || ""))) {
+      return NextResponse.json(
+        { error: "Google credentials invalid or expired. Please sign in with Google again to reconnect Calendar." },
+        { status: 403 }
+      );
+    }
+    if (String(error?.message || "").includes("No Google account linked")) {
+      return NextResponse.json({ error: "No Google account linked to this user" }, { status: 403 });
+    }
     console.error("Get Events Error:", error);
     return NextResponse.json(
       { error: "Failed to retrieve events." },
@@ -96,7 +119,8 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const oAuthClient = await getAuthenticatedClient(req);
-    const { calendarId = "primary", eventId, event } = await req.json();
+    const defaultCal = process.env.GOOGLE_CALENDAR_ID || "primary";
+    const { calendarId = defaultCal, eventId, event } = await req.json();
 
     if (!eventId || !event?.title || !event?.start || !event?.end) {
       return NextResponse.json(
@@ -122,7 +146,13 @@ export async function PUT(req: NextRequest) {
     });
 
     return NextResponse.json(response.data);
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.message === "UNAUTHORIZED") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (String(error?.message || "").includes("No Google account linked")) {
+      return NextResponse.json({ error: "No Google account linked to this user" }, { status: 403 });
+    }
     console.error("Update Event Error:", error);
     return NextResponse.json(
       { error: "Failed to update event." },
@@ -138,7 +168,7 @@ export async function DELETE(req: NextRequest) {
   try {
     const oAuthClient = await getAuthenticatedClient(req);
     const { searchParams } = new URL(req.url);
-    const calendarId = searchParams.get("calendarId") || "primary";
+    const calendarId = searchParams.get("calendarId") || process.env.GOOGLE_CALENDAR_ID || "primary";
     const eventId = searchParams.get("eventId");
 
     if (!eventId) {
@@ -152,7 +182,13 @@ export async function DELETE(req: NextRequest) {
     await calendar.events.delete({ calendarId, eventId });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.message === "UNAUTHORIZED") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (String(error?.message || "").includes("No Google account linked")) {
+      return NextResponse.json({ error: "No Google account linked to this user" }, { status: 403 });
+    }
     console.error("Delete Event Error:", error);
     return NextResponse.json(
       { error: "Failed to delete event." },
