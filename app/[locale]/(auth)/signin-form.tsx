@@ -107,7 +107,7 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
     setFormError("");
     try {
       await signIn.social(
-        { provider: "google", callbackURL: `/${locale}/admin` },
+        { provider: "google", callbackURL: `/${locale}/dashboard` },
         {
           onSuccess: async () => {
             const s = await getSession();
@@ -213,15 +213,6 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
             </>
           )}
         </Button>
-
-        <div className="mt-5 space-x-1 text-center text-sm">
-          <Link
-            href={`/${locale}/auth/forgot-password`}
-            className="text-sm text-muted-foreground hover:underline"
-          >
-            {t("links.forgotPassword")}
-          </Link>
-        </div>
       </CardContent>
     </Card>
   );
