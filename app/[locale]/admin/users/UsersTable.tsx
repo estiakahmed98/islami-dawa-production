@@ -393,7 +393,7 @@ export default function UsersTable() {
     union: "",
   });
 
-  const { data, isPending } = useSession();
+  const { data, status } = useSession();
   const sessionUser = data?.user;
 
   const [emailList, setEmailList] = useState<string[]>([]);
@@ -441,7 +441,7 @@ export default function UsersTable() {
 
   /** Fetch users */
   useEffect(() => {
-    if (isPending || !sessionUser) return;
+    if (status === "loading" || !sessionUser) return;
     const fetchUsers = async () => {
       setLoading(true);
       try {
@@ -456,7 +456,7 @@ export default function UsersTable() {
       }
     };
     fetchUsers();
-  }, [isPending, sessionUser]);
+  }, [status, sessionUser]);
 
   /** Apply filters & collect email list */
   useEffect(() => {
@@ -633,29 +633,32 @@ export default function UsersTable() {
 
   const toggleBan = async (userId: string, isBanned: boolean) => {
     try {
-      const response = await fetch("/api/usershow", {
+      const response = await fetch("/api/banuser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, banned: !isBanned }),
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Error response:", errorText);
-        throw new Error(`API error: ${response.statusText}`);
+        if (response.status === 403) {
+          toast.error(t("toasts.unauthorized"));
+          return;
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `API error: ${response.statusText}`);
       }
 
       setUsers((prevUsers) => prevUsers.map((user) => (user.id === userId ? { ...user, banned: !isBanned } : user)));
       toast.success(
         t("toasts.banUpdated", { action: isBanned ? t("actions.unban").toLowerCase() : t("actions.ban").toLowerCase() })
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating user status:", error);
-      toast.error(t("toasts.banFailed"));
+      toast.error(error.message || t("toasts.banFailed"));
     }
   };
 
-  if (isPending) {
+  if (status === "loading") {
     return <p className="text-center text-xl p-10">{t("status.authenticating")}</p>;
   }
 

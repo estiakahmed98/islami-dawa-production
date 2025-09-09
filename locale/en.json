@@ -349,20 +349,31 @@
     "failedToSaveEditsPleaseTryAgain": "Failed to save edits. Please try again.",
     "youCannotRequestEditsForFutureDates": "You cannot request edits for future dates",
     "editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval": "Edit request submitted successfully. Please wait for admin approval.",
-    "failedToSubmitEditRequestPleaseTryAgain": "Failed to submit edit request. Please try again."
+    "failedToSubmitEditRequestPleaseTryAgain": "Failed to submit edit request. Please try again.",
+    "editRequestFailed": "Edit request failed",
+    "totalPoints": "Total Points",
+    "tryAgain": "Try Again",
+    "error": "Error",
+    "accountBanned": "This account has been banned. Please contact support for assistance."
   },
   "SigninForm": {
-    "title": "Sign In",
-    "description": "Enter your account details to login",
+    "title": "Sign in to your account",
+    "description": "Enter your email and password below to sign in",
     "fields": {
       "email": {
         "label": "Email",
-        "placeholder": "Enter email address"
+        "placeholder": "name@example.com"
       },
       "password": {
         "label": "Password",
-        "placeholder": "Enter password"
+        "placeholder": "••••••••"
       }
+    },
+    "errors": {
+      "alreadyLoggedInElsewhere": "Already logged in on another device.",
+      "lockError": "Couldn't verify session lock. Please try again.",
+      "sessionLockFailed": "Session lock check failed",
+      "accountBanned": "This account has been banned. Please contact support for assistance."
     },
     "buttons": {
       "signingIn": "Signing In...",
@@ -371,11 +382,6 @@
     },
     "links": {
       "forgotPassword": "Forgot password?"
-    },
-    "errors": {
-      "alreadyLoggedInElsewhere": "Already logged in on another device.",
-      "lockError": "Couldn't verify session lock. Please try again.",
-      "sessionLockFailed": "Session lock check failed"
     },
     "toasts": {
       "loginSuccessful": "Login Successful",

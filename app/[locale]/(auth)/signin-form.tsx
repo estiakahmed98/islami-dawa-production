@@ -95,7 +95,13 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
           router.refresh();
         },
         onError: (ctx: { error: { message: string } }) => {
-          setFormError(ctx.error.message);
+          // Check for ban message and show appropriate error
+          if (ctx.error.message.includes('banned')) {
+            setFormError(t('errors.accountBanned'));
+            toast.error(t('errors.accountBanned'));
+          } else {
+            setFormError(ctx.error.message);
+          }
         },
         onFinally: () => setIsLoading(false),
       }
@@ -120,9 +126,16 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
           onError: (ctx: { error: { message: string } }) => setFormError(ctx.error.message),
         }
       );
-    } catch (err) {
-      console.error("Google Sign-In Error:", err);
-      toast.error(t("toasts.googleLoginFailed"));
+    } catch (error: any) {
+      console.error("Google login error:", error);
+      // Check for ban message in error
+      if (error?.message?.includes('banned') || error?.error?.message?.includes('banned')) {
+        const banMessage = t('errors.accountBanned');
+        setFormError(banMessage);
+        toast.error(banMessage);
+      } else {
+        toast.error(t("errors.googleLoginFailed"));
+      }
     } finally {
       setIsGoogleLoading(false);
     }

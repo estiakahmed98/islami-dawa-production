@@ -31,6 +31,11 @@ export const nextAuthOptions: NextAuthOptions = {
           where: { email: credentials.email },
         });
         if (!user) return null;
+        
+        // Check if user is banned
+        if (user.banned) {
+          throw new Error('This account has been banned. Please contact support for assistance.');
+        }
         // Find credentials account
         const account = await (db as any).accounts.findFirst({
           where: { providerId: "credentials", accountId: credentials.email },
@@ -152,10 +157,24 @@ export const nextAuthOptions: NextAuthOptions = {
       }
       return session;
     },
-    async signIn({ account }) {
-      // Allow both providers; jwt callback will link Google to existing user by email
-      if (account?.provider === "credentials") return true;
-      if (account?.provider === "google") return true;
+    async signIn({ account, user }) {
+      // Only allow social logins (Google) or credentials
+      if (account?.provider !== "google" && account?.provider !== "credentials") {
+        return false;
+      }
+
+      // For social logins, check if user is banned
+      if (account?.provider === "google" && user?.email) {
+        const dbUser = await (db as any).users.findUnique({
+          where: { email: user.email },
+          select: { banned: true }
+        });
+        
+        if (dbUser?.banned) {
+          throw new Error('This account has been banned. Please contact support for assistance.');
+        }
+      }
+      
       return true;
     },
   },
