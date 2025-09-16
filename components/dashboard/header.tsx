@@ -40,6 +40,7 @@ const Header = () => {
   const { toggleSidebar } = useSidebar();
   const userRole = session?.user?.role;
   const t = useTranslations("header");
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   // Hydration-safe date text
   const [mounted, setMounted] = useState(false);
@@ -156,20 +157,21 @@ const Header = () => {
 
               <DropdownMenuItem
                 onClick={async () => {
+                  if (isSigningOut) return;
+                  setIsSigningOut(true);
                   try {
-                    const res = await signOut({ redirect: false, callbackUrl: "/" });
-                    const url = (res as any)?.url || "/";
-                    router.replace(url);
-                    router.refresh();
-                  } catch (e) {
-                    router.replace("/");
-                    router.refresh();
+                    // Let the auth library handle the navigation
+                    await signOut({ redirect: true, callbackUrl: "/" });
+                  } catch {
+                    // Fallback to hard redirect if something goes wrong
+                    window.location.href = "/";
                   }
                 }}
+                disabled={isSigningOut}
                 className="text-red-600 focus:text-red-700"
               >
                 <LogOut className="opacity-70 mr-2 h-4 w-4" aria-hidden="true" />
-                <span>{t("logout")}</span>
+                <span>{isSigningOut ? t("signingOut") : t("logout")}</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

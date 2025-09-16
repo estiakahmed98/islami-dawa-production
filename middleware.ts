@@ -12,66 +12,78 @@ declare module "next-auth/jwt" {
   }
 }
 
-const PUBLIC_PATHS = ["/", "/login", "/signup", "/forgot-password"];
+// Public (unauthenticated) paths — base only; matching handles subpaths.
+const PUBLIC_PATHS = ["/", "/login", "/signup", "/forgot-password"] as const;
 
-// Define roles and the paths they are allowed to access.
+// Admin roles
 const ADMIN_ROLES: UserRole[] = ["centraladmin", "superadmin", "divisionadmin", "markazadmin"];
 
 function stripLocale(pathname: string): string {
   const locales = routing.locales;
   for (const l of locales) {
-    if (pathname === `/${l}`) return "/";
-    if (pathname.startsWith(`/${l}/`)) return pathname.slice(l.length + 1);
+    if (pathname === `/${l}` || pathname === `/${l}/`) return "/";
+    if (pathname.startsWith(`/${l}/`)) {
+      const rest = pathname.slice(l.length + 1); // keeps the leading slash before the rest
+      return rest.startsWith("/") ? rest : `/${rest}`;
+    }
   }
-  return pathname;
+  return pathname.startsWith("/") ? pathname : `/${pathname}`;
+}
+
+function isPublicPath(pathNoLocale: string): boolean {
+  return PUBLIC_PATHS.some(
+    (p) => pathNoLocale === p || pathNoLocale.startsWith(`${p}/`)
+  );
 }
 
 const intl = createIntlMiddleware(routing);
 
 export default async function middleware(req: NextRequest) {
   const intlRes = intl(req);
-  if (intlRes && intlRes.headers.get("Location")) return intlRes;
-
+  if (intlRes && intlRes.headers.get("Location")) {
+    return intlRes;
+  }
   const res = intlRes ?? NextResponse.next();
 
   const pathname = req.nextUrl.pathname || "/";
-  const locale =
-    (routing.locales).find(
+  const activeLocale =
+    routing.locales.find(
       (l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`)
     ) || routing.defaultLocale;
 
   const pathNoLocale = stripLocale(pathname);
-  const isPublic = PUBLIC_PATHS.some(
-    (p) => pathNoLocale === p || pathNoLocale.startsWith(`${p}/`)
-  );
 
-  // If the path is public, allow the request to proceed.
-  if (isPublic) {
+  if (isPublicPath(pathNoLocale)) {
     return res;
   }
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET }) as { role?: UserRole } | null;
-  
-  // If no token is found, redirect to the login page.
+  const token = (await getToken({ req, secret: process.env.NEXTAUTH_SECRET })) as { role?: UserRole } | null;
+
+  const isAuthPath =
+    pathNoLocale === "/login" ||
+    pathNoLocale === "/signup" ||
+    pathNoLocale === "/forgot-password" ||
+    pathNoLocale.startsWith("/login/") ||
+    pathNoLocale.startsWith("/signup/") ||
+    pathNoLocale.startsWith("/forgot-password/");
+
   if (!token) {
-    const loginUrl = new URL(`/${locale}/login`, req.url);
-    loginUrl.searchParams.set("error", "unauthenticated");
-    return NextResponse.redirect(loginUrl);
+    if (!isAuthPath) {
+      const loginUrl = new URL(`/${activeLocale}/login`, req.url);
+      loginUrl.searchParams.set("error", "unauthenticated");
+      return NextResponse.redirect(loginUrl);
+    }
+    return res;
   }
 
-  // Check if the user is trying to access an admin path
-  const isAdminPath = pathNoLocale.startsWith("/admin");
+  const isAdminPath = pathNoLocale === "/admin" || pathNoLocale.startsWith("/admin/");
+  const isNotAdmin = !ADMIN_ROLES.includes(token.role || "");
 
-  // Check if the user's role is not an admin role
-  const isNotAdmin = !ADMIN_ROLES.includes(token?.role || '');
-
-  // If the path is an admin path and the user is not an admin, redirect them.
   if (isAdminPath && isNotAdmin) {
-    const dashboardUrl = new URL(`/${locale}/dashboard`, req.url);
+    const dashboardUrl = new URL(`/${activeLocale}/dashboard`, req.url);
     return NextResponse.redirect(dashboardUrl);
   }
 
-  // If the user has a valid token and is authorized, allow the request to proceed.
   return res;
 }
 
