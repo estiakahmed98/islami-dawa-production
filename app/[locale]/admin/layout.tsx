@@ -36,7 +36,7 @@ const AdmindLayout = async ({ children, params }: Props) => {
           <ImpersonateSidebar />
           <div className="w-full overflow-hidden">
             <Header />
-            <main className="h-[calc(100vh-80px)] overflow-y-auto p-2 lg:p-6 ">
+            <main className="h-screen overflow-y-auto">
               {children}
             </main>
           </div>
