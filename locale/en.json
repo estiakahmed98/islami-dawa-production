@@ -9,6 +9,7 @@
     "profile": "Profile",
     "user": "User",
     "logout": "Logout",
+    "signingOut": "Signing out...",
     "roles": {
       "centraladmin": "Central Admin",
       "divisionadmin": "Division Admin",
@@ -525,7 +526,9 @@
       "submit": "Submit Leave Request",
       "submitting": "Submitting…"
     },
-    "toasts": { "submitted": "✅ Leave request submitted successfully!" },
+    "toasts": {
+      "submitted": "✅ Leave request submitted successfully!"
+    },
     "errors": {
       "typeRequired": "Please select a leave type.",
       "dateRequired": "Please select both dates.",
@@ -759,7 +762,10 @@
   "assistantDaeeList": {
     "unknownUser": "(Unknown user)",
     "summary": "Assistant Da'ee List — Total {total} (Parent Da'ee: {parents})",
-    "buttons": { "exportPdf": "Export PDF", "exportCsv": "Export CSV" },
+    "buttons": {
+      "exportPdf": "Export PDF",
+      "exportCsv": "Export CSV"
+    },
     "table": {
       "headers": {
         "parent": "Name of Daye",
@@ -774,8 +780,12 @@
         "date": "Date of Record"
       }
     },
-    "status": { "loading": "Loading..." },
-    "empty": { "noRows": "No assistants found for the current filter." },
+    "status": {
+      "loading": "Loading..."
+    },
+    "empty": {
+      "noRows": "No assistants found for the current filter."
+    },
     "errors": {
       "loadFailed": "Failed to load assistants",
       "partial": "Some data couldn't be loaded. The rest is shown."

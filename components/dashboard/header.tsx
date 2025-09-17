@@ -2,11 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { LogOut, Menu, UserRound } from "lucide-react";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +24,9 @@ import { useTranslations } from "next-intl";
 function getInitials(name?: string | null, email?: string | null) {
   if (name && name.trim()) {
     const parts = name.trim().split(/\s+/);
-    return ((parts[0]?.[0] || "") + (parts[parts.length - 1]?.[0] || "")).toUpperCase();
+    return (
+      (parts[0]?.[0] || "") + (parts[parts.length - 1]?.[0] || "")
+    ).toUpperCase();
   }
   if (email && email.length) return email[0]!.toUpperCase();
   return "";
@@ -58,10 +56,11 @@ const Header = () => {
 
   const initials = useMemo(
     () => getInitials(session?.user?.name, session?.user?.email),
-    [session?.user?.name, session?.user?.email],
+    [session?.user?.name, session?.user?.email]
   );
 
-  const profileHref = userRole === "daye" ? "/dashboard/profile" : "/admin/profile";
+  const profileHref =
+    userRole === "daye" ? "/dashboard/profile" : "/admin/profile";
 
   return (
     <header
@@ -89,14 +88,17 @@ const Header = () => {
         <h1 className="text-sm md:text-lg font-semibold tracking-wide">
           {t("instituteName")}
         </h1>
-        <div className="text-[10px] md:text-sm/5 text-white/90" suppressHydrationWarning>
+        <div
+          className="text-[10px] md:text-sm/5 text-white/90"
+          suppressHydrationWarning
+        >
           {t("dawahYear")} ({mounted ? gregorian : "—"}) {t("gregorian")} /
           {mounted ? ` ${hijri}` : " —"} {t("hijri")}
         </div>
       </div>
-      
+
       <div className="flex gap-5">
-        <LanguageSwitcher/>
+        <LanguageSwitcher />
         {/* Right: Avatar = dropdown trigger */}
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
@@ -130,7 +132,10 @@ const Header = () => {
             </button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" className="max-w-72 rounded-xl shadow-lg">
+          <DropdownMenuContent
+            align="end"
+            className="max-w-72 rounded-xl shadow-lg"
+          >
             <DropdownMenuLabel className="flex min-w-0 flex-col">
               <span className="truncate text-base font-semibold text-foreground">
                 {session?.user?.name ?? t("user")}
@@ -146,11 +151,14 @@ const Header = () => {
             </DropdownMenuLabel>
 
             <DropdownMenuSeparator />
-       
+
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link href={profileHref} className="cursor-pointer">
-                  <UserRound className="opacity-70 mr-2 h-4 w-4" aria-hidden="true" />
+                  <UserRound
+                    className="opacity-70 mr-2 h-4 w-4"
+                    aria-hidden="true"
+                  />
                   <span>{t("profile")}</span>
                 </Link>
               </DropdownMenuItem>
@@ -160,17 +168,22 @@ const Header = () => {
                   if (isSigningOut) return;
                   setIsSigningOut(true);
                   try {
-                    // Let the auth library handle the navigation
-                    await signOut({ redirect: true, callbackUrl: "/" });
-                  } catch {
-                    // Fallback to hard redirect if something goes wrong
-                    window.location.href = "/";
+                    // Perform signOut without automatic redirect, then navigate client-side.
+                    await signOut({ redirect: false });
+                  } catch (err) {
+                    // ignore error and continue to route to home
+                  } finally {
+                    setIsSigningOut(false);
+                    router.replace("/");
                   }
                 }}
                 disabled={isSigningOut}
                 className="text-red-600 focus:text-red-700"
               >
-                <LogOut className="opacity-70 mr-2 h-4 w-4" aria-hidden="true" />
+                <LogOut
+                  className="opacity-70 mr-2 h-4 w-4"
+                  aria-hidden="true"
+                />
                 <span>{isSigningOut ? t("signingOut") : t("logout")}</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>

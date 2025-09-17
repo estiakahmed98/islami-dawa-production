@@ -9,6 +9,7 @@
     "profile": "প্রোফাইল",
     "user": "ব্যবহারকারী",
     "logout": "লগআউট",
+    "signingOut": "লগআউট করা হচ্ছে...",
     "roles": {
       "centraladmin": "সেন্ট্রাল অ্যাডমিন",
       "divisionadmin": "ডিভিশন অ্যাডমিন",
@@ -519,7 +520,9 @@
       "submit": "ছুটির আবেদন জমা দিন",
       "submitting": "জমা হচ্ছে…"
     },
-    "toasts": { "submitted": "✅ ছুটির আবেদন সফলভাবে জমা হয়েছে!" },
+    "toasts": {
+      "submitted": "✅ ছুটির আবেদন সফলভাবে জমা হয়েছে!"
+    },
     "errors": {
       "typeRequired": "ছুটির ধরন নির্বাচন করুন।",
       "dateRequired": "উভয় তারিখ নির্বাচন করুন।",
@@ -753,7 +756,10 @@
   "assistantDaeeList": {
     "unknownUser": "(অজানা ব্যবহারকারী)",
     "summary": "সহযোগী দায়ী তালিকা — মোট {total} জন (প্যারেন্ট দা'ঈ: {parents})",
-    "buttons": { "exportPdf": "Export PDF", "exportCsv": "Export CSV" },
+    "buttons": {
+      "exportPdf": "Export PDF",
+      "exportCsv": "Export CSV"
+    },
     "table": {
       "headers": {
         "parent": "দা'ঈ এর নাম",
@@ -768,8 +774,12 @@
         "date": "তারিখ"
       }
     },
-    "status": { "loading": "লোড হচ্ছে..." },
-    "empty": { "noRows": "বর্তমান ফিল্টারে কোনো সহযোগী দায়ী পাওয়া যায়নি।" },
+    "status": {
+      "loading": "লোড হচ্ছে..."
+    },
+    "empty": {
+      "noRows": "বর্তমান ফিল্টারে কোনো সহযোগী দায়ী পাওয়া যায়নি।"
+    },
     "errors": {
       "loadFailed": "সহযোগী দায়ী লোড ব্যর্থ",
       "partial": "কিছু ডেটা লোড করা যায়নি। বাকি অংশ দেখানো হয়েছে।"
@@ -933,8 +943,7 @@
       "totalUsers": "মোট ব্যবহারকারী:"
     }
   },
-
-"markaz": {
+  "markaz": {
     "title": "মারকায মসজিদ",
     "searchPlaceholder": "এখানে খুঁজুন...",
     "buttons": {
