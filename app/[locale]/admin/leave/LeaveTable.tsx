@@ -41,11 +41,11 @@ interface LeaveUserSummary {
   phone?: string;
   casual: number;
   sick: number;
-  maternity: number;
-  paternity: number;
-  annual: number;
   other: number;
   total: number;
+  casualRemaining: number;
+  sickRemaining: number;
+  totalRemaining: number;
   leaves: LeaveRecord[];
   notificationCount: number;
   hasNewNotification: boolean;
@@ -152,7 +152,22 @@ const AdminLeaveManagement: React.FC = () => {
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
-      setFilteredLeaves(leaveRequests);
+      const remainingCasual = Math.max(7 - (leaveRequests.filter((leave) => lower(leave.leaveType) === "casual" && lower(leave.status) === "approved").reduce((acc, leave) => acc + leave.days, 0)), 0);
+      const remainingSick = Math.max(10 - (leaveRequests.filter((leave) => lower(leave.leaveType) === "sick" && lower(leave.status) === "approved").reduce((acc, leave) => acc + leave.days, 0)), 0);
+      const remainingTotal = remainingCasual + remainingSick;
+      const filtered = leaveRequests.filter((leave) => {
+        const hay = [
+          leave.user.email,
+          leave.user.name ?? "",
+          leave.user.phone ?? "",
+          leave.leaveType ?? "",
+          leave.reason ?? "",
+          leave.status ?? "",
+          leave.rejectionReason ?? ""
+        ].join(" ").toLowerCase();
+        return hay.includes(searchTerm.toLowerCase());
+      });
+      setFilteredLeaves(filtered);
     } else {
       const needle = searchTerm.toLowerCase();
       const filtered = leaveRequests.filter((leave) => {
@@ -181,7 +196,8 @@ const AdminLeaveManagement: React.FC = () => {
           name: leave.user.name || t("labels.na"),
           email,
           phone: leave.user.phone || t("labels.na"),
-          casual: 0, sick: 0, maternity: 0, paternity: 0, annual: 0, other: 0, total: 0,
+          casual: 0, sick: 0, other: 0, total: 0,
+          casualRemaining: 0, sickRemaining: 0, totalRemaining: 0,
           leaves: [], notificationCount: 0, hasNewNotification: false,
         };
       }
@@ -200,12 +216,16 @@ const AdminLeaveManagement: React.FC = () => {
         const days = Number(leave.days) || 0;
         if (type === "casual") bucket.casual += days;
         else if (type === "sick") bucket.sick += days;
-        else if (type === "maternity") bucket.maternity += days;
-        else if (type === "paternity") bucket.paternity += days;
-        else if (type === "annual") bucket.annual += days;
         else bucket.other += days;
         bucket.total += days;
       }
+      
+      // Calculate remaining leave days
+      const CASUAL_LIMIT = 7;
+      const SICK_LIMIT = 10;
+      bucket.casualRemaining = Math.max(0, CASUAL_LIMIT - bucket.casual);
+      bucket.sickRemaining = Math.max(0, SICK_LIMIT - bucket.sick);
+      bucket.totalRemaining = bucket.casualRemaining + bucket.sickRemaining;
     }
 
     return Object.values(grouped);
@@ -254,10 +274,10 @@ const AdminLeaveManagement: React.FC = () => {
         t("columns.email"),
         t("columns.phone"),
         t("columns.casual"),
+        t("columns.casualRemaining"),
         t("columns.sick"),
-        t("columns.maternity"),
-        t("columns.paternity"),
-        t("columns.annual"),
+        t("columns.sickRemaining"),
+        t("columns.totalRemaining"),
         t("columns.other"),
         t("columns.total"),
       ];
@@ -285,10 +305,10 @@ const AdminLeaveManagement: React.FC = () => {
           <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.email}</td>
           <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.phone}</td>
           <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.casual}</td>
+          <td style="padding:8px 10px;border:1px solid #e2e8f0;color: ${user.casualRemaining > 0 ? '#10b981' : '#ef4444'}">${user.casualRemaining}</td>
           <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.sick}</td>
-          <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.maternity}</td>
-          <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.paternity}</td>
-          <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.annual}</td>
+          <td style="padding:8px 10px;border:1px solid #e2e8f0;color: ${user.sickRemaining > 0 ? '#10b981' : '#ef4444'}">${user.sickRemaining}</td>
+          <td style="padding:8px 10px;border:1px solid #e2e8f0;font-weight:700;color: ${user.totalRemaining > 0 ? '#10b981' : '#ef4444'}">${user.totalRemaining}</td>
           <td style="padding:8px 10px;border:1px solid #e2e8f0">${user.other}</td>
           <td style="padding:8px 10px;border:1px solid #e2e8f0;font-weight:700">${user.total}</td>
         `;
@@ -563,10 +583,10 @@ const AdminLeaveManagement: React.FC = () => {
                   <TableHead className="font-bold text-blue-800">{t("columns.email")}</TableHead>
                   <TableHead className="font-bold text-blue-800">{t("columns.phone")}</TableHead>
                   <TableHead className="font-bold text-blue-800">{t("columns.casual")}</TableHead>
+                  <TableHead className="font-bold text-blue-800">{t("columns.casualRemaining")}</TableHead>
                   <TableHead className="font-bold text-blue-800">{t("columns.sick")}</TableHead>
-                  <TableHead className="font-bold text-blue-800">{t("columns.maternity")}</TableHead>
-                  <TableHead className="font-bold text-blue-800">{t("columns.paternity")}</TableHead>
-                  <TableHead className="font-bold text-blue-800">{t("columns.annual")}</TableHead>
+                  <TableHead className="font-bold text-blue-800">{t("columns.sickRemaining")}</TableHead>
+                  <TableHead className="font-bold text-blue-800">{t("columns.totalRemaining")}</TableHead>
                   <TableHead className="font-bold text-blue-800">{t("columns.other")}</TableHead>
                   <TableHead className="font-bold text-blue-800">{t("columns.total")}</TableHead>
                 </TableRow>
@@ -607,10 +627,16 @@ const AdminLeaveManagement: React.FC = () => {
                         <TableCell className="text-gray-700">{user.email}</TableCell>
                         <TableCell className="text-gray-700">{user.phone}</TableCell>
                         <TableCell className="text-gray-700">{user.casual}</TableCell>
+                        <TableCell className={user.casualRemaining > 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                          {user.casualRemaining}
+                        </TableCell>
                         <TableCell className="text-gray-700">{user.sick}</TableCell>
-                        <TableCell className="text-gray-700">{user.maternity}</TableCell>
-                        <TableCell className="text-gray-700">{user.paternity}</TableCell>
-                        <TableCell className="text-gray-700">{user.annual}</TableCell>
+                        <TableCell className={user.sickRemaining > 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                          {user.sickRemaining}
+                        </TableCell>
+                        <TableCell className={user.totalRemaining > 0 ? "text-green-600 font-bold" : "text-red-600 font-bold"}>
+                          {user.totalRemaining}
+                        </TableCell>
                         <TableCell className="text-gray-700">{user.other}</TableCell>
                         <TableCell className="font-bold text-blue-900">{user.total}</TableCell>
                       </TableRow>
