@@ -1,34 +1,106 @@
-"use client"; //Estiak
+"use client"; // Estiak
 
 import { useState, useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
+
+// ------ Types ------
+type MarkazRef = { id: string; name: string };
 
 interface User {
   id: string;
   name: string;
   email: string;
   role: string;
-  division?: string;
-  district?: string;
-  upazila?: string;
-  union?: string;
-  // markaz can be a legacy string or relation array
-  markaz?: string | null | { id: string; name: string }[];
-  phone?: string;
+  division?: string | null;
+  district?: string | null;
+  upazila?: string | null;
+  union?: string | null;
+  phone?: string | null;
+  // New schema: single relation (object) or null; keep legacy string for safety
+  markaz?: MarkazRef | string | null;
+  markazId?: string | null;
 }
 
 interface CalendarEventFormProps {
   initialValues?: {
     title: string;
     description: string;
+    start: string; // ISO or datetime-local value
+    end: string;   // ISO or datetime-local value
+    attendees: string[]; // always array of emails
+  };
+  onSubmit?: (event: {
+    title: string;
+    description: string;
     start: string;
     end: string;
-    attendees: string[]; // Ensure attendees is always an array
-  };
-  onSubmit?: (event: any) => Promise<void>;
+    attendees: { email: string }[];
+  }) => Promise<void>;
   onSubmitSuccess?: () => void;
   onCancel?: () => void;
 }
+
+// Safely parse /api/users which may return [] or { users: [] }
+async function readUsers(res: Response): Promise<User[]> {
+  const json = await res.json();
+  if (Array.isArray(json)) return json as User[];
+  if (Array.isArray(json?.users)) return json.users as User[];
+  return [];
+}
+
+// --- markaz normalization (single relation, legacy-safe) ---
+const getMarkazId = (u?: User): string | null => {
+  if (!u) return null;
+  if (u.markaz && typeof u.markaz !== "string") return u.markaz.id ?? u.markazId ?? null;
+  return u.markazId ?? null;
+};
+const getMarkazName = (u?: User): string | null => {
+  if (!u?.markaz) return null;
+  return typeof u.markaz === "string" ? u.markaz : (u.markaz.name ?? null);
+};
+const shareMarkaz = (a: User, b: User): boolean => {
+  const aId = getMarkazId(a);
+  const bId = getMarkazId(b);
+  if (aId && bId) return aId === bId;
+  const aName = getMarkazName(a);
+  const bName = getMarkazName(b);
+  if (aName && bName) return aName === bName;
+  return false;
+};
+
+const getParentEmail = (
+  user: User,
+  users: User[],
+  loggedInUser: User | null
+): string | null => {
+  let parentUser: User | undefined;
+
+  switch (user.role) {
+    case "divisionadmin": {
+      parentUser =
+        (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
+        users.find((u) => u.role === "centraladmin");
+      break;
+    }
+    case "markazadmin": {
+      parentUser =
+        users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+        (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
+        users.find((u) => u.role === "centraladmin");
+      break;
+    }
+    case "daye": {
+      parentUser =
+        users.find((u) => u.role === "markazadmin" && shareMarkaz(u, user)) ||
+        (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
+        users.find((u) => u.role === "centraladmin");
+      break;
+    }
+    default:
+      return null;
+  }
+  return parentUser ? parentUser.email : null;
+};
 
 const CalendarEventForm = ({
   initialValues,
@@ -38,25 +110,24 @@ const CalendarEventForm = ({
 }: CalendarEventFormProps) => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
-  const [emailList, setEmailList] = useState<string[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
 
-  // Initialize event state with proper type
+  const [users, setUsers] = useState<User[]>([]);
+  const [emailList, setEmailList] = useState<string[]>([]);
   const [event, setEvent] = useState({
     title: "",
     description: "",
     start: "",
     end: "",
-    attendees: [] as string[],
+    attendees: [] as string[], // emails
   });
 
-  // Fetch users and process email list
+  // Fetch users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await fetch("/api/users", { cache: "no-store" });
         if (!response.ok) throw new Error("Failed to fetch users");
-        const usersData: User[] = await response.json();
+        const usersData = await readUsers(response);
         setUsers(usersData);
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -65,49 +136,44 @@ const CalendarEventForm = ({
     fetchUsers();
   }, []);
 
-  // Process email list based on user hierarchy
+  // Compute hierarchical email list for auto-attendees
   useEffect(() => {
-    if (!users.length) return;
+    if (!users.length || !userEmail) return;
 
-    const processEmails = () => {
-      const loggedInUser = users.find((u) => u.email === userEmail);
-      if (!loggedInUser) return;
+    const loggedInUser = users.find((u) => u.email === userEmail) || null;
+    if (!loggedInUser) return;
 
-      const collectedEmails = new Set<string>();
-      collectedEmails.add(loggedInUser.email);
+    const collectedEmails = new Set<string>();
+    collectedEmails.add(loggedInUser.email);
 
-      const findChildEmails = (parentEmail: string) => {
-        users.forEach((user) => {
-          if (
-            getParentEmail(user, users, loggedInUser) === parentEmail &&
-            !collectedEmails.has(user.email)
-          ) {
-            collectedEmails.add(user.email);
-            findChildEmails(user.email);
-          }
-        });
-      };
-
-      findChildEmails(loggedInUser.email);
-      return Array.from(collectedEmails);
+    const findChildEmails = (parentEmail: string) => {
+      users.forEach((u) => {
+        if (getParentEmail(u, users, loggedInUser) === parentEmail && !collectedEmails.has(u.email)) {
+          collectedEmails.add(u.email);
+          findChildEmails(u.email);
+        }
+      });
     };
+    findChildEmails(loggedInUser.email);
 
-    setEmailList(processEmails() || []);
+    setEmailList(Array.from(collectedEmails));
   }, [users, userEmail]);
 
+  // Initialize/merge event values and attendees
   useEffect(() => {
     if (initialValues) {
-      const mergedAttendees = [
-        ...new Set([...initialValues.attendees, ...emailList]),
-      ];
+      const merged = Array.from(new Set([...initialValues.attendees, ...emailList]));
       setEvent({
-        ...initialValues,
-        attendees: mergedAttendees,
+        title: initialValues.title || "",
+        description: initialValues.description || "",
+        start: initialValues.start || "",
+        end: initialValues.end || "",
+        attendees: merged,
       });
     } else {
       setEvent((prev) => ({
         ...prev,
-        attendees: emailList,
+        attendees: Array.from(new Set([...(prev.attendees || []), ...emailList])),
       }));
     }
   }, [initialValues, emailList]);
@@ -118,23 +184,24 @@ const CalendarEventForm = ({
     setEvent({ ...event, [e.target.name]: e.target.value });
   };
 
+  // Optional manual attendee input (currently hidden in UI)
   const handleAttendeeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const enteredEmails = e.target.value
       .split(",")
-      .map((email) => email.trim())
-      .filter((email) => email.includes("@")); // Basic validation
+      .map((email) => email.trim().toLowerCase())
+      .filter((email) => email.includes("@"));
     setEvent((prev) => ({
       ...prev,
-      attendees: [...emailList, ...enteredEmails],
+      attendees: Array.from(new Set([...emailList, ...enteredEmails])),
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Ensure we have valid attendees
-    const validAttendees = event.attendees
-      .filter((email) => email && email.includes("@"))
+    const validAttendees = (event.attendees || [])
+      .map((email) => email?.trim().toLowerCase())
+      .filter((email) => !!email && email.includes("@"))
       .map((email) => ({ email }));
 
     if (validAttendees.length === 0) {
@@ -144,7 +211,10 @@ const CalendarEventForm = ({
 
     try {
       const eventData = {
-        ...event,
+        title: event.title,
+        description: event.description,
+        start: event.start,
+        end: event.end,
         attendees: validAttendees,
       };
 
@@ -154,14 +224,10 @@ const CalendarEventForm = ({
         const response = await fetch("/api/calendar", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            calendarId: "primary",
-            event: eventData,
-          }),
+          body: JSON.stringify({ calendarId: "primary", event: eventData }),
         });
-
         if (!response.ok) throw new Error("Failed to create event");
-        const data = await response.json();
+        await response.json();
       }
 
       onSubmitSuccess?.();
@@ -177,64 +243,9 @@ const CalendarEventForm = ({
     }
   };
 
-  // --- Helpers to normalize markaz relation (mirrors AdminDashboard/MuiTreeView) ---
-  const getMarkazIds = (u?: User): string[] => {
-    if (!u?.markaz) return [];
-    if (Array.isArray(u.markaz)) return u.markaz.map((m) => m.id).filter(Boolean);
-    return [];
-  };
-  const getMarkazNames = (u?: User): string[] => {
-    if (!u?.markaz) return [];
-    if (Array.isArray(u.markaz)) return u.markaz.map((m) => m.name).filter(Boolean);
-    if (typeof u.markaz === "string" && u.markaz.trim()) return [u.markaz.trim()];
-    return [];
-  };
-  const shareMarkaz = (a: User, b: User): boolean => {
-    const aIds = getMarkazIds(a);
-    const bIds = getMarkazIds(b);
-    if (aIds.length && bIds.length) return aIds.some((id) => bIds.includes(id));
-    const aNames = getMarkazNames(a);
-    const bNames = getMarkazNames(b);
-    if (aNames.length && bNames.length) return aNames.some((n) => bNames.includes(n));
-    return false;
-  };
-
-  const getParentEmail = (
-    user: User,
-    users: User[],
-    loggedInUser: User | null
-  ): string | null => {
-    let parentUser: User | undefined;
-    switch (user.role) {
-      case "divisionadmin": {
-        parentUser =
-          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      case "markazadmin": {
-        parentUser =
-          users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
-          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      case "daye": {
-        parentUser =
-          users.find((u) => u.role === "markazadmin" && shareMarkaz(u, user)) ||
-          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      default:
-        return null;
-    }
-    return parentUser ? parentUser.email : null;
-  };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg">
-      {/* Title Input */}
+      {/* Title */}
       <input
         type="text"
         name="title"
@@ -245,7 +256,7 @@ const CalendarEventForm = ({
         className="block w-full p-2 border rounded"
       />
 
-      {/* Description Textarea */}
+      {/* Description */}
       <textarea
         name="description"
         placeholder="Event Description"
@@ -254,7 +265,7 @@ const CalendarEventForm = ({
         className="block w-full p-2 border rounded"
       />
 
-      {/* Start Time Input */}
+      {/* Start */}
       <input
         type="datetime-local"
         name="start"
@@ -264,7 +275,7 @@ const CalendarEventForm = ({
         className="block w-full p-2 border rounded"
       />
 
-      {/* End Time Input */}
+      {/* End */}
       <input
         type="datetime-local"
         name="end"
@@ -274,6 +285,7 @@ const CalendarEventForm = ({
         className="block w-full p-2 border rounded"
       />
 
+      {/* Hidden extra attendees field (kept for future UX) */}
       <input
         type="text"
         placeholder="Additional attendees (comma-separated)"
@@ -282,18 +294,18 @@ const CalendarEventForm = ({
         className="hidden"
       />
 
-      {/* Auto-included attendees display */}
+      {/* Hidden display of auto-included attendees */}
       <div className="text-sm text-gray-600 hidden">
         Auto-included attendees: {emailList.join(", ")}
       </div>
 
-      {/* Form Buttons */}
+      {/* Buttons */}
       <div className="flex gap-2">
         <button
           type="submit"
           className="bg-blue-500 text-white p-2 rounded flex-1"
         >
-          {initialValues ? "Create Event" : "Update Event"}
+          {initialValues ? "Update Event" : "Create Event"}
         </button>
         {onCancel && (
           <button

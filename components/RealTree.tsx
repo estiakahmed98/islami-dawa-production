@@ -224,34 +224,38 @@ const RealTree = () => {
     return [rootNode];
   };
 
-  // --- Helpers to normalize markaz relation (mirrors AdminDashboard/MuiTreeView) ---
-  const getMarkazIds = (u?: User): string[] => {
-    if (!u?.markaz) return [];
-    if (Array.isArray(u.markaz)) return u.markaz.map((m) => m.id).filter(Boolean);
-    return [];
+  // --- markaz normalization (single relation, legacy safe) ---
+  const getMarkazId = (u?: User): string | null => {
+    if (!u) return null;
+    if (u.markaz && typeof u.markaz === 'object' && !Array.isArray(u.markaz)) {
+      return (u.markaz as any).id ?? (u as any).markazId ?? null;
+    }
+    return (u as any).markazId ?? null;
   };
-  const getMarkazNames = (u?: User): string[] => {
-    if (!u?.markaz) return [];
-    if (Array.isArray(u.markaz)) return u.markaz.map((m) => m.name).filter(Boolean);
-    if (typeof u.markaz === "string" && u.markaz.trim()) return [u.markaz.trim()];
-    return [];
+  
+  const getMarkazName = (u?: User): string | null => {
+    if (!u?.markaz) return null;
+    return typeof u.markaz === "string" ? u.markaz : (u.markaz as any).name ?? null;
   };
+  
   const shareMarkaz = (a: User, b: User): boolean => {
-    const aIds = getMarkazIds(a);
-    const bIds = getMarkazIds(b);
-    if (aIds.length && bIds.length) return aIds.some((id) => bIds.includes(id));
-    const aNames = getMarkazNames(a);
-    const bNames = getMarkazNames(b);
-    if (aNames.length && bNames.length) return aNames.some((n) => bNames.includes(n));
+    const aId = getMarkazId(a);
+    const bId = getMarkazId(b);
+    if (aId && bId) return aId === bId;
+    const aName = getMarkazName(a);
+    const bName = getMarkazName(b);
+    if (aName && bName) return aName === bName;
     return false;
   };
 
+  // Parent resolution updated for single markaz relation
   const getParentEmail = (
     user: User,
     users: User[],
     loggedInUser: User | null
   ): string | null => {
     let parentUser: User | undefined;
+
     switch (user.role) {
       case "divisionadmin": {
         parentUser =
@@ -273,9 +277,32 @@ const RealTree = () => {
           users.find((u) => u.role === "centraladmin");
         break;
       }
+      // legacy roles - keep for compatibility
+      case "unionadmin": {
+        parentUser =
+          users.find((u) => u.role === "upozilaadmin" && u.upazila === user.upazila) ||
+          users.find((u) => u.role === "districtadmin" && u.district === user.district) ||
+          users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+          users.find((u) => u.role === "centraladmin");
+        break;
+      }
+      case "upozilaadmin": {
+        parentUser =
+          users.find((u) => u.role === "districtadmin" && u.district === user.district) ||
+          users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+          users.find((u) => u.role === "centraladmin");
+        break;
+      }
+      case "districtadmin": {
+        parentUser =
+          users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+          users.find((u) => u.role === "centraladmin");
+        break;
+      }
       default:
         return null;
     }
+
     return parentUser ? parentUser.email : null;
   };
 
