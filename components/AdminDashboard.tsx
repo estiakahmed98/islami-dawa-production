@@ -30,7 +30,7 @@ interface User {
 }
 
 type RecordsByEmail = Record<string, Record<string, any>>;
-type LabelMap = Record<string, string>;
+type LabelMap = Record<string, string | undefined>;
 type LabeledData = {
   records: RecordsByEmail;
   labelMap: LabelMap;

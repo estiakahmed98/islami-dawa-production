@@ -1,10 +1,13 @@
 import RealTree from "@/components/RealTree";
+import TreeProvider from "@/providers/treeProvider";
 
 const Page = () => {
   return (
-    <div>
-      <RealTree />
-    </div>
+    <TreeProvider>
+      <div>
+        <RealTree />
+      </div>
+    </TreeProvider>
   );
 };
 

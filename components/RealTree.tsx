@@ -38,16 +38,25 @@ const RealTree = () => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
-  const { data: session } = useSession();
+  const { data: session } = useSession({ required: false });
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown>>();
 
   useEffect(() => {
+    const isUser = (user: any): user is User => {
+      return user && 
+             typeof user.id === 'string' && 
+             typeof user.name === 'string' &&
+             typeof user.role === 'string' &&
+             typeof user.email === 'string';
+    };
+
     const fetchUsers = async () => {
       try {
         const response = await fetch("/api/users", { cache: "no-store" });
         const usersData: User[] = await response.json();
         setUsers(usersData);
-        const tree = buildBfsTree(usersData, session?.user || null);
+        const currentUser = session?.user && isUser(session.user) ? session.user : null;
+        const tree = buildBfsTree(usersData, currentUser);
         setNodes(tree);
       } catch (error) {
         console.error("Error fetching users:", error);
