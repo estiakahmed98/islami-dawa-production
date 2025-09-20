@@ -1,58 +1,45 @@
-ALTER TABLE "sessions" ADD COLUMN "impersonatedBy" TEXT;
+-- CreateTable
+CREATE TABLE "users" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "name" TEXT,
+    "role" TEXT,
+    "division" TEXT,
+    "district" TEXT,
+    "area" TEXT,
+    "upazila" TEXT,
+    "union" TEXT,
+    "phone" TEXT,
+    "parent" TEXT,
+    "emailVerified" BOOLEAN NOT NULL,
+    "image" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "banned" BOOLEAN,
+    "banReason" TEXT,
+    "banExpires" INTEGER,
+    "note" TEXT,
+    "activeDeviceId" TEXT,
+    "activeSessionId" TEXT,
+    "markazId" TEXT,
 
--- AlterTable
-ALTER TABLE "users"
-ADD COLUMN "activeDeviceId" TEXT,
-ADD COLUMN "activeSessionId" TEXT,
-ADD COLUMN "banExpires" INTEGER,
-ADD COLUMN "banReason" TEXT,
-ADD COLUMN "banned" BOOLEAN,
-ADD COLUMN "note" TEXT,
-ADD COLUMN "parent" TEXT,
-ALTER COLUMN "role"
-DROP NOT NULL,
-ALTER COLUMN "division"
-DROP NOT NULL,
-ALTER COLUMN "district"
-DROP NOT NULL,
-ALTER COLUMN "area"
-DROP NOT NULL,
-ALTER COLUMN "upazila"
-DROP NOT NULL,
-ALTER COLUMN "union"
-DROP NOT NULL,
-ALTER COLUMN "phone"
-DROP NOT NULL;
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
 
--- DropTable
-DROP TABLE "AmoliMuhasabaData";
+-- CreateTable
+CREATE TABLE "sessions" (
+    "id" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "token" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "ipAddress" TEXT,
+    "userAgent" TEXT,
+    "userId" TEXT NOT NULL,
+    "impersonatedBy" TEXT,
 
--- DropTable
-DROP TABLE "DawatiBisoy";
-
--- DropTable
-DROP TABLE "DawatiMojlish";
-
--- DropTable
-DROP TABLE "DayeBisoy";
-
--- DropTable
-DROP TABLE "DinerDikeFireche";
-
--- DropTable
-DROP TABLE "JamatBisoy";
-
--- DropTable
-DROP TABLE "MasterTableDawa";
-
--- DropTable
-DROP TABLE "MoktobBisoy";
-
--- DropTable
-DROP TABLE "SoforBisoy";
-
--- DropTable
-DROP TABLE "TalimBisoy";
+    CONSTRAINT "sessions_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "CalendarEvent" (
@@ -68,7 +55,39 @@ CREATE TABLE "CalendarEvent" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "userId" TEXT NOT NULL,
+
     CONSTRAINT "CalendarEvent_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "accounts" (
+    "id" TEXT NOT NULL,
+    "accountId" TEXT NOT NULL,
+    "providerId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "accessToken" TEXT,
+    "refreshToken" TEXT,
+    "idToken" TEXT,
+    "accessTokenExpiresAt" TIMESTAMP(3),
+    "refreshTokenExpiresAt" TIMESTAMP(3),
+    "scope" TEXT,
+    "password" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "accounts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "verifications" (
+    "id" TEXT NOT NULL,
+    "identifier" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3),
+    "updatedAt" TIMESTAMP(3),
+
+    CONSTRAINT "verifications_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -94,6 +113,7 @@ CREATE TABLE "AmoliMuhasaba" (
     "editorContent" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "AmoliMuhasaba_pkey" PRIMARY KEY ("id")
 );
 
@@ -110,6 +130,7 @@ CREATE TABLE "DawatiBisoyRecord" (
     "editorContent" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "DawatiBisoyRecord_pkey" PRIMARY KEY ("id")
 );
 
@@ -128,6 +149,7 @@ CREATE TABLE "DawatiMojlishRecord" (
     "editorContent" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "DawatiMojlishRecord_pkey" PRIMARY KEY ("id")
 );
 
@@ -141,6 +163,7 @@ CREATE TABLE "JamatBisoyRecord" (
     "editorContent" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "JamatBisoyRecord_pkey" PRIMARY KEY ("id")
 );
 
@@ -154,11 +177,11 @@ CREATE TABLE "DineFeraRecord" (
     "editorContent" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "DineFeraRecord_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-
 CREATE TABLE "SoforBisoyRecord" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -185,6 +208,7 @@ CREATE TABLE "TalimBisoyRecord" (
     "editorContent" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "TalimBisoyRecord_pkey" PRIMARY KEY ("id")
 );
 
@@ -197,6 +221,7 @@ CREATE TABLE "DayeeBishoyRecord" (
     "editorContent" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "DayeeBishoyRecord_pkey" PRIMARY KEY ("id")
 );
 
@@ -215,6 +240,7 @@ CREATE TABLE "AssistantDaee" (
     "dayeeBishoyId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "AssistantDaee_pkey" PRIMARY KEY ("id")
 );
 
@@ -235,6 +261,7 @@ CREATE TABLE "MoktobBisoyRecord" (
     "editorContent" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "MoktobBisoyRecord_pkey" PRIMARY KEY ("id")
 );
 
@@ -255,6 +282,7 @@ CREATE TABLE "LeaveRequest" (
     "requestDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "LeaveRequest_pkey" PRIMARY KEY ("id")
 );
 
@@ -275,6 +303,7 @@ CREATE TABLE "Task" (
     "completed" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
 );
 
@@ -296,186 +325,200 @@ CREATE TABLE "EditRequest" (
     "editedOnce" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
     CONSTRAINT "EditRequest_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "CalendarEvent_googleEventId_key" ON "CalendarEvent" ("googleEventId");
+-- CreateTable
+CREATE TABLE "Markaz" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "division" TEXT NOT NULL,
+    "district" TEXT NOT NULL,
+    "upazila" TEXT NOT NULL,
+    "union" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
--- CreateIndex
-CREATE INDEX "AmoliMuhasaba_userId_idx" ON "AmoliMuhasaba" ("userId");
-
--- CreateIndex
-CREATE INDEX "AmoliMuhasaba_date_idx" ON "AmoliMuhasaba" ("date");
-
--- CreateIndex
-CREATE UNIQUE INDEX "AmoliMuhasaba_userId_date_key" ON "AmoliMuhasaba" ("userId", "date");
-
--- CreateIndex
-CREATE INDEX "DawatiBisoyRecord_userId_idx" ON "DawatiBisoyRecord" ("userId");
-
--- CreateIndex
-CREATE INDEX "DawatiBisoyRecord_date_idx" ON "DawatiBisoyRecord" ("date");
-
--- CreateIndex
-CREATE UNIQUE INDEX "DawatiBisoyRecord_userId_date_key" ON "DawatiBisoyRecord" ("userId", "date");
-
--- CreateIndex
-CREATE INDEX "DawatiMojlishRecord_userId_idx" ON "DawatiMojlishRecord" ("userId");
-
--- CreateIndex
-CREATE INDEX "DawatiMojlishRecord_date_idx" ON "DawatiMojlishRecord" ("date");
-
--- CreateIndex
-CREATE UNIQUE INDEX "DawatiMojlishRecord_userId_date_key" ON "DawatiMojlishRecord" ("userId", "date");
-
--- CreateIndex
-CREATE INDEX "JamatBisoyRecord_userId_idx" ON "JamatBisoyRecord" ("userId");
-
--- CreateIndex
-CREATE INDEX "JamatBisoyRecord_date_idx" ON "JamatBisoyRecord" ("date");
-
--- CreateIndex
-CREATE UNIQUE INDEX "JamatBisoyRecord_userId_date_key" ON "JamatBisoyRecord" ("userId", "date");
-
--- CreateIndex
-CREATE INDEX "DineFeraRecord_userId_idx" ON "DineFeraRecord" ("userId");
-
--- CreateIndex
-CREATE INDEX "DineFeraRecord_date_idx" ON "DineFeraRecord" ("date");
-
--- CreateIndex
-CREATE UNIQUE INDEX "DineFeraRecord_userId_date_key" ON "DineFeraRecord" ("userId", "date");
-
--- CreateIndex
-CREATE INDEX "SoforBisoyRecord_userId_idx" ON "SoforBisoyRecord" ("userId");
-
--- CreateIndex
-CREATE INDEX "SoforBisoyRecord_date_idx" ON "SoforBisoyRecord" ("date");
-
--- CreateIndex
-CREATE UNIQUE INDEX "SoforBisoyRecord_userId_date_key" ON "SoforBisoyRecord" ("userId", "date");
-
--- CreateIndex
-CREATE INDEX "TalimBisoyRecord_userId_idx" ON "TalimBisoyRecord" ("userId");
-
--- CreateIndex
-CREATE INDEX "TalimBisoyRecord_date_idx" ON "TalimBisoyRecord" ("date");
-
--- CreateIndex
-CREATE UNIQUE INDEX "TalimBisoyRecord_userId_date_key" ON "TalimBisoyRecord" ("userId", "date");
-
--- CreateIndex
-CREATE INDEX "DayeeBishoyRecord_userId_idx" ON "DayeeBishoyRecord" ("userId");
-
--- CreateIndex
-CREATE INDEX "DayeeBishoyRecord_date_idx" ON "DayeeBishoyRecord" ("date");
-
--- CreateIndex
-CREATE UNIQUE INDEX "DayeeBishoyRecord_userId_date_key" ON "DayeeBishoyRecord" ("userId", "date");
-
--- CreateIndex
-CREATE INDEX "AssistantDaee_dayeeBishoyId_idx" ON "AssistantDaee" ("dayeeBishoyId");
-
--- CreateIndex
-CREATE INDEX "MoktobBisoyRecord_userId_idx" ON "MoktobBisoyRecord" ("userId");
-
--- CreateIndex
-CREATE INDEX "MoktobBisoyRecord_date_idx" ON "MoktobBisoyRecord" ("date");
-
--- CreateIndex
-CREATE UNIQUE INDEX "MoktobBisoyRecord_userId_date_key" ON "MoktobBisoyRecord" ("userId", "date");
-
--- CreateIndex
-CREATE INDEX "LeaveRequest_userId_idx" ON "LeaveRequest" ("userId");
-
--- CreateIndex
-CREATE INDEX "LeaveRequest_status_idx" ON "LeaveRequest" ("status");
-
--- CreateIndex
-CREATE INDEX "LeaveRequest_requestDate_idx" ON "LeaveRequest" ("requestDate");
-
--- CreateIndex
-CREATE INDEX "Task_userId_idx" ON "Task" ("userId");
-
--- CreateIndex
-CREATE INDEX "Task_date_idx" ON "Task" ("date");
-
--- CreateIndex
-CREATE INDEX "Task_visibility_idx" ON "Task" ("visibility");
-
--- CreateIndex
-CREATE INDEX "Task_division_district_upazila_union_idx" ON "Task" (
-    "division",
-    "district",
-    "upazila",
-    "union"
+    CONSTRAINT "Markaz_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE INDEX "EditRequest_userId_idx" ON "EditRequest" ("userId");
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
-CREATE INDEX "EditRequest_email_idx" ON "EditRequest" ("email");
+CREATE UNIQUE INDEX "sessions_token_key" ON "sessions"("token");
 
 -- CreateIndex
-CREATE INDEX "EditRequest_status_idx" ON "EditRequest" ("status");
+CREATE UNIQUE INDEX "CalendarEvent_googleEventId_key" ON "CalendarEvent"("googleEventId");
 
 -- CreateIndex
-CREATE INDEX "EditRequest_date_idx" ON "EditRequest" ("date");
+CREATE INDEX "AmoliMuhasaba_userId_idx" ON "AmoliMuhasaba"("userId");
+
+-- CreateIndex
+CREATE INDEX "AmoliMuhasaba_date_idx" ON "AmoliMuhasaba"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AmoliMuhasaba_userId_date_key" ON "AmoliMuhasaba"("userId", "date");
+
+-- CreateIndex
+CREATE INDEX "DawatiBisoyRecord_userId_idx" ON "DawatiBisoyRecord"("userId");
+
+-- CreateIndex
+CREATE INDEX "DawatiBisoyRecord_date_idx" ON "DawatiBisoyRecord"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DawatiBisoyRecord_userId_date_key" ON "DawatiBisoyRecord"("userId", "date");
+
+-- CreateIndex
+CREATE INDEX "DawatiMojlishRecord_userId_idx" ON "DawatiMojlishRecord"("userId");
+
+-- CreateIndex
+CREATE INDEX "DawatiMojlishRecord_date_idx" ON "DawatiMojlishRecord"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DawatiMojlishRecord_userId_date_key" ON "DawatiMojlishRecord"("userId", "date");
+
+-- CreateIndex
+CREATE INDEX "JamatBisoyRecord_userId_idx" ON "JamatBisoyRecord"("userId");
+
+-- CreateIndex
+CREATE INDEX "JamatBisoyRecord_date_idx" ON "JamatBisoyRecord"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "JamatBisoyRecord_userId_date_key" ON "JamatBisoyRecord"("userId", "date");
+
+-- CreateIndex
+CREATE INDEX "DineFeraRecord_userId_idx" ON "DineFeraRecord"("userId");
+
+-- CreateIndex
+CREATE INDEX "DineFeraRecord_date_idx" ON "DineFeraRecord"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DineFeraRecord_userId_date_key" ON "DineFeraRecord"("userId", "date");
+
+-- CreateIndex
+CREATE INDEX "SoforBisoyRecord_userId_idx" ON "SoforBisoyRecord"("userId");
+
+-- CreateIndex
+CREATE INDEX "SoforBisoyRecord_date_idx" ON "SoforBisoyRecord"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "SoforBisoyRecord_userId_date_key" ON "SoforBisoyRecord"("userId", "date");
+
+-- CreateIndex
+CREATE INDEX "TalimBisoyRecord_userId_idx" ON "TalimBisoyRecord"("userId");
+
+-- CreateIndex
+CREATE INDEX "TalimBisoyRecord_date_idx" ON "TalimBisoyRecord"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "TalimBisoyRecord_userId_date_key" ON "TalimBisoyRecord"("userId", "date");
+
+-- CreateIndex
+CREATE INDEX "DayeeBishoyRecord_userId_idx" ON "DayeeBishoyRecord"("userId");
+
+-- CreateIndex
+CREATE INDEX "DayeeBishoyRecord_date_idx" ON "DayeeBishoyRecord"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DayeeBishoyRecord_userId_date_key" ON "DayeeBishoyRecord"("userId", "date");
+
+-- CreateIndex
+CREATE INDEX "AssistantDaee_dayeeBishoyId_idx" ON "AssistantDaee"("dayeeBishoyId");
+
+-- CreateIndex
+CREATE INDEX "MoktobBisoyRecord_userId_idx" ON "MoktobBisoyRecord"("userId");
+
+-- CreateIndex
+CREATE INDEX "MoktobBisoyRecord_date_idx" ON "MoktobBisoyRecord"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "MoktobBisoyRecord_userId_date_key" ON "MoktobBisoyRecord"("userId", "date");
+
+-- CreateIndex
+CREATE INDEX "LeaveRequest_userId_idx" ON "LeaveRequest"("userId");
+
+-- CreateIndex
+CREATE INDEX "LeaveRequest_status_idx" ON "LeaveRequest"("status");
+
+-- CreateIndex
+CREATE INDEX "LeaveRequest_requestDate_idx" ON "LeaveRequest"("requestDate");
+
+-- CreateIndex
+CREATE INDEX "Task_userId_idx" ON "Task"("userId");
+
+-- CreateIndex
+CREATE INDEX "Task_date_idx" ON "Task"("date");
+
+-- CreateIndex
+CREATE INDEX "Task_visibility_idx" ON "Task"("visibility");
+
+-- CreateIndex
+CREATE INDEX "Task_division_district_upazila_union_idx" ON "Task"("division", "district", "upazila", "union");
+
+-- CreateIndex
+CREATE INDEX "EditRequest_userId_idx" ON "EditRequest"("userId");
+
+-- CreateIndex
+CREATE INDEX "EditRequest_email_idx" ON "EditRequest"("email");
+
+-- CreateIndex
+CREATE INDEX "EditRequest_status_idx" ON "EditRequest"("status");
+
+-- CreateIndex
+CREATE INDEX "EditRequest_date_idx" ON "EditRequest"("date");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Markaz_name_key" ON "Markaz"("name");
 
 -- AddForeignKey
-ALTER TABLE "CalendarEvent"
-ADD CONSTRAINT "CalendarEvent_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "users" ADD CONSTRAINT "users_markazId_fkey" FOREIGN KEY ("markazId") REFERENCES "Markaz"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AmoliMuhasaba"
-ADD CONSTRAINT "AmoliMuhasaba_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "sessions" ADD CONSTRAINT "sessions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DawatiBisoyRecord"
-ADD CONSTRAINT "DawatiBisoyRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "CalendarEvent" ADD CONSTRAINT "CalendarEvent_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DawatiMojlishRecord"
-ADD CONSTRAINT "DawatiMojlishRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "accounts" ADD CONSTRAINT "accounts_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "JamatBisoyRecord"
-ADD CONSTRAINT "JamatBisoyRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AmoliMuhasaba" ADD CONSTRAINT "AmoliMuhasaba_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DineFeraRecord"
-ADD CONSTRAINT "DineFeraRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "DawatiBisoyRecord" ADD CONSTRAINT "DawatiBisoyRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SoforBisoyRecord"
-ADD CONSTRAINT "SoforBisoyRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "DawatiMojlishRecord" ADD CONSTRAINT "DawatiMojlishRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TalimBisoyRecord"
-ADD CONSTRAINT "TalimBisoyRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "JamatBisoyRecord" ADD CONSTRAINT "JamatBisoyRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DayeeBishoyRecord"
-ADD CONSTRAINT "DayeeBishoyRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "DineFeraRecord" ADD CONSTRAINT "DineFeraRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AssistantDaee"
-ADD CONSTRAINT "AssistantDaee_dayeeBishoyId_fkey" FOREIGN KEY ("dayeeBishoyId") REFERENCES "DayeeBishoyRecord" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "SoforBisoyRecord" ADD CONSTRAINT "SoforBisoyRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "MoktobBisoyRecord"
-ADD CONSTRAINT "MoktobBisoyRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "TalimBisoyRecord" ADD CONSTRAINT "TalimBisoyRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "LeaveRequest"
-ADD CONSTRAINT "LeaveRequest_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "DayeeBishoyRecord" ADD CONSTRAINT "DayeeBishoyRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Task"
-ADD CONSTRAINT "Task_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AssistantDaee" ADD CONSTRAINT "AssistantDaee_dayeeBishoyId_fkey" FOREIGN KEY ("dayeeBishoyId") REFERENCES "DayeeBishoyRecord"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "EditRequest"
-ADD CONSTRAINT "EditRequest_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "MoktobBisoyRecord" ADD CONSTRAINT "MoktobBisoyRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LeaveRequest" ADD CONSTRAINT "LeaveRequest_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Task" ADD CONSTRAINT "Task_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "EditRequest" ADD CONSTRAINT "EditRequest_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
