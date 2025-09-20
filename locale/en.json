@@ -715,7 +715,8 @@
         "unionadmin": "Union Admin",
         "markazadmin": "Markaz Admin",
         "daye": "Da'ee",
-        "assistantList": "Assistant Da'ee"
+        "assistantList": "Assistant Da'ee",
+        "null": "No Role"
       },
       "placeholders": {
         "name": "Name",
