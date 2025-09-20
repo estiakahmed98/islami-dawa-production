@@ -461,17 +461,19 @@ export default function UsersTable() {
 
   /** Apply filters & collect email list */
   useEffect(() => {
-    const filtered = users.filter((user) =>
-      Object.entries(filters).every(
-        ([key, value]) =>
-          !value ||
-          (typeof user[key as keyof User] === "string" &&
-            (user[key as keyof User] as string)?.toLowerCase().includes(value.toLowerCase()))
-      )
-    );
+    const filtered = users
+      .filter((user) => canViewUser(user))
+      .filter((user) =>
+        Object.entries(filters).every(
+          ([key, value]) =>
+            !value ||
+            (typeof user[key as keyof User] === "string" &&
+              (user[key as keyof User] as string)?.toLowerCase().includes(value.toLowerCase()))
+        )
+      );
     setFilteredUsers(filtered);
     setEmailList(filtered.map((user) => user.email));
-  }, [filters, users]);
+  }, [filters, users, (sessionUser as any)?.email, (sessionUser as any)?.role]);
 
   /** Fetch DB datasets whenever email list changes */
   useEffect(() => {
@@ -718,9 +720,22 @@ export default function UsersTable() {
     return parentUser ? parentUser.email : null;
   };
 
+  // View control: who can see which users in the table
+  const canViewUser = (u: User): boolean => {
+    // No session -> nothing to show (but upstream we guard on status/loading)
+    if (!sessionUser) return false;
+    // Central admin sees everyone
+    if ((sessionUser as any).role === "centraladmin") return true;
+    // Always allow user to view own row
+    if ((sessionUser as any).email === u.email) return true;
+    // Otherwise, only if the logged-in user is the computed parent admin
+    const parent = getParentEmail(u, users, sessionUser as any);
+    return parent === (sessionUser as any).email;
+  };
+
   return (
     <div className="w-full h-[calc(100vh)] overflow-auto mx-auto p-2">
-      <div className="h-[calc(70vh)] overflow-auto">
+      <div className="max-h-[calc(70vh)] mt-20 overflow-auto">
         <h1 className="text-2xl font-bold text-center mb-6">{t("title")}</h1>
 
         {/* Filters */}
@@ -731,10 +746,25 @@ export default function UsersTable() {
             className="border border-slate-500 rounded-md px-4 py-2"
           >
             <option value="">{t("filters.allRoles")}</option>
-            <option value="divisionadmin">{roleLabel("divisionadmin")}</option>
-            <option value="markazadmin">{roleLabel("markazadmin")}</option>
-            <option value="daye">{roleLabel("daye")}</option>
-            <option value="AssistantDaeeList">{t("filters.roleOptions.assistantList")}</option>
+            {sessionUser?.role === "centraladmin" && (
+              <>
+                <option value="divisionadmin">{roleLabel("divisionadmin")}</option>
+                <option value="markazadmin">{roleLabel("markazadmin")}</option>
+                <option value="daye">{roleLabel("daye")}</option>
+              </>
+            )}
+            {sessionUser?.role === "divisionadmin" && (
+              <>
+                <option value="markazadmin">{roleLabel("markazadmin")}</option>
+                <option value="daye">{roleLabel("daye")}</option>
+              </>
+            )}
+            {sessionUser?.role === "markazadmin" && (
+              <option value="daye">{roleLabel("daye")}</option>
+            )}
+            {["centraladmin", "divisionadmin", "markazadmin"].includes(sessionUser?.role as string) && (
+              <option value="AssistantDaeeList">{t("filters.roleOptions.assistantList")}</option>
+            )}
           </select>
 
           {(["name", "division", "district", "upazila", "union"] as (keyof Filters)[]).map((key) => (
@@ -774,7 +804,7 @@ export default function UsersTable() {
                   [t("columns.union")]: user.union,
                   [t("columns.phone")]: user.phone,
                   [t("columns.markaz")]: getMarkazName(user) || "N/A",
-                  [t("columns.adminAssigned")]: getParentEmail(user, users) || "N/A",
+                  [t("columns.adminAssigned")]: getParentEmail(user, users, sessionUser as any) || "N/A",
                   [t("columns.status")]: user.banned ? t("status.banned") : t("status.active"),
                 })),
                 title: t("export.title"),
@@ -822,7 +852,7 @@ export default function UsersTable() {
                     <TableCell className="border-r border-gray-300">{user.phone}</TableCell>
                     <TableCell className="border-r border-gray-300">{getMarkazName(user) || "N/A"}</TableCell>
                     <TableCell className="border-r border-gray-300 text-center">
-                      {getParentEmail(user, users) || "N/A"}
+                      {getParentEmail(user, users, sessionUser as any) || "N/A"}
                     </TableCell>
                     <TableCell className="border-r border-gray-300">{user.banned ? t("status.banned") : t("status.active")}</TableCell>
                     <TableCell>
