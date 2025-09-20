@@ -1,20 +1,16 @@
-//Juwel
+// app/api/users/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma"; // use a singleton instead of new PrismaClient()
 
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const email = url.searchParams.get("email");
 
-    // Handle email-specific query (new functionality)
+    // 1) Direct lookup by email
     if (email) {
       const user = await prisma.users.findFirst({
-        where: {
-          email: email.toLowerCase(),
-        },
+        where: { email: email.toLowerCase() },
         select: {
           id: true,
           name: true,
@@ -25,7 +21,8 @@ export async function GET(req: NextRequest) {
           upazila: true,
           union: true,
           phone: true,
-          markaz: true,
+          markazId: true,
+          markaz: { select: { id: true, name: true } },
         },
       });
 
@@ -36,7 +33,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(user, { status: 200 });
     }
 
-    // Existing filter logic
+    // 2) Filters
     const filters = {
       role: url.searchParams.get("role") || undefined,
       name: url.searchParams.get("name") || undefined,
@@ -44,21 +41,26 @@ export async function GET(req: NextRequest) {
       district: url.searchParams.get("district") || undefined,
       upazila: url.searchParams.get("upazila") || undefined,
       union: url.searchParams.get("union") || undefined,
-      markaz: url.searchParams.get("markaz") || undefined,
+      markaz: url.searchParams.get("markaz") || undefined, // markaz name
+      markazId: url.searchParams.get("markazId") || undefined, // markaz id
     };
 
-    const query: any = {};
-    Object.keys(filters).forEach((key) => {
-      if (filters[key as keyof typeof filters]) {
-        query[key] = {
-          contains: filters[key as keyof typeof filters],
-          mode: "insensitive",
-        };
+    const where: any = {};
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (!value) return;
+
+      if (key === "markaz") {
+        where.markaz = { name: { contains: value, mode: "insensitive" } };
+      } else if (key === "markazId") {
+        where.markazId = value;
+      } else {
+        where[key] = { contains: value, mode: "insensitive" };
       }
     });
 
     const users = await prisma.users.findMany({
-      where: query,
+      where,
       select: {
         id: true,
         name: true,
@@ -69,21 +71,15 @@ export async function GET(req: NextRequest) {
         upazila: true,
         union: true,
         phone: true,
-        markaz: true,
+        markazId: true,
+        markaz: { select: { id: true, name: true } },
       },
-      orderBy: {
-        name: "asc",
-      },
+      orderBy: { name: "asc" },
     });
 
     return NextResponse.json(users, { status: 200 });
   } catch (error) {
     console.error("Error fetching users:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch users." },
-      { status: 500 }
-    );
-  } finally {
-    await prisma.$disconnect();
+    return NextResponse.json({ error: "Failed to fetch users." }, { status: 500 });
   }
 }

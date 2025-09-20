@@ -13,28 +13,48 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 // ----------------- Types -----------------
+type MarkazRef = { id: string; name: string };
+
 interface User {
   id: string;
   name: string;
   email: string;
   role: string;
-  division?: string;
-  district?: string;
-  upazila?: string;
-  union?: string;
-  // markaz can be a legacy string or relation array
-  markaz?: string | null | { id: string; name: string }[];
+  division?: string | null;
+  district?: string | null;
+  upazila?: string | null;
+  union?: string | null;
+  // after schema change: single object or null; legacy string tolerated from older endpoints
+  markaz?: MarkazRef | string | null;
+  markazId?: string | null;
 }
+
 type RecordsByEmail = Record<string, Record<string, any>>;
+type LabelMap = Record<string, string>;
 type LabeledData = {
   records: RecordsByEmail;
-  labelMap: Record<string, string>;
-  // NEW: store raw arrays for modals
+  labelMap: LabelMap;
   meta?: {
-    assistants?: Record<string, Record<string, any[]>>;          // [email][date] -> Assistant[]
-    madrasa?: Record<string, Record<string, string[]>>;           // [email][date] -> string[]
-    school?: Record<string, Record<string, string[]>>;            // [email][date] -> string[]
+    assistants?: Record<string, Record<string, any[]>>; // [email][date] -> Assistant[]
+    madrasa?: Record<string, Record<string, string[]>>;  // [email][date] -> string[]
+    school?: Record<string, Record<string, string[]>>;   // [email][date] -> string[]
   };
+};
+
+type EndpointDef = {
+  key:
+    | "amoli"
+    | "moktob"
+    | "talim"
+    | "daye"
+    | "dawati"
+    | "dawatimojlish"
+    | "jamat"
+    | "dinefera"
+    | "sofor";
+  url: string;
+  setter: React.Dispatch<React.SetStateAction<LabeledData>>;
+  labelMap: LabelMap;
 };
 
 // ----------------- Helpers -----------------
@@ -58,30 +78,30 @@ function toNumberedHTML(arr: unknown): string {
   return list.map((item, idx) => `${idx + 1}. ${item}`).join("<br/>");
 }
 
-// --- Helpers to normalize markaz relation (mirrors components/MuiTreeView.tsx) ---
-const getMarkazIds = (u?: User): string[] => {
-  if (!u?.markaz) return [];
-  if (Array.isArray(u.markaz)) return u.markaz.map((m) => m.id).filter(Boolean);
-  return [];
+// --- markaz normalization (single relation, legacy safe) ---
+const getMarkazId = (u?: User): string | null => {
+  if (!u) return null;
+  if (u.markaz && typeof u.markaz !== "string") return u.markaz.id ?? u.markazId ?? null;
+  return u.markazId ?? null;
 };
-const getMarkazNames = (u?: User): string[] => {
-  if (!u?.markaz) return [];
-  if (Array.isArray(u.markaz)) return u.markaz.map((m) => m.name).filter(Boolean);
-  if (typeof u.markaz === "string" && u.markaz.trim()) return [u.markaz.trim()];
-  return [];
+const getMarkazName = (u?: User): string | null => {
+  if (!u?.markaz) return null;
+  return typeof u.markaz === "string" ? u.markaz : (u.markaz.name ?? null);
 };
 const shareMarkaz = (a: User, b: User): boolean => {
-  const aIds = getMarkazIds(a);
-  const bIds = getMarkazIds(b);
-  if (aIds.length && bIds.length) return aIds.some((id) => bIds.includes(id));
-  const aNames = getMarkazNames(a);
-  const bNames = getMarkazNames(b);
-  if (aNames.length && bNames.length) return aNames.some((n) => bNames.includes(n));
+  const aId = getMarkazId(a);
+  const bId = getMarkazId(b);
+  if (aId && bId) return aId === bId;
+  const aName = getMarkazName(a);
+  const bName = getMarkazName(b);
+  if (aName && bName) return aName === bName;
   return false;
 };
 
+// parent resolver using roles + markaz/division scopes
 const getParentEmail = (user: User, users: User[], loggedInUser: User | null): string | null => {
   let parentUser: User | undefined;
+
   switch (user.role) {
     case "divisionadmin": {
       parentUser =
@@ -103,11 +123,42 @@ const getParentEmail = (user: User, users: User[], loggedInUser: User | null): s
         users.find((u) => u.role === "centraladmin");
       break;
     }
+    // legacy roles - keep for compatibility
+    case "unionadmin": {
+      parentUser =
+        users.find((u) => u.role === "upozilaadmin" && u.upazila === user.upazila) ||
+        users.find((u) => u.role === "districtadmin" && u.district === user.district) ||
+        users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+        users.find((u) => u.role === "centraladmin");
+      break;
+    }
+    case "upozilaadmin": {
+      parentUser =
+        users.find((u) => u.role === "districtadmin" && u.district === user.district) ||
+        users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+        users.find((u) => u.role === "centraladmin");
+      break;
+    }
+    case "districtadmin": {
+      parentUser =
+        users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+        users.find((u) => u.role === "centraladmin");
+      break;
+    }
     default:
       return null;
   }
+
   return parentUser ? parentUser.email : null;
 };
+
+// Users API may return an array or `{ users: User[] }`
+async function readUsers(res: Response): Promise<User[]> {
+  const json = await res.json();
+  if (Array.isArray(json)) return json as User[];
+  if (Array.isArray(json?.users)) return json.users as User[];
+  return [];
+}
 
 // ----------------- Component -----------------
 const AdminDashboard: React.FC = () => {
@@ -148,7 +199,7 @@ const AdminDashboard: React.FC = () => {
       try {
         const res = await fetch("/api/users", { cache: "no-store" });
         if (!res.ok) throw new Error("Failed to fetch users");
-        const usersData: User[] = await res.json();
+        const usersData = await readUsers(res);
         setUsers(usersData);
       } catch (e) {
         console.error(e);
@@ -156,13 +207,13 @@ const AdminDashboard: React.FC = () => {
       }
     };
     go();
-  }, []);
+  }, [t]);
 
   // ---------- compute emailList ----------
   useEffect(() => {
-    if (!userEmail || !users.length) return;
+    if (!userEmail || users.length === 0) return;
 
-    const loggedIn = users.find((u) => u.email === userEmail);
+    const loggedIn = users.find((u) => u.email === userEmail) || null;
     if (!loggedIn) return;
 
     let collected: string[] = [loggedIn.email];
@@ -177,16 +228,21 @@ const AdminDashboard: React.FC = () => {
     };
     findChildEmails(loggedIn.email);
 
+    // legacy scope add (optional; keep for compatibility)
     const includeDayeByScope = (scope: Partial<User>) => {
       const dayeEmails = users
-        .filter((u) => u.role === "daye" && Object.entries(scope).every(([k, v]) => (u as any)[k] === v))
+        .filter(
+          (u) =>
+            u.role === "daye" &&
+            Object.entries(scope).every(([k, v]) => (u as any)[k] === v)
+        )
         .map((u) => u.email);
       collected = [...new Set([...collected, ...dayeEmails])];
     };
 
-    if (loggedIn.role === "unionadmin") includeDayeByScope({ union: loggedIn.union });
-    else if (loggedIn.role === "upozilaadmin") includeDayeByScope({ upazila: loggedIn.upazila });
-    else if (loggedIn.role === "districtadmin") includeDayeByScope({ district: loggedIn.district });
+    if ((loggedIn as any).role === "unionadmin") includeDayeByScope({ union: loggedIn.union });
+    else if ((loggedIn as any).role === "upozilaadmin") includeDayeByScope({ upazila: loggedIn.upazila });
+    else if ((loggedIn as any).role === "districtadmin") includeDayeByScope({ district: loggedIn.district });
     else if (loggedIn.role === "divisionadmin") includeDayeByScope({ division: loggedIn.division });
     else if (loggedIn.role === "centraladmin") {
       const dayeAll = users.filter((u) => u.role === "daye").map((u) => u.email);
@@ -207,11 +263,38 @@ const AdminDashboard: React.FC = () => {
         };
         findChild(chosen.email);
 
-        if (chosen.role === "unionadmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role === "daye" && u.union === chosen.union).map((u) => u.email)])];
-        else if (chosen.role === "upozilaadmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role === "daye" && u.upazila === chosen.upazila).map((u) => u.email)])];
-        else if (chosen.role === "districtadmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role === "daye" && u.district === chosen.district).map((u) => u.email)])];
-        else if (chosen.role === "divisionadmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role === "daye" && u.division === chosen.division).map((u) => u.email)])];
-        else if (chosen.role === "centraladmin") selEmails = [...new Set([...selEmails, ...users.filter((u) => u.role === "daye").map((u) => u.email)])];
+        if ((chosen as any).role === "unionadmin")
+          selEmails = [
+            ...new Set([
+              ...selEmails,
+              ...users.filter((u) => u.role === "daye" && u.union === chosen.union).map((u) => u.email),
+            ]),
+          ];
+        else if ((chosen as any).role === "upozilaadmin")
+          selEmails = [
+            ...new Set([
+              ...selEmails,
+              ...users.filter((u) => u.role === "daye" && u.upazila === chosen.upazila).map((u) => u.email),
+            ]),
+          ];
+        else if ((chosen as any).role === "districtadmin")
+          selEmails = [
+            ...new Set([
+              ...selEmails,
+              ...users.filter((u) => u.role === "daye" && u.district === chosen.district).map((u) => u.email),
+            ]),
+          ];
+        else if (chosen.role === "divisionadmin")
+          selEmails = [
+            ...new Set([
+              ...selEmails,
+              ...users.filter((u) => u.role === "daye" && u.division === chosen.division).map((u) => u.email),
+            ]),
+          ];
+        else if (chosen.role === "centraladmin")
+          selEmails = [
+            ...new Set([...selEmails, ...users.filter((u) => u.role === "daye").map((u) => u.email)]),
+          ];
 
         setEmailList(selEmails);
       } else {
@@ -223,7 +306,7 @@ const AdminDashboard: React.FC = () => {
   }, [selectedUser, users, userEmail]);
 
   // ---------- endpoints ----------
-  const endpoints = useMemo(
+  const endpoints: EndpointDef[] = useMemo(
     () => [
       {
         key: "amoli",
@@ -266,21 +349,29 @@ const AdminDashboard: React.FC = () => {
         key: "talim",
         url: "/api/talim",
         setter: setTalimData,
-        labelMap: { mohilaTalim: t("talim.mohilaTalim"), mohilaOnshogrohon: t("talim.mohilaOnshogrohon") },
+        labelMap: {
+          mohilaTalim: t("talim.mohilaTalim"),
+          mohilaOnshogrohon: t("talim.mohilaOnshogrohon"),
+        },
       },
       {
         key: "daye",
         url: "/api/dayi",
         setter: setDayeData,
-        labelMap: { sohojogiDayeToiri: t("daye.sohojogiDayeToiri"), assistantsList: t("daye.assistantsList") },
+        labelMap: {
+          sohojogiDayeToiri: t("daye.sohojogiDayeToiri"),
+          assistantsList: t("daye.assistantsList"),
+        },
       },
       {
         key: "dawati",
         url: "/api/dawati",
         setter: setDawatiData,
         labelMap: {
-          nonMuslimDawat: t("dawati.nonMuslimDawat"), murtadDawat: t("dawati.murtadDawat"),
-          alemderSatheyMojlish: t("dawati.alemderSatheyMojlish"), publicSatheyMojlish: t("dawati.publicSatheyMojlish"),
+          nonMuslimDawat: t("dawati.nonMuslimDawat"),
+          murtadDawat: t("dawati.murtadDawat"),
+          alemderSatheyMojlish: t("dawati.alemderSatheyMojlish"),
+          publicSatheyMojlish: t("dawati.publicSatheyMojlish"),
           nonMuslimSaptahikGasht: t("dawati.nonMuslimSaptahikGasht"),
         },
       },
@@ -289,22 +380,32 @@ const AdminDashboard: React.FC = () => {
         url: "/api/dawatimojlish",
         setter: setDawatiMojlishData,
         labelMap: {
-          dawatterGuruttoMojlish: t("dawatiMojlish.dawatterGuruttoMojlish"), mojlisheOnshogrohon: t("dawatiMojlish.mojlisheOnshogrohon"),
-          prosikkhonKormoshalaAyojon: t("dawatiMojlish.prosikkhonKormoshalaAyojon"), prosikkhonOnshogrohon: t("dawatiMojlish.prosikkhonOnshogrohon"),
-          jummahAlochona: t("dawatiMojlish.jummahAlochona"), dhormoSova: t("dawatiMojlish.dhormoSova"), mashwaraPoint: t("dawatiMojlish.mashwaraPoint"),
+          dawatterGuruttoMojlish: t("dawatiMojlish.dawatterGuruttoMojlish"),
+          mojlisheOnshogrohon: t("dawatiMojlish.mojlisheOnshogrohon"),
+          prosikkhonKormoshalaAyojon: t("dawatiMojlish.prosikkhonKormoshalaAyojon"),
+          prosikkhonOnshogrohon: t("dawatiMojlish.prosikkhonOnshogrohon"),
+          jummahAlochona: t("dawatiMojlish.jummahAlochona"),
+          dhormoSova: t("dawatiMojlish.dhormoSova"),
+          mashwaraPoint: t("dawatiMojlish.mashwaraPoint"),
         },
       },
       {
         key: "jamat",
         url: "/api/jamat",
         setter: setJamatData,
-        labelMap: { jamatBerHoise: t("jamat.jamatBerHoise"), jamatSathi: t("jamat.jamatSathi") },
+        labelMap: {
+          jamatBerHoise: t("jamat.jamatBerHoise"),
+          jamatSathi: t("jamat.jamatSathi"),
+        },
       },
       {
         key: "dinefera",
         url: "/api/dinefera",
         setter: setDineFeraData,
-        labelMap: { nonMuslimMuslimHoise: t("dineFera.nonMuslimMuslimHoise"), murtadIslamFireche: t("dineFera.murtadIslamFireche") },
+        labelMap: {
+          nonMuslimMuslimHoise: t("dineFera.nonMuslimMuslimHoise"),
+          murtadIslamFireche: t("dineFera.murtadIslamFireche"),
+        },
       },
       {
         key: "sofor",
@@ -319,7 +420,7 @@ const AdminDashboard: React.FC = () => {
         },
       },
     ],
-    []
+    [t]
   );
 
   // merge helper + collect meta
@@ -328,14 +429,13 @@ const AdminDashboard: React.FC = () => {
     email: string,
     rawRecords: any[],
     meta: LabeledData["meta"],
-    key: string
+    key: EndpointDef["key"]
   ) => {
     if (!acc[email]) acc[email] = {};
     rawRecords.forEach((rec) => {
       const dateKey = dhakaYMD(new Date(rec.date));
-      const copy = { ...rec };
+      const copy: any = { ...rec };
 
-      // keep raw arrays in meta for modal use
       if (key === "daye") {
         meta!.assistants = meta!.assistants || {};
         meta!.assistants[email] = meta!.assistants[email] || {};
@@ -350,12 +450,11 @@ const AdminDashboard: React.FC = () => {
         meta!.school[email][dateKey] = Array.isArray(rec.schoolCollegeVisitList) ? rec.schoolCollegeVisitList : [];
       }
 
-      // prettify for table cells (HTML strings)
       if (copy.madrasaVisitList) copy.madrasaVisitList = toNumberedHTML(copy.madrasaVisitList);
       if (copy.schoolCollegeVisitList) copy.schoolCollegeVisitList = toNumberedHTML(copy.schoolCollegeVisitList);
       if (copy.assistants) {
         copy.assistants = toNumberedHTML((copy.assistants as any[]).map((a) => `${a.name} (${a.phone})`));
-        copy.assistantsList = copy.assistants; // expose as list row if needed
+        copy.assistantsList = copy.assistants;
       }
 
       acc[email][dateKey] = copy;
@@ -371,16 +470,14 @@ const AdminDashboard: React.FC = () => {
       try {
         await Promise.all(
           endpoints.map(async (ep) => {
-            // meta holder for this endpoint
             const meta: LabeledData["meta"] = {};
-
             const perEmailResults = await Promise.all(
               emailList.map(async (email) => {
                 try {
                   const res = await fetch(`${ep.url}?email=${encodeURIComponent(email)}`, { cache: "no-store" });
                   if (!res.ok) throw new Error(`Failed ${ep.key} for ${email}`);
                   const json = await res.json();
-                  const records = Array.isArray(json.records) ? json.records : [];
+                  const records: any[] = Array.isArray(json.records) ? json.records : [];
                   return { email, records };
                 } catch (e) {
                   console.error(`Error fetching ${ep.key} for ${email}:`, e);
@@ -391,9 +488,7 @@ const AdminDashboard: React.FC = () => {
             );
 
             const merged: RecordsByEmail = {};
-            perEmailResults.forEach(({ email, records }) =>
-              mergeEmailRecords(merged, email, records, meta, ep.key)
-            );
+            perEmailResults.forEach(({ email, records }) => mergeEmailRecords(merged, email, records, meta, ep.key));
 
             ep.setter({ records: merged, labelMap: ep.labelMap, meta });
           })
@@ -406,27 +501,21 @@ const AdminDashboard: React.FC = () => {
       }
     };
     go();
-  }, [emailList]);
+  }, [emailList, endpoints, t]);
 
   // filter to selected month/year (same shape back)
   const filterChartAndTallyData = (data: LabeledData) => {
     if (!data || !data.records) return data;
-    const filteredRecords = Object.keys(data.records).reduce<RecordsByEmail>(
-      (filtered, email) => {
-        const emailData = data.records[email];
-        const filteredDates = Object.keys(emailData).reduce<Record<string, any>>(
-          (acc, date) => {
-            const [y, m] = date.split("-").map(Number);
-            if (y === selectedYear && m === selectedMonth + 1) acc[date] = emailData[date];
-            return acc;
-          },
-          {}
-        );
-        if (Object.keys(filteredDates).length > 0) filtered[email] = filteredDates;
-        return filtered;
-      },
-      {}
-    );
+    const filteredRecords = Object.keys(data.records).reduce<RecordsByEmail>((filtered, email) => {
+      const emailData = data.records[email];
+      const filteredDates = Object.keys(emailData).reduce<Record<string, any>>((acc, date) => {
+        const [y, m] = date.split("-").map(Number);
+        if (y === selectedYear && m === selectedMonth + 1) acc[date] = emailData[date];
+        return acc;
+      }, {});
+      if (Object.keys(filteredDates).length > 0) filtered[email] = filteredDates;
+      return filtered;
+    }, {});
     return { ...data, records: filteredRecords };
   };
 
@@ -503,6 +592,12 @@ const AdminDashboard: React.FC = () => {
           </button>
 
           <div className="flex gap-3 items-center w-full md:w-auto">
+            <input
+              value={searchMonth}
+              onChange={(e) => setSearchMonth(e.target.value)}
+              placeholder={t("searchMonth")}
+              className="w-full lg:w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500"
+            />
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(parseInt(e.target.value))}

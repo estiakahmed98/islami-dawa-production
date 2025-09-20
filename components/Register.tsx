@@ -171,33 +171,36 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
       const schema = variant === "special" ? signUpSchemaSpecial : signUpSchemaStandard;
       await schema.validate(formData, { abortEarly: false });
 
-      // Build nested data for Prisma create via Better Auth
-      const extraData: any = {
-        division: formData.division,
-        district: formData.district,
-        upazila: formData.upazila,
-        union: formData.union,
-        phone: formData.phone,
+      // Build nested data for Prisma create
+      const userData: any = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role || (variant === "special" ? "daye" : formData.role),
+        data: {
+          division: formData.division,
+          district: formData.district,
+          upazila: formData.upazila,
+          union: formData.union,
+          phone: formData.phone,
+        },
       };
 
-      // attach relation only if markaz is selected
+      // Add markaz connection if selected
       if (formData.markazId) {
-        // many-to-many: use connect with array
-        extraData.markaz = { connect: [{ id: formData.markazId }] };
+        userData.data.markaz = {
+          connect: {
+            id: formData.markazId
+          }
+        };
       }
 
-      const roleToSend = formData.role || (variant === "special" ? "daye" : formData.role);
       await admin.createUser(
-        {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          role: roleToSend,
-          data: extraData,
-        },
+        userData,
         {
           onSuccess: () => {
             toast.success(t("toasts.created"));
+            // Reset form
             setFormData({
               name: "",
               role: "",
@@ -215,15 +218,19 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
               password: "",
             });
           },
-          onError: (ctx: { error: { message: string } }) => toast.error(ctx.error.message),
+          onError: (error: any) => {
+            console.error("Registration error:", error);
+            const errorMessage = error?.message || error?.error?.message || t("toasts.error");
+            toast.error(errorMessage);
+          },
         }
       );
     } catch (error: any) {
       if (error?.name === "ValidationError" && Array.isArray(error.inner)) {
         error.inner.forEach((err: any) => toast.error(err.message));
       } else {
-        console.error("Error creating user:", error);
-        toast.error(t("toasts.error"));
+        console.error("Unexpected error:", error);
+        toast.error(error?.message || t("toasts.error"));
       }
     } finally {
       setLoading(false);

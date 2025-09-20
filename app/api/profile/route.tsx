@@ -34,6 +34,7 @@ export async function GET() {
         union: true,
         area: true,
         // get only markaz names to avoid sending objects to the client UI
+        markazId: true,
         markaz: { select: { name: true } },
         parent: true,
         emailVerified: true,
@@ -62,10 +63,7 @@ export async function GET() {
     return NextResponse.json(responseBody, { status: 200 });
   } catch (error) {
     console.error("GET /api/profile error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch profile." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch profile." }, { status: 500 });
   }
 }
 
@@ -97,6 +95,7 @@ export async function PUT(req: Request) {
         upazila: data.upazila,
         union: data.union,
         area: data.area,
+        markazId: data.markazId,
         // markaz is a relation; updating it requires a connect/disconnect payload.
         // Intentionally omitted here to avoid runtime errors when the client sends a scalar string.
       },
@@ -105,9 +104,6 @@ export async function PUT(req: Request) {
     return NextResponse.json(updatedUser, { status: 200 });
   } catch (error) {
     console.error("PUT /api/profile error:", error);
-    return NextResponse.json(
-      { error: "Failed to update profile." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update profile." }, { status: 500 });
   }
 }

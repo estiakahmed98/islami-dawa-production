@@ -1,18 +1,21 @@
-// app/api/profile/route.ts
+// app/api/userprofile/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getServerAuthSession } from "@/lib/auth"; // <- make sure this exists
+import { getServerAuthSession } from "@/lib/auth";
 
 export async function GET() {
   try {
     const session = await getServerAuthSession();
-    if (!session?.user?.email) {
+    const email = session?.user?.email?.toLowerCase();
+
+    if (!email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await db.users.findUnique({
-      where: { email: session.user.email },
+      where: { email }, // email is unique in your schema
       select: {
+        id: true,
         name: true,
         email: true,
         role: true,
@@ -23,7 +26,8 @@ export async function GET() {
         union: true,
         phone: true,
         image: true,
-        // markaz: true, // ← uncomment only if this relation exists in your Prisma model
+        markazId: true,
+        markaz: { select: { id: true, name: true } },
       },
     });
 
@@ -34,9 +38,6 @@ export async function GET() {
     return NextResponse.json(user, { status: 200 });
   } catch (error) {
     console.error("Error fetching user profile:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

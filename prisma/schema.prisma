@@ -47,7 +47,8 @@ model users {
   leaveRequests    LeaveRequest[]
   tasks            Task[]
   editRequests     EditRequest[]
-  markaz           Markaz[]
+  markazId         String?
+  markaz           Markaz?      @relation("MarkazToUsers", fields: [markazId], references: [id])
 }
 
 model sessions {
@@ -392,8 +393,7 @@ model Markaz {
   district  String
   upazila   String
   union     String
+  users     users[]  @relation("MarkazToUsers")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  users     users[]  
 }

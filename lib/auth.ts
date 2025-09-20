@@ -1,3 +1,4 @@
+//auth.ts
 import { db } from "@/lib/db";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";

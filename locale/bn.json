@@ -203,6 +203,7 @@
     },
     "adminDashboard": {
       "welcome": "স্বাগতম",
+      "searchMonth": "মাসের অনুসারে খুঁজুন",
       "months": {
         "january": "জানুয়ারি",
         "february": "ফেব্রুয়ারি",

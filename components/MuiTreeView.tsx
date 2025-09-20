@@ -23,8 +23,9 @@ interface User {
   name: string;
   email: string;
   role: string;
-  // markaz can be a string (legacy), null/undefined, or relation array
-  markaz?: string | null | MarkazRef[];
+  markazId?: string | null;
+  // after schema change: markaz is a single object or null (legacy string tolerated)
+  markaz?: MarkazRef | string | null;
   division?: string | null;
   district?: string | null;
   upazila?: string | null;
@@ -51,41 +52,49 @@ const MuiTreeView: React.FC = () => {
   const router = useRouter();
   const { data: session } = useSession();
 
-  // --- Helpers to normalize markaz relation ---
-  const getMarkazIds = (u?: User): string[] => {
-    if (!u?.markaz) return [];
-    if (Array.isArray(u.markaz)) return u.markaz.map((m) => m.id).filter(Boolean);
-    return []; // legacy string has no ID
+  // --- Helpers to normalize markaz relation (single object after schema change) ---
+  const getMarkazId = (u?: User): string | null => {
+    if (!u?.markaz) return u?.markazId ?? null;
+    if (typeof u.markaz === "string") return u.markazId ?? null; // legacy label only
+    return u.markaz.id ?? u.markazId ?? null;
   };
-  const getMarkazNames = (u?: User): string[] => {
-    if (!u?.markaz) return [];
-    if (Array.isArray(u.markaz)) return u.markaz.map((m) => m.name).filter(Boolean);
-    if (typeof u.markaz === "string" && u.markaz.trim()) return [u.markaz.trim()];
-    return [];
+
+  const getMarkazName = (u?: User): string | null => {
+    if (!u?.markaz) return null;
+    if (typeof u.markaz === "string") return u.markaz;
+    return u.markaz.name ?? null;
   };
+
   const shareMarkaz = (a: User, b: User): boolean => {
-    const aIds = getMarkazIds(a);
-    const bIds = getMarkazIds(b);
-    if (aIds.length && bIds.length) return aIds.some((id) => bIds.includes(id));
+    const aId = getMarkazId(a);
+    const bId = getMarkazId(b);
+    if (aId && bId) return aId === bId;
     // fallback by name if ids missing
-    const aNames = getMarkazNames(a);
-    const bNames = getMarkazNames(b);
-    if (aNames.length && bNames.length) return aNames.some((n) => bNames.includes(n));
+    const aName = getMarkazName(a);
+    const bName = getMarkazName(b);
+    if (aName && bName) return aName === bName;
     return false;
+  };
+
+  // handle API that may return either an array or { users: [...] }
+  const normalizeUsersResponse = async (res: Response): Promise<User[]> => {
+    const json = await res.json();
+    if (Array.isArray(json)) return json as User[];
+    if (Array.isArray(json?.users)) return json.users as User[];
+    return [];
   };
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // This route should now return markaz relation as [{id,name}] for each user
         const response = await fetch("/api/users", { cache: "no-store" });
         if (!response.ok) throw new Error(t("fetchError"));
 
-        const usersData: User[] = await response.json();
+        const usersData = await normalizeUsersResponse(response);
         setUsers(usersData);
 
         const loggedInUser: User | null = session?.user
-          ? { ...(session.user as unknown as User), role: (session.user as any).role || "" }
+          ? ({ ...(session.user as any), role: (session.user as any).role || "" } as User)
           : null;
 
         const tree = buildTree(usersData, loggedInUser);
@@ -126,7 +135,7 @@ const MuiTreeView: React.FC = () => {
     return [];
   };
 
-  // Parent resolution updated for markaz relation
+  // Parent resolution updated for single markaz relation
   const getParentEmail = (
     user: User,
     users: User[],
@@ -142,18 +151,13 @@ const MuiTreeView: React.FC = () => {
         break;
       }
       case "markazadmin": {
-        parentUser = users.find(
-          (u) => u.role === "divisionadmin" && u.division === user.division
-        );
-        if (!parentUser) {
-          parentUser =
-            (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-            users.find((u) => u.role === "centraladmin");
-        }
+        parentUser =
+          users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
+          users.find((u) => u.role === "centraladmin");
         break;
       }
       case "daye": {
-        // Find a markazadmin who shares at least one Markaz (by id first, name fallback)
         parentUser =
           users.find((u) => u.role === "markazadmin" && shareMarkaz(u, user)) ||
           (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
@@ -264,17 +268,13 @@ const MuiTreeView: React.FC = () => {
           <span className="text-white">
             {isExpanded ? t("collapseAll") : t("expandAll")}
           </span>
-          {isExpanded ? (
-            <ArrowDropUpIcon className="text-white" />
-          ) : (
-            <ArrowDropDownIcon className="text-white" />
-          )}
+          {isExpanded ? <ArrowDropUpIcon className="text-white" /> : <ArrowDropDownIcon className="text-white" />}
         </IconButton>
 
         <Box sx={{ minHeight: 352, minWidth: 300 }}>
           <SimpleTreeView
             expandedItems={expanded}
-            onExpandedItemsChange={(e, ids) => setExpanded(ids)}
+            onExpandedItemsChange={(_e, ids) => setExpanded(ids)}
           >
             {renderTree(filteredTree)}
           </SimpleTreeView>

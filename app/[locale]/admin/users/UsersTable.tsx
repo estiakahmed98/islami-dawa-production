@@ -26,7 +26,8 @@ interface User {
   union: string;
   phone: string;
   area: string;
-  markaz: string;
+  markazId?: string | null;
+  markaz?: { id: string; name: string } | string | null;
   banned: boolean;
 }
 
@@ -414,7 +415,7 @@ export default function UsersTable() {
         const j = await res.json();
         if (!res.ok) throw new Error(j?.error || "Failed to load markaz");
         const opts = Array.isArray(j?.data)
-          ? j.data.map((m: any) => ({ value: m.name as string, title: m.name as string }))
+          ? j.data.map((m: any) => ({ value: m.id as string, title: m.name as string }))
           : [];
         if (!aborted) setMarkazOptions(opts);
       } catch (e) {
@@ -554,7 +555,7 @@ export default function UsersTable() {
         union,
         phone: formData.get("phone") as string,
         area: formData.get("area") as string,
-        markaz: formData.get("markaz") as string,
+        markazId: (formData.get("markazId") as string) || null,
       };
       const note = formData.get("note") as string;
 
@@ -662,59 +663,64 @@ export default function UsersTable() {
     return <p className="text-center text-xl p-10">{t("status.authenticating")}</p>;
   }
 
-  // Helpers to normalize/compare Markaz (works with string or relation array)
-  const getMarkazIds = (u: any): string[] => {
-    const m = u?.markaz;
-    return Array.isArray(m) ? m.map((x: any) => x?.id).filter(Boolean) : [];
+  // Helpers to normalize/compare Markaz (single relation)
+  const getMarkazId = (u: any): string | null => {
+    if (!u) return null;
+    return u.markazId || (u.markaz && typeof u.markaz !== "string" ? u.markaz.id : null);
   };
-  const getMarkazNames = (u: any): string[] => {
-    const m = u?.markaz;
-    if (Array.isArray(m)) return m.map((x: any) => x?.name).filter(Boolean);
-    if (typeof m === "string" && m.trim()) return [m.trim()];
-    return [];
+  const getMarkazName = (u: any): string => {
+    if (!u?.markaz) return "";
+    if (typeof u.markaz === "string") return u.markaz;
+    return u.markaz.name || "";
   };
   const shareMarkaz = (a: any, b: any): boolean => {
-    const aIds = getMarkazIds(a);
-    const bIds = getMarkazIds(b);
-    if (aIds.length && bIds.length) return aIds.some((id) => bIds.includes(id));
-    const aNames = getMarkazNames(a);
-    const bNames = getMarkazNames(b);
-    if (aNames.length && bNames.length) return aNames.some((n) => bNames.includes(n));
+    const aId = getMarkazId(a);
+    const bId = getMarkazId(b);
+    if (aId && bId) return aId === bId;
+    const aName = getMarkazName(a);
+    const bName = getMarkazName(b);
+    if (aName && bName) return aName === bName;
     return false;
   };
-
-  const getParentEmail = (user: User, users: User[]): string | null => {
+  // Parent resolution updated for single markaz relation
+  const getParentEmail = (
+    user: User,
+    users: User[],
+    loggedInUser: User | null
+  ): string | null => {
     let parentUser: User | undefined;
+
     switch (user.role) {
       case "divisionadmin": {
         parentUser =
-          (sessionUser?.role === "centraladmin" ? (sessionUser as any) : undefined) ||
+          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
           users.find((u) => u.role === "centraladmin");
         break;
       }
       case "markazadmin": {
         parentUser =
           users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
-          (sessionUser?.role === "centraladmin" ? (sessionUser as any) : undefined) ||
+          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
           users.find((u) => u.role === "centraladmin");
         break;
       }
       case "daye": {
         parentUser =
           users.find((u) => u.role === "markazadmin" && shareMarkaz(u, user)) ||
-          (sessionUser?.role === "centraladmin" ? (sessionUser as any) : undefined) ||
+          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
           users.find((u) => u.role === "centraladmin");
         break;
       }
       default:
         return null;
     }
-    return parentUser ? `${parentUser.name} (${roleLabel(parentUser.role)})` : null;
+
+    return parentUser ? parentUser.email : null;
   };
 
   return (
-    <div className="w-full mx-auto p-2">
-      <div>
+    <div className="w-full h-[calc(100vh)] overflow-auto mx-auto p-2">
+      <div className="h-[calc(70vh)] overflow-auto">
         <h1 className="text-2xl font-bold text-center mb-6">{t("title")}</h1>
 
         {/* Filters */}
@@ -767,7 +773,7 @@ export default function UsersTable() {
                   [t("columns.upazila")]: user.upazila,
                   [t("columns.union")]: user.union,
                   [t("columns.phone")]: user.phone,
-                  [t("columns.markaz")]: getMarkazNames(user).join(", ") || "N/A",
+                  [t("columns.markaz")]: getMarkazName(user) || "N/A",
                   [t("columns.adminAssigned")]: getParentEmail(user, users) || "N/A",
                   [t("columns.status")]: user.banned ? t("status.banned") : t("status.active"),
                 })),
@@ -814,7 +820,7 @@ export default function UsersTable() {
                     <TableCell className="border-r border-gray-300">{user.upazila}</TableCell>
                     <TableCell className="border-r border-gray-300">{user.union}</TableCell>
                     <TableCell className="border-r border-gray-300">{user.phone}</TableCell>
-                    <TableCell className="border-r border-gray-300">{getMarkazNames(user).join(", ") || "N/A"}</TableCell>
+                    <TableCell className="border-r border-gray-300">{getMarkazName(user) || "N/A"}</TableCell>
                     <TableCell className="border-r border-gray-300 text-center">
                       {getParentEmail(user, users) || "N/A"}
                     </TableCell>
@@ -940,10 +946,10 @@ export default function UsersTable() {
                   <div className="col-span-2">
                     <SelectField
                       label={t("columns.markaz")}
-                      name="markaz"
-                      value={selectedUser.markaz}
+                      name="markazId"
+                      value={selectedUser.markazId || ""}
                       onChange={(e) => {
-                        setSelectedUser((prev) => (prev ? { ...prev, markaz: e.target.value } : null));
+                        setSelectedUser((prev) => (prev ? { ...prev, markazId: e.target.value } : null));
                       }}
                       options={markazOptions}
                     />
@@ -972,8 +978,8 @@ export default function UsersTable() {
                         name={`${field}Id`}
                         value={
                           field === "division" ? divisionId :
-                          field === "district" ? districtId :
-                          field === "upazila" ? upazilaId : unionId
+                            field === "district" ? districtId :
+                              field === "upazila" ? upazilaId : unionId
                         }
                         onChange={(e) => handleLocationChange(`${field}Id`, e.target.value)}
                         disabled={
@@ -1042,9 +1048,9 @@ export default function UsersTable() {
       </div>
 
       {/* --------- UniversalTableShow-backed tabs (live DB) --------- */}
-      <div className="mt-8">
+      <div className="mt-8 h-full overflow-auto">
         <h3 className="text-center text-2xl font-semibold">{t("totalsTitle")}</h3>
-        <div className="border border-[#155E75] lg:p-6 mt-4 rounded-xl overflow-y-auto">
+        <div className="border border-[#155E75] lg:p-6 mt-4 rounded-xl h-full overflow-auto">
           <Tabs defaultValue="moktob" className="w-full p-4">
             <TabsList className="grid grid-cols-2 md:grid-cols-4">
               <TabsTrigger value="moktob">{t("tabs.moktob")}</TabsTrigger>
