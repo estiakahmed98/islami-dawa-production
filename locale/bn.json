@@ -323,7 +323,8 @@
       "centraladmin": "সেন্ট্রাল অ্যাডমিন",
       "divisionadmin": "ডিভিশন অ্যাডমিন",
       "markazadmin": "মারকাজ অ্যাডমিন",
-      "daye": "দাঈ"
+      "daye": "দাঈ",
+      "null": "নাই"
     }
   },
   "universalTableShow": {

@@ -11,13 +11,22 @@ export const nextAuthOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       authorization: {
         params: {
-          scope:
-            "openid email profile https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events",
-          // Request refresh token; 'consent' ensures refresh_token on each auth
-          access_type: "offline",
           prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+          scope: [
+            'openid',
+            'email',
+            'profile',
+            'https://www.googleapis.com/auth/calendar',
+            'https://www.googleapis.com/auth/calendar.events'
+          ].join(' '),
         },
       },
+      httpOptions: {
+        timeout: 10000,
+      },
+      allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -180,6 +189,19 @@ export const nextAuthOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/auth/signin",
+    error: "/auth/signin", // Redirect to signin page on errors
+  },
+  debug: process.env.NODE_ENV === 'development', // Enable debug in development
+  logger: {
+    error(code, metadata) {
+      console.error('Auth Error:', code, metadata);
+    },
+    warn(code) {
+      console.warn('Auth Warning:', code);
+    },
+    debug(code, metadata) {
+      console.log('Auth Debug:', code, metadata);
+    },
   },
 };
 

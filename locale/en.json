@@ -323,7 +323,8 @@
       "centraladmin": "Central Admin",
       "divisionadmin": "Division Admin",
       "markazadmin": "Markaz Admin",
-      "daye": "Daee"
+      "daye": "Daee",
+      "null": "null"
     }
   },
   "universalTableShow": {
