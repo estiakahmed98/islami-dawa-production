@@ -576,7 +576,7 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-[calc(100vh-100px)] overflow-y-auto">
       <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl space-y-4 lg:space-y-0 lg:space-x-4">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800 text-center lg:text-left">
           {t("welcome")},{" "}
@@ -637,7 +637,7 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="border border-[#155E75] lg:p-6 mt-10 rounded-xl overflow-y-auto">
+      <div className="border border-[#155E75] lg:p-6 mt-10 rounded-xl ">
         <Tabs defaultValue="moktob" className="w-full p-4">
           <TabsList className="grid grid-cols-2 md:grid-cols-4">
             <TabsTrigger value="Amolimusahaba">{t("dashboard.amoliMuhasaba")}</TabsTrigger>
