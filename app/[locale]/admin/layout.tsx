@@ -32,11 +32,11 @@ const AdmindLayout = async ({ children, params }: Props) => {
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <SidebarProvider>
-        <div className="flex fixed size-full">
+        <div className="flex h-screen w-full">
           <ImpersonateSidebar />
-          <div className="w-full overflow-hidden">
+          <div className="flex flex-col flex-1 min-w-0">
             <Header />
-            <main className="h-screen overflow-y-auto">
+            <main className="flex-1 overflow-y-auto p-2 lg:p-6">
               {children}
             </main>
           </div>

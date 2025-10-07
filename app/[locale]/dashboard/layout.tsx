@@ -18,18 +18,17 @@ export default async function DashboardLayout({ children, params }: Props) {
     notFound();
   }
 
-  // Load messages for the locale
-  // const messages = (await import(`@/messages/${locale}.json`)).default;
-
   return (
     <NextIntlClientProvider locale={locale}>
       <SidebarProvider>
-        <div className="flex fixed size-full">
+        <div className="flex h-screen w-full">
           <Sidebar />
-          <div className="w-full overflow-hidden">
+          <div className="flex flex-col flex-1 min-w-0">
             <Header />
-            <main className="h-[calc(100vh-80px)] overflow-y-auto p-2 lg:p-6">
-              {children}
+            <main className="flex-1 overflow-y-auto p-2 lg:p-6">
+              <div className="min-h-full">
+                {children}
+              </div>
             </main>
           </div>
         </div>

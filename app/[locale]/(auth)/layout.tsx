@@ -26,7 +26,7 @@ const AuthLayout = async ({ children, params }: Props) => {
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <div className="grid h-screen place-items-center px-4 py-8">
+      <div className="grid min-h-screen place-items-center px-4 py-8">
         <main className="flex w-full max-w-sm flex-col gap-8">
           <div className="flex items-center justify-center bg-[#155E75] p-2 rounded-lg">
             <Image

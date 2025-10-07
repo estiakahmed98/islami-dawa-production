@@ -127,7 +127,7 @@ export default function MarkazPage() {
               {t("buttons.add")}
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-[95vw] sm:max-w-lg p-4">
+          <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] overflow-y-auto p-4">
             <DialogHeader>
               <DialogTitle className="text-base sm:text-lg">
                 {editing ? t("dialogs.editTitle") : t("dialogs.createTitle")}
@@ -314,7 +314,7 @@ export default function MarkazPage() {
 
       {/* delete dialog */}
       <Dialog open={!!deleting} onOpenChange={(v) => !v && setDeleting(null)}>
-        <DialogContent className="max-w-[95vw] sm:max-w-md">
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] sm:max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t("dialogs.deleteTitle")}</DialogTitle>
           </DialogHeader>

@@ -334,7 +334,7 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-32 py-2 px-4 bg-[#155E75] text-white rounded-md hover:bg-blue-600"
+              className="py-2 px-4 bg-[#155E75] text-white rounded-md hover:bg-blue-600"
             >
               {loading ? t("buttons.processing") : t("buttons.addUser")}
             </button>
