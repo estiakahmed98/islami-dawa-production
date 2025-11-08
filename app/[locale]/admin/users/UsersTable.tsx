@@ -437,8 +437,13 @@ export default function UsersTable() {
   const [soforData, setSoforData] = useState<UserDataForAdminTable>({ records: {}, labelMap: SOFOR_LABELS });
 
   /** role label helper (UI) */
-  const roleLabel = (role: string) =>
-    t.optional ? t.optional(`filters.roleOptions.${role}`, { default: role }) : t(`filters.roleOptions.${role}`);
+  const roleLabel = (role: string) => {
+    try {
+      return t(`filters.roleOptions.${role}`);
+    } catch {
+      return role;
+    }
+  };
 
   /** Fetch users */
   useEffect(() => {
@@ -543,9 +548,9 @@ export default function UsersTable() {
       const unionId = formData.get("unionId") as string;
 
       const division = divisions.find((d) => d.value.toString() === divisionId)?.title || "";
-      const district = districts[divisionId]?.find((d) => d.value.toString() === districtId)?.title || "";
-      const upazila = upazilas[districtId]?.find((u) => u.value.toString() === upazilaId)?.title || "";
-      const union = unions[upazilaId]?.find((u) => u.value.toString() === unionId)?.title || "";
+      const district = (districts as Record<number, any>)[+divisionId]?.find((d: any) => d.value.toString() === districtId)?.title || "";
+      const upazila = (upazilas as Record<number, any>)[+districtId]?.find((u: any) => u.value.toString() === upazilaId)?.title || "";
+      const union = (unions as Record<number, any>)[+upazilaId]?.find((u: any) => u.value.toString() === unionId)?.title || "";
 
       const updates = {
         name: formData.get("name") as string,
@@ -593,16 +598,16 @@ export default function UsersTable() {
       const division = divisions.find((d) => d.title === selectedUser.division);
       setDivisionId(division?.value.toString() || "");
 
-      const districtList = division ? districts[division.value] : [];
-      const district = districtList.find((d) => d.title === selectedUser.district);
+      const districtList = division ? (districts as Record<number, any>)[+division.value] : [];
+      const district = districtList.find((d: { value: string; title: string }) => d.title === selectedUser.district);
       setDistrictId(district?.value.toString() || "");
 
-      const upazilaList = district ? upazilas[district.value] : [];
-      const upazila = upazilaList.find((u) => u.title === selectedUser.upazila);
+      const upazilaList = district ? (upazilas as Record<number, any>)[+district.value] : [];
+      const upazila = upazilaList.find((u: { value: string; title: string }) => u.title === selectedUser.upazila);
       setUpazilaId(upazila?.value.toString() || "");
 
-      const unionList = upazila ? unions[upazila.value] : [];
-      const union = unionList.find((u) => u.title === selectedUser.union);
+      const unionList = upazila ? (unions as Record<number, any>)[+upazila.value] : [];
+      const union = unionList.find((u: { value: string; title: string }) => u.title === selectedUser.union);
       setUnionId(union?.value.toString() || "");
     }
   }, [selectedUser]);
@@ -1029,21 +1034,21 @@ export default function UsersTable() {
                           ))}
                         {field === "district" &&
                           divisionId &&
-                          districts[divisionId]?.map((d) => (
+                          (districts as Record<number, any>)[+divisionId]?.map((d: { value: string; title: string }) => (
                             <option key={d.value} value={d.value}>
                               {d.title}
                             </option>
                           ))}
                         {field === "upazila" &&
                           districtId &&
-                          upazilas[districtId]?.map((u) => (
+                          (upazilas as Record<number, any>)[+districtId]?.map((u: { value: string; title: string }) => (
                             <option key={u.value} value={u.value}>
                               {u.title}
                             </option>
                           ))}
                         {field === "union" &&
                           upazilaId &&
-                          unions[upazilaId]?.map((u) => (
+                          (unions as Record<number, any>)[+upazilaId]?.map((u: { value: string; title: string }) => (
                             <option key={u.value} value={u.value}>
                               {u.title}
                             </option>

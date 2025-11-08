@@ -45,7 +45,8 @@ type User = {
   union: string;
   phone: string;
   area: string;
-  markaz: string;
+  markazId?: string | null;
+  markaz?: { id: string; name: string } | string | null;
   banned: boolean;
 };
 
