@@ -6,7 +6,7 @@ import fileDownload from "js-file-download";
 import "@fontsource/noto-sans-bengali";
 import { useSelectedUser } from "@/providers/treeProvider";
 import { useTranslations } from "next-intl";
-import {MonthlyUserReportButton} from "@/components/MonthlyReportPDF";
+import { MonthlyUserReportButton } from "@/components/MonthlyReportPDF";
 
 interface AdminTableProps {
   userData: any;
@@ -41,8 +41,12 @@ const AdminTable: React.FC<AdminTableProps> = ({
   allTabsData,
 }) => {
   // if parent controls month/year, use props; else fallback to internal state
-  const [internalMonth, setInternalMonth] = useState<number>(new Date().getMonth());
-  const [internalYear, setInternalYear] = useState<number>(new Date().getFullYear());
+  const [internalMonth, setInternalMonth] = useState<number>(
+    new Date().getMonth()
+  );
+  const [internalYear, setInternalYear] = useState<number>(
+    new Date().getFullYear()
+  );
 
   const selectedMonth = selectedMonthProp ?? internalMonth;
   const selectedYear = selectedYearProp ?? internalYear;
@@ -52,7 +56,9 @@ const AdminTable: React.FC<AdminTableProps> = ({
   const [filterValue, setFilterValue] = useState<string>("");
 
   const { selectedUser } = useSelectedUser();
-  const [allUserDetails, setAllUserDetails] = useState<Record<string, { name: string; email: string }>>({});
+  const [allUserDetails, setAllUserDetails] = useState<
+    Record<string, { name: string; email: string }>
+  >({});
   const [selectedUserData, setSelectedUserData] = useState<any>(null);
 
   const month = useTranslations("dashboard.UserDashboard.months");
@@ -62,7 +68,10 @@ const AdminTable: React.FC<AdminTableProps> = ({
     const fetchUserDetails = async () => {
       if (!selectedUser) return;
       try {
-        const response = await fetch(`/api/users?email=${encodeURIComponent(selectedUser)}`, { cache: "no-store" });
+        const response = await fetch(
+          `/api/users?email=${encodeURIComponent(selectedUser)}`,
+          { cache: "no-store" }
+        );
         if (!response.ok) throw new Error("Failed to fetch user");
         const u = await response.json();
         setSelectedUserData(u);
@@ -83,28 +92,31 @@ const AdminTable: React.FC<AdminTableProps> = ({
 
       try {
         const userDetails: Record<string, { name: string; email: string }> = {};
-        
+
         // Fetch details for all users
         await Promise.all(
           emailList.map(async (email) => {
             try {
-              const response = await fetch(`/api/users?email=${encodeURIComponent(email)}`, { cache: "no-store" });
+              const response = await fetch(
+                `/api/users?email=${encodeURIComponent(email)}`,
+                { cache: "no-store" }
+              );
               if (response.ok) {
                 const user = await response.json();
                 userDetails[email] = {
                   name: user.name || email,
-                  email: user.email || email
+                  email: user.email || email,
                 };
               } else {
                 userDetails[email] = {
                   name: email,
-                  email: email
+                  email: email,
                 };
               }
             } catch {
               userDetails[email] = {
                 name: email,
-                email: email
+                email: email,
               };
             }
           })
@@ -112,10 +124,11 @@ const AdminTable: React.FC<AdminTableProps> = ({
 
         setAllUserDetails(userDetails);
       } catch (error) {
-        console.error('Error fetching user details:', error);
+        console.error("Error fetching user details:", error);
         // Fallback to email as name
-        const fallbackDetails: Record<string, { name: string; email: string }> = {};
-        emailList.forEach(email => {
+        const fallbackDetails: Record<string, { name: string; email: string }> =
+          {};
+        emailList.forEach((email) => {
           fallbackDetails[email] = { name: email, email };
         });
         setAllUserDetails(fallbackDetails);
@@ -123,11 +136,21 @@ const AdminTable: React.FC<AdminTableProps> = ({
     };
 
     fetchAllUserDetails();
-  }, [emailList.join(',')]);
+  }, [emailList.join(",")]);
 
   const months = [
-    month("january"), month("february"), month("march"), month("april"), month("may"), month("june"),
-    month("july"), month("august"), month("september"), month("october"), month("november"), month("december"),
+    month("january"),
+    month("february"),
+    month("march"),
+    month("april"),
+    month("may"),
+    month("june"),
+    month("july"),
+    month("august"),
+    month("september"),
+    month("october"),
+    month("november"),
+    month("december"),
   ];
 
   const monthDays = useMemo(() => {
@@ -159,7 +182,16 @@ const AdminTable: React.FC<AdminTableProps> = ({
         const n = Number(v) || 0;
         return n >= 1 && n <= 5 ? n : 0;
       }
-      if (["Dua", "tasbih", "amoliSura", "hijbulBahar", "dayeeAmol", "ayamroja"].includes(field)) {
+      if (
+        [
+          "Dua",
+          "tasbih",
+          "amoliSura",
+          "hijbulBahar",
+          "dayeeAmol",
+          "ayamroja",
+        ].includes(field)
+      ) {
         return v === "হ্যাঁ" ? 1 : 0;
       }
       const n = parseFloat(v);
@@ -177,7 +209,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
     const labelKeys = Object.keys(labelsMap);
 
     const transposed = labelKeys.map((labelKey) => {
-      const row: { labelKey: string; label: string;[key: number]: any } = {
+      const row: { labelKey: string; label: string; [key: number]: any } = {
         labelKey,
         label: labelsMap[labelKey],
       };
@@ -199,9 +231,14 @@ const AdminTable: React.FC<AdminTableProps> = ({
 
   const filteredData = useMemo(() => {
     return transposedData.filter((row) => {
-      const matchesLabel = filterLabel ? String(row.label).includes(filterLabel) : true;
+      const matchesLabel = filterLabel
+        ? String(row.label).includes(filterLabel)
+        : true;
       const matchesValue = filterValue
-        ? Object.values(row).some((val) => typeof val !== "object" && String(val).includes(filterValue))
+        ? Object.values(row).some(
+            (val) =>
+              typeof val !== "object" && String(val).includes(filterValue)
+          )
         : true;
       return matchesLabel && matchesValue;
     });
@@ -211,17 +248,34 @@ const AdminTable: React.FC<AdminTableProps> = ({
     const BOM = "\uFEFF";
     const monthName = months[selectedMonth];
     const headers = [t("label"), ...monthDays.map((d) => `${t("day")} ${d}`)];
-    const rows = filteredData.map((row) => [row.label, ...monthDays.map((d) => row[d] ?? "-")]);
-    const csv = BOM + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-    const safeName = (selectedUserData?.name || "User").replace(/[\/\\:?*"<>|]/g, "_");
-    const safeRole = (selectedUserData?.role || "Role").replace(/[\/\\:?*"<>|]/g, "_");
-    fileDownload(csv, `report_${monthName}_${selectedYear}_${safeName}_${safeRole}.csv`);
+    const rows = filteredData.map((row) => [
+      row.label,
+      ...monthDays.map((d) => row[d] ?? "-"),
+    ]);
+    const csv =
+      BOM + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const safeName = (selectedUserData?.name || "User").replace(
+      /[\/\\:?*"<>|]/g,
+      "_"
+    );
+    const safeRole = (selectedUserData?.role || "Role").replace(
+      /[\/\\:?*"<>|]/g,
+      "_"
+    );
+    fileDownload(
+      csv,
+      `report_${monthName}_${selectedYear}_${safeName}_${safeRole}.csv`
+    );
   };
 
   // Prepare category data for PDF from all tabs
   const preparePDFData = () => {
     const processTabData = (tabData: any) => {
-      if (!tabData || !tabData.records) return { labelMap: {}, valuesByField: {} as Record<string, Record<string, number>> };
+      if (!tabData || !tabData.records)
+        return {
+          labelMap: {},
+          valuesByField: {} as Record<string, Record<string, number>>,
+        };
 
       const labelMap = tabData.labelMap || {};
       const valuesByField: Record<string, Record<string, number>> = {};
@@ -234,7 +288,8 @@ const AdminTable: React.FC<AdminTableProps> = ({
             const dateKey = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const raw = tabData.records[email]?.[dateKey]?.[fieldKey];
             if (typeof raw === "number" && !isNaN(raw)) sum += raw;
-            else if (typeof raw === "string" && !isNaN(Number(raw))) sum += Number(raw);
+            else if (typeof raw === "string" && !isNaN(Number(raw)))
+              sum += Number(raw);
           });
           perEmail[email] = sum;
         });
@@ -257,71 +312,186 @@ const AdminTable: React.FC<AdminTableProps> = ({
       {
         title: "মক্তব বিষয়",
         items: [
-          { label: moktob.labelMap?.["notunMoktobChalu"] || "নতুন মক্তব চালু", values: moktob.valuesByField?.["notunMoktobChalu"] || {} },
-          { label: moktob.labelMap?.["totalMoktob"] || "মোট মক্তব", values: moktob.valuesByField?.["totalMoktob"] || {} },
-          { label: moktob.labelMap?.["totalStudent"] || "মোট ছাত্র", values: moktob.valuesByField?.["totalStudent"] || {} },
-          { label: moktob.labelMap?.["obhibhabokConference"] || "অভিভাবক কনফারেন্স", values: moktob.valuesByField?.["obhibhabokConference"] || {} },
-          { label: moktob.labelMap?.["moktoThekeMadrasaAdmission"] || "মক্তব থেকে মাদরাসায় ভর্তি", values: moktob.valuesByField?.["moktoThekeMadrasaAdmission"] || {} },
-          { label: moktob.labelMap?.["notunBoyoskoShikkha"] || "নতুন বয়স্ক শিক্ষা", values: moktob.valuesByField?.["notunBoyoskoShikkha"] || {} },
-          { label: moktob.labelMap?.["totalBoyoskoShikkha"] || "মোট বয়স্ক শিক্ষা", values: moktob.valuesByField?.["totalBoyoskoShikkha"] || {} },
-          { label: moktob.labelMap?.["boyoskoShikkhaOnshogrohon"] || "বয়স্ক শিক্ষায় অংশগ্রহণ", values: moktob.valuesByField?.["boyoskoShikkhaOnshogrohon"] || {} },
-          { label: moktob.labelMap?.["newMuslimeDinerFikir"] || "নতুন মুসলিমের দিনের ফিকির", values: moktob.valuesByField?.["newMuslimeDinerFikir"] || {} },
-        ]
+          {
+            label: moktob.labelMap?.["notunMoktobChalu"] || "নতুন মক্তব চালু",
+            values: moktob.valuesByField?.["notunMoktobChalu"] || {},
+          },
+          {
+            label: moktob.labelMap?.["totalMoktob"] || "মোট মক্তব",
+            values: moktob.valuesByField?.["totalMoktob"] || {},
+          },
+          {
+            label: moktob.labelMap?.["totalStudent"] || "মোট ছাত্র",
+            values: moktob.valuesByField?.["totalStudent"] || {},
+          },
+          {
+            label:
+              moktob.labelMap?.["obhibhabokConference"] || "অভিভাবক কনফারেন্স",
+            values: moktob.valuesByField?.["obhibhabokConference"] || {},
+          },
+          {
+            label:
+              moktob.labelMap?.["moktoThekeMadrasaAdmission"] ||
+              "মক্তব থেকে মাদরাসায় ভর্তি",
+            values: moktob.valuesByField?.["moktoThekeMadrasaAdmission"] || {},
+          },
+          {
+            label:
+              moktob.labelMap?.["notunBoyoskoShikkha"] || "নতুন বয়স্ক শিক্ষা",
+            values: moktob.valuesByField?.["notunBoyoskoShikkha"] || {},
+          },
+          {
+            label:
+              moktob.labelMap?.["totalBoyoskoShikkha"] || "মোট বয়স্ক শিক্ষা",
+            values: moktob.valuesByField?.["totalBoyoskoShikkha"] || {},
+          },
+          {
+            label:
+              moktob.labelMap?.["boyoskoShikkhaOnshogrohon"] ||
+              "বয়স্ক শিক্ষায় অংশগ্রহণ",
+            values: moktob.valuesByField?.["boyoskoShikkhaOnshogrohon"] || {},
+          },
+          {
+            label:
+              moktob.labelMap?.["newMuslimeDinerFikir"] ||
+              "নতুন মুসলিমের দিনের ফিকির",
+            values: moktob.valuesByField?.["newMuslimeDinerFikir"] || {},
+          },
+        ],
       },
       {
         title: "মহিলাদের তালিম",
         items: [
-          { label: talim.labelMap?.["mohilaTalim"] || "মহিলাদের তালিম", values: talim.valuesByField?.["mohilaTalim"] || {} },
-          { label: talim.labelMap?.["mohilaOnshogrohon"] || "মহিলাদের অংশগ্রহণ", values: talim.valuesByField?.["mohilaOnshogrohon"] || {} },
-        ]
+          {
+            label: talim.labelMap?.["mohilaTalim"] || "মহিলাদের তালিম",
+            values: talim.valuesByField?.["mohilaTalim"] || {},
+          },
+          {
+            label: talim.labelMap?.["mohilaOnshogrohon"] || "মহিলাদের অংশগ্রহণ",
+            values: talim.valuesByField?.["mohilaOnshogrohon"] || {},
+          },
+        ],
       },
       {
         title: "সহযোগী দায়ী",
         items: [
-          { label: dayee.labelMap?.["sohojogiDayeToiri"] || "সহযোগী দায়ী তৈরি", values: dayee.valuesByField?.["sohojogiDayeToiri"] || {} },
-        ]
+          {
+            label: dayee.labelMap?.["sohojogiDayeToiri"] || "সহযোগী দায়ী তৈরি",
+            values: dayee.valuesByField?.["sohojogiDayeToiri"] || {},
+          },
+        ],
       },
       {
         title: "দাওয়াতি বিষয়",
         items: [
-          { label: dawati.labelMap?.["nonMuslimDawat"] || "অমুসলিমকে দাওয়াত", values: dawati.valuesByField?.["nonMuslimDawat"] || {} },
-          { label: dawati.labelMap?.["murtadDawat"] || "মুরতাদকে দাওয়াত", values: dawati.valuesByField?.["murtadDawat"] || {} },
-          { label: dawati.labelMap?.["nonMuslimSaptahikGasht"] || "অমুসলিম সাপ্তাহিক গাশত", values: dawati.valuesByField?.["nonMuslimSaptahikGasht"] || {} },
-        ]
+          {
+            label: dawati.labelMap?.["nonMuslimDawat"] || "অমুসলিমকে দাওয়াত",
+            values: dawati.valuesByField?.["nonMuslimDawat"] || {},
+          },
+          {
+            label: dawati.labelMap?.["murtadDawat"] || "মুরতাদকে দাওয়াত",
+            values: dawati.valuesByField?.["murtadDawat"] || {},
+          },
+          {
+            label:
+              dawati.labelMap?.["nonMuslimSaptahikGasht"] ||
+              "অমুসলিম সাপ্তাহিক গাশত",
+            values: dawati.valuesByField?.["nonMuslimSaptahikGasht"] || {},
+          },
+        ],
       },
       {
         title: "দাওয়াতি মজলিশ",
         items: [
-          { label: dawatiMojlish.labelMap?.["dawatterGuruttoMojlish"] || "দাওয়াতি মজলিশ", values: dawatiMojlish.valuesByField?.["dawatterGuruttoMojlish"] || {} },
-          { label: dawatiMojlish.labelMap?.["mojlisheOnshogrohon"] || "মজলিশে অংশগ্রহণ", values: dawatiMojlish.valuesByField?.["mojlisheOnshogrohon"] || {} },
-          { label: dawatiMojlish.labelMap?.["prosikkhonKormoshalaAyojon"] || "প্রশিক্ষণ কর্মশালা আয়োজন", values: dawatiMojlish.valuesByField?.["prosikkhonKormoshalaAyojon"] || {} },
-          { label: dawatiMojlish.labelMap?.["prosikkhonOnshogrohon"] || "প্রশিক্ষণে অংশগ্রহণ", values: dawatiMojlish.valuesByField?.["prosikkhonOnshogrohon"] || {} },
-          { label: dawatiMojlish.labelMap?.["jummahAlochona"] || "জুম্মাহ আলোচনা", values: dawatiMojlish.valuesByField?.["jummahAlochona"] || {} },
-          { label: dawatiMojlish.labelMap?.["dhormoSova"] || "ধর্মসভা", values: dawatiMojlish.valuesByField?.["dhormoSova"] || {} },
-          { label: dawatiMojlish.labelMap?.["mashwaraPoint"] || "মাশওয়ারা পয়েন্ট", values: dawatiMojlish.valuesByField?.["mashwaraPoint"] || {} },
-        ]
+          {
+            label:
+              dawatiMojlish.labelMap?.["dawatterGuruttoMojlish"] ||
+              "দাওয়াতি মজলিশ",
+            values:
+              dawatiMojlish.valuesByField?.["dawatterGuruttoMojlish"] || {},
+          },
+          {
+            label:
+              dawatiMojlish.labelMap?.["mojlisheOnshogrohon"] ||
+              "মজলিশে অংশগ্রহণ",
+            values: dawatiMojlish.valuesByField?.["mojlisheOnshogrohon"] || {},
+          },
+          {
+            label:
+              dawatiMojlish.labelMap?.["prosikkhonKormoshalaAyojon"] ||
+              "প্রশিক্ষণ কর্মশালা আয়োজন",
+            values:
+              dawatiMojlish.valuesByField?.["prosikkhonKormoshalaAyojon"] || {},
+          },
+          {
+            label:
+              dawatiMojlish.labelMap?.["prosikkhonOnshogrohon"] ||
+              "প্রশিক্ষণে অংশগ্রহণ",
+            values:
+              dawatiMojlish.valuesByField?.["prosikkhonOnshogrohon"] || {},
+          },
+          {
+            label:
+              dawatiMojlish.labelMap?.["jummahAlochona"] || "জুম্মাহ আলোচনা",
+            values: dawatiMojlish.valuesByField?.["jummahAlochona"] || {},
+          },
+          {
+            label: dawatiMojlish.labelMap?.["dhormoSova"] || "ধর্মসভা",
+            values: dawatiMojlish.valuesByField?.["dhormoSova"] || {},
+          },
+          {
+            label:
+              dawatiMojlish.labelMap?.["mashwaraPoint"] || "মাশওয়ারা পয়েন্ট",
+            values: dawatiMojlish.valuesByField?.["mashwaraPoint"] || {},
+          },
+        ],
       },
       {
         title: "জামাত বিষয়",
         items: [
-          { label: jamat.labelMap?.["jamatBerHoise"] || "জামাত বের হয়েছে", values: jamat.valuesByField?.["jamatBerHoise"] || {} },
-          { label: jamat.labelMap?.["jamatSathi"] || "জামাত সাথী", values: jamat.valuesByField?.["jamatSathi"] || {} },
-        ]
+          {
+            label: jamat.labelMap?.["jamatBerHoise"] || "জামাত বের হয়েছে",
+            values: jamat.valuesByField?.["jamatBerHoise"] || {},
+          },
+          {
+            label: jamat.labelMap?.["jamatSathi"] || "জামাত সাথী",
+            values: jamat.valuesByField?.["jamatSathi"] || {},
+          },
+        ],
       },
       {
         title: "দ্বীনে ফিরে এসেছে",
         items: [
-          { label: dineFera.labelMap?.["nonMuslimMuslimHoise"] || "অমুসলিম মুসলিম হয়েছে", values: dineFera.valuesByField?.["nonMuslimMuslimHoise"] || {} },
-          { label: dineFera.labelMap?.["murtadIslamFireche"] || "মুরতাদ ইসলাম ফিরেছে", values: dineFera.valuesByField?.["murtadIslamFireche"] || {} },
-        ]
+          {
+            label:
+              dineFera.labelMap?.["nonMuslimMuslimHoise"] ||
+              "অমুসলিম মুসলিম হয়েছে",
+            values: dineFera.valuesByField?.["nonMuslimMuslimHoise"] || {},
+          },
+          {
+            label:
+              dineFera.labelMap?.["murtadIslamFireche"] ||
+              "মুরতাদ ইসলাম ফিরেছে",
+            values: dineFera.valuesByField?.["murtadIslamFireche"] || {},
+          },
+        ],
       },
       {
         title: "সফর বিষয়",
         items: [
-          { label: sofor.labelMap?.["madrasaVisit"] || "মাদ্রাসা ভিজিট", values: sofor.valuesByField?.["madrasaVisit"] || {} },
-          { label: sofor.labelMap?.["moktobVisit"] || "মক্তব ভিজিট", values: sofor.valuesByField?.["moktobVisit"] || {} },
-          { label: sofor.labelMap?.["schoolCollegeVisit"] || "স্কুল/কলেজ ভিজিট", values: sofor.valuesByField?.["schoolCollegeVisit"] || {} },
-        ]
+          {
+            label: sofor.labelMap?.["madrasaVisit"] || "মাদ্রাসা ভিজিট",
+            values: sofor.valuesByField?.["madrasaVisit"] || {},
+          },
+          {
+            label: sofor.labelMap?.["moktobVisit"] || "মক্তব ভিজিট",
+            values: sofor.valuesByField?.["moktobVisit"] || {},
+          },
+          {
+            label: sofor.labelMap?.["schoolCollegeVisit"] || "স্কুল/কলেজ ভিজিট",
+            values: sofor.valuesByField?.["schoolCollegeVisit"] || {},
+          },
+        ],
       },
     ];
 
@@ -346,7 +516,9 @@ const AdminTable: React.FC<AdminTableProps> = ({
               className="w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
             >
               {months.map((m, i) => (
-                <option key={i} value={i}>{m}</option>
+                <option key={i} value={i}>
+                  {m}
+                </option>
               ))}
             </select>
 
@@ -356,13 +528,18 @@ const AdminTable: React.FC<AdminTableProps> = ({
               className="w-24 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
             >
               {Array.from({ length: 10 }, (_, i) => 2020 + i).map((y) => (
-                <option key={y} value={y}>{y}</option>
+                <option key={y} value={y}>
+                  {y}
+                </option>
               ))}
             </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center rounded-xl" onClick={convertToCSV}>
+            <button
+              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center rounded-xl"
+              onClick={convertToCSV}
+            >
               📥 Download CSV
             </button>
             {allTabsData && (
@@ -373,7 +550,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
                 usersData={Object.fromEntries(
                   Object.entries(allUserDetails).map(([email, details]) => [
                     email,
-                    details.name
+                    details.name,
                   ])
                 )}
                 categoryData={preparePDFData()}
@@ -387,9 +564,14 @@ const AdminTable: React.FC<AdminTableProps> = ({
         <table className="border-collapse border border-gray-300 w-full table-auto text-sm md:text-base">
           <thead>
             <tr className="bg-gray-200">
-              <th className="border border-gray-300 px-4 py-2 text-left">{t("label")}</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                {t("label")}
+              </th>
               {monthDays.map((day) => (
-                <th key={day} className="border border-gray-300 px-6 py-2 text-center text-nowrap">
+                <th
+                  key={day}
+                  className="border border-gray-300 px-6 py-2 text-center text-nowrap"
+                >
                   {t("day")} {day}
                 </th>
               ))}
@@ -398,7 +580,9 @@ const AdminTable: React.FC<AdminTableProps> = ({
           <tbody>
             {filteredData.map((row, rowIndex) => (
               <tr key={rowIndex} className="hover:bg-gray-100">
-                <td className="border border-gray-300 px-6 py-2 text-nowrap">{row.label}</td>
+                <td className="border border-gray-300 px-6 py-2 text-nowrap">
+                  {row.label}
+                </td>
                 {monthDays.map((day) => {
                   const clickable = clickableFields.includes(row.labelKey);
                   return (

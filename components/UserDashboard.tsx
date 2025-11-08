@@ -10,6 +10,7 @@ import TallyAdmin from "@/components/TallyAdmin";
 import ComparisonTallyCard from "@/components/ComparisonTallyCard";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import UserTableShowPDFButton from "@/components/UserTableShowPDFButton"; // Add this line
 
 interface TallyProps {
   userData: Record<string, any>;
@@ -74,6 +75,18 @@ const Dashboard: React.FC<TallyProps> = () => {
     t("months.october"),
     t("months.november"),
     t("months.december"),
+  ];
+
+  const categories = [
+    { title: t("dashboard.amoliMuhasaba"), userData: userAmoliData, selectedMonth, selectedYear },
+    { title: t("dashboard.moktobSubject"), userData: userMoktobBisoyData, selectedMonth, selectedYear },
+    { title: t("dashboard.talimSubject"), userData: userTalimBisoyData, selectedMonth, selectedYear },
+    { title: t("dashboard.dayiSubject"), userData: userDayeData, selectedMonth, selectedYear },
+    { title: t("dashboard.dawatiSubject"), userData: userDawatiBisoyData, selectedMonth, selectedYear },
+    { title: t("dashboard.dawatiMojlish"), userData: userDawatiMojlishData, selectedMonth, selectedYear },
+    { title: t("dashboard.jamatSubject"), userData: userJamatBisoyData, selectedMonth, selectedYear },
+    { title: t("dashboard.dineFera"), userData: userDineFeraData, selectedMonth, selectedYear },
+    { title: t("dashboard.soforSubject"), userData: userSoforBishoyData, selectedMonth, selectedYear },
   ];
 
   // Helper function to format date as YYYY-MM-DD (Dhaka timezone)
@@ -237,7 +250,7 @@ const Dashboard: React.FC<TallyProps> = () => {
             const madrasaByDate: Record<string, string[]> = {};
             const schoolByDate: Record<string, string[]> = {};
 
-            records.forEach((rec) => {
+            records.forEach((rec: any) => {
               const dateKey = dhakaYMD(new Date(rec.date));
               transformed[userEmail][dateKey] = { ...rec };
 
@@ -817,17 +830,17 @@ const Dashboard: React.FC<TallyProps> = () => {
               {/* Tab Content */}
               <TabsContent value="Amolimusahaba">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userAmoliData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
+                  <AmoliTableShow userData={userAmoliData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} categories={categories} userEmail={userEmail} userName={session?.user?.name || ""} />
                 </div>
               </TabsContent>
               <TabsContent value="moktob">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userMoktobBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
+                  <AmoliTableShow userData={userMoktobBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} categories={categories} userEmail={userEmail} userName={session?.user?.name || ""} />
                 </div>
               </TabsContent>
               <TabsContent value="talim">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userTalimBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
+                  <AmoliTableShow userData={userTalimBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} categories={categories} userEmail={userEmail} userName={session?.user?.name || ""} />
                 </div>
               </TabsContent>
               <TabsContent value="daye">
@@ -841,27 +854,30 @@ const Dashboard: React.FC<TallyProps> = () => {
                     htmlFields={["assistantsList"]}          // render <br/> lists nicely
                     clickableFields={["assistantsList"]}     // make cells clickable
                     onCellClick={handleUserCellClick}        // open modal
+                    categories={categories}
+                    userEmail={userEmail}
+                    userName={session?.user?.name || ""}
                   />
                 </div>
               </TabsContent>
               <TabsContent value="dawati">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userDawatiBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
+                  <AmoliTableShow userData={userDawatiBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} categories={categories} userEmail={userEmail} userName={session?.user?.name || ""} />
                 </div>
               </TabsContent>
               <TabsContent value="dawatimojlish">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userDawatiMojlishData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
+                  <AmoliTableShow userData={userDawatiMojlishData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} categories={categories} userEmail={userEmail} userName={session?.user?.name || ""} />
                 </div>
               </TabsContent>
               <TabsContent value="jamat">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userJamatBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
+                  <AmoliTableShow userData={userJamatBisoyData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} categories={categories} userEmail={userEmail} userName={session?.user?.name || ""} />
                 </div>
               </TabsContent>
               <TabsContent value="dinefera">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userDineFeraData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} />
+                  <AmoliTableShow userData={userDineFeraData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} categories={categories} userEmail={userEmail} userName={session?.user?.name || ""} />
                 </div>
               </TabsContent>
               <TabsContent value="sofor">
@@ -875,6 +891,9 @@ const Dashboard: React.FC<TallyProps> = () => {
                     htmlFields={["madrasaVisitList", "schoolCollegeVisitList"]}
                     clickableFields={["madrasaVisitList", "schoolCollegeVisitList"]}
                     onCellClick={handleUserCellClick}
+                    categories={categories}
+                    userEmail={userEmail}
+                    userName={session?.user?.name || ""}
                   />
                 </div>
               </TabsContent>

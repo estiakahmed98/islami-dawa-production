@@ -8,6 +8,7 @@ import "@fontsource/noto-sans-bengali"
 import { EditRequestModal } from "./edit-request-modal"
 import { createEditRequest, getEditRequestsByEmail } from "@/lib/edit-requests"
 import { useTranslations } from "next-intl";
+import UserTableShowPDFButton from "./UserTableShowPDFButton"
 
 type EditStatus = "pending" | "approved" | "rejected"
 
@@ -36,6 +37,10 @@ type Props = {
   htmlFields?: string[] // row keys that should render with innerHTML (e.g., lists with <br/>)
   clickableFields?: string[] // row keys that are clickable
   onCellClick?: (info: { email: string; dateKey: string; rowKey: string }) => void
+  // Optional PDF button for all categories
+  categories?: { title: string; userData: any; selectedMonth: number; selectedYear: number }[]
+  userEmail?: string
+  userName?: string
 }
 
 const UniversalTableShow: React.FC<Props> = ({
@@ -47,9 +52,13 @@ const UniversalTableShow: React.FC<Props> = ({
   htmlFields = [],
   clickableFields = [],
   onCellClick,
+  categories,
+  userEmail,
+  userName,
 }) => {
   const { data: session } = useSession()
-  const userEmail = session?.user?.email || ""
+  const finalUserEmail = userEmail || session?.user?.email || ""
+  const finalUserName = userName || session?.user?.name || ""
   const user = session?.user || null
 
   const [transposedData, setTransposedData] = useState<any[]>([])
@@ -102,9 +111,9 @@ const UniversalTableShow: React.FC<Props> = ({
   // Fetch edit-request statuses (by email)
   useEffect(() => {
     const fetchEditRequestStatuses = async () => {
-      if (!userEmail) return
+      if (!finalUserEmail) return
       try {
-        const requests = await getEditRequestsByEmail(userEmail)
+        const requests = await getEditRequestsByEmail(finalUserEmail)
         const statuses: EditRequestStatus = {}
         requests.forEach((request: any) => {
           statuses[request.date] = {
@@ -119,13 +128,13 @@ const UniversalTableShow: React.FC<Props> = ({
       }
     }
     fetchEditRequestStatuses()
-  }, [userEmail, selectedMonth, selectedYear])
+  }, [finalUserEmail, selectedMonth, selectedYear])
 
   // Build table data
   useEffect(() => {
-    if (!userData || !userData.records || !userEmail) return
+    if (!userData || !userData.records || !finalUserEmail) return
 
-    setTableData(userData.records[userEmail] || {})
+    setTableData(userData.records[finalUserEmail] || {})
 
     const labels = userData.labelMap || {}
     // rows by labelMap key order
@@ -136,7 +145,7 @@ const UniversalTableShow: React.FC<Props> = ({
       }
       monthDays.forEach((day) => {
         const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-        const cellValue = userData.records[userEmail]?.[date]?.[rowKey] ?? "- -"
+        const cellValue = userData.records[finalUserEmail]?.[date]?.[rowKey] ?? "- -"
         row[day] = cellValue
       })
       return row
@@ -149,7 +158,7 @@ const UniversalTableShow: React.FC<Props> = ({
     }
     monthDays.forEach((day) => {
       const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-      const motamotHtml: string = userData.records[userEmail]?.[date]?.editorContent || "- -"
+      const motamotHtml: string = userData.records[finalUserEmail]?.[date]?.editorContent || "- -"
       const motamotText = DOMPurify.sanitize(motamotHtml, { ALLOWED_TAGS: [] })
       motamotRow[day] =
         motamotText !== "- -" ? (
@@ -231,7 +240,7 @@ const UniversalTableShow: React.FC<Props> = ({
     transposed.push(editRow)
 
     setTransposedData(transposed)
-  }, [selectedMonth, selectedYear, userData, userEmail, editRequestStatuses, monthDays])
+  }, [selectedMonth, selectedYear, userData, finalUserEmail, editRequestStatuses, monthDays])
 
   // Filtering (optional UI left out; hooks kept)
   const filteredData = useMemo(() => {
@@ -270,7 +279,7 @@ const UniversalTableShow: React.FC<Props> = ({
     const monthName = months[selectedMonth]
     const year = selectedYear
 
-    if (!monthName || !year || !userEmail || !Array.isArray(transposedData)) {
+    if (!monthName || !year || !finalUserEmail || !Array.isArray(transposedData)) {
       console.error(t("invalidDataForPDFGeneration"))
       return
     }
@@ -476,7 +485,7 @@ const UniversalTableShow: React.FC<Props> = ({
   }
 
   const handleEditRequest = async (day: number, reason: string) => {
-    if (!userEmail || !user) return
+    if (!finalUserEmail || !user) return
     if (isFutureDate(day)) {
       alert(t("youCannotRequestEditsForFutureDates"))
       return
@@ -486,7 +495,7 @@ const UniversalTableShow: React.FC<Props> = ({
 
     try {
       const newRequest = await createEditRequest({
-        email: userEmail,
+        email: finalUserEmail,
         name: user.name || "",
         phone: user.phone || "",
         date,
@@ -571,12 +580,19 @@ const UniversalTableShow: React.FC<Props> = ({
           >
             📥 Download CSV
           </button>
-          <button
+          {/* <button
             className="flex items-center gap-2 text-xs lg:text-lg px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition duration-300"
             onClick={convertToPDF}
           >
             📄 Download PDF
-          </button>
+          </button> */}
+          {categories && (
+            <UserTableShowPDFButton
+              categories={categories}
+              userEmail={finalUserEmail}
+              userName={finalUserName}
+            />
+          )}
         </div>
       </div>
       <div className="overflow-auto">
@@ -611,7 +627,7 @@ const UniversalTableShow: React.FC<Props> = ({
                       "border border-gray-300 px-6 py-2 text-center align-top " +
                       (clickable ? "cursor-pointer hover:bg-gray-50" : "text-nowrap"),
                     onClick:
-                      clickable && onCellClick ? () => onCellClick({ email: userEmail, dateKey, rowKey }) : undefined,
+                      clickable && onCellClick ? () => onCellClick({ email: finalUserEmail, dateKey, rowKey }) : undefined,
                   }
                   if (shouldRenderHTML) {
                     return (
