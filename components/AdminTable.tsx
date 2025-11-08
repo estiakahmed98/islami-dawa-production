@@ -52,7 +52,9 @@ const AdminTable: React.FC<AdminTableProps> = ({
   const [filterValue, setFilterValue] = useState<string>("");
 
   const { selectedUser } = useSelectedUser();
+  const [allUserDetails, setAllUserDetails] = useState<Record<string, { name: string; email: string }>>({});
   const [selectedUserData, setSelectedUserData] = useState<any>(null);
+
   const month = useTranslations("dashboard.UserDashboard.months");
   const t = useTranslations("universalTableShow");
 
@@ -70,6 +72,58 @@ const AdminTable: React.FC<AdminTableProps> = ({
     };
     fetchUserDetails();
   }, [selectedUser]);
+
+  // Fetch all user details for PDF
+  useEffect(() => {
+    const fetchAllUserDetails = async () => {
+      if (!emailList.length) {
+        setAllUserDetails({});
+        return;
+      }
+
+      try {
+        const userDetails: Record<string, { name: string; email: string }> = {};
+        
+        // Fetch details for all users
+        await Promise.all(
+          emailList.map(async (email) => {
+            try {
+              const response = await fetch(`/api/users?email=${encodeURIComponent(email)}`, { cache: "no-store" });
+              if (response.ok) {
+                const user = await response.json();
+                userDetails[email] = {
+                  name: user.name || email,
+                  email: user.email || email
+                };
+              } else {
+                userDetails[email] = {
+                  name: email,
+                  email: email
+                };
+              }
+            } catch {
+              userDetails[email] = {
+                name: email,
+                email: email
+              };
+            }
+          })
+        );
+
+        setAllUserDetails(userDetails);
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+        // Fallback to email as name
+        const fallbackDetails: Record<string, { name: string; email: string }> = {};
+        emailList.forEach(email => {
+          fallbackDetails[email] = { name: email, email };
+        });
+        setAllUserDetails(fallbackDetails);
+      }
+    };
+
+    fetchAllUserDetails();
+  }, [emailList.join(',')]);
 
   const months = [
     month("january"), month("february"), month("march"), month("april"), month("may"), month("june"),
@@ -316,7 +370,12 @@ const AdminTable: React.FC<AdminTableProps> = ({
                 monthName={months[selectedMonth]}
                 year={selectedYear}
                 emailList={emailList}
-                usersData={Object.fromEntries(emailList.map((e) => [e, e]))}
+                usersData={Object.fromEntries(
+                  Object.entries(allUserDetails).map(([email, details]) => [
+                    email,
+                    details.name
+                  ])
+                )}
                 categoryData={preparePDFData()}
               />
             )}
