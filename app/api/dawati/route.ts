@@ -32,8 +32,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       email,
       nonMuslimDawat = 0,
       murtadDawat = 0,
-      alemderSatheyMojlish = 0,
-      publicSatheyMojlish = 0,
       nonMuslimSaptahikGasht = 0,
       editorContent = "",
     } = body ?? {};
@@ -70,8 +68,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         date: now,         // EXACT same timestamp as createdAt
         nonMuslimDawat,
         murtadDawat,
-        alemderSatheyMojlish,
-        publicSatheyMojlish,
         nonMuslimSaptahikGasht,
         editorContent,
       },
@@ -189,8 +185,6 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
       data: {
         ...(typeof patch.nonMuslimDawat === "number" ? { nonMuslimDawat: patch.nonMuslimDawat } : {}),
         ...(typeof patch.murtadDawat === "number" ? { murtadDawat: patch.murtadDawat } : {}),
-        ...(typeof patch.alemderSatheyMojlish === "number" ? { alemderSatheyMojlish: patch.alemderSatheyMojlish } : {}),
-        ...(typeof patch.publicSatheyMojlish === "number" ? { publicSatheyMojlish: patch.publicSatheyMojlish } : {}),
         ...(typeof patch.nonMuslimSaptahikGasht === "number" ? { nonMuslimSaptahikGasht: patch.nonMuslimSaptahikGasht } : {}),
         ...(typeof patch.editorContent === "string" ? { editorContent: patch.editorContent } : {}),
       },

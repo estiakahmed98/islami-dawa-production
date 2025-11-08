@@ -3,7 +3,11 @@
 
 import { Button } from "@/components/ui/button";
 import { ErrorMessage, Field, Form, Formik } from "formik";
-import { initialFormData, validationSchema } from "@/app/data/DawatiMojlishData";
+import {
+  initialFormData,
+  validationSchema,
+  DawatiFormData,
+} from "@/app/data/DawatiMojlishData";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
@@ -11,17 +15,6 @@ import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
 import Loading from "@/app/[locale]/dashboard/loading";
 import { useTranslations } from "next-intl";
-
-interface FormValues {
-  dawatterGuruttoMojlish: string;
-  mojlisheOnshogrohon: string;
-  prosikkhonKormoshalaAyojon: string;
-  prosikkhonOnshogrohon: string;
-  jummahAlochona: string;
-  dhormoSova: string;
-  mashwaraPoint: string;
-  editorContent: string;
-}
 
 const DawatiMojlishForm: React.FC = () => {
   const router = useRouter();
@@ -31,6 +24,7 @@ const DawatiMojlishForm: React.FC = () => {
   const tDM = useTranslations("dashboard.UserDashboard.dawatiMojlish");
   const tToast = useTranslations("dashboard.UserDashboard.toast");
   const common = useTranslations("common");
+  const tDawati = useTranslations("dashboard.UserDashboard.dawati");
 
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -60,7 +54,7 @@ const DawatiMojlishForm: React.FC = () => {
     checkSubmissionStatus();
   }, [email, tToast]);
 
-  const handleSubmit = async (values: FormValues, { setSubmitting }: any) => {
+  const handleSubmit = async (values: DawatiFormData, { setSubmitting }: any) => {
     if (!email) {
       toast.error(common("userEmailIsNotSet"));
       return;
@@ -74,7 +68,10 @@ const DawatiMojlishForm: React.FC = () => {
       email,
       dawatterGuruttoMojlish: Number(values.dawatterGuruttoMojlish) || 0,
       mojlisheOnshogrohon: Number(values.mojlisheOnshogrohon) || 0,
-      prosikkhonKormoshalaAyojon: Number(values.prosikkhonKormoshalaAyojon) || 0,
+      alemderSatheyMojlish: Number(values.alemderSatheyMojlish) || 0,
+      publicSatheyMojlish: Number(values.publicSatheyMojlish) || 0,
+      prosikkhonKormoshalaAyojon:
+        Number(values.prosikkhonKormoshalaAyojon) || 0,
       prosikkhonOnshogrohon: Number(values.prosikkhonOnshogrohon) || 0,
       jummahAlochona: Number(values.jummahAlochona) || 0,
       dhormoSova: Number(values.dhormoSova) || 0,
@@ -121,10 +118,7 @@ const DawatiMojlishForm: React.FC = () => {
         </div>
       )}
 
-      <h2 className="mb-6 text-2xl">
-        {/* No explicit title key under UserDashboard.dawatiMojlish; fallback text */}
-        {"Dawah Majlis"}
-      </h2>
+      <h2 className="mb-6 text-2xl">{tDM("title")}</h2>
 
       <Formik
         initialValues={{ ...initialFormData, editorContent: "" }}
@@ -145,7 +139,11 @@ const DawatiMojlishForm: React.FC = () => {
                   placeholder="0"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
-                <ErrorMessage name="dawatterGuruttoMojlish" component="div" className="text-red-500" />
+                <ErrorMessage
+                  name="dawatterGuruttoMojlish"
+                  component="div"
+                  className="text-red-500"
+                />
               </div>
 
               <div>
@@ -159,7 +157,47 @@ const DawatiMojlishForm: React.FC = () => {
                   placeholder="0"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
-                <ErrorMessage name="mojlisheOnshogrohon" component="div" className="text-red-500" />
+                <ErrorMessage
+                  name="mojlisheOnshogrohon"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-gray-700">
+                  {tDawati("alemderSatheyMojlish")}
+                </label>
+                <Field
+                  name="alemderSatheyMojlish"
+                  type="number"
+                  disabled={isSubmittedToday || isSubmitting}
+                  placeholder="0"
+                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                />
+                <ErrorMessage
+                  name="alemderSatheyMojlish"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-gray-700">
+                  {tDawati("publicSatheyMojlish")}
+                </label>
+                <Field
+                  name="publicSatheyMojlish"
+                  type="number"
+                  disabled={isSubmittedToday || isSubmitting}
+                  placeholder="0"
+                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                />
+                <ErrorMessage
+                  name="publicSatheyMojlish"
+                  component="div"
+                  className="text-red-500"
+                />
               </div>
 
               <div>
@@ -173,7 +211,11 @@ const DawatiMojlishForm: React.FC = () => {
                   placeholder="0"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
-                <ErrorMessage name="prosikkhonKormoshalaAyojon" component="div" className="text-red-500" />
+                <ErrorMessage
+                  name="prosikkhonKormoshalaAyojon"
+                  component="div"
+                  className="text-red-500"
+                />
               </div>
 
               <div>
@@ -187,7 +229,11 @@ const DawatiMojlishForm: React.FC = () => {
                   placeholder="0"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
-                <ErrorMessage name="prosikkhonOnshogrohon" component="div" className="text-red-500" />
+                <ErrorMessage
+                  name="prosikkhonOnshogrohon"
+                  component="div"
+                  className="text-red-500"
+                />
               </div>
 
               <div>
@@ -201,7 +247,11 @@ const DawatiMojlishForm: React.FC = () => {
                   placeholder="0"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
-                <ErrorMessage name="jummahAlochona" component="div" className="text-red-500" />
+                <ErrorMessage
+                  name="jummahAlochona"
+                  component="div"
+                  className="text-red-500"
+                />
               </div>
 
               <div>
@@ -215,7 +265,11 @@ const DawatiMojlishForm: React.FC = () => {
                   placeholder="0"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
-                <ErrorMessage name="dhormoSova" component="div" className="text-red-500" />
+                <ErrorMessage
+                  name="dhormoSova"
+                  component="div"
+                  className="text-red-500"
+                />
               </div>
 
               <div>
@@ -229,15 +283,23 @@ const DawatiMojlishForm: React.FC = () => {
                   placeholder="0"
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
-                <ErrorMessage name="mashwaraPoint" component="div" className="text-red-500" />
+                <ErrorMessage
+                  name="mashwaraPoint"
+                  component="div"
+                  className="text-red-500"
+                />
               </div>
 
               <div className="lg:col-span-2">
-                <label className="mb-2 block text-gray-700">{common("editorContent")}</label>
+                <label className="mb-2 block text-gray-700">
+                  {common("editorContent")}
+                </label>
                 <JoditEditorComponent
                   placeholder={common("editorContentPlaceholder")}
                   initialValue=""
-                  onContentChange={(content) => setFieldValue("editorContent", content)}
+                  onContentChange={(content) =>
+                    setFieldValue("editorContent", content)
+                  }
                   height="300px"
                   width="100%"
                   disabled={isSubmittedToday || isSubmitting}

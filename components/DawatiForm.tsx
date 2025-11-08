@@ -15,8 +15,6 @@ import { useTranslations } from "next-intl";
 interface DawatiFormData {
   nonMuslimDawat: string;
   murtadDawat: string;
-  alemderSatheyMojlish: string;
-  publicSatheyMojlish: string;
   nonMuslimSaptahikGasht: string;
   editorContent: string;
 }
@@ -71,8 +69,6 @@ const DawatiForm: React.FC = () => {
       email,
       nonMuslimDawat: Number(values.nonMuslimDawat) || 0,
       murtadDawat: Number(values.murtadDawat) || 0,
-      alemderSatheyMojlish: Number(values.alemderSatheyMojlish) || 0,
-      publicSatheyMojlish: Number(values.publicSatheyMojlish) || 0,
       nonMuslimSaptahikGasht: Number(values.nonMuslimSaptahikGasht) || 0,
       editorContent: values.editorContent || "",
     };
@@ -150,34 +146,6 @@ const DawatiForm: React.FC = () => {
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                 />
                 <ErrorMessage name="murtadDawat" component="div" className="text-red-500" />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  {tDawati("alemderSatheyMojlish")}
-                </label>
-                <Field
-                  name="alemderSatheyMojlish"
-                  type="number"
-                  disabled={isSubmittedToday || isSubmitting}
-                  placeholder="0"
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                />
-                <ErrorMessage name="alemderSatheyMojlish" component="div" className="text-red-500" />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-gray-700">
-                  {tDawati("publicSatheyMojlish")}
-                </label>
-                <Field
-                  name="publicSatheyMojlish"
-                  type="number"
-                  disabled={isSubmittedToday || isSubmitting}
-                  placeholder="0"
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                />
-                <ErrorMessage name="publicSatheyMojlish" component="div" className="text-red-500" />
               </div>
 
               <div>

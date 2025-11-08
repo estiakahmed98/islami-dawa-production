@@ -114,23 +114,23 @@ model AmoliMuhasaba {
   userId      String
   user        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
   date        DateTime
-  tahajjud    Int?     // Number value for tahajjud prayers
-  surah       String?  // Surah name for tilawat
-  ayat        String?  // Number of ayats read (can be range like "10-20")
+  tahajjud    Int?     
+  surah       String?  
+  ayat        String?  
   quarntilawat Json?
-  zikir       String?  // Morning/evening zikir status
-  ishraq      String?  // Ishraq-Awwabin-Chasht prayers
-  jamat       Int?     // Number of prayers in jamat
-  sirat       String?  // Sirat book reading
-  Dua         String?  // Dua Anas ibn Malik
-  ilm         String?  // Islamic knowledge book reading
-  tasbih      String?  // Three tasbih (morning-evening)
-  dayeeAmol   String?  // Daee's practical book reading
-  amoliSura   String?  // Daily practical surah reading
-  ayamroja    String?  // Ayame Beej fasting
-  hijbulBahar String?  // Daily Hijbul Bahar reading
-  percentage  String?  // Overall percentage
-  editorContent String? @db.Text // Rich text content for opinions/notes
+  zikir       String?  
+  ishraq      String?  
+  jamat       Int?     
+  sirat       String?  
+  Dua         String?  
+  ilm         String?  
+  tasbih      String?  
+  dayeeAmol   String?  
+  amoliSura   String?  
+  ayamroja    String? 
+  hijbulBahar String? 
+  percentage  String? 
+  editorContent String? @db.Text 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -147,8 +147,6 @@ model DawatiBisoyRecord {
   date                   DateTime
   nonMuslimDawat         Int      @default(0)
   murtadDawat            Int      @default(0)
-  alemderSatheyMojlish   Int      @default(0)
-  publicSatheyMojlish    Int      @default(0)
   nonMuslimSaptahikGasht Int      @default(0)
   editorContent          String?  @db.Text
   createdAt              DateTime @default(now())
@@ -167,6 +165,8 @@ model DawatiMojlishRecord {
   date                       DateTime
   dawatterGuruttoMojlish     Int      @default(0)
   mojlisheOnshogrohon        Int      @default(0)
+  alemderSatheyMojlish       Int      @default(0)
+  publicSatheyMojlish        Int      @default(0)
   prosikkhonKormoshalaAyojon Int      @default(0)
   prosikkhonOnshogrohon      Int      @default(0)
   jummahAlochona             Int      @default(0)
@@ -294,15 +294,15 @@ model MoktobBisoyRecord {
   userId                     String
   user                       users    @relation(fields: [userId], references: [id], onDelete: Cascade)
   date                       DateTime
-  notunMoktobChalu           Int      @default(0) // MoktobChalu
-  totalMoktob                Int      @default(0) // NewMoktob
-  totalStudent               Int      @default(0) // TotalStudent
-  obhibhabokConference       Int      @default(0) // GurdianMeeting
-  moktoThekeMadrasaAdmission Int      @default(0) // MoktobAdmit/MadrasahAdmit
-  notunBoyoskoShikkha        Int      @default(0) // Sikkha
-  totalBoyoskoShikkha        Int      @default(0) // TotalSikkha
-  boyoskoShikkhaOnshogrohon  Int      @default(0) // TotalAgeSikkha
-  newMuslimeDinerFikir       Int      @default(0) // NewMuslim
+  notunMoktobChalu           Int      @default(0) 
+  totalMoktob                Int      @default(0) 
+  totalStudent               Int      @default(0) 
+  obhibhabokConference       Int      @default(0) 
+  moktoThekeMadrasaAdmission Int      @default(0) 
+  notunBoyoskoShikkha        Int      @default(0) 
+  totalBoyoskoShikkha        Int      @default(0) 
+  boyoskoShikkhaOnshogrohon  Int      @default(0) 
+  newMuslimeDinerFikir       Int      @default(0) 
   editorContent              String?  @db.Text
   createdAt                  DateTime @default(now())
   updatedAt                  DateTime @updatedAt
@@ -317,14 +317,14 @@ model LeaveRequest {
   id          String   @id @default(cuid())
   userId      String
   user        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  leaveType   String   // Casual, Sick, Maternity, etc.
+  leaveType   String   
   fromDate    DateTime
   toDate      DateTime
   days        Int
   reason      String   @db.Text
   approvedBy  String?
-  status      String   @default("pending") // pending, approved, rejected
-  rejectionReason  String?  // Reason why the leave was rejected
+  status      String   @default("pending") 
+  rejectionReason  String?
   phone       String?
   name        String?
   requestDate DateTime @default(now())
@@ -345,7 +345,7 @@ model Task {
   description String?  @db.Text
   date        DateTime
   time        String?
-  visibility  String   @default("private") // private, public
+  visibility  String   @default("private") 
   division    String?
   district    String?
   upazila     String?
@@ -369,15 +369,15 @@ model EditRequest {
   email     String
   name      String
   phone     String
-  date      DateTime // The date for which edit is requested
+  date      DateTime  
   reason    String   @db.Text
   division  String
   district  String
   upazila   String
   union     String
   role      String
-  status    String   @default("pending") // pending, approved, rejected, completed
-  editedOnce Boolean @default(false) // Track if data has been edited once after approval
+  status    String   @default("pending") 
+  editedOnce Boolean @default(false) 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

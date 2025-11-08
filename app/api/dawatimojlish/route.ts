@@ -32,6 +32,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       email,
       dawatterGuruttoMojlish = 0,
       mojlisheOnshogrohon = 0,
+      alemderSatheyMojlish = 0,
+      publicSatheyMojlish = 0,
       prosikkhonKormoshalaAyozon = 0, // typo guard (if client sends this)
       prosikkhonKormoshalaAyojon = prosikkhonKormoshalaAyozon ?? 0,
       prosikkhonOnshogrohon = 0,
@@ -72,6 +74,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         date: now,      // EXACT same timestamp as createdAt
         dawatterGuruttoMojlish,
         mojlisheOnshogrohon,
+        alemderSatheyMojlish,
+        publicSatheyMojlish,
         prosikkhonKormoshalaAyojon,
         prosikkhonOnshogrohon,
         jummahAlochona,

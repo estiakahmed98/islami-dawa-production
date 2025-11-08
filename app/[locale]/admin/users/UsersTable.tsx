@@ -137,7 +137,7 @@ const DAWATI_LABELS: Record<string, string> = {
 };
 
 const DAWATI_MOJLISH_LABELS: Record<string, string> = {
-  dawatterGuruttoMojlish: "দাওয়াতের গুরুত্ব মজলিশ",
+  dawatterGuruttoMojlish: "দাওয়াতি মজলিশ",
   mojlisheOnshogrohon: "মজলিশে অংশগ্রহণ",
   prosikkhonKormoshalaAyojon: "প্রশিক্ষণ কর্মশালা আয়োজন",
   prosikkhonOnshogrohon: "প্রশিক্ষণে অংশগ্রহণ",

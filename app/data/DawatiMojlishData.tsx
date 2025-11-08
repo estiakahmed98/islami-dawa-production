@@ -4,6 +4,8 @@ import * as Yup from "yup";
 export interface DawatiFormData {
   dawatterGuruttoMojlish: string;
   mojlisheOnshogrohon: string;
+  alemderSatheyMojlish: string;
+  publicSatheyMojlish: string;
   prosikkhonKormoshalaAyojon: string;
   prosikkhonOnshogrohon: string;
   jummahAlochona: string;
@@ -16,6 +18,8 @@ export interface DawatiFormData {
 export const initialFormData: DawatiFormData = {
   dawatterGuruttoMojlish: "",
   mojlisheOnshogrohon: "",
+  alemderSatheyMojlish: "",
+  publicSatheyMojlish: "",
   prosikkhonKormoshalaAyojon: "",
   prosikkhonOnshogrohon: "",
   jummahAlochona: "",
@@ -30,6 +34,12 @@ export const validationSchema = Yup.object().shape({
     "Dawat Mojlish Field is required"
   ),
   mojlisheOnshogrohon: Yup.string().required("Dawat Gurutto Field is required"),
+  alemderSatheyMojlish: Yup.string().required(
+    "Alem Mojlish Field is required"
+  ),
+  publicSatheyMojlish: Yup.string().required(
+    "Public Mojlish Field is required"
+  ),
   prosikkhonKormoshalaAyojon: Yup.string().required(
     "Dawat Prosikkhon Field is required"
   ),

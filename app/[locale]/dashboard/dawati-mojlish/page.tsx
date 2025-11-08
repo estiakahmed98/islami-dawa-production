@@ -12,6 +12,8 @@ import { useTranslations } from "next-intl";
 type MojlishRow = {
   dawatterGuruttoMojlish?: number;
   mojlisheOnshogrohon?: number;
+  alemderSatheyMojlish?: number;
+  publicSatheyMojlish?: number;
   prosikkhonKormoshalaAyojon?: number;
   prosikkhonOnshogrohon?: number;
   jummahAlochona?: number;
@@ -43,17 +45,21 @@ const DawatiMojlisPage: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
+  const tDawati = useTranslations("dashboard.UserDashboard.dawati");
+
   const labelMap = useMemo(
     () => ({
       dawatterGuruttoMojlish: tDM("dawatterGuruttoMojlish"),
       mojlisheOnshogrohon: tDM("mojlisheOnshogrohon"),
+      alemderSatheyMojlish: tDawati("alemderSatheyMojlish"),
+      publicSatheyMojlish: tDawati("publicSatheyMojlish"),
       prosikkhonKormoshalaAyojon: tDM("prosikkhonKormoshalaAyojon"),
       prosikkhonOnshogrohon: tDM("prosikkhonOnshogrohon"),
       jummahAlochona: tDM("jummahAlochona"),
       dhormoSova: tDM("dhormoSova"),
       mashwaraPoint: tDM("mashwaraPoint"),
     }),
-    [tDM]
+    [tDM, tDawati]
   );
 
   useEffect(() => {
@@ -74,6 +80,8 @@ const DawatiMojlisPage: React.FC = () => {
           date: string | Date;
           dawatterGuruttoMojlish?: number;
           mojlisheOnshogrohon?: number;
+          alemderSatheyMojlish?: number;
+          publicSatheyMojlish?: number;
           prosikkhonKormoshalaAyojon?: number;
           prosikkhonOnshogrohon?: number;
           jummahAlochona?: number;
@@ -87,6 +95,8 @@ const DawatiMojlisPage: React.FC = () => {
           acc[dateStr] = {
             dawatterGuruttoMojlish: rec.dawatterGuruttoMojlish ?? 0,
             mojlisheOnshogrohon: rec.mojlisheOnshogrohon ?? 0,
+            alemderSatheyMojlish: rec.alemderSatheyMojlish ?? 0,
+            publicSatheyMojlish: rec.publicSatheyMojlish ?? 0,
             prosikkhonKormoshalaAyojon: rec.prosikkhonKormoshalaAyojon ?? 0,
             prosikkhonOnshogrohon: rec.prosikkhonOnshogrohon ?? 0,
             jummahAlochona: rec.jummahAlochona ?? 0,

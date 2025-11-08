@@ -12,8 +12,6 @@ import { useTranslations } from "next-intl";
 type RecordRow = {
   nonMuslimDawat?: number;
   murtadDawat?: number;
-  alemderSatheyMojlish?: number;
-  publicSatheyMojlish?: number;
   nonMuslimSaptahikGasht?: number;
   editorContent?: string | null;
 };
@@ -45,8 +43,6 @@ const DawatiPage: React.FC = () => {
     () => ({
       nonMuslimDawat: tDawati("nonMuslimDawat"),
       murtadDawat: tDawati("murtadDawat"),
-      alemderSatheyMojlish: tDawati("alemderSatheyMojlish"),
-      publicSatheyMojlish: tDawati("publicSatheyMojlish"),
       nonMuslimSaptahikGasht: tDawati("nonMuslimSaptahikGasht"),
     }),
     [tDawati]
@@ -70,8 +66,6 @@ const DawatiPage: React.FC = () => {
           date: string | Date;
           nonMuslimDawat?: number;
           murtadDawat?: number;
-          alemderSatheyMojlish?: number;
-          publicSatheyMojlish?: number;
           nonMuslimSaptahikGasht?: number;
           editorContent?: string | null;
         }>;
@@ -81,8 +75,6 @@ const DawatiPage: React.FC = () => {
           acc[dateStr] = {
             nonMuslimDawat: rec.nonMuslimDawat ?? 0,
             murtadDawat: rec.murtadDawat ?? 0,
-            alemderSatheyMojlish: rec.alemderSatheyMojlish ?? 0,
-            publicSatheyMojlish: rec.publicSatheyMojlish ?? 0,
             nonMuslimSaptahikGasht: rec.nonMuslimSaptahikGasht ?? 0,
             editorContent: rec.editorContent ?? "",
           };
