@@ -1099,34 +1099,138 @@ export default function UsersTable() {
             </TabsList>
 
             <TabsContent value="moktob">
-              <AdminTable userData={moktobData} emailList={emailList} />
+              <AdminTable 
+                userData={moktobData} 
+                emailList={emailList}
+                allTabsData={{
+                  moktobData,
+                  talimData,
+                  dayeData,
+                  dawatiData,
+                  dawatiMojlishData,
+                  jamatData,
+                  dineFeraData,
+                  soforData,
+                }}
+              />
             </TabsContent>
             <TabsContent value="talim">
-              <AdminTable userData={talimData} emailList={emailList} />
+              <AdminTable 
+                userData={talimData} 
+                emailList={emailList}
+                allTabsData={{
+                  moktobData,
+                  talimData,
+                  dayeData,
+                  dawatiData,
+                  dawatiMojlishData,
+                  jamatData,
+                  dineFeraData,
+                  soforData,
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="daye">
-              <AdminTable userData={dayeData} emailList={emailList} />
+              <AdminTable 
+                userData={dayeData} 
+                emailList={emailList}
+                allTabsData={{
+                  moktobData,
+                  talimData,
+                  dayeData,
+                  dawatiData,
+                  dawatiMojlishData,
+                  jamatData,
+                  dineFeraData,
+                  soforData,
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="dawati">
-              <AdminTable userData={dawatiData} emailList={emailList} />
+              <AdminTable 
+                userData={dawatiData} 
+                emailList={emailList}
+                allTabsData={{
+                  moktobData,
+                  talimData,
+                  dayeData,
+                  dawatiData,
+                  dawatiMojlishData,
+                  jamatData,
+                  dineFeraData,
+                  soforData,
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="dawatimojlish">
-              <AdminTable userData={dawatiMojlishData} emailList={emailList} />
+              <AdminTable 
+                userData={dawatiMojlishData} 
+                emailList={emailList}
+                allTabsData={{
+                  moktobData,
+                  talimData,
+                  dayeData,
+                  dawatiData,
+                  dawatiMojlishData,
+                  jamatData,
+                  dineFeraData,
+                  soforData,
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="jamat">
-              <AdminTable userData={jamatData} emailList={emailList} />
+              <AdminTable 
+                userData={jamatData} 
+                emailList={emailList}
+                allTabsData={{
+                  moktobData,
+                  talimData,
+                  dayeData,
+                  dawatiData,
+                  dawatiMojlishData,
+                  jamatData,
+                  dineFeraData,
+                  soforData,
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="dinefera">
-              <AdminTable userData={dineFeraData} emailList={emailList} />
+              <AdminTable 
+                userData={dineFeraData} 
+                emailList={emailList}
+                allTabsData={{
+                  moktobData,
+                  talimData,
+                  dayeData,
+                  dawatiData,
+                  dawatiMojlishData,
+                  jamatData,
+                  dineFeraData,
+                  soforData,
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="sofor">
-              <AdminTable userData={soforData} emailList={emailList} />
+              <AdminTable 
+                userData={soforData} 
+                emailList={emailList}
+                allTabsData={{
+                  moktobData,
+                  talimData,
+                  dayeData,
+                  dawatiData,
+                  dawatiMojlishData,
+                  jamatData,
+                  dineFeraData,
+                  soforData,
+                }}
+              />
             </TabsContent>
           </Tabs>
         </div>

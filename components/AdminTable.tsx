@@ -1,11 +1,12 @@
 // components/AdminTable.tsx
-"use client"; // Juwel
+"use client";
 
 import React, { useState, useEffect, useMemo } from "react";
 import fileDownload from "js-file-download";
 import "@fontsource/noto-sans-bengali";
 import { useSelectedUser } from "@/providers/treeProvider";
 import { useTranslations } from "next-intl";
+import {MonthlyUserReportButton} from "@/components/MonthlyReportPDF";
 
 interface AdminTableProps {
   userData: any;
@@ -17,6 +18,17 @@ interface AdminTableProps {
   clickableFields?: string[];
   // NEW: bubble up clicks with dateKey + rowKey
   onCellClick?: (info: { dateKey: string; rowKey: string }) => void;
+  // NEW: All tab data for PDF export
+  allTabsData?: {
+    moktobData?: any;
+    talimData?: any;
+    dayeData?: any;
+    dawatiData?: any;
+    dawatiMojlishData?: any;
+    jamatData?: any;
+    dineFeraData?: any;
+    soforData?: any;
+  };
 }
 
 const AdminTable: React.FC<AdminTableProps> = ({
@@ -26,6 +38,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
   selectedYear: selectedYearProp,
   clickableFields = [],
   onCellClick,
+  allTabsData,
 }) => {
   // if parent controls month/year, use props; else fallback to internal state
   const [internalMonth, setInternalMonth] = useState<number>(new Date().getMonth());
@@ -151,110 +164,114 @@ const AdminTable: React.FC<AdminTableProps> = ({
     fileDownload(csv, `report_${monthName}_${selectedYear}_${safeName}_${safeRole}.csv`);
   };
 
-  const getHtml2Pdf = async () => {
-    const html2pdfModule = await import("html2pdf.js");
-    return html2pdfModule.default || html2pdfModule;
-  };
+  // Prepare category data for PDF from all tabs
+  const preparePDFData = () => {
+    const processTabData = (tabData: any) => {
+      if (!tabData || !tabData.records) return { labelMap: {}, valuesByField: {} as Record<string, Record<string, number>> };
 
-  const convertToPDF = async () => {
-    const monthName = months[selectedMonth];
+      const labelMap = tabData.labelMap || {};
+      const valuesByField: Record<string, Record<string, number>> = {};
 
-    const printableRows = transposedData
-      .filter((row) => row.label !== "মতামত")
-      .filter((row) => row.label !== "Edit");
+      Object.keys(labelMap).forEach((fieldKey) => {
+        const perEmail: Record<string, number> = {};
+        emailList.forEach((email) => {
+          let sum = 0;
+          monthDays.forEach((day) => {
+            const dateKey = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+            const raw = tabData.records[email]?.[dateKey]?.[fieldKey];
+            if (typeof raw === "number" && !isNaN(raw)) sum += raw;
+            else if (typeof raw === "string" && !isNaN(Number(raw))) sum += Number(raw);
+          });
+          perEmail[email] = sum;
+        });
+        valuesByField[fieldKey] = perEmail;
+      });
 
-    let tableHTML = `
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap');
-            body { font-family: 'Noto Sans Bengali', sans-serif; padding: 0; text-align: center; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            thead { display: table-header-group; }
-            tr { page-break-inside: avoid; }
-            th, td { border: 1px solid #000; padding: 8px; font-size: 12px; text-align: center; }
-            th { background-color: #fff; color: #000; font-size: 14px; position: sticky; top: 0; z-index: 2; }
-            .row-label { background-color: #fff; color: #000; font-weight: bold; text-align: left; padding-left: 10px; }
-            .header-grid { font-size: 14px; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px; }
-          </style>
-        </head>
-        <body>
-          <div class="header-grid">
-            <div style="text-align: left;">
-              <span>Name: ${selectedUserData?.name || "Name"}</span><br/>
-              <span>Phone: ${selectedUserData?.phone || "Phone"}</span><br/>
-              <span>Email: ${selectedUserData?.email || "Email"}</span><br/>
-              <span>Role: ${selectedUserData?.role || "Role"}</span>
-            </div>
-            <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
-              <span>${monthName} ${selectedYear} - ${selectedUserData?.name || ""}</span>
-              <span>Markaz: ${selectedUserData?.markaz || "N/A"}</span>
-            </div>
-            <div style="text-align: right;">
-              <span>Division: ${selectedUserData?.division || "N/A"}</span><br/>
-              <span>District: ${selectedUserData?.district || "N/A"}</span><br/>
-              <span>Upazila: ${selectedUserData?.upazila || "N/A"}</span><br/>
-              <span>Union: ${selectedUserData?.union || "N/A"}</span><br/>
-            </div>
-          </div>
+      return { labelMap, valuesByField };
+    };
 
-          <table>
-            <thead>
-              <tr>
-                <th>${monthName}</th>
-                ${printableRows.map((row) => `<th>${row.label}</th>`).join("")}
-              </tr>
-            </thead>
-            <tbody>
-              ${monthDays
-        .map(
-          (day) => `
-                    <tr>
-                      <td class="row-label">${t("day")} ${day}</td>
-                      ${printableRows.map((row) => `<td>${row[day] ?? "-"}</td>`).join("")}
-                    </tr>
-                  `
-        )
-        .join("")}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `;
+    const moktob = processTabData(allTabsData?.moktobData);
+    const talim = processTabData(allTabsData?.talimData);
+    const dayee = processTabData(allTabsData?.dayeData);
+    const dawati = processTabData(allTabsData?.dawatiData);
+    const dawatiMojlish = processTabData(allTabsData?.dawatiMojlishData);
+    const jamat = processTabData(allTabsData?.jamatData);
+    const dineFera = processTabData(allTabsData?.dineFeraData);
+    const sofor = processTabData(allTabsData?.soforData);
 
-    const element = document.createElement("div");
-    element.innerHTML = tableHTML;
+    const categoryData = [
+      {
+        title: "মক্তব বিষয়",
+        items: [
+          { label: moktob.labelMap?.["notunMoktobChalu"] || "নতুন মক্তব চালু", values: moktob.valuesByField?.["notunMoktobChalu"] || {} },
+          { label: moktob.labelMap?.["totalMoktob"] || "মোট মক্তব", values: moktob.valuesByField?.["totalMoktob"] || {} },
+          { label: moktob.labelMap?.["totalStudent"] || "মোট ছাত্র", values: moktob.valuesByField?.["totalStudent"] || {} },
+          { label: moktob.labelMap?.["obhibhabokConference"] || "অভিভাবক কনফারেন্স", values: moktob.valuesByField?.["obhibhabokConference"] || {} },
+          { label: moktob.labelMap?.["moktoThekeMadrasaAdmission"] || "মক্তব থেকে মাদরাসায় ভর্তি", values: moktob.valuesByField?.["moktoThekeMadrasaAdmission"] || {} },
+          { label: moktob.labelMap?.["notunBoyoskoShikkha"] || "নতুন বয়স্ক শিক্ষা", values: moktob.valuesByField?.["notunBoyoskoShikkha"] || {} },
+          { label: moktob.labelMap?.["totalBoyoskoShikkha"] || "মোট বয়স্ক শিক্ষা", values: moktob.valuesByField?.["totalBoyoskoShikkha"] || {} },
+          { label: moktob.labelMap?.["boyoskoShikkhaOnshogrohon"] || "বয়স্ক শিক্ষায় অংশগ্রহণ", values: moktob.valuesByField?.["boyoskoShikkhaOnshogrohon"] || {} },
+          { label: moktob.labelMap?.["newMuslimeDinerFikir"] || "নতুন মুসলিমের দিনের ফিকির", values: moktob.valuesByField?.["newMuslimeDinerFikir"] || {} },
+        ]
+      },
+      {
+        title: "মহিলাদের তালিম",
+        items: [
+          { label: talim.labelMap?.["mohilaTalim"] || "মহিলাদের তালিম", values: talim.valuesByField?.["mohilaTalim"] || {} },
+          { label: talim.labelMap?.["mohilaOnshogrohon"] || "মহিলাদের অংশগ্রহণ", values: talim.valuesByField?.["mohilaOnshogrohon"] || {} },
+        ]
+      },
+      {
+        title: "সহযোগী দায়ী",
+        items: [
+          { label: dayee.labelMap?.["sohojogiDayeToiri"] || "সহযোগী দায়ী তৈরি", values: dayee.valuesByField?.["sohojogiDayeToiri"] || {} },
+        ]
+      },
+      {
+        title: "দাওয়াতি বিষয়",
+        items: [
+          { label: dawati.labelMap?.["nonMuslimDawat"] || "অমুসলিমকে দাওয়াত", values: dawati.valuesByField?.["nonMuslimDawat"] || {} },
+          { label: dawati.labelMap?.["murtadDawat"] || "মুরতাদকে দাওয়াত", values: dawati.valuesByField?.["murtadDawat"] || {} },
+          { label: dawati.labelMap?.["nonMuslimSaptahikGasht"] || "অমুসলিম সাপ্তাহিক গাশত", values: dawati.valuesByField?.["nonMuslimSaptahikGasht"] || {} },
+        ]
+      },
+      {
+        title: "দাওয়াতি মজলিশ",
+        items: [
+          { label: dawatiMojlish.labelMap?.["dawatterGuruttoMojlish"] || "দাওয়াতি মজলিশ", values: dawatiMojlish.valuesByField?.["dawatterGuruttoMojlish"] || {} },
+          { label: dawatiMojlish.labelMap?.["mojlisheOnshogrohon"] || "মজলিশে অংশগ্রহণ", values: dawatiMojlish.valuesByField?.["mojlisheOnshogrohon"] || {} },
+          { label: dawatiMojlish.labelMap?.["prosikkhonKormoshalaAyojon"] || "প্রশিক্ষণ কর্মশালা আয়োজন", values: dawatiMojlish.valuesByField?.["prosikkhonKormoshalaAyojon"] || {} },
+          { label: dawatiMojlish.labelMap?.["prosikkhonOnshogrohon"] || "প্রশিক্ষণে অংশগ্রহণ", values: dawatiMojlish.valuesByField?.["prosikkhonOnshogrohon"] || {} },
+          { label: dawatiMojlish.labelMap?.["jummahAlochona"] || "জুম্মাহ আলোচনা", values: dawatiMojlish.valuesByField?.["jummahAlochona"] || {} },
+          { label: dawatiMojlish.labelMap?.["dhormoSova"] || "ধর্মসভা", values: dawatiMojlish.valuesByField?.["dhormoSova"] || {} },
+          { label: dawatiMojlish.labelMap?.["mashwaraPoint"] || "মাশওয়ারা পয়েন্ট", values: dawatiMojlish.valuesByField?.["mashwaraPoint"] || {} },
+        ]
+      },
+      {
+        title: "জামাত বিষয়",
+        items: [
+          { label: jamat.labelMap?.["jamatBerHoise"] || "জামাত বের হয়েছে", values: jamat.valuesByField?.["jamatBerHoise"] || {} },
+          { label: jamat.labelMap?.["jamatSathi"] || "জামাত সাথী", values: jamat.valuesByField?.["jamatSathi"] || {} },
+        ]
+      },
+      {
+        title: "দ্বীনে ফিরে এসেছে",
+        items: [
+          { label: dineFera.labelMap?.["nonMuslimMuslimHoise"] || "অমুসলিম মুসলিম হয়েছে", values: dineFera.valuesByField?.["nonMuslimMuslimHoise"] || {} },
+          { label: dineFera.labelMap?.["murtadIslamFireche"] || "মুরতাদ ইসলাম ফিরেছে", values: dineFera.valuesByField?.["murtadIslamFireche"] || {} },
+        ]
+      },
+      {
+        title: "সফর বিষয়",
+        items: [
+          { label: sofor.labelMap?.["madrasaVisit"] || "মাদ্রাসা ভিজিট", values: sofor.valuesByField?.["madrasaVisit"] || {} },
+          { label: sofor.labelMap?.["moktobVisit"] || "মক্তব ভিজিট", values: sofor.valuesByField?.["moktobVisit"] || {} },
+          { label: sofor.labelMap?.["schoolCollegeVisit"] || "স্কুল/কলেজ ভিজিট", values: sofor.valuesByField?.["schoolCollegeVisit"] || {} },
+        ]
+      },
+    ];
 
-    try {
-      const html2pdf = await getHtml2Pdf();
-      html2pdf()
-        .set({
-          margin: 10,
-          filename: `${monthName}_${selectedYear}_${(selectedUserData?.name || "User").replace(/[\/\\:?*"<>|]/g, "_")}.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2 },
-          jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
-        })
-        .from(element)
-        .toPdf()
-        .get("pdf")
-        .then((pdf: any) => {
-          const totalPages = pdf.internal.getNumberOfPages();
-          for (let i = 1; i <= totalPages; i++) {
-            pdf.setPage(i);
-            pdf.setFontSize(10);
-            pdf.text(
-              `Page ${i} of ${totalPages}`,
-              pdf.internal.pageSize.getWidth() - 20,
-              pdf.internal.pageSize.getHeight() - 10
-            );
-          }
-        })
-        .save();
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-    }
+    return categoryData;
   };
 
   const handleCellClick = (rowKey: string, day: number) => {
@@ -294,9 +311,15 @@ const AdminTable: React.FC<AdminTableProps> = ({
             <button className="px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-md" onClick={convertToCSV}>
               📥 Download CSV
             </button>
-            <button className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md" onClick={convertToPDF}>
-              📄 Download PDF
-            </button>
+            {allTabsData && (
+              <MonthlyUserReportButton
+                monthName={months[selectedMonth]}
+                year={selectedYear}
+                emailList={emailList}
+                usersData={Object.fromEntries(emailList.map((e) => [e, e]))}
+                categoryData={preparePDFData()}
+              />
+            )}
           </div>
         </div>
       ) : null}
