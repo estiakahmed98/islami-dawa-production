@@ -361,8 +361,8 @@ const AdminTable: React.FC<AdminTableProps> = ({
             </select>
           </div>
 
-          <div className="flex gap-4">
-            <button className="px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-md" onClick={convertToCSV}>
+          <div className="grid grid-cols-2 gap-4">
+            <button className="bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center rounded-xl" onClick={convertToCSV}>
               📥 Download CSV
             </button>
             {allTabsData && (

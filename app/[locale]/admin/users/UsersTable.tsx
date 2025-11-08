@@ -739,8 +739,8 @@ export default function UsersTable() {
   };
 
   return (
-    <div className="w-full h-[calc(100vh)] overflow-auto mx-auto p-2">
-      <div className="max-h-[calc(70vh)] mt-20 overflow-auto">
+    <div className="w-full h-full mx-auto p-2">
+      <div className="h-[60vh] mt-20">
         <h1 className="text-2xl font-bold text-center mb-6">{t("title")}</h1>
 
         {/* Filters */}
@@ -1083,9 +1083,9 @@ export default function UsersTable() {
       </div>
 
       {/* --------- UniversalTableShow-backed tabs (live DB) --------- */}
-      <div className="mt-8 h-full overflow-auto">
+      <div className="mt-[33vh]">
         <h3 className="text-center text-2xl font-semibold">{t("totalsTitle")}</h3>
-        <div className="border border-[#155E75] lg:p-6 mt-4 rounded-xl h-full overflow-auto">
+        <div className="border border-[#155E75] lg:p-6 mt-4 rounded-xl h-full">
           <Tabs defaultValue="moktob" className="w-full p-4">
             <TabsList className="grid grid-cols-2 md:grid-cols-4">
               <TabsTrigger value="moktob">{t("tabs.moktob")}</TabsTrigger>
