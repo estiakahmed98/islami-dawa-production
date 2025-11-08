@@ -14,8 +14,13 @@ export async function POST(req: NextRequest) {
       email,
       percentage = "0",
       editorContent = "",
+      quarntilawat,
+      quarntilawatAyat,
+      pageNo,
       ...otherFields
     } = body;
+
+    // quarntilawat is already the JSON object from the form
 
     if (!email || Object.keys(otherFields).length === 0) {
       return NextResponse.json(
@@ -53,6 +58,7 @@ export async function POST(req: NextRequest) {
         date: today,
         percentage,
         editorContent,
+        ...(quarntilawat && { quarntilawat }),
         ...otherFields, // ✅ safe now
       },
     });
@@ -105,7 +111,9 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, ...data } = body;
+    const { email, quarntilawat, quarntilawatAyat, pageNo, ...data } = body;
+
+    // quarntilawat is already the JSON object from the form
 
     if (!email || Object.keys(data).length === 0) {
       return NextResponse.json({ error: "Email and data are required." }, { status: 400 });
@@ -122,7 +130,10 @@ export async function PUT(req: NextRequest) {
           date: today,
         },
       },
-      data,
+      data: {
+        ...(quarntilawat && { quarntilawat }),
+        ...data,
+      },
     });
 
     return NextResponse.json({ message: "Updated successfully", data: updated }, { status: 200 });

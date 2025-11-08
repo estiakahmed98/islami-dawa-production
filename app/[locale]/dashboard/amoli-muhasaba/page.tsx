@@ -36,6 +36,11 @@ const AmoliMuhasabaPage: React.FC = () => {
           records: {
             [userEmail]: json.records.reduce((acc: any, record: any) => {
               const date = new Date(record.date).toISOString().split('T')[0];
+              // Format quarntilawat JSON for display
+              const quarntilawatDisplay = record.quarntilawat 
+                ? `Para: ${record.quarntilawat.para || '-'}<br/>Page: ${record.quarntilawat.pageNo || '-'}<br/>Ayat: ${record.quarntilawat.ayat || '-'}`
+                : '- -';
+              
               acc[date] = {
                 tahajjud: record.tahajjud,
                 surah: record.surah,
@@ -52,7 +57,8 @@ const AmoliMuhasabaPage: React.FC = () => {
                 ayamroja: record.ayamroja,
                 hijbulBahar: record.hijbulBahar,
                 percentage: record.percentage,
-                editorContent: record.editorContent
+                editorContent: record.editorContent,
+                quarntilawat: quarntilawatDisplay
               };
               return acc;
             }, {})
@@ -72,6 +78,7 @@ const AmoliMuhasabaPage: React.FC = () => {
             amoliSura: t("amoliSura"),
             ayamroja: t("ayamroja"),
             hijbulBahar: t("hijbulBahar"),
+            quarntilawat: t("quarntilawat"),
             percentage: t("percentage"),
           }
         };
@@ -109,6 +116,7 @@ const AmoliMuhasabaPage: React.FC = () => {
               selectedYear={selectedYear}
               onMonthChange={setSelectedMonth}
               onYearChange={setSelectedYear}
+              htmlFields={["quarntilawat"]}
             />
           </div>
         </TabsContent>

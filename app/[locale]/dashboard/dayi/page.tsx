@@ -187,18 +187,6 @@ const DayiPage: React.FC = () => {
                     <div>
                       <span className="font-medium">{tDayi('address')}:</span> {a.address || '-'}
                     </div>
-                    <div>
-                      <span className="font-medium">{tDayi('division')}:</span> {a.division || '-'}
-                    </div>
-                    <div>
-                      <span className="font-medium">{tDayi('district')}:</span> {a.district || '-'}
-                    </div>
-                    <div>
-                      <span className="font-medium">{tDayi('upazila')}:</span> {a.upazila || '-'}
-                    </div>
-                    <div>
-                      <span className="font-medium">{tDayi('union')}:</span> {a.union || '-'}
-                    </div>
                     {a.description ? (
                       <div className="mt-1">
                         <span className="font-medium">{tDayi('description')}:</span> {a.description}

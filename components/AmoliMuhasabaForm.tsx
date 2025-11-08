@@ -38,6 +38,9 @@ interface AmoliMuhasabaFormValues {
   ayamroja: string;
   hijbulBahar: string;
   ayat: string;
+  quarntilawat: string;
+  quarntilawatAyat: string;
+  pageNo: number;
   editorContent: string;
 }
 
@@ -56,6 +59,9 @@ const initialFormData: AmoliMuhasabaFormValues = {
   ayamroja: "",
   hijbulBahar: "",
   ayat: "",
+  quarntilawat: "",
+  quarntilawatAyat: "",
+  pageNo: 0,
   editorContent: "",
 };
 
@@ -77,6 +83,9 @@ const validationSchema = Yup.object({
   ayamroja: Yup.string().optional(),
   hijbulBahar: Yup.string().optional(),
   ayat: Yup.string().optional(),
+  quarntilawat: Yup.string().optional(),
+  quarntilawatAyat: Yup.string().optional(),
+  pageNo: Yup.number().min(0).optional(),
   editorContent: Yup.string().optional(),
 });
 
@@ -103,6 +112,9 @@ const AmoliMuhasabaForm = () => {
     ayamroja: 0,
     hijbulBahar: 0,
     ayat: 0,
+    quarntilawat: 0,
+    quarntilawatAyat: 0,
+    pageNo: 0,
   });
 
   moment.locale("en");
@@ -131,6 +143,8 @@ const AmoliMuhasabaForm = () => {
       if (value >= 10) return 3;
       if (value >= 1) return 2;
       return 0;
+    } else if (field === "pageNo") {
+      return value > 0 ? 5 : 0;
     } else if (
       [
         "Dua",
@@ -143,7 +157,7 @@ const AmoliMuhasabaForm = () => {
     ) {
       return value === "হ্যাঁ" ? 5 : 0;
     }
-    return value.trim() ? 5 : 0;
+    return value && value.toString().trim() ? 5 : 0;
   };
 
   const handleInputChange = (
@@ -242,7 +256,17 @@ const AmoliMuhasabaForm = () => {
     }
 
     // If passed check, submit form
-    const formData = { ...values, email, percentage };
+    const quarntilawatJson = {
+      para: values.quarntilawat,
+      pageNo: values.pageNo,
+      ayat: values.quarntilawatAyat,
+    };
+    const formData = {
+      ...values,
+      quarntilawat: quarntilawatJson,
+      email,
+      percentage,
+    };
 
     try {
       const response = await fetch("/api/amoli", {
@@ -288,7 +312,9 @@ const AmoliMuhasabaForm = () => {
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="mb-4">
-                <label className="mb-2 block text-gray-700">{t("tahajjud")}</label>
+                <label className="mb-2 block text-gray-700">
+                  {t("tahajjud")}
+                </label>
                 <Field
                   name="tahajjud"
                   type="number"
@@ -378,8 +404,90 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">{common("points")}: {points.ayat}</div>
+                <div className="text-gray-600">
+                  {common("points")}: {points.ayat}
+                </div>
               </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="mb-2">
+                  <label className="mb-2 block text-gray-700">
+                    Quarn Tilawt
+                  </label>
+                  <Field
+                    name="quarntilawat"
+                    type="text"
+                    placeholder="Para no"
+                    className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                    onChange={(
+                      e:
+                        | ChangeEvent<HTMLInputElement | HTMLSelectElement>
+                        | ChangeEvent<HTMLSelectElement>
+                    ) => handleInputChange(e, "quarntilawat", setFieldValue)}
+                    disabled={isSubmittedToday}
+                  />
+                  <ErrorMessage
+                    name="quarntilawat"
+                    component="div"
+                    className="text-red-500"
+                  />
+                  <div className="text-gray-600">
+                    {common("points")}: {points.quarntilawat}
+                  </div>
+                </div>
+
+                <div className="mb-2">
+                  <label className="mb-2 block text-gray-700">Page No</label>
+                  <Field
+                    name="pageNo"
+                    type="number"
+                    disabled={isSubmittedToday}
+                    className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                    onChange={(
+                      e:
+                        | ChangeEvent<HTMLInputElement | HTMLSelectElement>
+                        | ChangeEvent<HTMLSelectElement>
+                    ) => handleInputChange(e, "pageNo", setFieldValue)}
+                  />
+                  <ErrorMessage
+                    name="pageNo"
+                    component="div"
+                    className="text-red-500"
+                  />
+                  <div className="text-gray-600">
+                    {common("points")}: {points.pageNo}
+                  </div>
+                </div>
+
+                <div className="mb-2">
+                  <label className="mb-2 block text-gray-700">
+                    {t("ayat")}
+                  </label>
+                  <Field
+                    name="quarntilawatAyat"
+                    type="text"
+                    placeholder="Start - End"
+                    className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                    onChange={(
+                      e:
+                        | ChangeEvent<HTMLInputElement | HTMLSelectElement>
+                        | ChangeEvent<HTMLSelectElement>
+                    ) =>
+                      handleInputChange(e, "quarntilawatAyat", setFieldValue)
+                    }
+                    disabled={isSubmittedToday}
+                  />
+                  <ErrorMessage
+                    name="quarntilawatAyat"
+                    component="div"
+                    className="text-red-500"
+                  />
+                  <div className="text-gray-600">
+                    {common("points")}: {points.quarntilawatAyat}
+                  </div>
+                </div>
+              </div>
+
               <div className="mb-2">
                 <label className="mb-2 block text-gray-700">{t("zikir")}</label>
                 <Field
@@ -408,7 +516,9 @@ const AmoliMuhasabaForm = () => {
                 <div className="text-gray-600">Points: {points.zikir}</div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">{t("ishraq")}</label>
+                <label className="mb-2 block text-gray-700">
+                  {t("ishraq")}
+                </label>
                 <Field
                   name="ishraq"
                   as="select"
@@ -432,8 +542,11 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">{common("points")}: {points.ishraq}</div>
+                <div className="text-gray-600">
+                  {common("points")}: {points.ishraq}
+                </div>
               </div>
+
               <div className="mb-2">
                 <label className="mb-2 block text-gray-700">{t("sirat")}</label>
                 <Field
@@ -453,7 +566,9 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">{common("points")}: {points.sirat}</div>
+                <div className="text-gray-600">
+                  {common("points")}: {points.sirat}
+                </div>
               </div>
               <div className="mb-2">
                 <label className="mb-2 block text-gray-700">{t("dua")}</label>
@@ -480,7 +595,9 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">{common("points")}: {points.Dua}</div>
+                <div className="text-gray-600">
+                  {common("points")}: {points.Dua}
+                </div>
               </div>
               <div className="mb-2">
                 <label className="mb-2 block text-gray-700">{t("ilm")}</label>
@@ -501,10 +618,14 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">{common("points")}: {points.ilm}</div>
+                <div className="text-gray-600">
+                  {common("points")}: {points.ilm}
+                </div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">{t("tasbih")}</label>
+                <label className="mb-2 block text-gray-700">
+                  {t("tasbih")}
+                </label>
                 <Field
                   name="tasbih"
                   as="select"
@@ -528,10 +649,14 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">{common("points")}: {points.tasbih}</div>
+                <div className="text-gray-600">
+                  {common("points")}: {points.tasbih}
+                </div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">{t("dayeeAmol")}</label>
+                <label className="mb-2 block text-gray-700">
+                  {t("dayeeAmol")}
+                </label>
                 <Field
                   name="dayeeAmol"
                   as="select"
@@ -555,10 +680,14 @@ const AmoliMuhasabaForm = () => {
                   component="div"
                   className="text-red-500"
                 />
-                <div className="text-gray-600">{common("points")}: {points.dayeeAmol}</div>
+                <div className="text-gray-600">
+                  {common("points")}: {points.dayeeAmol}
+                </div>
               </div>
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">{t("amoliSura")}</label>
+                <label className="mb-2 block text-gray-700">
+                  {t("amoliSura")}
+                </label>
                 <Field
                   name="amoliSura"
                   as="select"
@@ -586,7 +715,9 @@ const AmoliMuhasabaForm = () => {
               </div>
               {showAyamRojaSection && (
                 <div className="mb-2">
-                  <label className="mb-2 block text-gray-700">{t("ayamroja")}</label>
+                  <label className="mb-2 block text-gray-700">
+                    {t("ayamroja")}
+                  </label>
                   <Field
                     name="ayamroja"
                     as="select"
@@ -610,11 +741,15 @@ const AmoliMuhasabaForm = () => {
                     component="div"
                     className="text-red-500"
                   />
-                  <div className="text-gray-600">{common("points")}: {points.ayamroja}</div>
+                  <div className="text-gray-600">
+                    {common("points")}: {points.ayamroja}
+                  </div>
                 </div>
               )}
               <div className="mb-2">
-                <label className="mb-2 block text-gray-700">{t("hijbulBahar")}</label>
+                <label className="mb-2 block text-gray-700">
+                  {t("hijbulBahar")}
+                </label>
                 <Field
                   name="hijbulBahar"
                   as="select"
@@ -644,7 +779,9 @@ const AmoliMuhasabaForm = () => {
               </div>
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700 mt-4 mb-2">{common("editorContent")}</label>
+              <label className="block text-gray-700 mt-4 mb-2">
+                {common("editorContent")}
+              </label>
               <Field
                 as="textarea"
                 name="editorContent"

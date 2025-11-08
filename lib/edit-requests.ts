@@ -17,6 +17,7 @@ export interface EditRequest {
   location: EditRequestLocation;
   role: string;
   status: "pending" | "approved" | "rejected" | "completed";
+  editedOnce?: boolean;
   createdAt: string;
 }
 

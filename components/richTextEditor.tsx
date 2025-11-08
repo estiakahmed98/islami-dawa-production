@@ -12,6 +12,7 @@ interface JoditEditorProps {
   onContentChange?: (content: string) => void;
   height?: string | number;
   width?: string | number;
+  disabled?: boolean;
 }
 
 const JoditEditorComponent: React.FC<JoditEditorProps> = ({
@@ -20,18 +21,19 @@ const JoditEditorComponent: React.FC<JoditEditorProps> = ({
   onContentChange,
   height = "400px",
   width = "100%",
+  disabled = false,
 }) => {
   const editor = useRef(null);
   const [content, setContent] = useState(initialValue);
 
   const config = useMemo(
     () => ({
-      readonly: false,
+      readonly: disabled,
       toolbar: true,
       placeholder,
       height,
     }),
-    [placeholder, height]
+    [placeholder, height, disabled]
   );
 
   const handleBlur = (newContent: string) => {

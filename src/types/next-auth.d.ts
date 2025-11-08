@@ -12,6 +12,7 @@ declare module "next-auth" {
       upazila?: string | null;
       union?: string | null;
       phone?: string | null;
+      markaz?: string | null;
       image?: string | null;
     } & DefaultSession["user"];
   }
@@ -23,6 +24,7 @@ declare module "next-auth" {
     upazila?: string | null;
     union?: string | null;
     phone?: string | null;
+    markaz?: string | null;
   }
 }
 

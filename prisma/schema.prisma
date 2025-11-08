@@ -117,6 +117,7 @@ model AmoliMuhasaba {
   tahajjud    Int?     // Number value for tahajjud prayers
   surah       String?  // Surah name for tilawat
   ayat        String?  // Number of ayats read (can be range like "10-20")
+  quarntilawat Json?
   zikir       String?  // Morning/evening zikir status
   ishraq      String?  // Ishraq-Awwabin-Chasht prayers
   jamat       Int?     // Number of prayers in jamat

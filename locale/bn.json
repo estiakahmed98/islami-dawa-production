@@ -127,6 +127,7 @@
         "amoliSura": "আমলি সুরা",
         "ayamroja": "আইয়ামে রোজা",
         "hijbulBahar": "হিজবুল বাহার",
+        "quarntilawat": "কুরআন তিলাওয়াত",
         "percentage": "শতাংশ",
         "title": "আ'মলি মুহাসাবা"
       },
@@ -253,7 +254,8 @@
         "dayeeAmol": "দায়ী আমল",
         "amoliSura": "আমলি সুরা",
         "ayamroja": "আইয়ামে রোজা",
-        "hijbulBahar": "হিজবুল বাহার"
+        "hijbulBahar": "হিজবুল বাহার",
+        "quarntilawat": "কুরআন তিলাওয়াত"
       },
       "moktob": {
         "title": "মক্তব বিষয়",

@@ -71,6 +71,29 @@ export const nextAuthOptions: NextAuthOptions = {
       if (user) {
         token.id = (user as any).id;
         token.role = (user as any).role ?? null;
+
+        // Fetch full user data
+        const fullUser = await (db as any).users.findUnique({
+          where: { id: (user as any).id },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            division: true,
+            district: true,
+            upazila: true,
+            union: true,
+            phone: true,
+            markaz: { select: { name: true } },
+          },
+        });
+        if (fullUser) {
+          token.user = {
+            ...fullUser,
+            markaz: fullUser.markaz?.name || null,
+          };
+        }
       }
 
       // For Google sign-in, ensure a corresponding user exists and link to existing credentials user by email
@@ -80,7 +103,6 @@ export const nextAuthOptions: NextAuthOptions = {
           const resolvedEmail =
             (profile as any)?.email ||
             (user as any)?.email ||
-            (token as any)?.email ||
             (token as any)?.user?.email ||
             token?.email ||
             null;
@@ -108,6 +130,29 @@ export const nextAuthOptions: NextAuthOptions = {
           token.id = existing.id;
           token.role = existing.role ?? null;
 
+          // Fetch full user data for Google sign-in
+          const fullUser = await (db as any).users.findUnique({
+            where: { id: existing.id },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              role: true,
+              division: true,
+              district: true,
+              upazila: true,
+              union: true,
+              phone: true,
+              markaz: { select: { name: true } },
+            },
+          });
+          if (fullUser) {
+            token.user = {
+              ...fullUser,
+              markaz: fullUser.markaz?.name || null,
+            };
+          }
+
           // Persist Google OAuth tokens and metadata to accounts table for Calendar access
           const userId = existing.id as string;
           const providerId = "google";
@@ -115,7 +160,7 @@ export const nextAuthOptions: NextAuthOptions = {
           const refreshToken = (account as any).refresh_token || null;
           const idToken = (account as any).id_token || null;
           const scope = (account as any).scope || null;
-          const providerAccountId = (account as any).providerAccountId || (profile as any)?.sub || resolvedEmail || "";
+          const providerAccountId = (profile as any)?.sub || (account as any)?.providerAccountId || resolvedEmail || "";
           const expiresAt = (account as any).expires_at
             ? new Date(((account as any).expires_at as number) * 1000)
             : null;
@@ -164,6 +209,9 @@ export const nextAuthOptions: NextAuthOptions = {
       if (session?.user) {
         (session as any).user.id = (token as any).id as string;
         (session as any).user.role = ((token as any).role ?? null) as any;
+        if ((token as any).user) {
+          Object.assign(session.user, (token as any).user);
+        }
       }
       return session;
     },

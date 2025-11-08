@@ -78,10 +78,6 @@ const DayeeBishoyForm: React.FC = () => {
           phone: '',
           address: '',
           description: '',
-          division: '',
-          district: '',
-          upazila: '',
-          union: '',
         }
       );
 
@@ -108,11 +104,7 @@ const DayeeBishoyForm: React.FC = () => {
         (a) =>
           !a.name?.trim() ||
           !a.phone?.trim() ||
-          !a.address?.trim() ||
-          !a.division?.trim() ||
-          !a.district?.trim() ||
-          !a.upazila?.trim() ||
-          !a.union?.trim()
+          !a.address?.trim()
       );
       if (invalid) {
         toast.error(common('formSubmissionFailed')); // or a new key like common.fillAllRequiredFields
@@ -227,65 +219,6 @@ const DayeeBishoyForm: React.FC = () => {
                         className="w-full rounded border border-gray-300 px-4 py-2"
                         rows={3}
                         required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-1 block text-gray-700">{tDayi('division')} *</label>
-                      <input
-                        type="text"
-                        value={assistant.division}
-                        onChange={(e) => handleAssistantChange(index, 'division', e.target.value)}
-                        disabled={isSubmittedToday}
-                        className="w-full rounded border border-gray-300 px-4 py-2"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-1 block text-gray-700">{tDayi('district')} *</label>
-                      <input
-                        type="text"
-                        value={assistant.district}
-                        onChange={(e) => handleAssistantChange(index, 'district', e.target.value)}
-                        disabled={isSubmittedToday}
-                        className="w-full rounded border border-gray-300 px-4 py-2"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-1 block text-gray-700">{tDayi('upazila')} *</label>
-                      <input
-                        type="text"
-                        value={assistant.upazila}
-                        onChange={(e) => handleAssistantChange(index, 'upazila', e.target.value)}
-                        disabled={isSubmittedToday}
-                        className="w-full rounded border border-gray-300 px-4 py-2"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-1 block text-gray-700">{tDayi('union')} *</label>
-                      <input
-                        type="text"
-                        value={assistant.union}
-                        onChange={(e) => handleAssistantChange(index, 'union', e.target.value)}
-                        disabled={isSubmittedToday}
-                        className="w-full rounded border border-gray-300 px-4 py-2"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-1 block text-gray-700">{tDayi('email')}</label>
-                      <input
-                        type="email"
-                        value={assistant.email || ''}
-                        onChange={(e) => handleAssistantChange(index, 'email', e.target.value)}
-                        disabled={isSubmittedToday}
-                        className="w-full rounded border border-gray-300 px-4 py-2"
                       />
                     </div>
 
