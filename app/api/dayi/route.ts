@@ -2,6 +2,21 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+/** Start/end of the current Dhaka day (Asia/Dhaka) */
+function getDhakaDayRange(now = new Date()) {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const [y, m, d] = fmt.format(now).split("-"); // "YYYY-MM-DD"
+  // Dhaka is UTC+06:00 year-round (no DST)
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`); // next day 00:00
+  return { start, end };
+}
+
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
@@ -33,30 +48,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Build UTC day window
-    const now = new Date();
-    const start = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate(),
-        0,
-        0,
-        0,
-        0
-      )
-    );
-    const end = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate(),
-        23,
-        59,
-        59,
-        999
-      )
-    );
+    // Build Dhaka day window
+    const { start, end } = getDhakaDayRange();
 
     // Check for existing submission
     const existing = await prisma.dayeeBishoyRecord.findFirst({
@@ -124,27 +117,43 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(req.url);
+    const emailsParam = searchParams.get("emails");
     const email = searchParams.get("email");
 
-    if (!email) {
-      return NextResponse.json(
-        { error: "Email is required." },
-        { status: 400 }
-      );
+    let emailList: string[] = [];
+    if (emailsParam) {
+      emailList = emailsParam.split(",").map(e => e.trim());
+    } else if (email) {
+      emailList = [email];
+    } else {
+      return NextResponse.json({ error: "Emails or email is required." }, { status: 400 });
     }
 
-    const user = await prisma.users.findUnique({ where: { email } });
-    if (!user) {
-      return NextResponse.json({ error: "User not found." }, { status: 404 });
+    const records: Record<string, any[]> = {};
+
+    for (const em of emailList) {
+      const user = await prisma.users.findUnique({ where: { email: em } });
+      if (!user) {
+        records[em] = [];
+        continue;
+      }
+
+      const userRecords = await prisma.dayeeBishoyRecord.findMany({
+        where: { userId: user.id },
+        orderBy: { date: "asc" },
+        include: { assistants: true },
+      });
+
+      records[em] = userRecords;
     }
 
-    const records = await prisma.dayeeBishoyRecord.findMany({
-      where: { userId: user.id },
-      orderBy: { date: "asc" },
-      include: { assistants: true },
-    });
-
-    return NextResponse.json({ records }, { status: 200 });
+    if (emailsParam) {
+      // Multiple emails: return { records: { email: array } }
+      return NextResponse.json({ records }, { status: 200 });
+    } else {
+      // Single email: return { records: array }
+      return NextResponse.json({ records: records[email!] }, { status: 200 });
+    }
   } catch (error: any) {
     console.error("GET /api/dayi error stack:", error?.stack || error);
     return NextResponse.json(

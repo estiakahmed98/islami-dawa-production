@@ -113,7 +113,8 @@ const Dashboard: React.FC<TallyProps> = () => {
     // DAYE: assistants list
     if (rowKey === "assistantsList") {
       const items = userDayeData?._assistantsByDate?.[dateKey] || [];
-      setDetailModalTitle(t("detailModal.title"));
+      console.log("Assistants click:", { dateKey, rowKey, items, userDayeData });
+      setDetailModalTitle(t("dashboard.dayiSubject"));
       setDetailModalDate(dateKey);
       setDetailModalItems(items);
       if (items.length) setDetailModalOpen(true);
@@ -123,7 +124,8 @@ const Dashboard: React.FC<TallyProps> = () => {
     // SOFOR: madrasa / school lists
     if (rowKey === "madrasaVisitList") {
       const items = userSoforBishoyData?._madrasaByDate?.[dateKey] || [];
-      setDetailModalTitle(t("detailModal.title"));
+      console.log("Madrasa click:", { dateKey, rowKey, items, userSoforBishoyData });
+      setDetailModalTitle(t("dashboard.soforSubject"));
       setDetailModalDate(dateKey);
       setDetailModalItems(items);
       if (items.length) setDetailModalOpen(true);
@@ -131,7 +133,8 @@ const Dashboard: React.FC<TallyProps> = () => {
     }
     if (rowKey === "schoolCollegeVisitList") {
       const items = userSoforBishoyData?._schoolByDate?.[dateKey] || [];
-      setDetailModalTitle(t("detailModal.title"));
+      console.log("School click:", { dateKey, rowKey, items, userSoforBishoyData });
+      setDetailModalTitle(t("dashboard.soforSubject"));
       setDetailModalDate(dateKey);
       setDetailModalItems(items);
       if (items.length) setDetailModalOpen(true);
@@ -920,44 +923,51 @@ const Dashboard: React.FC<TallyProps> = () => {
             <div className="max-h-[70vh] overflow-auto p-6 space-y-3">
               {/* Assistants: full cards */}
               {detailModalTitle === t("dashboard.dayiSubject") ? (
-                detailModalItems.length ? (
-                  detailModalItems.map((a: any, idx: number) => (
-                    <div key={a.id || idx} className="rounded-xl border p-4 shadow-sm hover:shadow">
-                      <div className="flex items-start justify-between">
-                        <div className="text-base font-semibold">{idx + 1}. {a?.name || "-"}</div>
-                        {a?.email ? (
-                          <a className="text-sm underline hover:text-blue-700" href={`mailto:${a.email}`}>
-                            {a.email}
-                          </a>
-                        ) : null}
+                (() => {
+                  console.log("Rendering assistants modal:", { detailModalTitle, detailModalItems });
+                  const filteredItems = detailModalItems.filter((item) => item && typeof item === 'object');
+                  console.log("Filtered assistants:", filteredItems);
+                  return filteredItems.length ? (
+                    filteredItems.map((a: any, idx: number) => (
+                      <div key={a.id || idx} className="rounded-xl border p-4 shadow-sm hover:shadow">
+                        <div className="flex items-start justify-between">
+                          <div className="text-base font-semibold">{idx + 1}. {String(a?.name || "")}</div>
+                          {a?.email ? (
+                            <a className="text-sm underline hover:text-blue-700" href={`mailto:${String(a.email)}`}>
+                              {String(a.email)}
+                            </a>
+                          ) : null}
+                        </div>
+                        <div className="mt-2 grid gap-1 text-sm text-gray-700">
+                          <div><span className="font-medium">{t("dashboard.phone")}:</span> {String(a?.phone || "")}</div>
+                          <div><span className="font-medium">{t("dashboard.address")}:</span> {String(a?.address || "")}</div>
+                          {a?.description ? (
+                            <div className="mt-1"><span className="font-medium">{t("dashboard.description")}:</span> {String(a.description)}</div>
+                          ) : null}
+                        </div>
                       </div>
-                      <div className="mt-2 grid gap-1 text-sm text-gray-700">
-                        <div><span className="font-medium">{t("dashboard.phone")}:</span> {a?.phone || "-"}</div>
-                        <div><span className="font-medium">{t("dashboard.address")}:</span> {a?.address || "-"}</div>
-                        <div><span className="font-medium">{t("dashboard.division")}:</span> {a?.division || "-"}</div>
-                        <div><span className="font-medium">{t("dashboard.district")}:</span> {a?.district || "-"}</div>
-                        <div><span className="font-medium">{t("dashboard.upazila")}:</span> {a?.upazila || "-"}</div>
-                        <div><span className="font-medium">{t("dashboard.union")}:</span> {a?.union || "-"}</div>
-                        {a?.description ? (
-                          <div className="mt-1"><span className="font-medium">{t("dashboard.description")}:</span> {a.description}</div>
-                        ) : null}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-gray-600">{t("dashboard.noData")}</div>
-                )
-              ) : (
-                // Madrasa / School lists as simple lines
-                <div className="space-y-2">
-                  {detailModalItems.length ? (
-                    detailModalItems.map((t: string, idx: number) => (
-                      <div key={idx} className="rounded border p-3">{idx + 1}. {t}</div>
                     ))
                   ) : (
                     <div className="text-gray-600">{t("dashboard.noData")}</div>
-                  )}
-                </div>
+                  );
+                })()
+              ) : (
+                (() => {
+                  console.log("Rendering string modal:", { detailModalTitle, detailModalItems });
+                  const filteredItems = detailModalItems.filter((item) => typeof item === 'string');
+                  console.log("Filtered strings:", filteredItems);
+                  return (
+                    <div className="space-y-2">
+                      {filteredItems.length ? (
+                        filteredItems.map((t: string, idx: number) => (
+                          <div key={idx} className="rounded border p-3">{idx + 1}. {t}</div>
+                        ))
+                      ) : (
+                        <div className="text-gray-600">{t("dashboard.noData")}</div>
+                      )}
+                    </div>
+                  );
+                })()
               )}
             </div>
 

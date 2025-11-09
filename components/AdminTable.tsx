@@ -8,6 +8,19 @@ import { useSelectedUser } from "@/providers/treeProvider";
 import { useTranslations } from "next-intl";
 import { MonthlyUserReportButton } from "@/components/MonthlyReportPDF";
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  division?: string | null;
+  district?: string | null;
+  upazila?: string | null;
+  union?: string | null;
+  markaz?: { id: string; name: string } | string | null;
+  markazId?: string | null;
+}
+
 interface AdminTableProps {
   userData: any;
   emailList: string[];
@@ -29,6 +42,8 @@ interface AdminTableProps {
     dineFeraData?: any;
     soforData?: any;
   };
+  // NEW: users data to avoid fetching user details
+  users?: User[];
 }
 
 const AdminTable: React.FC<AdminTableProps> = ({
@@ -39,6 +54,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
   clickableFields = [],
   onCellClick,
   allTabsData,
+  users = [],
 }) => {
   // if parent controls month/year, use props; else fallback to internal state
   const [internalMonth, setInternalMonth] = useState<number>(
@@ -56,9 +72,6 @@ const AdminTable: React.FC<AdminTableProps> = ({
   const [filterValue, setFilterValue] = useState<string>("");
 
   const { selectedUser } = useSelectedUser();
-  const [allUserDetails, setAllUserDetails] = useState<
-    Record<string, { name: string; email: string }>
-  >({});
   const [selectedUserData, setSelectedUserData] = useState<any>(null);
 
   const month = useTranslations("dashboard.UserDashboard.months");
@@ -82,61 +95,21 @@ const AdminTable: React.FC<AdminTableProps> = ({
     fetchUserDetails();
   }, [selectedUser]);
 
-  // Fetch all user details for PDF
-  useEffect(() => {
-    const fetchAllUserDetails = async () => {
-      if (!emailList.length) {
-        setAllUserDetails({});
-        return;
-      }
+  // Compute all user details for PDF - use useMemo directly without state
+  const allUserDetails = useMemo(() => {
+    if (!emailList.length) return {};
 
-      try {
-        const userDetails: Record<string, { name: string; email: string }> = {};
+    const userDetails: Record<string, { name: string; email: string }> = {};
+    emailList.forEach((email) => {
+      const user = users.find(u => u.email === email);
+      userDetails[email] = {
+        name: user?.name || email,
+        email: user?.email || email,
+      };
+    });
 
-        // Fetch details for all users
-        await Promise.all(
-          emailList.map(async (email) => {
-            try {
-              const response = await fetch(
-                `/api/users?email=${encodeURIComponent(email)}`,
-                { cache: "no-store" }
-              );
-              if (response.ok) {
-                const user = await response.json();
-                userDetails[email] = {
-                  name: user.name || email,
-                  email: user.email || email,
-                };
-              } else {
-                userDetails[email] = {
-                  name: email,
-                  email: email,
-                };
-              }
-            } catch {
-              userDetails[email] = {
-                name: email,
-                email: email,
-              };
-            }
-          })
-        );
-
-        setAllUserDetails(userDetails);
-      } catch (error) {
-        console.error("Error fetching user details:", error);
-        // Fallback to email as name
-        const fallbackDetails: Record<string, { name: string; email: string }> =
-          {};
-        emailList.forEach((email) => {
-          fallbackDetails[email] = { name: email, email };
-        });
-        setAllUserDetails(fallbackDetails);
-      }
-    };
-
-    fetchAllUserDetails();
-  }, [emailList.join(",")]);
+    return userDetails;
+  }, [emailList, users]);
 
   const months = [
     month("january"),

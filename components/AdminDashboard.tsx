@@ -370,8 +370,6 @@ const AdminDashboard: React.FC = () => {
         labelMap: {
           nonMuslimDawat: t("dawati.nonMuslimDawat"),
           murtadDawat: t("dawati.murtadDawat"),
-          alemderSatheyMojlish: t("dawati.alemderSatheyMojlish"),
-          publicSatheyMojlish: t("dawati.publicSatheyMojlish"),
           nonMuslimSaptahikGasht: t("dawati.nonMuslimSaptahikGasht"),
         },
       },
@@ -432,7 +430,8 @@ const AdminDashboard: React.FC = () => {
     key: EndpointDef["key"]
   ) => {
     if (!acc[email]) acc[email] = {};
-    rawRecords.forEach((rec) => {
+    const records = Array.isArray(rawRecords) ? rawRecords : [];
+    records.forEach((rec) => {
       const dateKey = dhakaYMD(new Date(rec.date));
       const copy: any = { ...rec };
 
@@ -471,21 +470,17 @@ const AdminDashboard: React.FC = () => {
         await Promise.all(
           endpoints.map(async (ep) => {
             const meta: LabeledData["meta"] = {};
-            const perEmailResults = await Promise.all(
-              emailList.map(async (email) => {
-                try {
-                  const res = await fetch(`${ep.url}?email=${encodeURIComponent(email)}`, { cache: "no-store" });
-                  if (!res.ok) throw new Error(`Failed ${ep.key} for ${email}`);
-                  const json = await res.json();
-                  const records: any[] = Array.isArray(json.records) ? json.records : [];
-                  return { email, records };
-                } catch (e) {
-                  console.error(`Error fetching ${ep.key} for ${email}:`, e);
-                  toast.error(t("error.dataLoad"));
-                  return { email, records: [] as any[] };
-                }
-              })
-            );
+            const res = await fetch(`${ep.url}?emails=${encodeURIComponent(emailList.join(','))}`, { cache: "no-store" });
+            if (!res.ok) throw new Error(`Failed ${ep.key} for emails`);
+            const json = await res.json();
+            
+            // Handle different API response formats
+            const perEmailResults = emailList.map(email => {
+              const emailData = json.records[email];
+              // Check if the data is wrapped in { records: [], isSubmittedToday: boolean } format
+              const records = emailData?.records ? emailData.records : (Array.isArray(emailData) ? emailData : []);
+              return { email, records };
+            });
 
             const merged: RecordsByEmail = {};
             perEmailResults.forEach(({ email, records }) => mergeEmailRecords(merged, email, records, meta, ep.key));
@@ -652,11 +647,11 @@ const AdminDashboard: React.FC = () => {
           </TabsList>
 
           <TabsContent value="moktob">
-            <AdminTable userData={moktobData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} />
+            <AdminTable userData={moktobData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
           </TabsContent>
 
           <TabsContent value="talim">
-            <AdminTable userData={talimData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} />
+            <AdminTable userData={talimData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
           </TabsContent>
 
           <TabsContent value="daye">
@@ -667,23 +662,24 @@ const AdminDashboard: React.FC = () => {
               selectedYear={selectedYear}
               clickableFields={["assistantsList", "assistants"]}
               onCellClick={handleDayeCellClick}
+              users={users}
             />
           </TabsContent>
 
           <TabsContent value="dawati">
-            <AdminTable userData={dawatiData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} />
+            <AdminTable userData={dawatiData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
           </TabsContent>
 
           <TabsContent value="dawatimojlish">
-            <AdminTable userData={dawatiMojlishData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} />
+            <AdminTable userData={dawatiMojlishData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
           </TabsContent>
 
           <TabsContent value="jamat">
-            <AdminTable userData={jamatData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} />
+            <AdminTable userData={jamatData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
           </TabsContent>
 
           <TabsContent value="dinefera">
-            <AdminTable userData={dineFeraData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} />
+            <AdminTable userData={dineFeraData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
           </TabsContent>
 
           <TabsContent value="sofor">
@@ -694,6 +690,7 @@ const AdminDashboard: React.FC = () => {
               selectedYear={selectedYear}
               clickableFields={["madrasaVisitList", "schoolCollegeVisitList"]}
               onCellClick={handleSoforCellClick}
+              users={users}
             />
           </TabsContent>
         </Tabs>
@@ -718,39 +715,43 @@ const AdminDashboard: React.FC = () => {
 
             <div className="max-h-[70vh] overflow-auto p-6 space-y-4">
               {modalType === "assistants" ? (
-                modalItems.map((a: any, idx: number) => (
-                  <div key={a.id || idx} className="rounded-xl border p-4 shadow-sm hover:shadow">
-                    <div className="flex items-start justify-between">
-                      <div className="text-base font-semibold">
-                        {idx + 1}. {a.name || "-"}
+                modalItems
+                  .filter((item) => item && typeof item === 'object' && item.name)
+                  .map((a: any, idx: number) => (
+                    <div key={a.id || idx} className="rounded-xl border p-4 shadow-sm hover:shadow">
+                      <div className="flex items-start justify-between">
+                        <div className="text-base font-semibold">
+                          {idx + 1}. {String(a.name || "")}
+                        </div>
+                        {a.email ? (
+                          <a className="text-sm underline hover:text-blue-700" href={`mailto:${a.email}`}>
+                            {String(a.email)}
+                          </a>
+                        ) : null}
                       </div>
-                      {a.email ? (
-                        <a className="text-sm underline hover:text-blue-700" href={`mailto:${a.email}`}>
-                          {a.email}
-                        </a>
-                      ) : null}
+                      <div className="mt-2 grid gap-1 text-sm text-gray-700">
+                        <div><span className="font-medium">ফোন:</span> {String(a.phone || "")}</div>
+                        <div><span className="font-medium">ঠিকানা:</span> {String(a.address || "")}</div>
+                        <div><span className="font-medium">বিভাগ:</span> {String(a.division || "")}</div>
+                        <div><span className="font-medium">জেলা:</span> {String(a.district || "")}</div>
+                        <div><span className="font-medium">উপজেলা:</span> {String(a.upazila || "")}</div>
+                        <div><span className="font-medium">ইউনিয়ন:</span> {String(a.union || "")}</div>
+                        {a.description ? (
+                          <div className="mt-1"><span className="font-medium">বিবরণ:</span> {String(a.description)}</div>
+                        ) : null}
+                      </div>
                     </div>
-                    <div className="mt-2 grid gap-1 text-sm text-gray-700">
-                      <div><span className="font-medium">ফোন:</span> {a.phone || "-"}</div>
-                      <div><span className="font-medium">ঠিকানা:</span> {a.address || "-"}</div>
-                      <div><span className="font-medium">বিভাগ:</span> {a.division || "-"}</div>
-                      <div><span className="font-medium">জেলা:</span> {a.district || "-"}</div>
-                      <div><span className="font-medium">উপজেলা:</span> {a.upazila || "-"}</div>
-                      <div><span className="font-medium">ইউনিয়ন:</span> {a.union || "-"}</div>
-                      {a.description ? (
-                        <div className="mt-1"><span className="font-medium">বিবরণ:</span> {a.description}</div>
-                      ) : null}
-                    </div>
-                  </div>
-                ))
+                  ))
               ) : (
                 <div className="space-y-2">
                   {modalItems.length === 0 ? (
                     <div className="text-gray-600">কোনো তথ্য পাওয়া যায়নি</div>
                   ) : (
-                    modalItems.map((text: string, idx: number) => (
-                      <div key={idx} className="rounded border p-3">{idx + 1}. {text}</div>
-                    ))
+                    modalItems
+                      .filter((item) => typeof item === 'string')
+                      .map((text: string, idx: number) => (
+                        <div key={idx} className="rounded border p-3">{idx + 1}. {text}</div>
+                      ))
                   )}
                 </div>
               )}

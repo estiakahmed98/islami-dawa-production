@@ -81,23 +81,42 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+    const emailsParam = searchParams.get("emails");
     const email = searchParams.get("email");
 
-    if (!email) {
-      return NextResponse.json({ error: "Email is required." }, { status: 400 });
+    let emailList: string[] = [];
+    if (emailsParam) {
+      emailList = emailsParam.split(",").map(e => e.trim());
+    } else if (email) {
+      emailList = [email];
+    } else {
+      return NextResponse.json({ error: "Emails or email is required." }, { status: 400 });
     }
 
-    const user = await prisma.users.findUnique({ where: { email } });
-    if (!user) {
-      return NextResponse.json({ error: "User not found." }, { status: 404 });
+    const records: Record<string, any[]> = {};
+
+    for (const em of emailList) {
+      const user = await prisma.users.findUnique({ where: { email: em } });
+      if (!user) {
+        records[em] = [];
+        continue;
+      }
+
+      const userRecords = await prisma.amoliMuhasaba.findMany({
+        where: { userId: user.id },
+        orderBy: { date: "asc" },
+      });
+
+      records[em] = userRecords;
     }
 
-    const records = await prisma.amoliMuhasaba.findMany({
-      where: { userId: user.id },
-      orderBy: { date: "asc" },
-    });
-
-    return NextResponse.json({ records }, { status: 200 });
+    if (emailsParam) {
+      // Multiple emails: return { records: { email: array } }
+      return NextResponse.json({ records }, { status: 200 });
+    } else {
+      // Single email: return { records: array }
+      return NextResponse.json({ records: records[email!] }, { status: 200 });
+    }
   } catch (error) {
     console.error("GET /api/amoli error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

@@ -44,10 +44,14 @@ const TallyAdmin: React.FC<TallyAdminProps> = ({
 
       // Merge data for each label from all dates for valid users
       Object.values(userRecords).forEach((dailyData) => {
-        const data = dailyData as Record<string, string>; // Explicitly cast to the expected type
+        const data = dailyData as Record<string, any>; // Explicitly cast to the expected type
         Object.entries(data).forEach(([key, value]) => {
           if (aggregatedData[key] !== undefined) {
-            aggregatedData[key] += parseInt(value, 10); // Sum up values for the valid emails
+            // Only sum numeric values, skip strings and other types
+            const numValue = typeof value === 'number' ? value : (typeof value === 'string' ? parseInt(value, 10) : 0);
+            if (!isNaN(numValue)) {
+              aggregatedData[key] += numValue; // Sum up values for the valid emails
+            }
           }
         });
       });

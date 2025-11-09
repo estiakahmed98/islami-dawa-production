@@ -12,6 +12,8 @@ type RecordsByUserAndDate = {
   [email: string]: { [dateKey: string]: any }
 }
 
+type LabelMap = Record<string, string>
+
 /** Format a date to YYYY-MM-DD in Dhaka time (safe) */
 function dhakaYMD(d: Date) {
   if (!(d instanceof Date) || isNaN(d.getTime())) return ""
@@ -27,29 +29,27 @@ const MoktobPage: React.FC = () => {
   const { data: session } = useSession()
   const userEmail = session?.user?.email ?? ""
 
-  const [userData, setUserData] = React.useState<{ records: RecordsByUserAndDate; labelMap?: any }>({
+  const t = useTranslations("dashboard.UserDashboard.moktob")
+  const common = useTranslations("common")
+
+  const labelMap: LabelMap = {
+    notunMoktobChalu: t("notunMoktobChalu"),
+    totalMoktob: t("totalMoktob"),
+    totalStudent: t("totalStudent"),
+    obhibhabokConference: t("obhibhabokConference"),
+    moktoThekeMadrasaAdmission: t("moktoThekeMadrasaAdmission"),
+    notunBoyoskoShikkha: t("notunBoyoskoShikkha"),
+    totalBoyoskoShikkha: t("totalBoyoskoShikkha"),
+    boyoskoShikkhaOnshogrohon: t("boyoskoShikkhaOnshogrohon"),
+    newMuslimeDinerFikir: t("newMuslimeDinerFikir"),
+  }
+
+  const [userData, setUserData] = React.useState<{ records: RecordsByUserAndDate; labelMap: LabelMap }>({
     records: {},
+    labelMap,
   })
   const [selectedMonth, setSelectedMonth] = React.useState<number>(new Date().getMonth())
   const [selectedYear, setSelectedYear] = React.useState<number>(new Date().getFullYear())
-
-  const t = useTranslations("dashboard.UserDashboard.moktob");
-  const common = useTranslations("common");
-
-  const labelMap = React.useMemo(
-    () => ({
-      notunMoktobChalu: t("notunMoktobChalu"),
-      totalMoktob: t("totalMoktob"),
-      totalStudent: t("totalStudent"),
-      obhibhabokConference: t("obhibhabokConference"),
-      moktoThekeMadrasaAdmission: t("moktoThekeMadrasaAdmission"),
-      notunBoyoskoShikkha: t("notunBoyoskoShikkha"),
-      totalBoyoskoShikkha: t("totalBoyoskoShikkha"),
-      boyoskoShikkhaOnshogrohon: t("boyoskoShikkhaOnshogrohon"),
-      newMuslimeDinerFikir: t("newMuslimeDinerFikir"),
-    }),
-    []
-  )
 
   React.useEffect(() => {
     if (!userEmail) {

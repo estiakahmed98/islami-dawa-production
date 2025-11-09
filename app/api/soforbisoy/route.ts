@@ -134,54 +134,79 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(req.url);
+    const emailsParam = searchParams.get("emails");
     const email = searchParams.get("email");
     const mode = searchParams.get("mode"); // "today" or null
     const sort = (searchParams.get("sort") ?? "desc") as "asc" | "desc";
     const from = searchParams.get("from"); // YYYY-MM-DD (Dhaka)
     const to = searchParams.get("to");     // YYYY-MM-DD (Dhaka)
 
-    if (!email) {
-      return NextResponse.json({ error: "Email is required." }, { status: 400 });
+    let emailList: string[] = [];
+    if (emailsParam) {
+      emailList = emailsParam.split(",").map(e => e.trim());
+    } else if (email) {
+      emailList = [email];
+    } else {
+      return NextResponse.json({ error: "Emails or email is required." }, { status: 400 });
     }
 
-    const user = await prisma.users.findUnique({ where: { email } });
-    if (!user) {
-      return NextResponse.json({ error: "User not found." }, { status: 404 });
-    }
+    const records: Record<string, any> = {};
 
-    if (mode === "today") {
-      const { start, end } = getDhakaDayRange();
-      const existing = await prisma.soforBisoyRecord.findFirst({
-        where: { userId: user.id, date: { gte: start, lt: end } },
-        select: { id: true },
+    for (const em of emailList) {
+      const user = await prisma.users.findUnique({ where: { email: em } });
+      if (!user) {
+        if (mode === "today") {
+          records[em] = { isSubmittedToday: false };
+        } else {
+          records[em] = [];
+        }
+        continue;
+      }
+
+      if (mode === "today") {
+        const { start, end } = getDhakaDayRange();
+        const existing = await prisma.soforBisoyRecord.findFirst({
+          where: { userId: user.id, date: { gte: start, lt: end } },
+          select: { id: true },
+        });
+        records[em] = { isSubmittedToday: Boolean(existing) };
+        continue;
+      }
+
+      // Optional date range filter (interpreted in Dhaka time)
+      let dateFilter: { gte?: Date; lt?: Date } | undefined;
+      if (from || to) {
+        const fromRange = from ? dhakaDayRangeFromISODate(from) : undefined;
+        const toRange = to ? dhakaDayRangeFromISODate(to) : undefined;
+        dateFilter = {
+          ...(fromRange ? { gte: fromRange.start } : {}),
+          ...(toRange ? { lt: toRange.end } : {}),
+        };
+      }
+
+      const userRecords = await prisma.soforBisoyRecord.findMany({
+        where: { userId: user.id, ...(dateFilter ? { date: dateFilter } : {}) },
+        orderBy: { date: sort },
       });
-      return NextResponse.json({ isSubmittedToday: Boolean(existing) }, { status: 200 });
+
+      // Convenience: compute today's flag + record
+      const { start, end } = getDhakaDayRange();
+      const todayRecord = userRecords.find((r) => r.date >= start && r.date < end);
+
+      records[em] = userRecords;
     }
 
-    // Optional date range filter (interpreted in Dhaka time)
-    let dateFilter: { gte?: Date; lt?: Date } | undefined;
-    if (from || to) {
-      const fromRange = from ? dhakaDayRangeFromISODate(from) : undefined;
-      const toRange = to ? dhakaDayRangeFromISODate(to) : undefined;
-      dateFilter = {
-        ...(fromRange ? { gte: fromRange.start } : {}),
-        ...(toRange ? { lt: toRange.end } : {}),
-      };
+    if (emailsParam) {
+      // Multiple emails: return { records: { email: data } }
+      return NextResponse.json({ records }, { status: 200 });
+    } else {
+      // Single email: return the data directly for today mode, otherwise { records: array }
+      if (mode === "today") {
+        return NextResponse.json(records[email!], { status: 200 });
+      } else {
+        return NextResponse.json({ records: records[email!] }, { status: 200 });
+      }
     }
-
-    const records = await prisma.soforBisoyRecord.findMany({
-      where: { userId: user.id, ...(dateFilter ? { date: dateFilter } : {}) },
-      orderBy: { date: sort },
-    });
-
-    // Convenience: compute today's flag + record
-    const { start, end } = getDhakaDayRange();
-    const todayRecord = records.find((r) => r.date >= start && r.date < end);
-
-    return NextResponse.json(
-      { isSubmittedToday: !!todayRecord, today: todayRecord ?? null, records },
-      { status: 200 }
-    );
   } catch (error) {
     console.error("GET /api/soforbisoy error:", error);
     return NextResponse.json({ error: "Failed to fetch records." }, { status: 500 });
