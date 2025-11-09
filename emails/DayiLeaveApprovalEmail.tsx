@@ -1,4 +1,5 @@
 import { Html } from "@react-email/components";
+import { useTranslations } from "next-intl";
 
 interface ApprovalEmailProps {
   name: string;
@@ -13,6 +14,7 @@ export default function LeaveApprovalEmail({
   leaveDates,
   footerText,
 }: ApprovalEmailProps) {
+  const t = useTranslations("header");
   return (
     <Html>
       <div
@@ -43,9 +45,9 @@ export default function LeaveApprovalEmail({
               textAlign: "center",
             }}
           >
-            <h1>Islami Dawa Institute</h1>
+            <h1>{t("instituteName")}</h1>
             <h1 style={{ color: "#ffffff", fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-              আপনার ছুটির আবেদন অনুমোদিত হয়েছে
+              {t("leaveSubjectApproved")}
             </h1>
           </div>
 
@@ -59,7 +61,7 @@ export default function LeaveApprovalEmail({
                 marginBottom: "20px",
               }}
             >
-              <strong>{name}</strong>, আপনার ছুটির আবেদনটি সফলভাবে অনুমোদিত হয়েছে। বিস্তারিত তথ্য নিচে দেওয়া হলঃ
+              <strong>{name}</strong>, {t("leaveSubjectApproved")}
             </p>
 
             {/* Leave Details */}

@@ -1,4 +1,5 @@
 import { Html } from "@react-email/components";
+import { useTranslations } from "next-intl";
 
 interface RejectedEmailProps {
   name: string;
@@ -14,6 +15,7 @@ export default function LeaveRejectedEmail({
   leaveDates,
   footerText,
 }: RejectedEmailProps) {
+  const t = useTranslations("header");
   return (
     <Html>
       <div
@@ -44,9 +46,9 @@ export default function LeaveRejectedEmail({
               textAlign: "center",
             }}
           >
-            <h1>Islami Dawa Institute</h1>
+            <h1>{t("instituteName")}</h1>
             <h1 style={{ color: "#ffffff", fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-              আপনার ছুটির আবেদন বাতিল হয়েছে
+              {t("leaveSubjectRejected")}
             </h1>
           </div>
 
@@ -60,7 +62,7 @@ export default function LeaveRejectedEmail({
                 marginBottom: "20px",
               }}
             >
-              <strong>{name}</strong>, আমরা দুঃখিত যে আপনার ছুটির আবেদনটি বাতিল করা হয়েছে। বিস্তারিত তথ্য নিচে দেওয়া হলঃ
+              <strong>{name}</strong>, {t("leaveSubjectRejected")}
             </p>
 
             {/* Leave Details */}

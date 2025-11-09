@@ -16,10 +16,12 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const Sidebar = () => {
   const { state, isMobile, openMobile, setOpenMobile } = useSidebar();
   const pathName = usePathname();
+  const t = useTranslations("header");
 
   // Hide sidebar on mobile when route changes
   useEffect(() => {
@@ -33,8 +35,8 @@ const Sidebar = () => {
       <Sheet open={openMobile} onOpenChange={setOpenMobile}>
         <SheetContent className="bg-[#155E75]">
           <SheetHeader>
-            <SheetTitle className="text-xl text-white font-medium">
-              Islami Dawa
+            <SheetTitle className="text-xs text-white font-medium">
+              {t("instituteName")}
             </SheetTitle>
             <SheetClose asChild>
               <Button variant="outline" size="icon">

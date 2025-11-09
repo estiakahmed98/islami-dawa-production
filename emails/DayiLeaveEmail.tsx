@@ -1,5 +1,6 @@
 import { Html } from "@react-email/components";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 interface EmailProps {
   name: string;
@@ -16,6 +17,7 @@ export default function StyledLeaveEmail({
   leaveDates,
   footerText,
 }: EmailProps) {
+  const t = useTranslations("header");
   return (
     <Html>
       <div
@@ -46,9 +48,9 @@ export default function StyledLeaveEmail({
               textAlign: "center",
             }}
           >
-            <h1>Islami Dawa Institute</h1>
+            <h1>{t("instituteName")}</h1>
             <h1 style={{  color: "#ffffff",fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-              আপনার ছুটির আবেদন জমা হয়েছে
+              {t("leaveSubject")}
             </h1>
           </div>
 
@@ -62,8 +64,7 @@ export default function StyledLeaveEmail({
                 marginBottom: "20px",
               }}
             >
-              <strong>{name}</strong>, আপনার ছুটির আবেদনটি সফলভাবে জমা দেওয়া
-              হয়েছে। বিস্তারিত তথ্য নিচে দেওয়া হলঃ
+                <strong>{name}</strong>, {t("leaveSubjectApproved")}  
             </p>
 
             {/* Details */}
