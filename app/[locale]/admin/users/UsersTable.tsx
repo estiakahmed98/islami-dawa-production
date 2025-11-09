@@ -1128,6 +1128,7 @@ export default function UsersTable() {
               <AdminTable 
                 userData={moktobData} 
                 emailList={emailList}
+                users={users}
                 allTabsData={{
                   moktobData,
                   talimData,
@@ -1144,6 +1145,7 @@ export default function UsersTable() {
               <AdminTable 
                 userData={talimData} 
                 emailList={emailList}
+                users={users}
                 allTabsData={{
                   moktobData,
                   talimData,
@@ -1161,6 +1163,7 @@ export default function UsersTable() {
               <AdminTable 
                 userData={dayeData} 
                 emailList={emailList}
+                users={users}
                 allTabsData={{
                   moktobData,
                   talimData,
@@ -1178,6 +1181,7 @@ export default function UsersTable() {
               <AdminTable 
                 userData={dawatiData} 
                 emailList={emailList}
+                users={users}
                 allTabsData={{
                   moktobData,
                   talimData,
@@ -1195,6 +1199,7 @@ export default function UsersTable() {
               <AdminTable 
                 userData={dawatiMojlishData} 
                 emailList={emailList}
+                users={users}
                 allTabsData={{
                   moktobData,
                   talimData,
@@ -1212,6 +1217,7 @@ export default function UsersTable() {
               <AdminTable 
                 userData={jamatData} 
                 emailList={emailList}
+                users={users}
                 allTabsData={{
                   moktobData,
                   talimData,
@@ -1229,6 +1235,7 @@ export default function UsersTable() {
               <AdminTable 
                 userData={dineFeraData} 
                 emailList={emailList}
+                users={users}
                 allTabsData={{
                   moktobData,
                   talimData,
@@ -1246,6 +1253,7 @@ export default function UsersTable() {
               <AdminTable 
                 userData={soforData} 
                 emailList={emailList}
+                users={users}
                 allTabsData={{
                   moktobData,
                   talimData,
