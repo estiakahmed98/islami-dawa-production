@@ -412,7 +412,7 @@ const AmoliMuhasabaForm = () => {
               <div className="grid grid-cols-3 gap-4">
                 <div className="mb-2">
                   <label className="mb-2 block text-gray-700">
-                    Quarn Tilawt
+                   {t("quarntilawat")}
                   </label>
                   <Field
                     name="quarntilawat"
@@ -437,7 +437,7 @@ const AmoliMuhasabaForm = () => {
                 </div>
 
                 <div className="mb-2">
-                  <label className="mb-2 block text-gray-700">Page No</label>
+                  <label className="mb-2 block text-gray-700">{t("pageNo")}</label>
                   <Field
                     name="pageNo"
                     type="number"
