@@ -1,21 +1,23 @@
 {
   "header": {
     "toggleSidebar": "Toggle Sidebar",
-    "instituteName": "Islamic Dawah Institute Bangladesh",
-    "dawahYear": "Dawah Year",
+    "instituteName": "Islamic Da'wah Institute Bangladesh",
+    "dawahYear": "Da'wah Year",
+    "leaveSubject": "Your Leave Application has been Submitted",
+    "leaveSubjectApproved": "Your Leave Application has been Submitted Successfully",
     "gregorian": "Gregorian",
     "hijri": "Hijri",
     "openAccountMenu": "Open Account Menu",
     "profile": "Profile",
     "user": "User",
     "logout": "Logout",
-    "signingOut": "Signing out...",
+    "signingOut": "Signing Out...",
     "roles": {
-        "centraladmin": "Central Admin",
-        "divisionadmin": "Division Admin",
-        "markazadmin": "Markaz Admin",
-        "daye": "Daee",
-        "user": "User"
+      "centraladmin": "Central Admin",
+      "divisionadmin": "Division Admin",
+      "markazadmin": "Markaz Admin",
+      "daye": "Da'ee",
+      "user": "User"
     }
   },
   "dashboard": {
