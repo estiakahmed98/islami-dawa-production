@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   CheckCircle2,
   XCircle,
@@ -50,6 +51,7 @@ interface DayeSubmissionStatus {
 }
 
 const DayeReviewComponent: React.FC = () => {
+  const t = useTranslations("dayeReview");
   const [dayees, setDayees] = useState<User[]>([]);
   const [submissionStatus, setSubmissionStatus] = useState<
     DayeSubmissionStatus[]
@@ -85,7 +87,7 @@ const DayeReviewComponent: React.FC = () => {
         setDayees(users);
       } catch (error) {
         console.error("Error fetching dayees:", error);
-        toast.error("দা'ঈদের তথ্য লোড করতে ব্যর্থ");
+        toast.error(t("toast.fetchDayeesError"));
       }
     };
     fetchDayees();
@@ -202,7 +204,7 @@ const DayeReviewComponent: React.FC = () => {
         setSubmissionStatus(statusList);
       } catch (error) {
         console.error("Error fetching submission status:", error);
-        toast.error("সাবমিশন স্ট্যাটাস লোড করতে ব্যর্থ");
+        toast.error(t("toast.fetchStatusError"));
       } finally {
         setLoading(false);
       }
@@ -253,12 +255,8 @@ const DayeReviewComponent: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-            দা'ঈ রিভিউ
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            কাজের অগ্রগতি পর্যালোচনা করুন
-          </p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{t("header.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("header.subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-gray-500" />
@@ -275,7 +273,7 @@ const DayeReviewComponent: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">মোট দা'ঈ</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stats.totalDaee")}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -285,41 +283,33 @@ const DayeReviewComponent: React.FC = () => {
 
         <Card className="border-green-200 bg-green-50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-800">
-              কাজ জমা দিয়েছে
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-green-800">{t("stats.submittedTitle")}</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-700">
               {stats.submitted}
             </div>
-            <p className="text-xs text-green-600 mt-1">
-              {stats.percentage}% সম্পন্ন
-            </p>
+            <p className="text-xs text-green-600 mt-1">{stats.percentage}% {t("stats.completedPercent")}</p>
           </CardContent>
         </Card>
 
         <Card className="border-red-200 bg-red-50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-red-800">
-              কাজ জমা দেয়নি
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-red-800">{t("stats.notSubmittedTitle")}</CardTitle>
             <XCircle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-700">
               {stats.notSubmitted}
             </div>
-            <p className="text-xs text-red-600 mt-1">
-              {(100 - parseFloat(stats.percentage)).toFixed(1)}% বাকি
-            </p>
+            <p className="text-xs text-red-600 mt-1">{(100 - parseFloat(stats.percentage)).toFixed(1)}% {t("stats.remainingPercent")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">অগ্রগতি</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("stats.progress")}</CardTitle>
             {parseFloat(stats.percentage) >= 50 ? (
               <TrendingUp className="h-4 w-4 text-green-600" />
             ) : (
@@ -333,9 +323,7 @@ const DayeReviewComponent: React.FC = () => {
                 style={{ width: `${stats.percentage}%` }}
               />
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              সম্পূর্ণতা: {stats.percentage}%
-            </p>
+            <p className="text-xs text-muted-foreground mt-2">{t("stats.completeness")}: {stats.percentage}%</p>
           </CardContent>
         </Card>
       </div>
@@ -345,7 +333,7 @@ const DayeReviewComponent: React.FC = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="নাম, ইমেইল বা স্থান দিয়ে খুঁজুন..."
+            placeholder={t("filters.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -357,7 +345,7 @@ const DayeReviewComponent: React.FC = () => {
             onClick={() => setFilterStatus("all")}
             size="sm"
           >
-            সব ({submissionStatus.length})
+            {t("filters.all")} ({submissionStatus.length})
           </Button>
           <Button
             variant={filterStatus === "submitted" ? "default" : "outline"}
@@ -365,7 +353,7 @@ const DayeReviewComponent: React.FC = () => {
             size="sm"
             className="bg-green-600 text-white hover:text-white hover:bg-green-700"
           >
-            জমা দিয়েছে ({stats.submitted})
+            {t("filters.submitted")} ({stats.submitted})
           </Button>
           <Button
             variant={filterStatus === "not-submitted" ? "default" : "outline"}
@@ -373,7 +361,7 @@ const DayeReviewComponent: React.FC = () => {
             size="sm"
             className="bg-red-600 text-white hover:text-white hover:bg-red-700"
           >
-            জমা দেয়নি ({stats.notSubmitted})
+            {t("filters.notSubmitted")} ({stats.notSubmitted})
           </Button>
         </div>
       </div>
@@ -403,9 +391,7 @@ const DayeReviewComponent: React.FC = () => {
                   <p className="text-sm text-muted-foreground mt-1">
                     {status.email}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    📍 {status.location || "স্থান উল্লেখ নেই"}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">📍 {status.location || t("list.locationUnknown")}</p>
                 </div>
                 <Badge
                   variant={status.hasSubmittedToday ? "default" : "destructive"}
@@ -413,27 +399,25 @@ const DayeReviewComponent: React.FC = () => {
                     status.hasSubmittedToday ? "bg-green-600" : "bg-red-600"
                   }
                 >
-                  {status.hasSubmittedToday ? "সম্পন্ন" : "অসম্পূর্ণ"}
+                  {status.hasSubmittedToday ? t("badge.completed") : t("badge.incomplete")}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm font-medium mb-2">
-                    আজকের কাজের বিবরণ ({status.totalSubmissions}/9):
-                  </p>
+                  <p className="text-sm font-medium mb-2">{t("details.todaySummary")} ({status.totalSubmissions}/9):</p>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { key: "amoli", label: "আ'মলি" },
-                      { key: "moktob", label: "মক্তব" },
-                      { key: "talim", label: "তালিম" },
-                      { key: "daye", label: "দা'ঈ" },
-                      { key: "dawati", label: "দাওয়াতি" },
-                      { key: "dawatimojlish", label: "মজলিশ" },
-                      { key: "jamat", label: "জামাত" },
-                      { key: "dinefera", label: "দ্বীনে ফেরা" },
-                      { key: "sofor", label: "সফর" },
+                      { key: "amoli", label: t("categories.amoli") },
+                      { key: "moktob", label: t("categories.moktob") },
+                      { key: "talim", label: t("categories.talim") },
+                      { key: "daye", label: t("categories.daye") },
+                      { key: "dawati", label: t("categories.dawati") },
+                      { key: "dawatimojlish", label: t("categories.dawatimojlish") },
+                      { key: "jamat", label: t("categories.jamat") },
+                      { key: "dinefera", label: t("categories.dinefera") },
+                      { key: "sofor", label: t("categories.sofor") },
                     ].map((cat) => (
                       <Badge
                         key={cat.key}
@@ -453,10 +437,7 @@ const DayeReviewComponent: React.FC = () => {
                 </div>
                 {status.lastSubmissionDate && (
                   <p className="text-xs font-semibold text-green-600">
-                    শেষ সাবমিশন:{" "}
-                    {new Date(status.lastSubmissionDate).toLocaleDateString(
-                      "bn-BD"
-                    )}
+                    {t("details.lastSubmission")} {new Date(status.lastSubmissionDate).toLocaleDateString()}
                   </p>
                 )}
               </div>
@@ -468,7 +449,7 @@ const DayeReviewComponent: React.FC = () => {
       {filteredStatus.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">কোনো দা'ঈ পাওয়া যায়নি</p>
+            <p className="text-muted-foreground">{t("empty.noResults")}</p>
           </CardContent>
         </Card>
       )}

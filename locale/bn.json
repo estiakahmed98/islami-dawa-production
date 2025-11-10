@@ -1034,5 +1034,55 @@
     "validation": {
       "required": "আবশ্যক"
     }
+  },
+   "dayeReview": {
+    "header": {
+      "title": "দা'ঈ রিভিউ",
+      "subtitle": "কাজের অগ্রগতি পর্যালোচনা করুন"
+    },
+    "stats": {
+      "totalDaee": "মোট দা'ঈ",
+      "submittedTitle": "কাজ জমা দিয়েছে",
+      "completedPercent": "সম্পন্ন",
+      "notSubmittedTitle": "কাজ জমা দেয়নি",
+      "remainingPercent": "বাকি",
+      "progress": "অগ্রগতি",
+      "completeness": "সম্পূর্ণতা"
+    },
+    "filters": {
+      "searchPlaceholder": "নাম, ইমেইল বা স্থান দিয়ে খুঁজুন...",
+      "all": "সব",
+      "submitted": "জমা দিয়েছে",
+      "notSubmitted": "জমা দেয়নি"
+    },
+    "list": {
+      "locationUnknown": "স্থান উল্লেখ নেই"
+    },
+    "badge": {
+      "completed": "সম্পন্ন",
+      "incomplete": "অসম্পূর্ণ"
+    },
+    "details": {
+      "todaySummary": "আজকের কাজের বিবরণ",
+      "lastSubmission": "শেষ সাবমিশন:"
+    },
+    "categories": {
+      "amoli": "আ'মলি",
+      "moktob": "মক্তব",
+      "talim": "তালিম",
+      "daye": "দা'ঈ",
+      "dawati": "দাওয়াতি",
+      "dawatimojlish": "মজলিশ",
+      "jamat": "জামাত",
+      "dinefera": "দ্বীনে ফেরা",
+      "sofor": "সফর"
+    },
+    "empty": {
+      "noResults": "কোনো দা'ঈ পাওয়া যায়নি"
+    },
+    "toast": {
+      "fetchDayeesError": "দা'ঈদের তথ্য লোড করতে ব্যর্থ",
+      "fetchStatusError": "সাবমিশন স্ট্যাটাস লোড করতে ব্যর্থ"
+    }
   }
 }

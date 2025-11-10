@@ -1041,5 +1041,55 @@
     "validation": {
         "required": "Required"
     }
+  },
+  "dayeReview": {
+    "header": {
+      "title": "Da'i Review",
+      "subtitle": "Review work progress"
+    },
+    "stats": {
+      "totalDaee": "Total Da'is",
+      "submittedTitle": "Submitted Work",
+      "completedPercent": "completed",
+      "notSubmittedTitle": "Not Submitted",
+      "remainingPercent": "remaining",
+      "progress": "Progress",
+      "completeness": "Completeness"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name, email or location...",
+      "all": "All",
+      "submitted": "Submitted",
+      "notSubmitted": "Not Submitted"
+    },
+    "list": {
+      "locationUnknown": "Location not specified"
+    },
+    "badge": {
+      "completed": "Completed",
+      "incomplete": "Incomplete"
+    },
+    "details": {
+      "todaySummary": "Today's work summary",
+      "lastSubmission": "Last submission:"
+    },
+    "categories": {
+      "amoli": "Amoli",
+      "moktob": "Moktob",
+      "talim": "Talim",
+      "daye": "Da'i",
+      "dawati": "Dawati",
+      "dawatimojlish": "Majlish",
+      "jamat": "Jamat",
+      "dinefera": "Return to Faith",
+      "sofor": "Travel"
+    },
+    "empty": {
+      "noResults": "No da'is found"
+    },
+    "toast": {
+      "fetchDayeesError": "Failed to load da'i information",
+      "fetchStatusError": "Failed to load submission status"
+    }
   }
 }
