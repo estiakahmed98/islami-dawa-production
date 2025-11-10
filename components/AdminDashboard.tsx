@@ -635,7 +635,6 @@ const AdminDashboard: React.FC = () => {
       <div className="border border-[#155E75] lg:p-6 mt-10 rounded-xl ">
         <Tabs defaultValue="moktob" className="w-full p-4">
           <TabsList className="grid grid-cols-2 md:grid-cols-4">
-            <TabsTrigger value="Amolimusahaba">{t("dashboard.amoliMuhasaba")}</TabsTrigger>
             <TabsTrigger value="moktob">{t("dashboard.moktobSubject")}</TabsTrigger>
             <TabsTrigger value="talim">{t("dashboard.talimSubject")}</TabsTrigger>
             <TabsTrigger value="daye">{t("dashboard.dayiSubject")}</TabsTrigger>
