@@ -358,7 +358,8 @@ const AmoliMuhasabaForm = () => {
                 />
                 <div className="text-gray-600">Points: {points.jamat}</div>
               </div>
-              <div className="mb-2">
+
+              {/* <div className="mb-2">
                 <label className="mb-2 block text-gray-700">{t("surah")}</label>
                 <Field
                   name="surah"
@@ -407,18 +408,18 @@ const AmoliMuhasabaForm = () => {
                 <div className="text-gray-600">
                   {common("points")}: {points.ayat}
                 </div>
-              </div>
+              </div> */}
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 md:col-span-2 gap-4">
                 <div className="mb-2">
-                  <label className="mb-2 block text-gray-700">
+                  <label className="mb-2 text-sm font-medium text-gray-700">
                    {t("quarntilawat")}
                   </label>
                   <Field
                     name="quarntilawat"
                     type="text"
                     placeholder="Para no"
-                    className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
+                    className="w-full rounded border border-gray-300 px-4 py-2 mb-3 mt-2"
                     onChange={(
                       e:
                         | ChangeEvent<HTMLInputElement | HTMLSelectElement>
