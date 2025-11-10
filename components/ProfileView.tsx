@@ -21,13 +21,18 @@ import {
   Clock,
   MapPinIcon,
   Home,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 function getInitials(name?: string | null, email?: string | null) {
   if (name && name.trim()) {
     const parts = name.trim().split(/\s+/);
-    return ((parts[0]?.[0] || "") + (parts[parts.length - 1]?.[0] || "")).toUpperCase();
+    return (
+      (parts[0]?.[0] || "") + (parts[parts.length - 1]?.[0] || "")
+    ).toUpperCase();
   }
   if (email && email.length) return email[0]!.toUpperCase();
   return "";
@@ -131,8 +136,20 @@ const ProfileField: React.FC<ProfileFieldProps> = ({
 
 const Profile: React.FC = () => {
   const [formData, setFormData] = useState<UserProfile>({});
+  const [markazName, setMarkazName] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdForm, setPwdForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [showPwd, setShowPwd] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
   const { data: session } = useSession();
 
   const fetchProfile = async () => {
@@ -146,6 +163,24 @@ const Profile: React.FC = () => {
       }
       const data = await response.json();
       setFormData(data);
+      // Resolve Markaz name from API response variants
+      try {
+        if (data?.markaz && typeof data.markaz === "string" && data.markaz.trim()) {
+          setMarkazName(data.markaz.trim());
+        } else if (data?.markaz && typeof data.markaz === "object" && data.markaz?.name) {
+          setMarkazName(String(data.markaz.name));
+        } else if (data?.markazId) {
+          const mr = await fetch(`/api/markaz-masjid/${data.markazId}`);
+          if (mr.ok) {
+            const mj = await mr.json();
+            if (mj?.name) setMarkazName(String(mj.name));
+          }
+        } else {
+          setMarkazName("");
+        }
+      } catch (_) {
+        setMarkazName("");
+      }
     } catch (err: any) {
       console.error("fetchProfile error:", err);
       // For demo purposes, set some sample data
@@ -168,6 +203,36 @@ const Profile: React.FC = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (
+      !pwdForm.currentPassword ||
+      !pwdForm.newPassword ||
+      !pwdForm.confirmPassword
+    )
+      return;
+    if (pwdForm.newPassword !== pwdForm.confirmPassword) return;
+    try {
+      setPwdLoading(true);
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword: pwdForm.currentPassword,
+          newPassword: pwdForm.newPassword,
+          toast: true,
+        }),
+      });
+      if (!res.ok) {
+        toast("Failed to change password");
+        return;
+      }
+      toast("Password changed successfully...");
+      setPwdForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } finally {
+      setPwdLoading(false);
     }
   };
 
@@ -238,7 +303,9 @@ const Profile: React.FC = () => {
               <div className="relative group">
                 <div className="w-24 h-24 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center border-3 border-white/50">
                   {(() => {
-                    const displayImage = (formData.image as string | undefined) || (session?.user?.image as string | undefined);
+                    const displayImage =
+                      (formData.image as string | undefined) ||
+                      (session?.user?.image as string | undefined);
                     if (displayImage) {
                       return (
                         <img
@@ -248,7 +315,10 @@ const Profile: React.FC = () => {
                         />
                       );
                     }
-                    const initials = getInitials(formData.name || session?.user?.name, formData.email || session?.user?.email);
+                    const initials = getInitials(
+                      formData.name || session?.user?.name,
+                      formData.email || session?.user?.email
+                    );
                     return initials ? (
                       <span className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-600 to-cyan-600 text-white flex items-center justify-center text-lg font-semibold">
                         {initials}
@@ -365,14 +435,6 @@ const Profile: React.FC = () => {
                     editable={isEditing}
                     type="tel"
                   />
-                  <ProfileField
-                    icon={User}
-                    label="Parent/Guardian"
-                    name="parent"
-                    value={formData.parent}
-                    onChange={handleChange}
-                    editable={isEditing}
-                  />
                 </div>
               </div>
 
@@ -425,14 +487,15 @@ const Profile: React.FC = () => {
                     onChange={handleChange}
                     editable={isEditing}
                   />
-                  <ProfileField
-                    icon={Landmark}
-                    label="Markaz"
-                    name="markaz"
-                    value={formData.markaz}
-                    onChange={handleChange}
-                    editable={isEditing}
-                  />
+                  <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="p-1.5 bg-blue-100 rounded-lg">
+                      <Landmark className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-gray-500">Markaz</p>
+                      <p className="text-sm text-gray-900">{(typeof formData.markaz === 'string' ? formData.markaz : formData.markaz && (formData.markaz as any).name) || markazName || '-'}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -509,6 +572,114 @@ const Profile: React.FC = () => {
                 />
               </div>
             )}
+
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-700 flex items-center space-x-2 mb-3">
+                <div className="w-5 h-5 bg-red-100 rounded-lg flex items-center justify-center">
+                  <Shield className="w-3 h-3 text-red-600" />
+                </div>
+                <span>Change Password</span>
+              </h3>
+              <div className="grid md:grid-cols-3 gap-3">
+                <div className="relative">
+                  <input
+                    type={showPwd.current ? "text" : "password"}
+                    value={pwdForm.currentPassword}
+                    onChange={(e) =>
+                      setPwdForm((p) => ({
+                        ...p,
+                        currentPassword: e.target.value,
+                      }))
+                    }
+                    placeholder="Current password"
+                    className="w-full px-3 py-2 pr-9 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-300 focus:border-blue-300 transition-all duration-200 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPwd((s) => ({ ...s, current: !s.current }))
+                    }
+                    className="absolute inset-y-0 right-2 my-auto h-6 w-6 flex items-center justify-center text-gray-500"
+                    aria-label={
+                      showPwd.current ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showPwd.current ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPwd.new ? "text" : "password"}
+                    value={pwdForm.newPassword}
+                    onChange={(e) =>
+                      setPwdForm((p) => ({ ...p, newPassword: e.target.value }))
+                    }
+                    placeholder="New password"
+                    className="w-full px-3 py-2 pr-9 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-300 focus:border-blue-300 transition-all duration-200 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwd((s) => ({ ...s, new: !s.new }))}
+                    className="absolute inset-y-0 right-2 my-auto h-6 w-6 flex items-center justify-center text-gray-500"
+                    aria-label={showPwd.new ? "Hide password" : "Show password"}
+                  >
+                    {showPwd.new ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPwd.confirm ? "text" : "password"}
+                    value={pwdForm.confirmPassword}
+                    onChange={(e) =>
+                      setPwdForm((p) => ({
+                        ...p,
+                        confirmPassword: e.target.value,
+                      }))
+                    }
+                    placeholder="Confirm new password"
+                    className="w-full px-3 py-2 pr-9 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-300 focus:border-blue-300 transition-all duration-200 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPwd((s) => ({ ...s, confirm: !s.confirm }))
+                    }
+                    className="absolute inset-y-0 right-2 my-auto h-6 w-6 flex items-center justify-center text-gray-500"
+                    aria-label={
+                      showPwd.confirm ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showPwd.confirm ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="mt-3">
+                <button
+                  onClick={handlePasswordChange}
+                  disabled={
+                    pwdLoading ||
+                    !pwdForm.currentPassword ||
+                    !pwdForm.newPassword ||
+                    pwdForm.newPassword !== pwdForm.confirmPassword
+                  }
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 text-sm"
+                >
+                  {pwdLoading ? "Updating..." : "Update Password"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
