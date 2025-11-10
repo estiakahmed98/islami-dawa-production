@@ -16,6 +16,7 @@ import { LuArrowLeftFromLine, LuArrowRightToLine, LuLayoutDashboard } from "reac
 import { Bell } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { PiMosqueDuotone } from "react-icons/pi";
+import { TbReport } from "react-icons/tb";
 
 const ImpersonateSidebar: React.FC = () => {
   const t = useTranslations("dashboard.sideBar");
@@ -115,6 +116,12 @@ const ImpersonateSidebar: React.FC = () => {
       href: "/admin/users",
       icon: <MdPeople className="size-6" />,
       label: t("viewDayi"),
+      roles: ["centraladmin", "divisionadmin", "markazadmin"],
+    },
+    {
+      href: "/admin/dayereview",
+      icon: <TbReport className="size-6" />,
+      label: t("dayeReview"),
       roles: ["centraladmin", "divisionadmin", "markazadmin"],
     },
     {

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import MenuItem from "./menu-item";
@@ -30,7 +30,6 @@ import { FiEdit3 } from "react-icons/fi";
 import { PiMosqueDuotone } from "react-icons/pi";
 import { TbReport } from "react-icons/tb";
 
-
 const SidebarMenu = () => {
   const t = useTranslations("dashboard.sideBar");
   const locale = useLocale();
@@ -59,6 +58,7 @@ const SidebarMenu = () => {
     "/admin/users",
     "/admin/register",
     "/admin/leave",
+    "/admin/dayereview",
   ];
   const userRoutes = [
     "/dashboard",
@@ -66,7 +66,9 @@ const SidebarMenu = () => {
     "/dashboard/*",
   ];
   const adminRoutesLocale = adminRoutes.map((p) => `/${locale}${p}`);
-  const userRoutesLocale = userRoutes.map((p) => `/${locale}${p.replace("*", "")}`);
+  const userRoutesLocale = userRoutes.map(
+    (p) => `/${locale}${p.replace("*", "")}`
+  );
 
   const [isAdminMode, setIsAdminMode] = useState<boolean>(
     adminRoutesLocale.includes(currentRoute)
@@ -81,7 +83,9 @@ const SidebarMenu = () => {
     if (adminRoutesLocale.includes(currentRoute)) {
       setIsAdminMode(true);
       setButtonText(t("gotoUserMode"));
-    } else if (userRoutesLocale.some((route) => currentRoute.startsWith(route))) {
+    } else if (
+      userRoutesLocale.some((route) => currentRoute.startsWith(route))
+    ) {
       setIsAdminMode(false);
       setButtonText(t("gotoAdminMode"));
     }
@@ -96,7 +100,9 @@ const SidebarMenu = () => {
       const res = await fetch("/api/leaves?status=pending");
       if (!res.ok) throw new Error("bad status");
       const data = await res.json();
-      setPendingLeaveCount(Array.isArray(data?.leaveRequests) ? data.leaveRequests.length : 0);
+      setPendingLeaveCount(
+        Array.isArray(data?.leaveRequests) ? data.leaveRequests.length : 0
+      );
     } catch {
       setPendingLeaveCount(0);
     }
@@ -104,10 +110,14 @@ const SidebarMenu = () => {
 
   const fetchPendingEditCount = async () => {
     try {
-      const raw = typeof window !== "undefined" ? localStorage.getItem("editRequests") : null;
+      const raw =
+        typeof window !== "undefined"
+          ? localStorage.getItem("editRequests")
+          : null;
       const list = raw ? JSON.parse(raw) : [];
       const pending = Array.isArray(list)
-        ? list.filter((r: any) => (r?.status || "").toLowerCase() === "pending").length
+        ? list.filter((r: any) => (r?.status || "").toLowerCase() === "pending")
+            .length
         : 0;
       setPendingEditCount(pending);
     } catch {
@@ -140,7 +150,6 @@ const SidebarMenu = () => {
     setUserName(userEmail);
   }, [userEmail]);
 
-  
   const menuList = [
     {
       title: t("dashBoard", { role: session?.user?.role || t("noRole") }),
@@ -152,7 +161,7 @@ const SidebarMenu = () => {
       icon: <FaRegFileAlt className="size-5" />,
       url: "/dashboard/amoli-muhasaba",
     },
-        {
+    {
       title: t("dawatiSubject"),
       icon: <FaRegHandshake className="size-5" />,
       url: "/dashboard/dawati",
@@ -215,7 +224,7 @@ const SidebarMenu = () => {
       icon: <LuLayoutDashboard className="size-6" />,
       title: `${t("dashBoard")} (${session?.user?.role || t("noRole")})`,
     },
-    {
+        {
       url: "/admin/register",
       icon: <IoPersonAddSharp className="size-6" />,
       title: t("addDayi"),
@@ -224,6 +233,11 @@ const SidebarMenu = () => {
       url: "/admin/users",
       icon: <MdPeople className="size-6" />,
       title: t("viewDayi"),
+    },
+    {
+      url: "/admin/dayereview",
+      icon: <TbReport className="size-6" />,
+      title: t("dayeReview"),
     },
     {
       url: "/admin/leave",
@@ -243,12 +257,12 @@ const SidebarMenu = () => {
       title: t("editRequest"),
       notificationCount: pendingEditCount,
       showNotification: true,
-    },{
+    },
+    {
       url: "/admin/markaz",
       icon: <PiMosqueDuotone className="size-5" />,
       title: t("markaz"),
-    }
-
+    },
   ];
 
   return (
