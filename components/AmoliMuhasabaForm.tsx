@@ -40,7 +40,7 @@ interface AmoliMuhasabaFormValues {
   ayat: string;
   quarntilawat: string;
   quarntilawatAyat: string;
-  pageNo: number;
+  pageNo: string;
   editorContent: string;
 }
 
@@ -61,7 +61,7 @@ const initialFormData: AmoliMuhasabaFormValues = {
   ayat: "",
   quarntilawat: "",
   quarntilawatAyat: "",
-  pageNo: 0,
+  pageNo: "",
   editorContent: "",
 };
 
@@ -85,7 +85,7 @@ const validationSchema = Yup.object({
   ayat: Yup.string().optional(),
   quarntilawat: Yup.string().optional(),
   quarntilawatAyat: Yup.string().optional(),
-  pageNo: Yup.number().min(0).optional(),
+  pageNo: Yup.string().optional(),
   editorContent: Yup.string().optional(),
 });
 
@@ -144,7 +144,7 @@ const AmoliMuhasabaForm = () => {
       if (value >= 1) return 2;
       return 0;
     } else if (field === "pageNo") {
-      return value > 0 ? 5 : 0;
+      return value && value.toString().trim() ? 5 : 0;
     } else if (
       [
         "Dua",
@@ -441,7 +441,8 @@ const AmoliMuhasabaForm = () => {
                   <label className="mb-2 block text-gray-700">{t("pageNo")}</label>
                   <Field
                     name="pageNo"
-                    type="number"
+                    type="text"
+                    placeholder="Start - End"
                     disabled={isSubmittedToday}
                     className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                     onChange={(
