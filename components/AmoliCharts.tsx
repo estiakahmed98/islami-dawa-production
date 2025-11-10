@@ -42,14 +42,6 @@ const AmoliChart: React.FC<AmoliChartProps> = ({
     return v;
   }, [userData]);
 
-  if (!userData || percentages.length === 0) {
-    return (
-      <div className="text-center text-red-500 font-semibold">
-        {tChart("noDataUser")}
-      </div>
-    );
-  }
-
   const average =
     percentages.reduce((sum, value) => sum + value, 0) / Math.max(1, percentages.length);
 
@@ -60,6 +52,14 @@ const AmoliChart: React.FC<AmoliChartProps> = ({
     ],
     [average, t]
   );
+
+  if (!userData || percentages.length === 0) {
+    return (
+      <div className="text-center text-red-500 font-semibold">
+        {tChart("noDataUser")}
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg bg-gradient-to-r from-blue-50 border to-white shadow-xl grow">

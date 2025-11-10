@@ -21,6 +21,7 @@ interface TallyProps {
 const Dashboard: React.FC<TallyProps> = () => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
+  const t = useTranslations("dashboard.UserDashboard");
 
   // State for main dashboard
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
@@ -50,7 +51,7 @@ const Dashboard: React.FC<TallyProps> = () => {
   const [detailModalTitle, setDetailModalTitle] = useState("");
   const [detailModalDate, setDetailModalDate] = useState("");
   const [detailModalItems, setDetailModalItems] = useState<any[]>([]);
-  const t = useTranslations("dashboard.UserDashboard");
+
 
   // Handler for month change
   const onMonthChange = (month: number) => {

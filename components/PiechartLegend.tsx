@@ -3,26 +3,16 @@
 import React from "react";
 
 interface Payload {
-  color: string;
-  payload: {
-    name: string;
-    value: number;
-  };
-}
-
-interface LegendPayload {
-  color: string;
-  payload: {
-    name: string;
-    value: number;
-  };
+  color?: string;
+  value?: any;
+  payload?: any;
 }
 
 interface RenderLegendProps {
-  payload?: LegendPayload[];
+  payload?: Payload[];
 }
 
-const renderLegend: React.FC<RenderLegendProps> = ({ payload }) => {
+const renderLegend = ({ payload }: RenderLegendProps) => {
   if (!payload || payload.length === 0) {
     return <p>No legend data available.</p>;
   }
@@ -36,13 +26,13 @@ const renderLegend: React.FC<RenderLegendProps> = ({ payload }) => {
         >
           <div
             className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: entry.color }}
+            style={{ backgroundColor: entry.color || "#000" }}
           ></div>
           <span className="text-gray-700 text-lg lg:text-xl">
-            {entry.payload.name}
+            {entry.value}
           </span>
           <span className="text-gray-800 text-lg lg:text-xl font-semibold">
-            ({entry.payload.value}%)
+            ({entry.payload?.value}%)
           </span>
         </li>
       ))}
