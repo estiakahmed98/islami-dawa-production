@@ -44,32 +44,72 @@ export function MonthlyUserReportButton({
 
       let globalPageNumber = 1;
 
-      // Generate each category section
-      for (let sectionIndex = 0; sectionIndex < categoryChunks.length; sectionIndex++) {
-        const sectionCategories = categoryChunks[sectionIndex];
+      // If users are 8 or less, combine category sets 1 & 2 on one page
+      if (emailList.length <= 8 && categoryChunks.length >= 2) {
+        // Combine first two category sets
+        const combinedCategories = [...categoryChunks[0], ...categoryChunks[1]];
+        
+        // Create hidden HTML content for combined page
+        const contentDiv = document.createElement('div');
+        contentDiv.innerHTML = generateHTMLContentForPage(
+          monthName,
+          year,
+          emailList,
+          usersData,
+          combinedCategories,
+          globalPageNumber,
+          categoryChunks.length - 1, // Total pages (reduced by 1 since we combined 2)
+          1,
+          categoryChunks.length,
+          true // Combined flag
+        );
+        contentDiv.style.position = 'absolute';
+        contentDiv.style.left = '-9999px';
+        contentDiv.style.top = '-9999px';
+        contentDiv.style.width = '1200px';
+        contentDiv.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
+        document.body.appendChild(contentDiv);
 
-        // Split users into chunks of 16 per page for this section
-        const usersPerPage = 16;
-        const userChunks = [];
-        for (let i = 0; i < emailList.length; i += usersPerPage) {
-          userChunks.push(emailList.slice(i, i + usersPerPage));
-        }
+        // Wait for fonts to load
+        await document.fonts.load("12px 'Noto Sans Bengali'");
 
-        // Generate pages for this section (one page per user chunk)
-        for (let userChunkIndex = 0; userChunkIndex < userChunks.length; userChunkIndex++) {
-          const pageUsers = userChunks[userChunkIndex];
+        // Generate canvas
+        const canvas = await html2canvas(contentDiv, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          width: 1200,
+          height: contentDiv.scrollHeight,
+        });
+
+        // Add image to PDF
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = 297; // A4 landscape width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+        // Cleanup
+        document.body.removeChild(contentDiv);
+
+        globalPageNumber++;
+
+        // Process remaining category chunks (starting from index 2)
+        for (let sectionIndex = 2; sectionIndex < categoryChunks.length; sectionIndex++) {
+          const sectionCategories = categoryChunks[sectionIndex];
 
           // Create hidden HTML content for this page
           const contentDiv = document.createElement('div');
           contentDiv.innerHTML = generateHTMLContentForPage(
             monthName,
             year,
-            pageUsers,
+            emailList,
             usersData,
             sectionCategories,
             globalPageNumber,
-            userChunks.length * categoryChunks.length, // Total pages
-            sectionIndex + 1,
+            categoryChunks.length - 1,
+            sectionIndex,
             categoryChunks.length
           );
           contentDiv.style.position = 'absolute';
@@ -92,10 +132,8 @@ export function MonthlyUserReportButton({
             height: contentDiv.scrollHeight,
           });
 
-          // Add page to PDF (except first page)
-          if (globalPageNumber > 1) {
-            pdf.addPage();
-          }
+          // Add page to PDF
+          pdf.addPage();
 
           // Add image to PDF
           const imgData = canvas.toDataURL('image/png');
@@ -108,6 +146,73 @@ export function MonthlyUserReportButton({
           document.body.removeChild(contentDiv);
 
           globalPageNumber++;
+        }
+      } else {
+        // Original logic: Generate each category section separately
+        for (let sectionIndex = 0; sectionIndex < categoryChunks.length; sectionIndex++) {
+          const sectionCategories = categoryChunks[sectionIndex];
+
+          // Split users into chunks of 16 per page for this section
+          const usersPerPage = 16;
+          const userChunks = [];
+          for (let i = 0; i < emailList.length; i += usersPerPage) {
+            userChunks.push(emailList.slice(i, i + usersPerPage));
+          }
+
+          // Generate pages for this section (one page per user chunk)
+          for (let userChunkIndex = 0; userChunkIndex < userChunks.length; userChunkIndex++) {
+            const pageUsers = userChunks[userChunkIndex];
+
+            // Create hidden HTML content for this page
+            const contentDiv = document.createElement('div');
+            contentDiv.innerHTML = generateHTMLContentForPage(
+              monthName,
+              year,
+              pageUsers,
+              usersData,
+              sectionCategories,
+              globalPageNumber,
+              userChunks.length * categoryChunks.length, // Total pages
+              sectionIndex + 1,
+              categoryChunks.length
+            );
+            contentDiv.style.position = 'absolute';
+            contentDiv.style.left = '-9999px';
+            contentDiv.style.top = '-9999px';
+            contentDiv.style.width = '1200px';
+            contentDiv.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
+            document.body.appendChild(contentDiv);
+
+            // Wait for fonts to load
+            await document.fonts.load("12px 'Noto Sans Bengali'");
+
+            // Generate canvas
+            const canvas = await html2canvas(contentDiv, {
+              scale: 2,
+              useCORS: true,
+              allowTaint: true,
+              backgroundColor: '#ffffff',
+              width: 1200,
+              height: contentDiv.scrollHeight,
+            });
+
+            // Add page to PDF (except first page)
+            if (globalPageNumber > 1) {
+              pdf.addPage();
+            }
+
+            // Add image to PDF
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 297; // A4 landscape width in mm
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+            // Cleanup
+            document.body.removeChild(contentDiv);
+
+            globalPageNumber++;
+          }
         }
       }
 
@@ -149,7 +254,8 @@ function generateHTMLContentForPage(
   currentPage: number,
   totalPages: number,
   sectionNumber: number,
-  totalSections: number
+  totalSections: number,
+  isCombined: boolean = false
 ): string {
   // Flatten headers
   const subHeaders = pageCategories.flatMap((cat) =>
@@ -193,83 +299,235 @@ function generateHTMLContentForPage(
           margin-top: 5px;
           font-family: 'Noto Sans Bengali', Arial, sans-serif;
         ">
-          ক্যাটাগরি সেট ${sectionNumber}/${totalSections} - পৃষ্ঠা ${currentPage}
+          ${isCombined ? 'ক্যাটাগরি সেট 1 & 2' : `ক্যাটাগরি সেট ${sectionNumber}/${totalSections}`} - পৃষ্ঠা ${currentPage}
         </div>
       </div>
 
-      <!-- Table -->
-      <table style="
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-        font-size: 10px;
-        font-family: 'Noto Sans Bengali', Arial, sans-serif;
-      ">
-        <!-- Header Row: Categories -->
-        <tr>
-          <th style="
-            border: 1px solid #000;
-            padding: 8px;
-            text-align: left;
-            background-color: #1e3a8a;
-            color: white;
-            font-weight: bold;
-            width: 80px;
-          ">নাম</th>
-          ${pageCategories.map(cat => `
-            <th style="
-              border: 1px solid #000;
-              padding: 8px;
-              text-align: center;
-              background-color: #2563eb;
-              color: white;
-              font-weight: bold;
-            " colspan="${cat.items.length}">${cat.title}</th>
-          `).join('')}
-        </tr>
+      ${isCombined ? `
+        <!-- Combined Categories Layout: 4 top, 4 bottom -->
+        <div style="margin-bottom: 20px;">
+          <!-- Top Row: First 4 categories -->
+          <table style="
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 10px;
+            font-family: 'Noto Sans Bengali', Arial, sans-serif;
+          ">
+            <!-- Header Row: Top 4 Categories -->
+            <tr>
+              <th style="
+                border: 1px solid #000;
+                padding: 8px;
+                text-align: left;
+                background-color: #1e3a8a;
+                color: white;
+                font-weight: bold;
+                width: 80px;
+              ">নাম</th>
+              ${pageCategories.slice(0, 4).map(cat => `
+                <th style="
+                  border: 1px solid #000;
+                  padding: 8px;
+                  text-align: center;
+                  background-color: #2563eb;
+                  color: white;
+                  font-weight: bold;
+                " colspan="${cat.items.length}">${cat.title}</th>
+              `).join('')}
+            </tr>
 
-        <!-- Subcategory header row -->
-        <tr>
-          <th style="
-            border: 1px solid #000;
-            padding: 6px;
-            background-color: #f8f9fa;
-          "></th>
-          ${pageCategories.map(cat =>
-            cat.items.map(item => `
+            <!-- Subcategory header row -->
+            <tr>
               <th style="
                 border: 1px solid #000;
                 padding: 6px;
-                text-align: center;
-                background-color: #e0f2fe;
-                font-weight: bold;
-              ">${item.label}</th>
-            `).join('')
-          ).join('')}
-        </tr>
+                background-color: #f8f9fa;
+              "></th>
+              ${pageCategories.slice(0, 4).map(cat =>
+                cat.items.map(item => `
+                  <th style="
+                    border: 1px solid #000;
+                    padding: 6px;
+                    text-align: center;
+                    background-color: #e0f2fe;
+                    font-weight: bold;
+                  ">${item.label}</th>
+                `).join('')
+              ).join('')}
+            </tr>
 
-        <!-- User rows -->
-        ${pageUsers.map((email: string) => `
-          <tr>
-            <td style="
-              border: 1px solid #000;
-              padding: 6px;
-              text-align: left;
-              font-weight: bold;
-              background-color: #f8f9fa;
-            ">${usersData[email] || email}</td>
-            ${pageCategories.map(cat =>
-              cat.items.map(item => `
+            <!-- User rows -->
+            ${pageUsers.map((email: string) => `
+              <tr>
                 <td style="
                   border: 1px solid #000;
                   padding: 6px;
+                  text-align: left;
+                  font-weight: bold;
+                  background-color: #f8f9fa;
+                ">${usersData[email] || email}</td>
+                ${pageCategories.slice(0, 4).map(cat =>
+                  cat.items.map(item => `
+                    <td style="
+                      border: 1px solid #000;
+                      padding: 6px;
+                      text-align: center;
+                    ">${item.values[email] ?? 0}</td>
+                  `).join('')
+                ).join('')}
+              </tr>
+            `).join('')}
+          </table>
+
+          <!-- Bottom Row: Next 4 categories -->
+          <table style="
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            font-family: 'Noto Sans Bengali', Arial, sans-serif;
+          ">
+            <!-- Header Row: Bottom 4 Categories -->
+            <tr>
+              <th style="
+                border: 1px solid #000;
+                padding: 8px;
+                text-align: left;
+                background-color: #1e3a8a;
+                color: white;
+                font-weight: bold;
+                width: 80px;
+              ">নাম</th>
+              ${pageCategories.slice(4, 8).map(cat => `
+                <th style="
+                  border: 1px solid #000;
+                  padding: 8px;
                   text-align: center;
-                ">${item.values[email] ?? 0}</td>
+                  background-color: #2563eb;
+                  color: white;
+                  font-weight: bold;
+                " colspan="${cat.items.length}">${cat.title}</th>
+              `).join('')}
+            </tr>
+
+            <!-- Subcategory header row -->
+            <tr>
+              <th style="
+                border: 1px solid #000;
+                padding: 6px;
+                background-color: #f8f9fa;
+              "></th>
+              ${pageCategories.slice(4, 8).map(cat =>
+                cat.items.map(item => `
+                  <th style="
+                    border: 1px solid #000;
+                    padding: 6px;
+                    text-align: center;
+                    background-color: #e0f2fe;
+                    font-weight: bold;
+                  ">${item.label}</th>
+                `).join('')
+              ).join('')}
+            </tr>
+
+            <!-- User rows -->
+            ${pageUsers.map((email: string) => `
+              <tr>
+                <td style="
+                  border: 1px solid #000;
+                  padding: 6px;
+                  text-align: left;
+                  font-weight: bold;
+                  background-color: #f8f9fa;
+                ">${usersData[email] || email}</td>
+                ${pageCategories.slice(4, 8).map(cat =>
+                  cat.items.map(item => `
+                    <td style="
+                      border: 1px solid #000;
+                      padding: 6px;
+                      text-align: center;
+                    ">${item.values[email] ?? 0}</td>
+                  `).join('')
+                ).join('')}
+              </tr>
+            `).join('')}
+          </table>
+        </div>
+      ` : `
+        <!-- Table -->
+        <table style="
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 15px;
+          font-size: 10px;
+          font-family: 'Noto Sans Bengali', Arial, sans-serif;
+        ">
+          <!-- Header Row: Categories -->
+          <tr>
+            <th style="
+              border: 1px solid #000;
+              padding: 8px;
+              text-align: left;
+              background-color: #1e3a8a;
+              color: white;
+              font-weight: bold;
+              width: 80px;
+            ">নাম</th>
+            ${pageCategories.map(cat => `
+              <th style="
+                border: 1px solid #000;
+                padding: 8px;
+                text-align: center;
+                background-color: #2563eb;
+                color: white;
+                font-weight: bold;
+              " colspan="${cat.items.length}">${cat.title}</th>
+            `).join('')}
+          </tr>
+
+          <!-- Subcategory header row -->
+          <tr>
+            <th style="
+              border: 1px solid #000;
+              padding: 6px;
+              background-color: #f8f9fa;
+            "></th>
+            ${pageCategories.map(cat =>
+              cat.items.map(item => `
+                <th style="
+                  border: 1px solid #000;
+                  padding: 6px;
+                  text-align: center;
+                  background-color: #e0f2fe;
+                  font-weight: bold;
+                ">${item.label}</th>
               `).join('')
             ).join('')}
           </tr>
-        `).join('')}
-      </table>
+
+          <!-- User rows -->
+          ${pageUsers.map((email: string) => `
+            <tr>
+              <td style="
+                border: 1px solid #000;
+                padding: 6px;
+                text-align: left;
+                font-weight: bold;
+                background-color: #f8f9fa;
+              ">${usersData[email] || email}</td>
+              ${pageCategories.map(cat =>
+                cat.items.map(item => `
+                  <td style="
+                    border: 1px solid #000;
+                    padding: 6px;
+                    text-align: center;
+                  ">${item.values[email] ?? 0}</td>
+                `).join('')
+              ).join('')}
+            </tr>
+          `).join('')}
+        </table>
+      `}
     </div>
   `;
 }
