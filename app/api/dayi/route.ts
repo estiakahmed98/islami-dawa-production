@@ -20,8 +20,6 @@ function getDhakaDayRange(now = new Date()) {
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
-    console.log("POST /api/dayi Received data:", body);
-
     const {
       email,
       sohojogiDayeToiri = 0,
@@ -62,9 +60,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Extra tracing: find potential jwt/jose usage in hooks/middleware
-    console.log("About to enter transaction: userId", user.id);
-
     const result = await prisma.$transaction(async (tx) => {
       const newRecord = await tx.dayeeBishoyRecord.create({
         data: {
@@ -88,8 +83,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           union: String(a?.union ?? ""), // ← from assistant
           dayeeBishoyId: newRecord.id,
         }));
-
-        console.log("assistant rows to insert:", rows);
 
         await tx.assistantDaee.createMany({ data: rows });
       }
