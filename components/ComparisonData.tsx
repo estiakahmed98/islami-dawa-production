@@ -98,7 +98,7 @@ const ComparisonDataComponent: React.FC = () => {
     Dua: "দোয়া",
     ilm: "ইলম",
     tasbih: "তাসবিহ",
-    dayeeAmol: "দায়ীর আমল",
+    dayeeAmol: "দা'ঈর আমল",
     amoliSura: "আমলী সূরা",
     ayamroja: "আয়াম-এ-বিদ",
     hijbulBahar: "হিজবুল বাহর",
@@ -123,7 +123,7 @@ const ComparisonDataComponent: React.FC = () => {
     editorContent: "মতামত",
   };
   const DAYE_LABELS: Record<string, string> = {
-    sohojogiDayeToiri: "সহযোগী দায়ী তৈরি",
+    sohojogiDayeToiri: "সহযোগী দা'ঈ তৈরি",
     editorContent: "মতামত",
   };
   const DAWATI_LABELS: Record<string, string> = {

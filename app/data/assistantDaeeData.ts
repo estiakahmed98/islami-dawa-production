@@ -57,7 +57,7 @@ export const assistantDaeeData = {
       "dayeName": "Mymenshing Daye"
     },
     "new123@gmail.com_2025-04-17_0": {
-      "name": "দাঈ #1",
+      "name": "দা'ঈ #1",
       "phone": "124584658",
       "address": "সিলেট",
       "email": "new123@gmail.com",
@@ -71,7 +71,7 @@ export const assistantDaeeData = {
       "dayeName": "Mymenshing Daye"
     },
     "new123@gmail.com_2025-04-17_1": {
-      "name": "সহযোগি দাঈ #2",
+      "name": "সহযোগি দা'ঈ #2",
       "phone": "124584658",
       "address": "সিলেট",
       "email": "new123@gmail.com",
@@ -85,7 +85,7 @@ export const assistantDaeeData = {
       "dayeName": "Mymenshing Daye"
     },
     "new123@gmail.com_2025-04-17_2": {
-      "name": "সহযোগি দাঈ #3",
+      "name": "সহযোগি দা'ঈ #3",
       "phone": "124584658",
       "address": "সিলেট",
       "email": "new123@gmail.com",
@@ -99,7 +99,7 @@ export const assistantDaeeData = {
       "dayeName": "Mymenshing Daye"
     },
     "new123@gmail.com_2025-04-17_3": {
-      "name": "সহযোগি দাঈ #3",
+      "name": "সহযোগি দা'ঈ #3",
       "phone": "124584658",
       "address": "সিলেট",
       "email": "new123@gmail.com",
@@ -113,7 +113,7 @@ export const assistantDaeeData = {
       "dayeName": "New Daye 123"
     },
     "new123@gmail.com_2025-04-17_4": {
-      "name": "সহযোগি দাঈ #5",
+      "name": "সহযোগি দা'ঈ #5",
       "phone": "124584658",
       "address": "সিলেট",
       "email": "new123@gmail.com",
@@ -127,7 +127,7 @@ export const assistantDaeeData = {
       "dayeName": "New Daye 123"
     },
     "new123@gmail.com_2025-04-17_5": {
-      "name": "সহযোগি দাঈ #6",
+      "name": "সহযোগি দা'ঈ #6",
       "phone": "124584658",
       "address": "সিলেট",
       "email": "new123@gmail.com",
@@ -141,7 +141,7 @@ export const assistantDaeeData = {
       "dayeName": "New Daye 123"
     },
     "new123@gmail.com_2025-04-17_6": {
-      "name": "সহযোগি দাঈ #7",
+      "name": "সহযোগি দা'ঈ #7",
       "phone": "124584658",
       "address": "সিলেট",
       "email": "new123@gmail.com",
@@ -155,7 +155,7 @@ export const assistantDaeeData = {
       "dayeName": "New Daye 123"
     },
     "new123@gmail.com_2025-04-17_7": {
-      "name": "সহযোগি দাঈ #8",
+      "name": "সহযোগি দা'ঈ #8",
       "phone": "124584658",
       "address": "সিলেট",
       "email": "new123@gmail.com",
@@ -169,7 +169,7 @@ export const assistantDaeeData = {
       "dayeName": "New Daye 123"
     },
     "new123@gmail.com_2025-04-17_8": {
-      "name": "সহযোগি দাঈ #9",
+      "name": "সহযোগি দা'ঈ #9",
       "phone": "124584658",
       "address": "খুলনা",
       "email": "new123@gmail.com",
@@ -183,7 +183,7 @@ export const assistantDaeeData = {
       "dayeName": "New Daye 123"
     },
     "new123@gmail.com_2025-04-17_9": {
-      "name": "সহযোগি দাঈ #10",
+      "name": "সহযোগি দা'ঈ #10",
       "phone": "124584658",
       "address": "খুলনা",
       "description": "Se Shabazpur jame Mosjid er imam",

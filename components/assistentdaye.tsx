@@ -56,7 +56,7 @@ const AssistantDaeeList: React.FC = () => {
     header.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #4a5568; padding-bottom: 10px;">
         <div style="text-align: left;">
-          <h1 style="color: #2c5282; margin: 0; font-size: 24px;">সহযোগি দাঈদের তালিকা</h1>
+          <h1 style="color: #2c5282; margin: 0; font-size: 24px;">সহযোগি দা'ঈদের তালিকা</h1>
           <p style="margin: 5px 0 0 0; color: #4a5568; font-size: 14px;">Generated on: ${dateTimeString}</p>
         </div>
       </div>
@@ -87,7 +87,7 @@ const AssistantDaeeList: React.FC = () => {
     const tableSection = document.createElement("div");
     tableSection.innerHTML = `
       <h3 style="margin: 0 0 10px 0; color: #2d3748; font-size: 18px;">
-        সহযোগি দাঈদের বিস্তারিত তথ্য: ${filteredAssistants.length}
+        সহযোগি দা'ঈদের বিস্তারিত তথ্য: ${filteredAssistants.length}
       </h3>
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
         <thead>
@@ -119,7 +119,7 @@ const AssistantDaeeList: React.FC = () => {
                   .join("")
               : `
               <tr>
-                <td colspan="6" style="text-align:center; padding:20px;">কোন সহযোগি দাঈ পাওয়া যায়নি</td>
+                <td colspan="6" style="text-align:center; padding:20px;">কোন সহযোগি দা'ঈ পাওয়া যায়নি</td>
               </tr>
             `
           }
@@ -130,7 +130,7 @@ const AssistantDaeeList: React.FC = () => {
 
     const options = {
       margin: 10,
-      filename: `সহযোগি_দাঈ_তালিকা_${now.toISOString().split("T")[0]}.pdf`,
+      filename: `সহযোগি_দা'ঈ_তালিকা_${now.toISOString().split("T")[0]}.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
@@ -208,7 +208,7 @@ const AssistantDaeeList: React.FC = () => {
                   colSpan={6}
                   className="text-center font-semibold py-4 text-red-500 "
                 >
-                  কোন সহযোগী দায়ীঁ পাওয়া যায়নি!
+                  কোন সহযোগী দা'ঈঁ পাওয়া যায়নি!
                 </td>
               </tr>
             )}

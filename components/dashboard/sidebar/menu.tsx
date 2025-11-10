@@ -28,6 +28,7 @@ import MuiTreeView from "@/components/MuiTreeView";
 import { useLocale, useTranslations } from "next-intl";
 import { FiEdit3 } from "react-icons/fi";
 import { PiMosqueDuotone } from "react-icons/pi";
+import { TbReport } from "react-icons/tb";
 
 
 const SidebarMenu = () => {
@@ -151,6 +152,16 @@ const SidebarMenu = () => {
       icon: <FaRegFileAlt className="size-5" />,
       url: "/dashboard/amoli-muhasaba",
     },
+        {
+      title: t("dawatiSubject"),
+      icon: <FaRegHandshake className="size-5" />,
+      url: "/dashboard/dawati",
+    },
+    {
+      title: t("dawatiMojlish"),
+      icon: <FaUsers className="size-5" />,
+      url: "/dashboard/dawati-mojlish",
+    },
     {
       title: t("moktobSubject"),
       icon: <LiaChalkboardTeacherSolid className="size-5" />,
@@ -167,16 +178,6 @@ const SidebarMenu = () => {
       url: "/dashboard/dayi",
     },
     {
-      title: t("dawatiSubject"),
-      icon: <FaRegHandshake className="size-5" />,
-      url: "/dashboard/dawati",
-    },
-    {
-      title: t("dawatiMojlish"),
-      icon: <FaUsers className="size-5" />,
-      url: "/dashboard/dawati-mojlish",
-    },
-    {
       title: t("jamatSubject"),
       icon: <MdOutlineMosque className="size-5" />,
       url: "/dashboard/jamat",
@@ -191,6 +192,11 @@ const SidebarMenu = () => {
       icon: <MdOutlineTravelExplore className="size-5" />,
       url: "/dashboard/sofor",
     },
+    // {
+    //   title: t("kargojariSubject"),
+    //   icon: <TbReport className="size-5" />,
+    //   url: "/dashboard/kargojari",
+    // },
     {
       title: t("leaveSubject"),
       icon: <FcLeave className="size-5" />,

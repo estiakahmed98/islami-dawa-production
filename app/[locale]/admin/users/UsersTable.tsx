@@ -125,7 +125,7 @@ const AMOLI_LABELS: Record<string, string> = {
   Dua: "দোয়া",
   ilm: "ইলম",
   tasbih: "তাসবিহ",
-  dayeeAmol: "দায়ীর আমল",
+  dayeeAmol: "দা'ঈর আমল",
   amoliSura: "আমলী সূরা",
   ayamroja: "আয়াম-এ-বিদ",
   hijbulBahar: "হিজবুল বাহর",
@@ -153,7 +153,7 @@ const TALIM_LABELS: Record<string, string> = {
 };
 
 const DAYE_LABELS: Record<string, string> = {
-  sohojogiDayeToiri: "সহযোগী দায়ী তৈরি",
+  sohojogiDayeToiri: "সহযোগী দা'ঈ তৈরি",
   editorContent: "মতামত",
 };
 

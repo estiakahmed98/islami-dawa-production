@@ -93,7 +93,7 @@ const MobileDataChart: React.FC<MobileDataChartProps> = ({
             {category === "jamat" && "জামাত বিষয়"}
             {category === "dineFera" && "দ্বীনে ফিরে এসেছে"}
             {category === "sofor" && "সফর বিষয়"}
-            {category === "daye" && "সহযোগী দায়ী বিষয"}
+            {category === "daye" && "সহযোগী দা'ঈ বিষয"}
             {category === "talim" && "তালিম বিষয়"}
           </h3>
           <div className="space-y-2">

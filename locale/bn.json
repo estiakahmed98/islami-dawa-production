@@ -16,7 +16,7 @@
       "centraladmin": "সেন্ট্রাল অ্যাডমিন",
       "divisionadmin": "ডিভিশন অ্যাডমিন",
       "markazadmin": "মারকাজ অ্যাডমিন",
-      "daye": "দাঈ",
+      "daye": "দা'ঈ",
       "user": "ব্যবহারকারী"
     }
   },
@@ -29,16 +29,17 @@
       "amoliMuhasaba": "আ'মলি মুহাসাবা",
       "moktobSubject": "মক্তব বিষয়",
       "talimSubject": "তালিম বিষয়",
-      "dayiSubject": "সহযোগী দায়ী বিষয়",
+      "dayiSubject": "সহযোগী দা'ঈ বিষয়",
       "dawatiSubject": "দাওয়াতি বিষয়",
       "dawatiMojlish": "দাওয়াতি মজলিশ",
       "jamatSubject": "জামাত বিষয়",
       "dineFera": "দ্বীনে ফিরে এসেছে",
       "soforSubject": "সফর বিষয়",
+      "kargojariSubject": "কারগুজারী",
       "leaveSubject": "ছুটি বিষয়",
       "calendar": "কর্মসূচি",
-      "addDayi": "দায়ী এড করুন",
-      "viewDayi": "দায়ী দেখুন",
+      "addDayi": "দা'ঈ এড করুন",
+      "viewDayi": "দা'ঈ দেখুন",
       "leaveMatters": "ছুটির বিষয়",
       "realTree": "রিয়েল ট্রি",
       "editRequest": "এডিট রিকোয়েস্ট",
@@ -66,7 +67,7 @@
         "amoliMuhasaba": "আ'মলি মুহাসাবা",
         "moktobSubject": "মক্তব বিষয়",
         "talimSubject": "মহিলাদের তালিম বিষয়",
-        "dayiSubject": "সহযোগী দায়ী বিষয়",
+        "dayiSubject": "সহযোগী দা'ঈ বিষয়",
         "dawatiSubject": "দাওয়াতি বিষয়",
         "dawatiMojlish": "দাওয়াতি মজলিশ",
         "jamatSubject": "জামাত বিষয়",
@@ -99,7 +100,7 @@
         "amoli": "আ'মলি মুহাসাবা",
         "moktob": "মক্তব বিষয়",
         "talim": "মহিলাদের তালিম",
-        "daye": "সহযোগী দায়ী",
+        "daye": "সহযোগী দা'ঈ",
         "dawati": "দাওয়াতি বিষয়",
         "dawatimojlish": "দাওয়াতি মজলিশ",
         "jamat": "জামাত বিষয়",
@@ -107,7 +108,7 @@
         "sofor": "সফর বিষয়"
       },
       "detailModal": {
-        "title": "সহযোগী দায়ীর তথ্য",
+        "title": "সহযোগী দা'ঈর তথ্য",
         "close": "বন্ধ করুন",
         "noData": "কোন তথ্য পাওয়া যায়নি"
       },
@@ -127,7 +128,7 @@
         "dua": "দোয়া",
         "ilm": "ইলম",
         "tasbih": "তাসবীহ",
-        "dayeeAmol": "দায়ী আমল",
+        "dayeeAmol": "দা'ঈ আমল",
         "amoliSura": "আমলি সুরা",
         "ayamroja": "আইয়ামে রোজা",
         "hijbulBahar": "হিজবুল বাহার",
@@ -153,10 +154,10 @@
         "title": "মহিলাদের তালিম"
       },
       "dayi": {
-        "sohojogiDayeToiri": "সহযোগী দায়ী তৈরি হয়েছে",
-        "assistantsList": "সহযোগী দায়ীর তালিকা",
-        "title": "সহযোগী দায়ী",
-        "assistant": "সহযোগী দায়ী",
+        "sohojogiDayeToiri": "সহযোগী দা'ঈ তৈরি হয়েছে",
+        "assistantsList": "সহযোগী দা'ঈর তালিকা",
+        "title": "সহযোগী দা'ঈ",
+        "assistant": "সহযোগী দা'ঈ",
         "name": "নাম",
         "phone": "ফোন",
         "address": "ঠিকানা",
@@ -232,7 +233,7 @@
         "amoliMuhasaba": "আ’মলি মুহাসাবা",
         "moktobSubject": "মক্তব বিষয়",
         "talimSubject": "মহিলাদের তালিম বিষয়",
-        "dayiSubject": "সহযোগী দায়ী বিষয়",
+        "dayiSubject": "সহযোগী দা'ঈ বিষয়",
         "dawatiSubject": "দাওয়াতি বিষয়",
         "dawatiMojlish": "দাওয়াতি মজলিশ",
         "jamatSubject": "জামাত বিষয়",
@@ -240,7 +241,7 @@
         "soforSubject": "সফর বিষয়"
       },
       "modalTitle": {
-        "assistants": "সহযোগী দায়ীর বিস্তারিত",
+        "assistants": "সহযোগী দা'ঈর বিস্তারিত",
         "madrasa": "মাদ্রাসার তালিকা",
         "school": "স্কুল/কলেজ তালিকা"
       },
@@ -255,7 +256,7 @@
         "dua": "দোয়া",
         "ilm": "ইলম",
         "tasbih": "তাসবীহ",
-        "dayeeAmol": "দায়ী আমল",
+        "dayeeAmol": "দা'ঈ আমল",
         "amoliSura": "আমলি সুরা",
         "ayamroja": "আইয়ামে রোজা",
         "hijbulBahar": "হিজবুল বাহার",
@@ -279,9 +280,9 @@
         "mohilaOnshogrohon": "মহিলাদের অংশগ্রহণ"
       },
       "daye": {
-        "title": "সহযোগী দায়ী",
-        "sohojogiDayeToiri": "সহযোগী দায়ী তৈরি হয়েছে",
-        "assistantsList": "সহযোগী দায়ীর তালিকা"
+        "title": "সহযোগী দা'ঈ",
+        "sohojogiDayeToiri": "সহযোগী দা'ঈ তৈরি হয়েছে",
+        "assistantsList": "সহযোগী দা'ঈর তালিকা"
       },
       "dawati": {
         "title": "দাওয়াতি বিষয়",
@@ -330,7 +331,7 @@
       "centraladmin": "সেন্ট্রাল অ্যাডমিন",
       "divisionadmin": "ডিভিশন অ্যাডমিন",
       "markazadmin": "মারকাজ অ্যাডমিন",
-      "daye": "দাঈ",
+      "daye": "দা'ঈ",
       "null": "নাই"
     }
   },
@@ -667,7 +668,7 @@
       "district": "জেলা",
       "upazila": "উপজেলা",
       "union": "ইউনিয়ন",
-      "markaz": "মার্কায",
+      "markaz": "মারকাজ",
       "phone": "মোবাইল নম্বর",
       "email": "ইমেইল",
       "password": "নতুন পাসওয়ার্ড তৈরি"
@@ -676,7 +677,7 @@
       "superadmin": "সুপার এডমিন",
       "centraladmin": "কেন্দ্রীয় এডমিন",
       "divisionadmin": "বিভাগীয় এডমিন",
-      "markazadmin": "মার্কায এডমিন",
+      "markazadmin": "মারকাজ এডমিন",
       "daye": "দা'ঈ"
     },
     "buttons": {
@@ -700,7 +701,7 @@
       "districtRequired": "জেলা প্রয়োজন",
       "upazilaRequired": "উপজেলা প্রয়োজন",
       "unionRequired": "ইউনিয়ন প্রয়োজন",
-      "markazRequired": "মার্কায প্রয়োজন"
+      "markazRequired": "মারকাজ প্রয়োজন"
     }
   },
   "usersTable": {
@@ -713,10 +714,10 @@
         "districtadmin": "জেলা এডমিন",
         "upozilaadmin": "উপজেলা এডমিন",
         "unionadmin": "ইউনিয়ন এডমিন",
-        "markazadmin": "মার্কায এডমিন",
+        "markazadmin": "মারকাজ এডমিন",
         "daye": "দা'ঈ",
         "null": "কোনো ভূমিকা",
-        "assistantList": "সহযোগী দায়ী"
+        "assistantList": "সহযোগী দা'ঈ"
       },
       "placeholders": {
         "name": "নাম",
@@ -740,7 +741,7 @@
       "upazila": "উপজেলা",
       "union": "ইউনিয়ন",
       "phone": "ফোন",
-      "markaz": "মার্কায",
+      "markaz": "মারকাজ",
       "adminAssigned": "দায়িত্বপ্রাপ্ত এডমিন",
       "status": "স্ট্যাটাস",
       "actions": "একশন"
@@ -782,7 +783,7 @@
     "tabs": {
       "moktob": "মক্তব বিষয়",
       "talim": "মহিলাদের তালিম",
-      "daye": "সহযোগী দায়ী",
+      "daye": "সহযোগী দা'ঈ",
       "dawati": "দাওয়াতি বিষয়",
       "dawatimojlish": "দাওয়াতি মজলিশ",
       "jamat": "জামাত বিষয়",
@@ -793,7 +794,7 @@
   },
   "assistantDaeeList": {
     "unknownUser": "(অজানা ব্যবহারকারী)",
-    "summary": "সহযোগী দায়ী তালিকা — মোট {total} জন (প্যারেন্ট দা'ঈ: {parents})",
+    "summary": "সহযোগী দা'ঈ তালিকা — মোট {total} জন (প্যারেন্ট দা'ঈ: {parents})",
     "buttons": {
       "exportPdf": "Export PDF",
       "exportCsv": "Export CSV"
@@ -816,14 +817,14 @@
       "loading": "লোড হচ্ছে..."
     },
     "empty": {
-      "noRows": "বর্তমান ফিল্টারে কোনো সহযোগী দায়ী পাওয়া যায়নি।"
+      "noRows": "বর্তমান ফিল্টারে কোনো সহযোগী দা'ঈ পাওয়া যায়নি।"
     },
     "errors": {
-      "loadFailed": "সহযোগী দায়ী লোড ব্যর্থ",
+      "loadFailed": "সহযোগী দা'ঈ লোড ব্যর্থ",
       "partial": "কিছু ডেটা লোড করা যায়নি। বাকি অংশ দেখানো হয়েছে।"
     },
     "pdf": {
-      "title": "সহযোগী দায়ী রিপোর্ট",
+      "title": "সহযোগী দা'ঈ রিপোর্ট",
       "totalParents": "মোট প্যারেন্ট",
       "totalAssistants": "মোট সহযোগী",
       "printed": "প্রিন্টেড",

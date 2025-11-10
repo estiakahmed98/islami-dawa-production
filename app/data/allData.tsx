@@ -1341,7 +1341,7 @@ export const allData = {
         },
         {
           title: "দা’য়ী বিষয়",
-          data: [{ label: "সহযোগি দায়ী তৈরি হয়েছে", value: 128, max: 320 }],
+          data: [{ label: "সহযোগি দা'ঈ তৈরি হয়েছে", value: 128, max: 320 }],
         },
         {
           title: "দাওয়াতি বিষয়",
@@ -1449,7 +1449,7 @@ export const allData = {
         },
         {
           title: "দা’য়ী বিষয়",
-          data: [{ label: "সহযোগি দায়ী তৈরি হয়েছে", value: 20, max: 25 }],
+          data: [{ label: "সহযোগি দা'ঈ তৈরি হয়েছে", value: 20, max: 25 }],
         },
         {
           title: "দাওয়াতি বিষয়",
@@ -1552,7 +1552,7 @@ export const allData = {
         },
         {
           title: "দা’য়ী বিষয়",
-          data: [{ label: "সহযোগি দায়ী তৈরি হয়েছে", value: 16, max: 40 }],
+          data: [{ label: "সহযোগি দা'ঈ তৈরি হয়েছে", value: 16, max: 40 }],
         },
         {
           title: "দাওয়াতি বিষয়",
@@ -1655,7 +1655,7 @@ export const allData = {
         },
         {
           title: "দা’য়ী বিষয়",
-          data: [{ label: "সহযোগি দায়ী তৈরি হয়েছে", value: 20, max: 25 }],
+          data: [{ label: "সহযোগি দা'ঈ তৈরি হয়েছে", value: 20, max: 25 }],
         },
         {
           title: "দাওয়াতি বিষয়",
@@ -1758,7 +1758,7 @@ export const allData = {
         },
         {
           title: "দা’য়ী বিষয়",
-          data: [{ label: "সহযোগি দায়ী তৈরি হয়েছে", value: 32, max: 80 }],
+          data: [{ label: "সহযোগি দা'ঈ তৈরি হয়েছে", value: 32, max: 80 }],
         },
         {
           title: "দাওয়াতি বিষয়",
@@ -1862,7 +1862,7 @@ export const allData = {
         },
         {
           title: "দা’য়ী বিষয়",
-          data: [{ label: "সহযোগি দায়ী তৈরি হয়েছে", value: 64, max: 160 }],
+          data: [{ label: "সহযোগি দা'ঈ তৈরি হয়েছে", value: 64, max: 160 }],
         },
         {
           title: "দাওয়াতি বিষয়",
@@ -1969,7 +1969,7 @@ export const allData = {
         },
         {
           title: "দা’য়ী বিষয়",
-          data: [{ label: "সহযোগি দায়ী তৈরি হয়েছে", value: 16, max: 40 }],
+          data: [{ label: "সহযোগি দা'ঈ তৈরি হয়েছে", value: 16, max: 40 }],
         },
         {
           title: "দাওয়াতি বিষয়",

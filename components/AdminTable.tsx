@@ -346,10 +346,10 @@ const AdminTable: React.FC<AdminTableProps> = ({
         ],
       },
       {
-        title: "সহযোগী দায়ী",
+        title: "সহযোগী দা'ঈ",
         items: [
           {
-            label: dayee.labelMap?.["sohojogiDayeToiri"] || "সহযোগী দায়ী তৈরি",
+            label: dayee.labelMap?.["sohojogiDayeToiri"] || "সহযোগী দা'ঈ তৈরি",
             values: dayee.valuesByField?.["sohojogiDayeToiri"] || {},
           },
         ],

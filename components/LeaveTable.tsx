@@ -199,7 +199,7 @@ const LeaveTable: React.FC = () => {
           <p style="margin: 5px 0 0 0; font-size: 14px;">Generated on ${new Date().toLocaleDateString()}</p>
         </div>
         <div style="padding: 25px; background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-          <h2 style="margin: 0 0 15px 0; color: #4a5568; font-size: 18px;">দায়ীর তথ্য</h2>
+          <h2 style="margin: 0 0 15px 0; color: #4a5568; font-size: 18px;">দা'ঈর তথ্য</h2>
           <div style="display: flex; flex-wrap: wrap; gap: 20px;">
             <div style="flex: 1; min-width: 200px;">
               <p style="margin: 5px 0;"><strong>নাম:</strong> ${leave.name || "N/A"}</p>
@@ -243,7 +243,7 @@ const LeaveTable: React.FC = () => {
           <div style="display: flex; justify-content: space-between; margin-top: 40px;">
             <div style="text-align: center; width: 45%;">
               <div style="border-top: 1px solid #718096; width: 80%; margin: 0 auto;"></div>
-              <p style="margin: 5px 0 0 0;">দায়ী স্বাক্ষর</p>
+              <p style="margin: 5px 0 0 0;">দা'ঈ স্বাক্ষর</p>
             </div>
             <div style="text-align: center; width: 45%;">
               <div style="border-top: 1px solid #718096; width: 80%; margin: 0 auto;"></div>

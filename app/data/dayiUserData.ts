@@ -1,6 +1,6 @@
 export const userDayeData = {
   "labelMap": {
-    "sohojogiDayeToiri": "সহযোগি দাঈ তৈরি হয়েছে"
+    "sohojogiDayeToiri": "সহযোগি দা'ঈ তৈরি হয়েছে"
   },
   "records": {
     "estiakahmed898@gmail.com": {
