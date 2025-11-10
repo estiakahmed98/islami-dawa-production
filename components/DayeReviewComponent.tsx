@@ -363,7 +363,7 @@ const DayeReviewComponent: React.FC = () => {
             variant={filterStatus === "submitted" ? "default" : "outline"}
             onClick={() => setFilterStatus("submitted")}
             size="sm"
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-green-600 text-white hover:text-white hover:bg-green-700"
           >
             জমা দিয়েছে ({stats.submitted})
           </Button>
@@ -371,7 +371,7 @@ const DayeReviewComponent: React.FC = () => {
             variant={filterStatus === "not-submitted" ? "default" : "outline"}
             onClick={() => setFilterStatus("not-submitted")}
             size="sm"
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-red-600 text-white hover:text-white hover:bg-red-700"
           >
             জমা দেয়নি ({stats.notSubmitted})
           </Button>
