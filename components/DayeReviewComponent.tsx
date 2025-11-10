@@ -254,10 +254,10 @@ const DayeReviewComponent: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-            দা'ঈ রিভিউ ড্যাশবোর্ড
+            দা'ঈ রিভিউ
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            আজকের কাজের অগ্রগতি পর্যালোচনা করুন
+            কাজের অগ্রগতি পর্যালোচনা করুন
           </p>
         </div>
         <div className="flex items-center gap-2">
