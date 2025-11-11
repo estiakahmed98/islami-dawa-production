@@ -410,7 +410,7 @@ const AmoliMuhasabaForm = () => {
                 </div>
               </div> */}
 
-              <div className="grid grid-cols-3 md:col-span-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:col-span-2 gap-4">
                 <div className="mb-2">
                   <label className="mb-2 text-sm font-medium text-gray-700">
                    {t("quarntilawat")}
