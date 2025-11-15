@@ -261,7 +261,10 @@
         "amoliSura": "আমলি সুরা",
         "ayamroja": "আইয়ামে রোজা",
         "hijbulBahar": "হিজবুল বাহার",
-        "quarntilawat": "কুরআন তিলাওয়াত"
+        "quarntilawat": "কুরআন তিলাওয়াত",
+        "quarntilawatAyat": "আয়াত",
+        "pageNo": "পেজ নম্বর",
+        "editorContent": "ইডিটর বিষয়"
       },
       "moktob": {
         "title": "মক্তব বিষয়",
@@ -273,17 +276,20 @@
         "notunBoyoskoShikkha": "নতুন বয়স্ক শিক্ষা",
         "totalBoyoskoShikkha": "মোট বয়স্ক শিক্ষা",
         "boyoskoShikkhaOnshogrohon": "বয়স্ক শিক্ষায় অংশগ্রহণ",
-        "newMuslimeDinerFikir": "নতুন মুসলিমদের ফিকির"
+        "newMuslimeDinerFikir": "নতুন মুসলিমদের ফিকির",
+        "editorContent": "ইডিটর বিষয়"
       },
       "talim": {
         "title": "মহিলাদের তালিম",
         "mohilaTalim": "মহিলাদের তালিম হয়েছে",
-        "mohilaOnshogrohon": "মহিলাদের অংশগ্রহণ"
+        "mohilaOnshogrohon": "মহিলাদের অংশগ্রহণ",
+        "editorContent": "ইডিটর বিষয়"
       },
       "daye": {
         "title": "সহযোগী দা'ঈ",
         "sohojogiDayeToiri": "সহযোগী দা'ঈ তৈরি হয়েছে",
-        "assistantsList": "সহযোগী দা'ঈর তালিকা"
+        "assistantsList": "সহযোগী দা'ঈর তালিকা",
+        "editorContent": "ইডিটর বিষয়"
       },
       "dawati": {
         "title": "দাওয়াতি বিষয়",
@@ -291,7 +297,8 @@
         "murtadDawat": "মুরতাদদের দাওয়াত",
         "alemderSatheyMojlish": "আলেমদের সাথে মজলিশ",
         "publicSatheyMojlish": "পাবলিকের সাথে মজলিশ",
-        "nonMuslimSaptahikGasht": "অমুসলিমদের সাথে সাপ্তাহিক গাশ্ত"
+        "nonMuslimSaptahikGasht": "অমুসলিমদের সাথে সাপ্তাহিক গাশ্ত",
+        "editorContent": "ইডিটর বিষয়"
       },
       "dawatiMojlish": {
         "title": "দাওয়াতি মজলিশ",
@@ -301,17 +308,20 @@
         "prosikkhonOnshogrohon": "প্রশিক্ষণে অংশগ্রহণ",
         "jummahAlochona": "জুম্মার আলোচনা",
         "dhormoSova": "ধর্ম সংসভা",
-        "mashwaraPoint": "মাশওয়ারা পয়েন্ট"
+        "mashwaraPoint": "মাশওয়ারা পয়েন্ট",
+        "editorContent": "ইডিটর বিষয়"
       },
       "jamat": {
         "title": "জামাত বিষয়",
         "jamatBerHoise": "জামাত বের হয়েছে",
-        "jamatSathi": "জামাত সাথী"
+        "jamatSathi": "জামাত সাথী",
+        "editorContent": "ইডিটর বিষয়"
       },
       "dineFera": {
         "title": "দ্বীনে ফিরে এসেছে",
         "nonMuslimMuslimHoise": "অমুসলিম মুসলিম হয়েছে",
-        "murtadIslamFireche": "মুরতাদ ইসলামে ফিরেছে"
+        "murtadIslamFireche": "মুরতাদ ইসলামে ফিরেছে",
+        "editorContent": "ইডিটর বিষয়"
       },
       "sofor": {
         "title": "সফর বিষয়",
@@ -319,7 +329,8 @@
         "madrasaVisit": "মাদ্রাসা সফর হয়েছে",
         "schoolCollegeVisit": "স্কুল/কলেজ সফর হয়েছে",
         "madrasaVisitList": "মাদ্রাসার তালিকা",
-        "schoolCollegeVisitList": "স্কুল/কলেজ তালিকা"
+        "schoolCollegeVisitList": "স্কুল/কলেজ তালিকা",
+        "editorContent": "ইডিটর বিষয়"
       }
     }
   },
@@ -419,7 +430,13 @@
     "submit": "জমা দিন ",
     "close": "বন্ধ করুন",
     "cancel": "বাতিল",
-    "save": "সংরক্ষণ"
+    "save": "সংরক্ষণ",
+    "error":"ত্রুটি",
+    "success":"সফল",
+    "warning":"সতর্ক",
+    "info":"একটি বিজ্ঞানী",
+    "loading":"লোড হচ্ছে...",
+    "tryAgain":"আবার চেষ্টা করুন"
   },
   "editRequest": {
     "title": "সম্পাদনার অনুমতি অনুরোধ",

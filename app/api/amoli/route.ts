@@ -14,6 +14,20 @@ export async function POST(req: NextRequest) {
       email,
       percentage = "0",
       editorContent = "",
+      tahajjud,
+      surah,
+      ayat,
+      zikir,
+      ishraq,
+      jamat,
+      sirat,
+      Dua,
+      ilm,
+      tasbih,
+      dayeeAmol,
+      amoliSura,
+      ayamroja,
+      hijbulBahar,
       quarntilawat,
       quarntilawatAyat,
       pageNo,
@@ -22,9 +36,17 @@ export async function POST(req: NextRequest) {
 
     // quarntilawat is already the JSON object from the form
 
-    if (!email || Object.keys(otherFields).length === 0) {
+    if (!email) {
       return NextResponse.json(
-        { error: "Email and data are required." },
+        { error: "Email is required." },
+        { status: 400 }
+      );
+    }
+
+    // Validate required fields
+    if (!tahajjud && !surah && !zikir && !ishraq && !jamat && !sirat && !Dua && !ilm && !tasbih && !dayeeAmol && !amoliSura && !ayamroja && !hijbulBahar) {
+      return NextResponse.json(
+        { error: "At least one field must be filled." },
         { status: 400 }
       );
     }
@@ -58,8 +80,24 @@ export async function POST(req: NextRequest) {
         date: today,
         percentage,
         editorContent,
+        tahajjud,
+        surah,
+        ayat,
+        zikir,
+        ishraq,
+        jamat,
+        sirat,
+        Dua,
+        ilm,
+        tasbih,
+        dayeeAmol,
+        amoliSura,
+        ayamroja,
+        hijbulBahar,
         ...(quarntilawat && { quarntilawat }),
-        ...otherFields, // ✅ safe now
+        ...(quarntilawatAyat && { quarntilawatAyat }),
+        ...(pageNo && { pageNo }),
+        ...otherFields
       },
     });
 

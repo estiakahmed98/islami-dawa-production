@@ -314,8 +314,9 @@ const AdminDashboard: React.FC = () => {
         setter: setAmoliData,
         labelMap: {
           tahajjud: t("amoli.tahajjud"),
-          surah: t("amoli.surah"),
-          ayat: t("amoli.ayat"),
+          quarntilawat: t("amoli.quarntilawat"),
+          pageNo: t("amoli.pageNo"),
+          quarntilawatAyat: t("amoli.quarntilawatAyat"),
           zikir: t("amoli.zikir"),
           ishraq: t("amoli.ishraq"),
           jamat: t("amoli.jamat"),
@@ -327,6 +328,7 @@ const AdminDashboard: React.FC = () => {
           amoliSura: t("amoli.amoliSura"),
           ayamroja: t("amoli.ayamroja"),
           hijbulBahar: t("amoli.hijbulBahar"),
+          editorContent: t("amoli.editorContent"),
         },
       },
       {
@@ -343,6 +345,7 @@ const AdminDashboard: React.FC = () => {
           totalBoyoskoShikkha: t("moktob.totalBoyoskoShikkha"),
           boyoskoShikkhaOnshogrohon: t("moktob.boyoskoShikkhaOnshogrohon"),
           newMuslimeDinerFikir: t("moktob.newMuslimeDinerFikir"),
+          editorContent: t("moktob.editorContent"),
         },
       },
       {
@@ -352,6 +355,7 @@ const AdminDashboard: React.FC = () => {
         labelMap: {
           mohilaTalim: t("talim.mohilaTalim"),
           mohilaOnshogrohon: t("talim.mohilaOnshogrohon"),
+          editorContent: t("talim.editorContent"),
         },
       },
       {
@@ -361,6 +365,7 @@ const AdminDashboard: React.FC = () => {
         labelMap: {
           sohojogiDayeToiri: t("daye.sohojogiDayeToiri"),
           assistantsList: t("daye.assistantsList"),
+          editorContent: t("daye.editorContent"),
         },
       },
       {
@@ -371,6 +376,7 @@ const AdminDashboard: React.FC = () => {
           nonMuslimDawat: t("dawati.nonMuslimDawat"),
           murtadDawat: t("dawati.murtadDawat"),
           nonMuslimSaptahikGasht: t("dawati.nonMuslimSaptahikGasht"),
+          editorContent: t("dawati.editorContent"),
         },
       },
       {
@@ -385,6 +391,7 @@ const AdminDashboard: React.FC = () => {
           jummahAlochona: t("dawatiMojlish.jummahAlochona"),
           dhormoSova: t("dawatiMojlish.dhormoSova"),
           mashwaraPoint: t("dawatiMojlish.mashwaraPoint"),
+          editorContent: t("dawatiMojlish.editorContent"),
         },
       },
       {
@@ -394,6 +401,7 @@ const AdminDashboard: React.FC = () => {
         labelMap: {
           jamatBerHoise: t("jamat.jamatBerHoise"),
           jamatSathi: t("jamat.jamatSathi"),
+          editorContent: t("jamat.editorContent"),
         },
       },
       {
@@ -403,6 +411,7 @@ const AdminDashboard: React.FC = () => {
         labelMap: {
           nonMuslimMuslimHoise: t("dineFera.nonMuslimMuslimHoise"),
           murtadIslamFireche: t("dineFera.murtadIslamFireche"),
+          editorContent: t("dineFera.editorContent"),
         },
       },
       {
@@ -415,6 +424,7 @@ const AdminDashboard: React.FC = () => {
           schoolCollegeVisit: t("sofor.schoolCollegeVisit"),
           madrasaVisitList: t("sofor.madrasaVisitList"),
           schoolCollegeVisitList: t("sofor.schoolCollegeVisitList"),
+          editorContent: t("sofor.editorContent"),
         },
       },
     ],
@@ -633,8 +643,9 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       <div className="border border-[#155E75] lg:p-6 mt-10 rounded-xl ">
-        <Tabs defaultValue="moktob" className="w-full p-4">
+        <Tabs defaultValue="amoli" className="w-full p-4">
           <TabsList className="grid grid-cols-2 md:grid-cols-4">
+            <TabsTrigger value="amoli">{t("dashboard.amoliMuhasaba")}</TabsTrigger>
             <TabsTrigger value="moktob">{t("dashboard.moktobSubject")}</TabsTrigger>
             <TabsTrigger value="talim">{t("dashboard.talimSubject")}</TabsTrigger>
             <TabsTrigger value="daye">{t("dashboard.dayiSubject")}</TabsTrigger>
@@ -644,6 +655,10 @@ const AdminDashboard: React.FC = () => {
             <TabsTrigger value="dinefera">{t("dashboard.dineFera")}</TabsTrigger>
             <TabsTrigger value="sofor">{t("dashboard.soforSubject")}</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="amoli">
+            <AdminTable userData={amoliData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
+          </TabsContent>
 
           <TabsContent value="moktob">
             <AdminTable userData={moktobData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
