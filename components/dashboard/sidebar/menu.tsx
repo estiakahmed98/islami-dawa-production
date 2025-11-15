@@ -157,6 +157,11 @@ const SidebarMenu = () => {
       url: "/dashboard",
     },
     {
+      url: "/dashboard/weekly-todo",
+      icon: <GrPlan className="size-5" />,
+      title: t("weeklyTodo"),
+    },
+    {
       title: t("amoliMuhasaba"),
       icon: <FaRegFileAlt className="size-5" />,
       url: "/dashboard/amoli-muhasaba",
@@ -215,11 +220,6 @@ const SidebarMenu = () => {
       title: t("calendar"),
       icon: <GrSchedules className="size-5" />,
       url: "/dashboard/calendar",
-    },
-    {
-      title: t("weeklyTodo"),
-      icon: <GrSchedules className="size-5" />,
-      url: "/dashboard/weekly-todo",
     },
   ];
 

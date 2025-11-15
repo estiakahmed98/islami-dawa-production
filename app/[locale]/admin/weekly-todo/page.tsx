@@ -1,6 +1,6 @@
 'use client';
 
-import AdminWeeklyTodoView from '@/components/weekly-todo/AdminToDo';
+import AdminWeeklyTodoView from '@/components/weekly-todo/AdminWeeklyTodoView';
 
 export default function AdminWeeklyTodoPage() {
     return (

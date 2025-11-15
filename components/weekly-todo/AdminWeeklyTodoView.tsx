@@ -35,15 +35,19 @@ export default function AdminWeeklyTodoView() {
         // Calculate Saturday as start of week (6 = Saturday)
         const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
         const daysUntilSaturday = currentDay === 6 ? 0 : (6 - currentDay + 7) % 7;
-        start = new Date(now.setDate(now.getDate() - daysUntilSaturday)); // This Saturday
-        end = new Date(now.setDate(start.getDate() + 6)); // Next Friday
+        start = new Date(now);
+        start.setDate(now.getDate() - daysUntilSaturday); // This Saturday
+        end = new Date(start);
+        end.setDate(start.getDate() + 6); // Next Friday
         break;
       case 'last-week':
         // Calculate last Saturday
         const currentDayForLast = now.getDay();
         const daysSinceLastSaturday = (currentDayForLast - 6 + 7) % 7;
-        start = new Date(now.setDate(now.getDate() - daysSinceLastSaturday - 7)); // Last Saturday
-        end = new Date(now.setDate(start.getDate() + 6)); // Last Friday
+        start = new Date(now);
+        start.setDate(now.getDate() - daysSinceLastSaturday - 7); // Last Saturday
+        end = new Date(start);
+        end.setDate(start.getDate() + 6); // Last Friday
         break;
       case 'custom':
         if (!customDate) return { start: null, end: null };
@@ -66,11 +70,13 @@ export default function AdminWeeklyTodoView() {
     setError('');
 
     try {
+      const dateRangeValues = getDateRange();
       const data = await adminWeeklyTodoService.getAdminTodos({
         status: statusFilter !== 'all' ? statusFilter : undefined,
         userId: selectedUser !== 'all' ? selectedUser : undefined,
         weekday: weekdayFilter !== 'all' ? weekdayFilter : undefined,
-        ...getDateRange(),
+        startDate: dateRangeValues.start || undefined,
+        endDate: dateRangeValues.end || undefined,
       });
 
       // Extract unique users from todos
@@ -170,8 +176,8 @@ export default function AdminWeeklyTodoView() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">সাপ্তাহিক প্ল্যান - অ্যাডমিন ভিউ</h1>
-        <p className="text-gray-600 mt-2">সকল ইউজারের সাপ্তাহিক প্ল্যান দেখুন ও ম্যানেজ করুন</p>
+        <h1 className="text-md md:text-3xl font-bold text-gray-900">সাপ্তাহিক প্ল্যান - অ্যাডমিন ভিউ</h1>
+        <p className="text-xs md:text-sm text-gray-600 mt-2">সকল ইউজারের সাপ্তাহিক প্ল্যান দেখুন ও ম্যানেজ করুন</p>
       </div>
 
       {/* Filters */}
@@ -226,7 +232,6 @@ export default function AdminWeeklyTodoView() {
               <option value="this-week">এই সপ্তাহ</option>
               <option value="last-week">গত সপ্তাহ</option>
               <option value="custom">কাস্টম</option>
-              <option value="all">সব তারিখ</option>
             </select>
           </div>
 
@@ -330,32 +335,41 @@ export default function AdminWeeklyTodoView() {
       )}
 
       {/* User Accordions */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Object.entries(groupedTodos).map(([userId, { user, todos }]) => (
-          <div key={userId} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div key={userId} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden h-full flex flex-col">
             {/* User Header */}
             <button
               onClick={() => toggleUserAccordion(userId)}
-              className="w-full px-6 py-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+              className="w-full px-6 py-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-200"
             >
               <div className="flex justify-between items-center">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-gray-900 truncate">
                     {user.name}
                   </h3>
-                  <div className="flex flex-wrap gap-4 mt-1 text-sm text-gray-600">
-                    <span>Email: {user.email}</span>
-                    {user.phone && <span>Phone: {user.phone}</span>}
-                    {user.role && <span>Role: {user.role}</span>}
-                    {getUserLocation(user) && <span>Location: {getUserLocation(user)}</span>}
+                  <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-600">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full bg-blue-50 text-blue-700 font-medium">
+                      {todos.length} টি প্ল্যান
+                    </span>
+                    {user.role && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                        {user.role}
+                      </span>
+                    )}
                   </div>
+                  <div className="mt-2 text-sm text-gray-600 truncate">
+                    {user.email}
+                  </div>
+                  {getUserLocation(user) && (
+                    <div className="mt-1 text-xs text-gray-500 truncate">
+                      📍 {getUserLocation(user)}
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-500">
-                    {todos.length} টি প্ল্যান
-                  </span>
+                <div className="flex items-center ml-4">
                   <svg
-                    className={`w-5 h-5 transform transition-transform ${
+                    className={`w-5 h-5 transform transition-transform duration-200 text-gray-400 ${
                       expandedUsers.has(userId) ? 'rotate-180' : ''
                     }`}
                     fill="none"
@@ -370,16 +384,21 @@ export default function AdminWeeklyTodoView() {
 
             {/* Todos List */}
             {expandedUsers.has(userId) && (
-              <div className="border-t border-gray-200">
-                <div className="p-6">
+              <div className="border-t border-gray-200 flex-1 overflow-hidden">
+                <div className="p-4 max-h-96 overflow-y-auto">
                   {todos.length === 0 ? (
-                    <p className="text-gray-500 text-center py-4">কোন প্ল্যান নেই</p>
+                    <div className="text-center py-8">
+                      <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      <p className="mt-2 text-sm text-gray-500">কোন প্ল্যান নেই</p>
+                    </div>
                   ) : (
-                    <div className="grid gap-4">
+                    <div className="space-y-3">
                       {todos.map(todo => (
                         <div
                           key={todo.id}
-                          className={`p-4 rounded-lg border ${getStatusColor(todo.status)}`}
+                          className={`p-3 rounded-lg border ${getStatusColor(todo.status)} hover:shadow-sm transition-shadow duration-200`}
                         >
                           <div className="flex justify-between items-start mb-2">
                             <h4 className="font-semibold text-gray-900">{todo.title}</h4>
