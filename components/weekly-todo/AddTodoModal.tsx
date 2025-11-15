@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   CreateWeeklyTodo,
   WeeklyTodo,
@@ -22,6 +23,7 @@ export default function AddTodoModal({
   onTodoAdded,
   editingTodo,
 }: AddTodoModalProps) {
+  const t = useTranslations("weeklyTodo.modal");
   const [formData, setFormData] = useState<CreateWeeklyTodo>({
     title: "",
     details: "",
@@ -37,8 +39,8 @@ export default function AddTodoModal({
       setFormData({
         title: editingTodo.title,
         details: editingTodo.details || "",
-        scheduledDate: editingTodo.scheduledDate 
-          ? new Date(editingTodo.scheduledDate).toISOString().split('T')[0]
+        scheduledDate: editingTodo.scheduledDate
+          ? new Date(editingTodo.scheduledDate).toISOString().split("T")[0]
           : "",
         status: editingTodo.status,
       });
@@ -78,9 +80,7 @@ export default function AddTodoModal({
         status: "pending",
       });
     } catch (err) {
-      setError(
-        `Failed to ${isEditing ? "update" : "create"} todo. Please try again.`
-      );
+      setError(isEditing ? t("errors.updateFailed") : t("errors.createFailed"));
     } finally {
       setLoading(false);
     }
@@ -101,15 +101,16 @@ export default function AddTodoModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50  rounded-t-4xl">
       <div className="bg-white rounded-lg w-[80vw] h-[90vh] flex flex-col">
-        <div className="flex justify-between items-center p-6 border-b flex-shrink-0">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {isEditing ? "Edit Plan" : "Add New Plan"}
+        <div className="flex justify-between bg-gradient-to-r from-[#1B809B] to-[#2C9AB8] items-center p-6 border-b flex-shrink-0  rounded-t-2xl">
+          <h2 className="text-xl font-semibold text-white">
+            {isEditing ? t("editTitle") : t("addTitle")}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-white hover:text-gray-600"
+            aria-label={t("close")}
           >
             <svg
               className="w-6 h-6"
@@ -127,7 +128,10 @@ export default function AddTodoModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="flex-1 overflow-y-auto p-6 space-y-4"
+        >
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
               {error}
@@ -139,7 +143,7 @@ export default function AddTodoModal({
               htmlFor="title"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Title *
+              {t("fields.title")} *
             </label>
             <input
               type="text"
@@ -149,7 +153,7 @@ export default function AddTodoModal({
               onChange={handleChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter todo title"
+              placeholder={t("placeholders.title")}
             />
           </div>
 
@@ -158,12 +162,14 @@ export default function AddTodoModal({
               htmlFor="details"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Details
+              {t("fields.details")}
             </label>
             <JoditEditorComponent
-              placeholder="Enter todo details"
+              placeholder={t("placeholders.details")}
               initialValue={formData.details}
-              onContentChange={(content) => setFormData(prev => ({ ...prev, details: content }))}
+              onContentChange={(content) =>
+                setFormData((prev) => ({ ...prev, details: content }))
+              }
               height="400px"
             />
           </div>
@@ -173,7 +179,7 @@ export default function AddTodoModal({
               htmlFor="scheduledDate"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Scheduled Date *
+              {t("fields.scheduledDate")} *
             </label>
             <input
               type="date"
@@ -193,7 +199,7 @@ export default function AddTodoModal({
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              Cancel
+              {t("buttons.cancel")}
             </button>
             <button
               type="submit"
@@ -202,11 +208,11 @@ export default function AddTodoModal({
             >
               {loading
                 ? isEditing
-                  ? "Updating..."
-                  : "Creating..."
+                  ? t("buttons.updating")
+                  : t("buttons.creating")
                 : isEditing
-                  ? "Update Plan"
-                  : "Create Plan"}
+                  ? t("buttons.update")
+                  : t("buttons.create")}
             </button>
           </div>
         </form>
