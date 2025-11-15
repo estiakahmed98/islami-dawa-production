@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import DOMPurify from "dompurify";
 import fileDownload from "js-file-download";
 import "@fontsource/noto-sans-bengali";
 import { useSelectedUser } from "@/providers/treeProvider";
@@ -68,6 +69,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
   const selectedYear = selectedYearProp ?? internalYear;
 
   const [transposedData, setTransposedData] = useState<any[]>([]);
+  const [motamotPopup, setMotamotPopup] = useState<string | null>(null);
   const [filterLabel, setFilterLabel] = useState<string>("");
   const [filterValue, setFilterValue] = useState<string>("");
 
@@ -189,15 +191,47 @@ const AdminTable: React.FC<AdminTableProps> = ({
 
       monthDays.forEach((day) => {
         const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        const sum = emailList.reduce((tot, email) => {
-          const val = userData.records[email]?.[date]?.[labelKey];
-          return tot + convertToPoints(val, labelKey);
-        }, 0);
-        row[day] = sum;
+        if (emailList.length === 1) {
+          // single user: show raw value (not aggregated)
+          const email = emailList[0];
+          const raw = userData.records[email]?.[date]?.[labelKey];
+          row[day] = raw ?? "- -";
+        } else {
+          // aggregated: existing behavior (sum points)
+          const sum = emailList.reduce((tot, email) => {
+            const val = userData.records[email]?.[date]?.[labelKey];
+            return tot + convertToPoints(val, labelKey);
+          }, 0);
+          row[day] = sum;
+        }
       });
 
       return row;
     });
+
+    // If single user, add a মতামত (editorContent) row (eye button -> popup)
+    // Avoid adding if the labelMap already contains an `editorContent` key
+    if (emailList.length === 1 && !labelKeys.includes("editorContent")) {
+      const motamotRow: { label: string; labelKey: string; [key: number]: any } = {
+        label: t("motamot"),
+        labelKey: "editorContent",
+      };
+      const email = emailList[0];
+      monthDays.forEach((day) => {
+        const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const motamotHtml: string = userData.records[email]?.[date]?.editorContent || "- -";
+        const motamotText = DOMPurify.sanitize(motamotHtml, { ALLOWED_TAGS: [] });
+        motamotRow[day] =
+          motamotText !== "- -" ? (
+            <button onClick={() => setMotamotPopup(motamotText)} title="See note">
+              👁️
+            </button>
+          ) : (
+            "- -"
+          );
+      });
+      transposed.push(motamotRow);
+    }
 
     setTransposedData(transposed);
   }, [selectedMonth, selectedYear, userData, emailList, monthDays]);
@@ -558,14 +592,77 @@ const AdminTable: React.FC<AdminTableProps> = ({
                 </td>
                 {monthDays.map((day) => {
                   const clickable = clickableFields.includes(row.labelKey);
+
+                  // Special-case editorContent (মতামত): show an eye button that opens a modal
+                  if (row.labelKey === "editorContent") {
+                    const dateKey = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                    // collect motamot for each email for this date
+                    const motamots = emailList
+                      .map((email) => {
+                        const raw = userData.records?.[email]?.[dateKey]?.editorContent;
+                        if (!raw) return null;
+                        const text = DOMPurify.sanitize(raw, { ALLOWED_TAGS: [] });
+                        const name = (allUserDetails?.[email]?.name) || email;
+                        return { name, email, text };
+                      })
+                      .filter(Boolean) as { name: string; email: string; text: string }[];
+
+                    if (!motamots.length) {
+                      return (
+                        <td key={day} className="border border-gray-300 px-6 py-2 text-center">- -</td>
+                    );
+                    }
+
+                    const combined = motamots.map((m) => `${m.name}: ${m.text}`).join("\n\n----\n\n");
+
+                    return (
+                      <td key={day} className="border border-gray-300 px-6 py-2 text-center">
+                        <button onClick={() => setMotamotPopup(combined)} title="See note">
+                          👁️
+                        </button>
+                      </td>
+                    );
+                  }
+
+                  const rawValue = row[day];
+
+                  // If the raw value is an object (e.g., amoli data { ayat, para, pageNo }),
+                  // convert it into a readable string to avoid React error "Objects are not valid as a React child".
+                  let displayValue: any = rawValue;
+                  if (rawValue && typeof rawValue === "object") {
+                    if (Array.isArray(rawValue)) {
+                      displayValue = rawValue
+                        .map((v) => (typeof v === "symbol" ? v.toString() : String(v)))
+                        .join(", ");
+                    } else if ("ayat" in rawValue || "para" in rawValue || "pageNo" in rawValue) {
+                      const parts: string[] = [];
+                      if (rawValue.ayat) parts.push(String(rawValue.ayat));
+                      if (rawValue.para) parts.push(`পারা:${rawValue.para}`);
+                      if (rawValue.pageNo) parts.push(`পৃষ্ঠা:${rawValue.pageNo}`);
+                      displayValue = parts.join(" | ") || JSON.stringify(rawValue);
+                    } else {
+                      const vals = Object.values(rawValue).map((v) => (typeof v === "symbol" ? v.toString() : String(v)));
+                      displayValue = vals.join(" | ") || JSON.stringify(rawValue);
+                    }
+                  }
+
+                  const shouldRenderHTML =
+                    typeof displayValue === "string" && (displayValue.includes("<br") || displayValue.includes("</"));
+
+                  const commonProps: any = {
+                    className: `border border-gray-300 px-6 py-2 text-center ${clickable ? "cursor-pointer underline decoration-dotted" : ""}`,
+                    onClick: () => handleCellClick(row.labelKey, day),
+                    title: clickable ? "Click to view details" : "",
+                    style: { whiteSpace: shouldRenderHTML ? "normal" : undefined },
+                  };
+
+                  if (shouldRenderHTML) {
+                    return <td key={day} {...commonProps} dangerouslySetInnerHTML={{ __html: displayValue as string }} />;
+                  }
+
                   return (
-                    <td
-                      key={day}
-                      className={`border border-gray-300 px-6 py-2 text-center ${clickable ? "cursor-pointer underline decoration-dotted" : ""}`}
-                      onClick={() => handleCellClick(row.labelKey, day)}
-                      title={clickable ? "Click to view details" : ""}
-                    >
-                      {row[day]}
+                    <td key={day} {...commonProps}>
+                      {displayValue}
                     </td>
                   );
                 })}
@@ -574,6 +671,21 @@ const AdminTable: React.FC<AdminTableProps> = ({
           </tbody>
         </table>
       </div>
+      {/* মতামত popup for single-user motamot rows */}
+      {motamotPopup && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-10 rounded-xl shadow-lg max-w-[85vw] lg:max-w-[60vw] max-h-[70vh] relative overflow-y-auto">
+            <button
+              className="absolute top-4 right-6 text-xl text-red-500 hover:text-red-700"
+              onClick={() => setMotamotPopup(null)}
+            >
+              {t("close")}
+            </button>
+            <h3 className="text-lg font-bold mb-4">{t("motamot")}</h3>
+            <p className="lg:text-xl">{motamotPopup}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

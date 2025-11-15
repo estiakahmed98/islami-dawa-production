@@ -29,9 +29,6 @@ export async function POST(req: NextRequest) {
       ayamroja,
       hijbulBahar,
       quarntilawat,
-      quarntilawatAyat,
-      pageNo,
-      ...otherFields
     } = body;
 
     // quarntilawat is already the JSON object from the form
@@ -74,30 +71,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Whitelist fields that exist on the Prisma model to avoid passing unknown keys
     const created = await prisma.amoliMuhasaba.create({
       data: {
         userId: user.id,
         date: today,
-        percentage,
-        editorContent,
-        tahajjud,
-        surah,
-        ayat,
-        zikir,
-        ishraq,
-        jamat,
-        sirat,
-        Dua,
-        ilm,
-        tasbih,
-        dayeeAmol,
-        amoliSura,
-        ayamroja,
-        hijbulBahar,
-        ...(quarntilawat && { quarntilawat }),
-        ...(quarntilawatAyat && { quarntilawatAyat }),
-        ...(pageNo && { pageNo }),
-        ...otherFields
+        percentage: percentage ?? undefined,
+        editorContent: editorContent ?? undefined,
+        tahajjud: typeof tahajjud !== "undefined" && tahajjud !== null ? Number(tahajjud) : undefined,
+        surah: surah ?? undefined,
+        ayat: ayat ?? undefined,
+        quarntilawat: typeof quarntilawat !== "undefined" ? quarntilawat : undefined,
+        zikir: zikir ?? undefined,
+        ishraq: ishraq ?? undefined,
+        jamat: typeof jamat !== "undefined" && jamat !== null ? Number(jamat) : undefined,
+        sirat: sirat ?? undefined,
+        Dua: Dua ?? undefined,
+        ilm: ilm ?? undefined,
+        tasbih: tasbih ?? undefined,
+        dayeeAmol: dayeeAmol ?? undefined,
+        amoliSura: amoliSura ?? undefined,
+        ayamroja: ayamroja ?? undefined,
+        hijbulBahar: hijbulBahar ?? undefined,
       },
     });
 
@@ -168,30 +163,61 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, quarntilawat, quarntilawatAyat, pageNo, ...data } = body;
+    const { email, quarntilawat, ...data } = body;
 
-    // quarntilawat is already the JSON object from the form
+      // Only allow updating known fields to avoid Prisma validation errors
+      if (!email || Object.keys(data).length === 0) {
+        return NextResponse.json({ error: "Email and data are required." }, { status: 400 });
+      }
 
-    if (!email || Object.keys(data).length === 0) {
-      return NextResponse.json({ error: "Email and data are required." }, { status: 400 });
-    }
+      const user = await prisma.users.findUnique({ where: { email } });
+      if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    const user = await prisma.users.findUnique({ where: { email } });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+      const today = new Date();
 
-    const today = new Date();
-    const updated = await prisma.amoliMuhasaba.update({
-      where: {
-        userId_date: {
-          userId: user.id,
-          date: today,
+      const updatePayload: any = {};
+      const allowedUpdateFields = [
+        "percentage",
+        "editorContent",
+        "tahajjud",
+        "surah",
+        "ayat",
+        "quarntilawat",
+        "zikir",
+        "ishraq",
+        "jamat",
+        "sirat",
+        "Dua",
+        "ilm",
+        "tasbih",
+        "dayeeAmol",
+        "amoliSura",
+        "ayamroja",
+        "hijbulBahar",
+      ];
+
+      for (const key of allowedUpdateFields) {
+        if (key in data) {
+          // coerce numeric fields where appropriate
+          if (key === "tahajjud" || key === "jamat") {
+            updatePayload[key] = data[key] !== null && data[key] !== undefined ? Number(data[key]) : null;
+          } else {
+            updatePayload[key] = data[key];
+          }
+        }
+      }
+
+      if (quarntilawat) updatePayload.quarntilawat = quarntilawat;
+
+      const updated = await prisma.amoliMuhasaba.update({
+        where: {
+          userId_date: {
+            userId: user.id,
+            date: today,
+          },
         },
-      },
-      data: {
-        ...(quarntilawat && { quarntilawat }),
-        ...data,
-      },
-    });
+        data: updatePayload,
+      });
 
     return NextResponse.json({ message: "Updated successfully", data: updated }, { status: 200 });
   } catch (error) {
