@@ -5,6 +5,21 @@ import { useTranslations } from "next-intl";
 import { WeeklyTodo } from "@/types/weekly-todo";
 import { weeklyTodoService } from "@/services/user-weekly-todo";
 
+// Utility function to strip HTML tags
+const stripHtmlTags = (html: string): string => {
+  if (!html) return "";
+
+  // Create a temporary div element to parse HTML
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = html;
+
+  // Get the text content
+  const textContent = tempDiv.textContent || tempDiv.innerText || "";
+
+  // Clean up extra whitespace
+  return textContent.replace(/\s+/g, " ").trim();
+};
+
 interface TodoCardProps {
   todo: WeeklyTodo;
   onTodoUpdated: () => void;
@@ -177,16 +192,16 @@ export default function TodoCard({
           <div className="mb-4">
             {!isExpanded ? (
               <p className="text-gray-600 text-sm leading-relaxed line-clamp-2">
-                {todo.details}
+                {stripHtmlTags(todo.details)}
               </p>
             ) : (
               <div className="text-gray-600 text-sm leading-relaxed bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <div className="whitespace-pre-wrap">{todo.details}</div>
+                <div className="whitespace-pre-wrap">{stripHtmlTags(todo.details)}</div>
               </div>
             )}
 
             {/* Show More/Less Button */}
-            {todo.details.length > 150 && (
+            {stripHtmlTags(todo.details).length > 150 && (
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium inline-flex items-center"

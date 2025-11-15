@@ -5,6 +5,21 @@ import { useTranslations } from "next-intl";
 import { WeeklyTodo, User } from "@/types/weekly-todo";
 import { adminWeeklyTodoService } from "@/services/admin-weekly-todo";
 
+// Utility function to strip HTML tags
+const stripHtmlTags = (html: string): string => {
+  if (!html) return "";
+  
+  // Create a temporary div element to parse HTML
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = html;
+  
+  // Get the text content
+  const textContent = tempDiv.textContent || tempDiv.innerText || "";
+  
+  // Clean up extra whitespace
+  return textContent.replace(/\s+/g, " ").trim();
+};
+
 interface GroupedTodos {
   [userId: string]: {
     user: User;
@@ -521,7 +536,7 @@ export default function AdminWeeklyTodoView() {
 
                           {todo.details && (
                             <p className="text-gray-700 mb-4 text-sm leading-relaxed">
-                              {todo.details}
+                              {stripHtmlTags(todo.details)}
                             </p>
                           )}
 
