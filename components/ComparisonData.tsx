@@ -48,6 +48,18 @@ const convertToPoints = (value: any, field: string): number => {
         .split("-")
         .map((num: string) => parseInt(num, 10) || 0);
       return Math.abs((end || start) - start); // Return difference
+    } else if (field === "quarntilawat") {
+      const ayatMatch = value.match(/(\d+\s*-\s*\d+)|(\d+)/);
+      if (ayatMatch) {
+        const nums = ayatMatch[0]
+          .split("-")
+          .map((s: string) => parseInt(s.replace(/\D/g, ""), 10) || 0);
+        const start = nums[0] || 0;
+        const end = nums[1] || start;
+        return Math.abs(end - start) || (start > 0 ? start : 1);
+      }
+      // If it's non-empty textual quarntilawat, count as 1 point
+      return value ? 1 : 0;
     } else if (["surah", "ishraq", "ilm", "sirat"].includes(field)) {
       return value ? 1 : 0;
     } else if (field === "jamat") {
@@ -85,16 +97,15 @@ const ComparisonDataComponent: React.FC = () => {
   const [to, setTo] = useState("");
   const [comparisonData, setComparisonData] = useState<any[]>([]);
   const [isFetching, setIsFetching] = useState(false);
-  const t = useTranslations('comparison');
+  const t = useTranslations("comparison");
 
   const isFetchingRef = useRef(false);
   const yearOptions = useMemo(() => generateYearOptions(), []);
 
   // --- Label maps (mirrors UsersTable) ---
   const AMOLI_LABELS: Record<string, string> = {
-    tahajjud: "তাহাজ্জুদ (মিনিট/রাকাআত)",
-    surah: "সূরা",
-    ayat: "আয়াত",
+    tahajjud: "তাহাজ্জুদ (রাকাআত)",
+    quarntilawat: "কোরআনে কারিম তিলাওয়াত",
     zikir: "যিকির",
     ishraq: "ইশরাক/আওয়াবীন/চাশ্ত",
     jamat: "জামাতে নামাজ",
@@ -107,7 +118,6 @@ const ComparisonDataComponent: React.FC = () => {
     ayamroja: "আয়াম-এ-বিদ",
     hijbulBahar: "হিজবুল বাহর",
     percentage: "পারসেন্টেজ",
-    editorContent: "কারগুজারী",
   };
   const MOKTOB_LABELS: Record<string, string> = {
     notunMoktobChalu: "নতুন মক্তব চালু",
@@ -119,16 +129,13 @@ const ComparisonDataComponent: React.FC = () => {
     totalBoyoskoShikkha: "মোট বয়স্ক শিক্ষা",
     boyoskoShikkhaOnshogrohon: "বয়স্ক শিক্ষায় অংশগ্রহণ",
     newMuslimeDinerFikir: "নতুন মুসলিমের দিনের ফিকির",
-    editorContent: "কারগুজারী",
   };
   const TALIM_LABELS: Record<string, string> = {
     mohilaTalim: "মহিলাদের তালিম",
     mohilaOnshogrohon: "মহিলাদের অংশগ্রহণ",
-    editorContent: "কারগুজারী",
   };
   const DAYE_LABELS: Record<string, string> = {
     sohojogiDayeToiri: "সহযোগী দা'ঈ তৈরি",
-    editorContent: "কারগুজারী",
   };
   const DAWATI_LABELS: Record<string, string> = {
     nonMuslimDawat: "অমুসলিমকে দাওয়াত",
@@ -136,7 +143,6 @@ const ComparisonDataComponent: React.FC = () => {
     alemderSatheyMojlish: "আলেমদের সাথে মজলিশ",
     publicSatheyMojlish: "জনসাধারণের সাথে মজলিশ",
     nonMuslimSaptahikGasht: "অমুসলিম সাপ্তাহিক গাশত",
-    editorContent: "কারগুজারী",
   };
   const DAWATI_MOJLISH_LABELS: Record<string, string> = {
     dawatterGuruttoMojlish: "দাওয়াতি মজলিশ",
@@ -146,17 +152,14 @@ const ComparisonDataComponent: React.FC = () => {
     jummahAlochona: "জুম্মাহ আলােচনা",
     dhormoSova: "ধর্মসভা",
     mashwaraPoint: "মাশওয়ারা পয়েন্ট",
-    editorContent: "কারগুজারী",
   };
   const JAMAT_LABELS: Record<string, string> = {
     jamatBerHoise: "জামাত বের হয়েছে",
     jamatSathi: "জামাত সাথী",
-    editorContent: "কারগুজারী",
   };
   const DINEFERA_LABELS: Record<string, string> = {
     nonMuslimMuslimHoise: "অমুসলিম মুসলিম হয়েছে",
     murtadIslamFireche: "মুরতাদ ইসলাম ফিরেছে",
-    editorContent: "কারগুজারী",
   };
   const SOFOR_LABELS: Record<string, string> = {
     madrasaVisit: "মাদ্রাসা ভিজিট",
@@ -164,11 +167,13 @@ const ComparisonDataComponent: React.FC = () => {
     moktobVisit: "মক্তব ভিজিট",
     schoolCollegeVisit: "স্কুল/কলেজ ভিজিট",
     schoolCollegeVisitList: "স্কুল/কলেজ ভিজিট তালিকা",
-    editorContent: "কারগুজারী",
   };
 
   type RecordsByEmail = Record<string, Record<string, Record<string, any>>>;
-  type UserDataForAdminTable = { records: RecordsByEmail; labelMap: Record<string, string> };
+  type UserDataForAdminTable = {
+    records: RecordsByEmail;
+    labelMap: Record<string, string>;
+  };
 
   const toDateKey = (iso: string) => {
     const d = new Date(iso);
@@ -178,7 +183,11 @@ const ComparisonDataComponent: React.FC = () => {
     return `${yyyy}-${mm}-${dd}`;
   };
 
-  const ensureEmailDateSlot = (records: RecordsByEmail, email: string, dateKey: string) => {
+  const ensureEmailDateSlot = (
+    records: RecordsByEmail,
+    email: string,
+    dateKey: string
+  ) => {
     if (!records[email]) records[email] = {};
     if (!records[email][dateKey]) records[email][dateKey] = {};
     return records[email][dateKey];
@@ -236,9 +245,15 @@ const ComparisonDataComponent: React.FC = () => {
     setIsFetching(true);
     setComparisonData([]);
 
-    const encodeEmails = (emails: string[]) => emails.map(e => encodeURIComponent(e)).join(',');
+    const encodeEmails = (emails: string[]) =>
+      emails.map((e) => encodeURIComponent(e)).join(",");
 
-    const fetchModule = async (endpoint: string, emails: string[], mapper: (r: any, slot: any) => void, labelMap: Record<string,string>) => {
+    const fetchModule = async (
+      endpoint: string,
+      emails: string[],
+      mapper: (r: any, slot: any) => void,
+      labelMap: Record<string, string>
+    ) => {
       const records: RecordsByEmail = {};
       if (!emails.length) return { records, labelMap };
       try {
@@ -262,94 +277,180 @@ const ComparisonDataComponent: React.FC = () => {
     };
 
     try {
-      const [amoli, moktob, talim, daye, dawati, dawatiMojlish, jamat, dineFera, sofor] = await Promise.all([
-        fetchModule('amoli', emailList, (r, slot) => {
-          slot.tahajjud = r.tahajjud ?? "-";
-          slot.surah = r.surah ?? "-";
-          slot.ayat = r.ayat ?? "-";
-          slot.zikir = r.zikir ?? "-";
-          slot.ishraq = r.ishraq ?? "-";
-          slot.jamat = r.jamat ?? "-";
-          slot.sirat = r.sirat ?? "-";
-          slot.Dua = r.Dua ?? "-";
-          slot.ilm = r.ilm ?? "-";
-          slot.tasbih = r.tasbih ?? "-";
-          slot.dayeeAmol = r.dayeeAmol ?? "-";
-          slot.amoliSura = r.amoliSura ?? "-";
-          slot.ayamroja = r.ayamroja ?? "-";
-          slot.hijbulBahar = r.hijbulBahar ?? "-";
-          slot.percentage = r.percentage ?? "-";
-          slot.editorContent = r.editorContent || "";
-        }, AMOLI_LABELS),
+      const [
+        amoli,
+        moktob,
+        talim,
+        daye,
+        dawati,
+        dawatiMojlish,
+        jamat,
+        dineFera,
+        sofor,
+      ] = await Promise.all([
+        fetchModule(
+          "amoli",
+          emailList,
+          (r, slot) => {
+            slot.tahajjud = r.tahajjud ?? "-";
+            slot.surah = r.surah ?? "-";
+            slot.ayat = r.ayat ?? "-";
+            slot.zikir = r.zikir ?? "-";
+            slot.ishraq = r.ishraq ?? "-";
+            slot.jamat = r.jamat ?? "-";
+            slot.sirat = r.sirat ?? "-";
+            slot.Dua = r.Dua ?? "-";
+            slot.ilm = r.ilm ?? "-";
+            slot.tasbih = r.tasbih ?? "-";
+            slot.dayeeAmol = r.dayeeAmol ?? "-";
+            slot.amoliSura = r.amoliSura ?? "-";
+            slot.ayamroja = r.ayamroja ?? "-";
+            slot.hijbulBahar = r.hijbulBahar ?? "-";
+            slot.percentage = r.percentage ?? "-";
+            slot.editorContent = r.editorContent || "";
+            // Map quarntilawat: stringify object if needed
+            if (r.quarntilawat) {
+              if (typeof r.quarntilawat === "object") {
+                const q = r.quarntilawat;
+                slot.quarntilawat = `${q.para ?? "-"} | ${q.pageNo ?? "-"} | ${q.ayat ?? "-"}`;
+              } else {
+                slot.quarntilawat = r.quarntilawat;
+              }
+            } else {
+              slot.quarntilawat = "-";
+            }
+          },
+          AMOLI_LABELS
+        ),
 
-        fetchModule('moktob', emailList, (r, slot) => {
-          slot.notunMoktobChalu = r.notunMoktobChalu ?? "-";
-          slot.totalMoktob = r.totalMoktob ?? "-";
-          slot.totalStudent = r.totalStudent ?? "-";
-          slot.obhibhabokConference = r.obhibhabokConference ?? "-";
-          slot.moktoThekeMadrasaAdmission = r.moktoThekeMadrasaAdmission ?? "-";
-          slot.notunBoyoskoShikkha = r.notunBoyoskoShikkha ?? "-";
-          slot.totalBoyoskoShikkha = r.totalBoyoskoShikkha ?? "-";
-          slot.boyoskoShikkhaOnshogrohon = r.boyoskoShikkhaOnshogrohon ?? "-";
-          slot.newMuslimeDinerFikir = r.newMuslimeDinerFikir ?? "-";
-          slot.editorContent = r.editorContent || "";
-        }, MOKTOB_LABELS),
+        fetchModule(
+          "moktob",
+          emailList,
+          (r, slot) => {
+            slot.notunMoktobChalu = r.notunMoktobChalu ?? "-";
+            slot.totalMoktob = r.totalMoktob ?? "-";
+            slot.totalStudent = r.totalStudent ?? "-";
+            slot.obhibhabokConference = r.obhibhabokConference ?? "-";
+            slot.moktoThekeMadrasaAdmission =
+              r.moktoThekeMadrasaAdmission ?? "-";
+            slot.notunBoyoskoShikkha = r.notunBoyoskoShikkha ?? "-";
+            slot.totalBoyoskoShikkha = r.totalBoyoskoShikkha ?? "-";
+            slot.boyoskoShikkhaOnshogrohon = r.boyoskoShikkhaOnshogrohon ?? "-";
+            slot.newMuslimeDinerFikir = r.newMuslimeDinerFikir ?? "-";
+            slot.editorContent = r.editorContent || "";
+          },
+          MOKTOB_LABELS
+        ),
 
-        fetchModule('talim', emailList, (r, slot) => {
-          slot.mohilaTalim = r.mohilaTalim ?? "-";
-          slot.mohilaOnshogrohon = r.mohilaOnshogrohon ?? "-";
-          slot.editorContent = r.editorContent || "";
-        }, TALIM_LABELS),
+        fetchModule(
+          "talim",
+          emailList,
+          (r, slot) => {
+            slot.mohilaTalim = r.mohilaTalim ?? "-";
+            slot.mohilaOnshogrohon = r.mohilaOnshogrohon ?? "-";
+            slot.editorContent = r.editorContent || "";
+          },
+          TALIM_LABELS
+        ),
 
-        fetchModule('dayi', emailList, (r, slot) => {
-          slot.sohojogiDayeToiri = r.sohojogiDayeToiri ?? "-";
-          slot.editorContent = r.editorContent || "";
-        }, DAYE_LABELS),
+        fetchModule(
+          "dayi",
+          emailList,
+          (r, slot) => {
+            slot.sohojogiDayeToiri = r.sohojogiDayeToiri ?? "-";
+            slot.editorContent = r.editorContent || "";
+          },
+          DAYE_LABELS
+        ),
 
-        fetchModule('dawati', emailList, (r, slot) => {
-          slot.nonMuslimDawat = r.nonMuslimDawat ?? "-";
-          slot.murtadDawat = r.murtadDawat ?? "-";
-          slot.alemderSatheyMojlish = r.alemderSatheyMojlish ?? "-";
-          slot.publicSatheyMojlish = r.publicSatheyMojlish ?? "-";
-          slot.nonMuslimSaptahikGasht = r.nonMuslimSaptahikGasht ?? "-";
-          slot.editorContent = r.editorContent || "";
-        }, DAWATI_LABELS),
+        fetchModule(
+          "dawati",
+          emailList,
+          (r, slot) => {
+            slot.nonMuslimDawat = r.nonMuslimDawat ?? "-";
+            slot.murtadDawat = r.murtadDawat ?? "-";
+            slot.alemderSatheyMojlish = r.alemderSatheyMojlish ?? "-";
+            slot.publicSatheyMojlish = r.publicSatheyMojlish ?? "-";
+            slot.nonMuslimSaptahikGasht = r.nonMuslimSaptahikGasht ?? "-";
+            slot.editorContent = r.editorContent || "";
+          },
+          DAWATI_LABELS
+        ),
 
-        fetchModule('dawatimojlish', emailList, (r, slot) => {
-          slot.dawatterGuruttoMojlish = r.dawatterGuruttoMojlish ?? "-";
-          slot.mojlisheOnshogrohon = r.mojlisheOnshogrohon ?? "-";
-          slot.prosikkhonKormoshalaAyojon = r.prosikkhonKormoshalaAyojon ?? "-";
-          slot.prosikkhonOnshogrohon = r.prosikkhonOnshogrohon ?? "-";
-          slot.jummahAlochona = r.jummahAlochona ?? "-";
-          slot.dhormoSova = r.dhormoSova ?? "-";
-          slot.mashwaraPoint = r.mashwaraPoint ?? "-";
-          slot.editorContent = r.editorContent || "";
-        }, DAWATI_MOJLISH_LABELS),
+        fetchModule(
+          "dawatimojlish",
+          emailList,
+          (r, slot) => {
+            slot.dawatterGuruttoMojlish = r.dawatterGuruttoMojlish ?? "-";
+            slot.mojlisheOnshogrohon = r.mojlisheOnshogrohon ?? "-";
+            slot.prosikkhonKormoshalaAyojon =
+              r.prosikkhonKormoshalaAyojon ?? "-";
+            slot.prosikkhonOnshogrohon = r.prosikkhonOnshogrohon ?? "-";
+            slot.jummahAlochona = r.jummahAlochona ?? "-";
+            slot.dhormoSova = r.dhormoSova ?? "-";
+            slot.mashwaraPoint = r.mashwaraPoint ?? "-";
+            slot.editorContent = r.editorContent || "";
+          },
+          DAWATI_MOJLISH_LABELS
+        ),
 
-        fetchModule('jamat', emailList, (r, slot) => {
-          slot.jamatBerHoise = r.jamatBerHoise ?? "-";
-          slot.jamatSathi = r.jamatSathi ?? "-";
-          slot.editorContent = r.editorContent || "";
-        }, JAMAT_LABELS),
+        fetchModule(
+          "jamat",
+          emailList,
+          (r, slot) => {
+            slot.jamatBerHoise = r.jamatBerHoise ?? "-";
+            slot.jamatSathi = r.jamatSathi ?? "-";
+            slot.editorContent = r.editorContent || "";
+          },
+          JAMAT_LABELS
+        ),
 
-        fetchModule('dinefera', emailList, (r, slot) => {
-          slot.nonMuslimMuslimHoise = r.nonMuslimMuslimHoise ?? "-";
-          slot.murtadIslamFireche = r.murtadIslamFireche ?? "-";
-          slot.editorContent = r.editorContent || "";
-        }, DINEFERA_LABELS),
+        fetchModule(
+          "dinefera",
+          emailList,
+          (r, slot) => {
+            slot.nonMuslimMuslimHoise = r.nonMuslimMuslimHoise ?? "-";
+            slot.murtadIslamFireche = r.murtadIslamFireche ?? "-";
+            slot.editorContent = r.editorContent || "";
+          },
+          DINEFERA_LABELS
+        ),
 
-        fetchModule('soforbisoy', emailList, (r, slot) => {
-          slot.madrasaVisit = r.madrasaVisit ?? "-";
-          slot.madrasaVisitList = Array.isArray(r.madrasaVisitList) ? r.madrasaVisitList.join(", ") : (r.madrasaVisitList || "");
-          slot.moktobVisit = r.moktobVisit ?? "-";
-          slot.schoolCollegeVisit = r.schoolCollegeVisit ?? "-";
-          slot.schoolCollegeVisitList = Array.isArray(r.schoolCollegeVisitList) ? r.schoolCollegeVisitList.join(", ") : (r.schoolCollegeVisitList || "");
-          slot.editorContent = r.editorContent || "";
-        }, SOFOR_LABELS),
+        fetchModule(
+          "soforbisoy",
+          emailList,
+          (r, slot) => {
+            slot.madrasaVisit = r.madrasaVisit ?? "-";
+            slot.madrasaVisitList = Array.isArray(r.madrasaVisitList)
+              ? r.madrasaVisitList.join(", ")
+              : r.madrasaVisitList || "";
+            slot.moktobVisit = r.moktobVisit ?? "-";
+            slot.schoolCollegeVisit = r.schoolCollegeVisit ?? "-";
+            slot.schoolCollegeVisitList = Array.isArray(
+              r.schoolCollegeVisitList
+            )
+              ? r.schoolCollegeVisitList.join(", ")
+              : r.schoolCollegeVisitList || "";
+            slot.editorContent = r.editorContent || "";
+          },
+          SOFOR_LABELS
+        ),
       ]);
 
-      const allData = [amoli, moktob, dawati, dawatiMojlish, jamat, dineFera, talim, sofor, daye];
-      const combinedData = allData.flatMap((data) => fetchUserComparisonData(data, comparisonType, from, to));
+      const allData = [
+        amoli,
+        moktob,
+        dawati,
+        dawatiMojlish,
+        jamat,
+        dineFera,
+        talim,
+        sofor,
+        daye,
+      ];
+      const combinedData = allData.flatMap((data) =>
+        fetchUserComparisonData(data, comparisonType, from, to)
+      );
       setComparisonData(combinedData);
     } catch (e) {
       console.error(e);
@@ -594,14 +695,16 @@ const ComparisonDataComponent: React.FC = () => {
         {comparisonType === "year" && (
           <>
             <div className="grid max-w-sm:w-full lg:flex lg:gap-2">
-                      <select
-                      value={from}
-                      onChange={(e) => setFrom(e.target.value)}
-                      className="border px-4 py-2 rounded-md shadow-sm"
-                    >
-                      {yearOptions}
-                    </select>
-              <span className="py-1 self-center font-bold">{t("controls.to")}</span>
+              <select
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+                className="border px-4 py-2 rounded-md shadow-sm"
+              >
+                {yearOptions}
+              </select>
+              <span className="py-1 self-center font-bold">
+                {t("controls.to")}
+              </span>
               <select
                 value={to}
                 onChange={(e) => setTo(e.target.value)}
@@ -616,9 +719,11 @@ const ComparisonDataComponent: React.FC = () => {
         <button
           onClick={handleCompare}
           disabled={isFetching}
-          className={`bg-blue-600 text-white px-4 py-2 rounded-md shadow-md ${isFetching ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+          className={`bg-blue-600 text-white px-4 py-2 rounded-md shadow-md ${isFetching ? "opacity-70 cursor-not-allowed" : "hover:bg-blue-700"}`}
         >
-          {isFetching ? t('controls.loading') || t('controls.compare') : t("controls.compare")}
+          {isFetching
+            ? t("controls.loading") || t("controls.compare")
+            : t("controls.compare")}
         </button>
       </div>
 
@@ -627,11 +732,17 @@ const ComparisonDataComponent: React.FC = () => {
           <table className="w-full border-collapse border border-gray-300 text-sm lg:text-base">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border px-2 lg:px-4 py-1 lg:py-2">{t("table.label")}</th>
+                <th className="border px-2 lg:px-4 py-1 lg:py-2">
+                  {t("table.label")}
+                </th>
                 <th className="border px-2 lg:px-4 py-1 lg:py-2">{from}</th>
                 <th className="border px-2 lg:px-4 py-1 lg:py-2">{to}</th>
-                <th className="border px-2 lg:px-4 py-1 lg:py-2">{t("table.difference")}</th>
-                <th className="border px-2 lg:px-4 py-1 lg:py-2">{t("table.change")}</th>
+                <th className="border px-2 lg:px-4 py-1 lg:py-2">
+                  {t("table.difference")}
+                </th>
+                <th className="border px-2 lg:px-4 py-1 lg:py-2">
+                  {t("table.change")}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -662,7 +773,7 @@ const ComparisonDataComponent: React.FC = () => {
           </table>
         ) : (
           <p className="text-center text-gray-600">
-            {t('messages.selectValues')}
+            {t("messages.selectValues")}
           </p>
         )}
 
@@ -698,7 +809,7 @@ const ComparisonDataComponent: React.FC = () => {
 // --- markaz normalization (single relation, legacy safe) ---
 const getMarkazId = (u?: User): string | null => {
   if (!u) return null;
-  if (u.markaz && typeof u.markaz === 'object' && !Array.isArray(u.markaz)) {
+  if (u.markaz && typeof u.markaz === "object" && !Array.isArray(u.markaz)) {
     return (u.markaz as any).id ?? (u as any).markazId ?? null;
   }
   return (u as any).markazId ?? null;
@@ -706,7 +817,9 @@ const getMarkazId = (u?: User): string | null => {
 
 const getMarkazName = (u?: User): string | null => {
   if (!u?.markaz) return null;
-  return typeof u.markaz === "string" ? u.markaz : (u.markaz as any).name ?? null;
+  return typeof u.markaz === "string"
+    ? u.markaz
+    : ((u.markaz as any).name ?? null);
 };
 
 const shareMarkaz = (a: User, b: User): boolean => {
@@ -736,7 +849,9 @@ const getParentEmail = (
     }
     case "markazadmin": {
       parentUser =
-        users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+        users.find(
+          (u) => u.role === "divisionadmin" && u.division === user.division
+        ) ||
         (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
         users.find((u) => u.role === "centraladmin");
       break;
@@ -751,23 +866,34 @@ const getParentEmail = (
     // legacy roles - keep for compatibility
     case "unionadmin": {
       parentUser =
-        users.find((u) => u.role === "upozilaadmin" && u.upazila === user.upazila) ||
-        users.find((u) => u.role === "districtadmin" && u.district === user.district) ||
-        users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+        users.find(
+          (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
+        ) ||
+        users.find(
+          (u) => u.role === "districtadmin" && u.district === user.district
+        ) ||
+        users.find(
+          (u) => u.role === "divisionadmin" && u.division === user.division
+        ) ||
         users.find((u) => u.role === "centraladmin");
       break;
     }
     case "upozilaadmin": {
       parentUser =
-        users.find((u) => u.role === "districtadmin" && u.district === user.district) ||
-        users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+        users.find(
+          (u) => u.role === "districtadmin" && u.district === user.district
+        ) ||
+        users.find(
+          (u) => u.role === "divisionadmin" && u.division === user.division
+        ) ||
         users.find((u) => u.role === "centraladmin");
       break;
     }
     case "districtadmin": {
       parentUser =
-        users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
-        users.find((u) => u.role === "centraladmin");
+        users.find(
+          (u) => u.role === "divisionadmin" && u.division === user.division
+        ) || users.find((u) => u.role === "centraladmin");
       break;
     }
     default:
