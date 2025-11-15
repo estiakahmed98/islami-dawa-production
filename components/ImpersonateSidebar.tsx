@@ -17,6 +17,7 @@ import { Bell } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { PiMosqueDuotone } from "react-icons/pi";
 import { TbReport } from "react-icons/tb";
+import { GrPlan } from "react-icons/gr";
 
 const ImpersonateSidebar: React.FC = () => {
   const t = useTranslations("dashboard.sideBar");
@@ -122,6 +123,12 @@ const ImpersonateSidebar: React.FC = () => {
       href: "/admin/dayereview",
       icon: <TbReport className="size-6" />,
       label: t("dayeReview"),
+      roles: ["centraladmin", "divisionadmin", "markazadmin"],
+    },
+    {
+      href: "/admin/weekly-todo",
+      icon: <GrPlan className="size-5" />,
+      label: t("weeklyTodo"),
       roles: ["centraladmin", "divisionadmin", "markazadmin"],
     },
     {

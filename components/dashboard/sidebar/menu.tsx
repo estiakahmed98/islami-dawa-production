@@ -21,7 +21,7 @@ import {
 import { BsMoonStars } from "react-icons/bs";
 import Image from "next/image";
 import { useSidebar } from "@/providers/sidebar-provider";
-import { GrSchedules } from "react-icons/gr";
+import { GrPlan, GrSchedules } from "react-icons/gr";
 import { useSession } from "@/lib/auth-client";
 import { IoPersonAddSharp } from "react-icons/io5";
 import MuiTreeView from "@/components/MuiTreeView";
@@ -243,6 +243,11 @@ const SidebarMenu = () => {
       url: "/admin/dayereview",
       icon: <TbReport className="size-6" />,
       title: t("dayeReview"),
+    },
+    {
+      url: "/admin/weekly-todo",
+      icon: <GrPlan className="size-5" />,
+      title: t("weeklyTodo"),
     },
     {
       url: "/admin/leave",
