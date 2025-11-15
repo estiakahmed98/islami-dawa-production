@@ -59,8 +59,20 @@ export async function GET(request: NextRequest) {
       filteredTodos = todos.filter(todo => {
         if (!todo.scheduledDate) return false;
         const todoDate = new Date(todo.scheduledDate);
-        const dayName = todoDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-        return dayName === weekday;
+        const dayOfWeek = todoDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        
+        // Map weekday names to day numbers
+        const weekdayMap: { [key: string]: number } = {
+          'sunday': 0,
+          'monday': 1,
+          'tuesday': 2,
+          'wednesday': 3,
+          'thursday': 4,
+          'friday': 5,
+          'saturday': 6,
+        };
+        
+        return weekdayMap[weekday.toLowerCase()] === dayOfWeek;
       });
     }
 

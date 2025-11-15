@@ -6,7 +6,7 @@ import {
   WeeklyTodo,
   UpdateWeeklyTodo,
 } from "@/types/weekly-todo";
-import { weeklyTodoService } from "@/app/api/weekly-todo/services/route";
+import { weeklyTodoService } from "@/services/user-weekly-todo";
 import JoditEditorComponent from "@/components/richTextEditor";
 
 interface AddTodoModalProps {
@@ -37,7 +37,9 @@ export default function AddTodoModal({
       setFormData({
         title: editingTodo.title,
         details: editingTodo.details || "",
-        scheduledDate: editingTodo.scheduledDate || "",
+        scheduledDate: editingTodo.scheduledDate 
+          ? new Date(editingTodo.scheduledDate).toISOString().split('T')[0]
+          : "",
         status: editingTodo.status,
       });
     } else {

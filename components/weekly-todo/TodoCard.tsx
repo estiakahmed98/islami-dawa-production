@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { WeeklyTodo } from '@/types/weekly-todo';
-import { weeklyTodoService } from '@/app/api/weekly-todo/services/route';
+import { weeklyTodoService } from "@/services/user-weekly-todo";
 
 interface TodoCardProps {
   todo: WeeklyTodo;

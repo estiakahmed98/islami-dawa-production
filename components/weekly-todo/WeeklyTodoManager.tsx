@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { WeeklyTodo, DateRangeType } from "@/types/weekly-todo";
-import { weeklyTodoService } from "@/app/api/weekly-todo/services/route";
+import { weeklyTodoService } from "@/services/user-weekly-todo";
 import AddTodoModal from "./AddTodoModal";
 import TodoCard from "./TodoCard";
 
@@ -27,12 +27,18 @@ export default function WeeklyTodoManager() {
 
     switch (range) {
       case "this-week":
-        start.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
-        end.setDate(start.getDate() + 6); // End of week (Saturday)
+        // Calculate Saturday as start of week (6 = Saturday)
+        const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+        const daysUntilSaturday = currentDay === 6 ? 0 : (6 - currentDay + 7) % 7;
+        start.setDate(now.getDate() - daysUntilSaturday); // This Saturday
+        end.setDate(start.getDate() + 6); // Next Friday
         break;
       case "last-week":
-        start.setDate(now.getDate() - now.getDay() - 7);
-        end.setDate(start.getDate() + 6);
+        // Calculate last Saturday
+        const currentDayForLast = now.getDay();
+        const daysSinceLastSaturday = (currentDayForLast - 6 + 7) % 7;
+        start.setDate(now.getDate() - daysSinceLastSaturday - 7); // Last Saturday
+        end.setDate(start.getDate() + 6); // Last Friday
         break;
       case "custom":
         if (!customDate)

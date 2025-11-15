@@ -32,12 +32,18 @@ export default function AdminWeeklyTodoView() {
 
     switch (dateRange) {
       case 'this-week':
-        start = new Date(now.setDate(now.getDate() - now.getDay()));
-        end = new Date(now.setDate(start.getDate() + 6));
+        // Calculate Saturday as start of week (6 = Saturday)
+        const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+        const daysUntilSaturday = currentDay === 6 ? 0 : (6 - currentDay + 7) % 7;
+        start = new Date(now.setDate(now.getDate() - daysUntilSaturday)); // This Saturday
+        end = new Date(now.setDate(start.getDate() + 6)); // Next Friday
         break;
       case 'last-week':
-        start = new Date(now.setDate(now.getDate() - now.getDay() - 7));
-        end = new Date(now.setDate(start.getDate() + 6));
+        // Calculate last Saturday
+        const currentDayForLast = now.getDay();
+        const daysSinceLastSaturday = (currentDayForLast - 6 + 7) % 7;
+        start = new Date(now.setDate(now.getDate() - daysSinceLastSaturday - 7)); // Last Saturday
+        end = new Date(now.setDate(start.getDate() + 6)); // Last Friday
         break;
       case 'custom':
         if (!customDate) return { start: null, end: null };
