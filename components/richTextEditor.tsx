@@ -1,6 +1,6 @@
 //Estiak
 
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 // import JoditEditor from "jodit-react";
 import dynamic from "next/dynamic";
 
@@ -25,6 +25,11 @@ const JoditEditorComponent: React.FC<JoditEditorProps> = ({
 }) => {
   const editor = useRef(null);
   const [content, setContent] = useState(initialValue);
+
+  // Update content when initialValue changes (for edit mode)
+  useEffect(() => {
+    setContent(initialValue);
+  }, [initialValue]);
 
   const config = useMemo(
     () => ({

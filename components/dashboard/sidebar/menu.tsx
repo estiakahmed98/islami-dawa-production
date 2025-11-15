@@ -216,6 +216,11 @@ const SidebarMenu = () => {
       icon: <GrSchedules className="size-5" />,
       url: "/dashboard/calendar",
     },
+    {
+      title: t("weeklyTodo"),
+      icon: <GrSchedules className="size-5" />,
+      url: "/dashboard/weekly-todo",
+    },
   ];
 
   const adminMenuList = [

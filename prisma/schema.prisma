@@ -49,6 +49,7 @@ model users {
   editRequests     EditRequest[]
   markazId         String?
   markaz           Markaz?      @relation("MarkazToUsers", fields: [markazId], references: [id])
+  WeeklyTodos     WeeklyTodo[]
 }
 
 model sessions {
@@ -397,4 +398,25 @@ model Markaz {
   users     users[]  @relation("MarkazToUsers")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum TodoStatus {
+  pending
+  completed
+  cancelled
+}
+
+model WeeklyTodo {
+  id            String      @id @default(cuid())
+  userId        String
+  user          users       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  details       String?     @db.Text
+  scheduledDate DateTime?   
+  status        TodoStatus  @default(pending)
+  completedAt   DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  @@index([userId])
+  @@index([status])
 }
