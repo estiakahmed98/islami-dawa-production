@@ -209,7 +209,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
       return row;
     });
 
-    // If single user, add a মতামত (editorContent) row (eye button -> popup)
+    // If single user, add a কারগুজারী (editorContent) row (eye button -> popup)
     // Avoid adding if the labelMap already contains an `editorContent` key
     if (emailList.length === 1 && !labelKeys.includes("editorContent")) {
       const motamotRow: { label: string; labelKey: string; [key: number]: any } = {
@@ -593,7 +593,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
                 {monthDays.map((day) => {
                   const clickable = clickableFields.includes(row.labelKey);
 
-                  // Special-case editorContent (মতামত): show an eye button that opens a modal
+                  // Special-case editorContent (কারগুজারী): show an eye button that opens a modal
                   if (row.labelKey === "editorContent") {
                     const dateKey = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
                     // collect motamot for each email for this date
@@ -671,7 +671,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
           </tbody>
         </table>
       </div>
-      {/* মতামত popup for single-user motamot rows */}
+      {/* কারগুজারী popup for single-user motamot rows */}
       {motamotPopup && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-10 rounded-xl shadow-lg max-w-[85vw] lg:max-w-[60vw] max-h-[70vh] relative overflow-y-auto">

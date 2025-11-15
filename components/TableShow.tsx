@@ -151,7 +151,7 @@ const UniversalTableShow: React.FC<Props> = ({
       return row
     })
 
-    // মতামত row (eye button)
+    // কারগুজারী row (eye button)
     const motamotRow: { label: string; key: string; [key: number]: any } = {
       label: t("motamot"),
       key: "editorContent",
@@ -284,7 +284,7 @@ const UniversalTableShow: React.FC<Props> = ({
       return
     }
 
-    // Exclude মতামত & Edit rows from PDF
+    // Exclude কারগুজারী & Edit rows from PDF
     const printableRows = transposedData.filter((row) => row.label !== t("motamot") && row.label !== t("edit"))
 
     const tableHTML = `
@@ -427,7 +427,7 @@ const UniversalTableShow: React.FC<Props> = ({
       alert(t("youCanOnlyEditDataOnceAfterApproval"))
       return
     }
-    // All row values except last two (মতামত + Edit actions)
+    // All row values except last two (কারগুজারী + Edit actions)
     const dataToEdit = currentTransposed.slice(0, -2).map((row) => row[day])
     setEditPopup({ day, data: dataToEdit })
   }
@@ -651,7 +651,7 @@ const UniversalTableShow: React.FC<Props> = ({
           </tbody>
         </table>
       </div>
-      {/* মতামত popup */}
+      {/* কারগুজারী popup */}
       {motamotPopup && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-10 rounded-xl shadow-lg max-w-[85vw] lg:max-w-[60vw] max-h-[70vh] relative overflow-y-auto">

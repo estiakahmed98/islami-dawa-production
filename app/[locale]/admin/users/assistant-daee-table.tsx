@@ -50,7 +50,7 @@ type User = {
   banned: boolean;
 };
 
-type Props = { emails: string[]; users: User[] };
+type Props = { emails: string[]; users: User[]; filterDate?: string };
 
 type FlatAssistant = Assistant & {
   parentUserId: string;
@@ -61,7 +61,7 @@ type FlatAssistant = Assistant & {
 
 const fmtDate = (iso?: string) => (iso ? new Date(iso).toLocaleDateString() : "-");
 
-const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
+const AssistantDaeeList: React.FC<Props> = ({ emails, users, filterDate }) => {
   const t = useTranslations("assistantDaeeList");
 
   const [loading, setLoading] = useState(false);
@@ -69,6 +69,15 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
   const [error, setError] = useState<string | null>(null);
 
   const userNameById = (id: string): string => users.find((x) => x.id === id)?.name || t("unknownUser");
+
+  const toDateKey = (iso?: string) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
 
   useEffect(() => {
     const run = async () => {
@@ -92,6 +101,11 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users }) => {
           if (r.status === "fulfilled") {
             const { email, json } = r.value;
             (json.records || []).forEach((rec) => {
+              // If filterDate is provided, only include records for that date
+              if (typeof filterDate !== "undefined" && filterDate !== null) {
+                const recKey = toDateKey(rec.date);
+                if (recKey !== filterDate) return;
+              }
               const parent = userNameById(rec.userId);
               (rec.assistants || []).forEach((a) => {
                 flat.push({

@@ -261,7 +261,10 @@
           "amoliSura": "Amali Surah",
           "ayamroja": "Ayyam Fasting",
           "hijbulBahar": "Hizb al-Bahr",
-          "quarntilawat": "Quran Tilawat"
+          "quarntilawat": "Quran Tilawat",
+          "pageNo": "Page No",
+          "quarntilawatAyat": "Quran Tilawat Ayat",
+          "editorContent": "Cargujari"
         },
         "moktob": {
           "title": "Maktab Matters",
@@ -273,17 +276,20 @@
           "notunBoyoskoShikkha": "New Adult Education",
           "totalBoyoskoShikkha": "Total Adult Education",
           "boyoskoShikkhaOnshogrohon": "Participation in Adult Education",
-          "newMuslimeDinerFikir": "Care for New Muslims"
+          "newMuslimeDinerFikir": "Care for New Muslims",
+          "editorContent": "Cargujari"
         },
         "talim": {
           "title": "Women's Taleem",
           "mohilaTalim": "Women's Taleem Held",
-          "mohilaOnshogrohon": "Women's Participation"
+          "mohilaOnshogrohon": "Women's Participation",
+          "editorContent": "Cargujari"
         },
         "daye": {
           "title": "Assistant Daee",
           "sohojogiDayeToiri": "Assistant Daee Created",
-          "assistantsList": "Assistant Daee List"
+          "assistantsList": "Assistant Daee List",
+          "editorContent": "Cargujari"
         },
         "dawati": {
           "title": "Dawah Matters",
@@ -291,7 +297,8 @@
           "murtadDawat": "Dawah to Apostates",
           "alemderSatheyMojlish": "Majlis with Scholars",
           "publicSatheyMojlish": "Majlis with Public",
-          "nonMuslimSaptahikGasht": "Weekly Outreach with Non-Muslims"
+          "nonMuslimSaptahikGasht": "Weekly Outreach with Non-Muslims",
+          "editorContent": "Cargujari"
         },
         "dawatiMojlish": {
           "title": "Dawah Majlis",
@@ -301,17 +308,20 @@
           "prosikkhonOnshogrohon": "Participation in Training",
           "jummahAlochona": "Jumu'ah Talk",
           "dhormoSova": "Religious Assembly",
-          "mashwaraPoint": "Mashwara Points"
+          "mashwaraPoint": "Mashwara Points",
+          "editorContent": "Cargujari"
         },
         "jamat": {
           "title": "Jamaat Matters",
           "jamatBerHoise": "Jamaat Dispatched",
-          "jamatSathi": "Jamaat Companions"
+          "jamatSathi": "Jamaat Companions",
+          "editorContent": "Cargujari"
         },
         "dineFera": {
           "title": "Returned to Islam",
           "nonMuslimMuslimHoise": "Non-Muslim Became Muslim",
-          "murtadIslamFireche": "Apostate Returned to Islam"
+          "murtadIslamFireche": "Apostate Returned to Islam",
+          "editorContent": "Cargujari"
         },
         "sofor": {
           "title": "Travel Matters",
@@ -319,7 +329,8 @@
           "madrasaVisit": "Madrasa Visited",
           "schoolCollegeVisit": "School/College Visited",
           "madrasaVisitList": "Madrasa List",
-          "schoolCollegeVisitList": "School/College List"
+          "schoolCollegeVisitList": "School/College List",
+          "editorContent": "Cargujari"
         }
     }
   },
@@ -344,8 +355,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",
-    "motamot": "Motamot",
-    "motamotPopup": "Motamot Popup",
+    "motamot": "Cargujari",
+    "motamotPopup": "Cargujari Popup",
     "label": "Label",
     "day": "Day",
     "edit": "Edit",
@@ -789,6 +800,7 @@
         "banUpdated": "User {action} successfully!"
     },
     "tabs": {
+      "amoli": "A'mali Muhasaba",
         "moktob": "Maktab Matters",
         "talim": "Women's Taleem",
         "daye": "Assistant Da'ee",

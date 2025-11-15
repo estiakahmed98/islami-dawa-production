@@ -130,7 +130,7 @@ const AMOLI_LABELS: Record<string, string> = {
   ayamroja: "আয়াম-এ-বিদ",
   hijbulBahar: "হিজবুল বাহর",
   percentage: "পারসেন্টেজ",
-  editorContent: "মতামত",
+  editorContent: "কারগুজারী",
 };
 
 const MOKTOB_LABELS: Record<string, string> = {
@@ -143,18 +143,18 @@ const MOKTOB_LABELS: Record<string, string> = {
   totalBoyoskoShikkha: "মোট বয়স্ক শিক্ষা",
   boyoskoShikkhaOnshogrohon: "বয়স্ক শিক্ষায় অংশগ্রহণ",
   newMuslimeDinerFikir: "নতুন মুসলিমের দিনের ফিকির",
-  editorContent: "মতামত",
+  editorContent: "কারগুজারী",
 };
 
 const TALIM_LABELS: Record<string, string> = {
   mohilaTalim: "মহিলাদের তালিম",
   mohilaOnshogrohon: "মহিলাদের অংশগ্রহণ",
-  editorContent: "মতামত",
+  editorContent: "কারগুজারী",
 };
 
 const DAYE_LABELS: Record<string, string> = {
   sohojogiDayeToiri: "সহযোগী দা'ঈ তৈরি",
-  editorContent: "মতামত",
+  editorContent: "কারগুজারী",
 };
 
 const DAWATI_LABELS: Record<string, string> = {
@@ -163,7 +163,7 @@ const DAWATI_LABELS: Record<string, string> = {
   alemderSatheyMojlish: "আলেমদের সাথে মজলিশ",
   publicSatheyMojlish: "জনসাধারণের সাথে মজলিশ",
   nonMuslimSaptahikGasht: "অমুসলিম সাপ্তাহিক গাশত",
-  editorContent: "মতামত",
+  editorContent: "কারগুজারী",
 };
 
 const DAWATI_MOJLISH_LABELS: Record<string, string> = {
@@ -174,19 +174,19 @@ const DAWATI_MOJLISH_LABELS: Record<string, string> = {
   jummahAlochona: "জুম্মাহ আলােচনা",
   dhormoSova: "ধর্মসভা",
   mashwaraPoint: "মাশওয়ারা পয়েন্ট",
-  editorContent: "মতামত",
+  editorContent: "কারগুজারী",
 };
 
 const JAMAT_LABELS: Record<string, string> = {
   jamatBerHoise: "জামাত বের হয়েছে",
   jamatSathi: "জামাত সাথী",
-  editorContent: "মতামত",
+  editorContent: "কারগুজারী",
 };
 
 const DINEFERA_LABELS: Record<string, string> = {
   nonMuslimMuslimHoise: "অমুসলিম মুসলিম হয়েছে",
   murtadIslamFireche: "মুরতাদ ইসলাম ফিরেছে",
-  editorContent: "মতামত",
+  editorContent: "কারগুজারী",
 };
 
 const SOFOR_LABELS: Record<string, string> = {
@@ -195,7 +195,7 @@ const SOFOR_LABELS: Record<string, string> = {
   moktobVisit: "মক্তব ভিজিট",
   schoolCollegeVisit: "স্কুল/কলেজ ভিজিট",
   schoolCollegeVisitList: "স্কুল/কলেজ ভিজিট তালিকা",
-  editorContent: "মতামত",
+  editorContent: "কারগুজারী",
 };
 
 /** ---------- Fetchers (build records+labels) ---------- */
@@ -1065,7 +1065,10 @@ export default function UsersTable() {
 
                 <TableBody>
                   {filteredUsers.map((user) => (
-                    <TableRow key={user.id} className="text-center hover:bg-gray-50">
+                    <TableRow
+                      key={user.id}
+                      className="text-center hover:bg-gray-50"
+                    >
                       <TableCell className="border-r font-semibold border-gray-300 text-sm px-2 py-2">
                         {user.name}
                       </TableCell>
@@ -1094,7 +1097,8 @@ export default function UsersTable() {
                         {getMarkazName(user) || "N/A"}
                       </TableCell>
                       <TableCell className="border-r border-gray-300 text-center text-sm px-2 py-2">
-                        {getParentEmail(user, users, sessionUser as any) || "N/A"}
+                        {getParentEmail(user, users, sessionUser as any) ||
+                          "N/A"}
                       </TableCell>
                       <TableCell className="border-r border-gray-300 text-sm px-2 py-2">
                         {user.banned ? t("status.banned") : t("status.active")}
@@ -1104,10 +1108,14 @@ export default function UsersTable() {
                           <Button
                             onClick={() => toggleBan(user.id, user.banned)}
                             className={`text-xs px-2 py-1 ${
-                              user.banned ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
+                              user.banned
+                                ? "bg-red-500 hover:bg-red-600"
+                                : "bg-green-500 hover:bg-green-600"
                             }`}
                           >
-                            {user.banned ? t("actions.unban") : t("actions.ban")}
+                            {user.banned
+                              ? t("actions.unban")
+                              : t("actions.ban")}
                           </Button>
                           <Button
                             className="text-xs px-2 py-1 border hover:underline"
@@ -1295,12 +1303,7 @@ export default function UsersTable() {
                     </select>
                   </div>
 
-                  {[
-                    "division",
-                    "district",
-                    "upazila",
-                    "union",
-                  ].map((field) => (
+                  {["division", "district", "upazila", "union"].map((field) => (
                     <div key={field}>
                       <label className="block text-sm font-medium mb-1">
                         {t(
@@ -1421,8 +1424,9 @@ export default function UsersTable() {
           {t("totalsTitle")}
         </h3>
         <div className="border border-[#155E75] lg:p-4 rounded-xl">
-          <Tabs defaultValue="moktob" className="w-full">
+          <Tabs defaultValue="amoli" className="w-full">
             <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-4">
+              <TabsTrigger value="amoli">{t("tabs.amoli")}</TabsTrigger>
               <TabsTrigger value="moktob">{t("tabs.moktob")}</TabsTrigger>
               <TabsTrigger value="talim">{t("tabs.talim")}</TabsTrigger>
               <TabsTrigger value="daye">{t("tabs.daye")}</TabsTrigger>
@@ -1434,6 +1438,24 @@ export default function UsersTable() {
               <TabsTrigger value="dinefera">{t("tabs.dinefera")}</TabsTrigger>
               <TabsTrigger value="sofor">{t("tabs.sofor")}</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="amoli">
+              <AdminTable
+                userData={amoliData}
+                emailList={emailList}
+                users={users}
+                allTabsData={{
+                  moktobData,
+                  talimData,
+                  dayeData,
+                  dawatiData,
+                  dawatiMojlishData,
+                  jamatData,
+                  dineFeraData,
+                  soforData,
+                }}
+              />
+            </TabsContent>
 
             <TabsContent value="moktob">
               <AdminTable

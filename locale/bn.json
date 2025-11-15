@@ -192,7 +192,7 @@
         "jamatBerHoise": "জামাত বের হয়েছে",
         "jamatSathi": "জামাত সাথী",
         "title": "জামাত বিষয়",
-        "editorContentPlaceholder": "আপনার মতামত লিখুন"
+        "editorContentPlaceholder": "আপনার কারগুজারী লিখুন"
       },
       "dineFera": {
         "nonMuslimMuslimHoise": "অমুসলিম মুসলিম হয়েছে",
@@ -264,7 +264,7 @@
         "quarntilawat": "কুরআন তিলাওয়াত",
         "quarntilawatAyat": "আয়াত",
         "pageNo": "পেজ নম্বর",
-        "editorContent": "ইডিটর বিষয়"
+        "editorContent": "কারগুজারী"
       },
       "moktob": {
         "title": "মক্তব বিষয়",
@@ -277,19 +277,19 @@
         "totalBoyoskoShikkha": "মোট বয়স্ক শিক্ষা",
         "boyoskoShikkhaOnshogrohon": "বয়স্ক শিক্ষায় অংশগ্রহণ",
         "newMuslimeDinerFikir": "নতুন মুসলিমদের ফিকির",
-        "editorContent": "ইডিটর বিষয়"
+        "editorContent": "কারগুজারী"
       },
       "talim": {
         "title": "মহিলাদের তালিম",
         "mohilaTalim": "মহিলাদের তালিম হয়েছে",
         "mohilaOnshogrohon": "মহিলাদের অংশগ্রহণ",
-        "editorContent": "ইডিটর বিষয়"
+        "editorContent": "কারগুজারী"
       },
       "daye": {
         "title": "সহযোগী দা'ঈ",
         "sohojogiDayeToiri": "সহযোগী দা'ঈ তৈরি হয়েছে",
         "assistantsList": "সহযোগী দা'ঈর তালিকা",
-        "editorContent": "ইডিটর বিষয়"
+        "editorContent": "কারগুজারী"
       },
       "dawati": {
         "title": "দাওয়াতি বিষয়",
@@ -298,7 +298,7 @@
         "alemderSatheyMojlish": "আলেমদের সাথে মজলিশ",
         "publicSatheyMojlish": "পাবলিকের সাথে মজলিশ",
         "nonMuslimSaptahikGasht": "অমুসলিমদের সাথে সাপ্তাহিক গাশ্ত",
-        "editorContent": "ইডিটর বিষয়"
+        "editorContent": "কারগুজারী"
       },
       "dawatiMojlish": {
         "title": "দাওয়াতি মজলিশ",
@@ -309,19 +309,19 @@
         "jummahAlochona": "জুম্মার আলোচনা",
         "dhormoSova": "ধর্ম সংসভা",
         "mashwaraPoint": "মাশওয়ারা পয়েন্ট",
-        "editorContent": "ইডিটর বিষয়"
+        "editorContent": "কারগুজারী"
       },
       "jamat": {
         "title": "জামাত বিষয়",
         "jamatBerHoise": "জামাত বের হয়েছে",
         "jamatSathi": "জামাত সাথী",
-        "editorContent": "ইডিটর বিষয়"
+        "editorContent": "কারগুজারী"
       },
       "dineFera": {
         "title": "দ্বীনে ফিরে এসেছে",
         "nonMuslimMuslimHoise": "অমুসলিম মুসলিম হয়েছে",
         "murtadIslamFireche": "মুরতাদ ইসলামে ফিরেছে",
-        "editorContent": "ইডিটর বিষয়"
+        "editorContent": "কারগুজারী"
       },
       "sofor": {
         "title": "সফর বিষয়",
@@ -330,7 +330,7 @@
         "schoolCollegeVisit": "স্কুল/কলেজ সফর হয়েছে",
         "madrasaVisitList": "মাদ্রাসার তালিকা",
         "schoolCollegeVisitList": "স্কুল/কলেজ তালিকা",
-        "editorContent": "ইডিটর বিষয়"
+        "editorContent": "কারগুজারী"
       }
     }
   },
@@ -355,8 +355,8 @@
     "save": "সেভ",
     "cancel": "বাতিল",
     "close": "বন্ধ",
-    "motamot": "মতামত",
-    "motamotPopup": "মতামত পপআপ",
+    "motamot": "কারগুজারী",
+    "motamotPopup": "কারগুজারী পপআপ",
     "label": "লেবেল",
     "day": "দিন",
     "edit": "এডিট",
@@ -406,7 +406,7 @@
     }
   },
   "common": {
-    "comment": "মতামত",
+    "comment": "কারগুজারী",
     "percentage": "শতাংশ",
     "dataForm": "তথ্য দিন",
     "submitting": "জমা হচ্ছে...",
@@ -799,6 +799,7 @@
       "banUpdated": "ব্যবহারকারী {action} হয়েছে!"
     },
     "tabs": {
+      "amoli": "আ’মলি মুহাসাবা",
       "moktob": "মক্তব বিষয়",
       "talim": "মহিলাদের তালিম",
       "daye": "সহযোগী দা'ঈ",

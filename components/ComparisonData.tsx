@@ -103,7 +103,7 @@ const ComparisonDataComponent: React.FC = () => {
     ayamroja: "আয়াম-এ-বিদ",
     hijbulBahar: "হিজবুল বাহর",
     percentage: "পারসেন্টেজ",
-    editorContent: "মতামত",
+    editorContent: "কারগুজারী",
   };
   const MOKTOB_LABELS: Record<string, string> = {
     notunMoktobChalu: "নতুন মক্তব চালু",
@@ -115,16 +115,16 @@ const ComparisonDataComponent: React.FC = () => {
     totalBoyoskoShikkha: "মোট বয়স্ক শিক্ষা",
     boyoskoShikkhaOnshogrohon: "বয়স্ক শিক্ষায় অংশগ্রহণ",
     newMuslimeDinerFikir: "নতুন মুসলিমের দিনের ফিকির",
-    editorContent: "মতামত",
+    editorContent: "কারগুজারী",
   };
   const TALIM_LABELS: Record<string, string> = {
     mohilaTalim: "মহিলাদের তালিম",
     mohilaOnshogrohon: "মহিলাদের অংশগ্রহণ",
-    editorContent: "মতামত",
+    editorContent: "কারগুজারী",
   };
   const DAYE_LABELS: Record<string, string> = {
     sohojogiDayeToiri: "সহযোগী দা'ঈ তৈরি",
-    editorContent: "মতামত",
+    editorContent: "কারগুজারী",
   };
   const DAWATI_LABELS: Record<string, string> = {
     nonMuslimDawat: "অমুসলিমকে দাওয়াত",
@@ -132,7 +132,7 @@ const ComparisonDataComponent: React.FC = () => {
     alemderSatheyMojlish: "আলেমদের সাথে মজলিশ",
     publicSatheyMojlish: "জনসাধারণের সাথে মজলিশ",
     nonMuslimSaptahikGasht: "অমুসলিম সাপ্তাহিক গাশত",
-    editorContent: "মতামত",
+    editorContent: "কারগুজারী",
   };
   const DAWATI_MOJLISH_LABELS: Record<string, string> = {
     dawatterGuruttoMojlish: "দাওয়াতি মজলিশ",
@@ -142,17 +142,17 @@ const ComparisonDataComponent: React.FC = () => {
     jummahAlochona: "জুম্মাহ আলােচনা",
     dhormoSova: "ধর্মসভা",
     mashwaraPoint: "মাশওয়ারা পয়েন্ট",
-    editorContent: "মতামত",
+    editorContent: "কারগুজারী",
   };
   const JAMAT_LABELS: Record<string, string> = {
     jamatBerHoise: "জামাত বের হয়েছে",
     jamatSathi: "জামাত সাথী",
-    editorContent: "মতামত",
+    editorContent: "কারগুজারী",
   };
   const DINEFERA_LABELS: Record<string, string> = {
     nonMuslimMuslimHoise: "অমুসলিম মুসলিম হয়েছে",
     murtadIslamFireche: "মুরতাদ ইসলাম ফিরেছে",
-    editorContent: "মতামত",
+    editorContent: "কারগুজারী",
   };
   const SOFOR_LABELS: Record<string, string> = {
     madrasaVisit: "মাদ্রাসা ভিজিট",
@@ -160,7 +160,7 @@ const ComparisonDataComponent: React.FC = () => {
     moktobVisit: "মক্তব ভিজিট",
     schoolCollegeVisit: "স্কুল/কলেজ ভিজিট",
     schoolCollegeVisitList: "স্কুল/কলেজ ভিজিট তালিকা",
-    editorContent: "মতামত",
+    editorContent: "কারগুজারী",
   };
 
   type RecordsByEmail = Record<string, Record<string, Record<string, any>>>;
