@@ -645,7 +645,8 @@
         "to": "To",
         "toWord": "to",
         "compare": "Compare",
-        "downloadPdf": "Download PDF"
+        "downloadPdf": "Download PDF",
+        "loading": "Loading comparison..."
     },
     "table": {
         "label": "Label",
