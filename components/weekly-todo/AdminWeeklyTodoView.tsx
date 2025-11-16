@@ -1,7 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
+
+// Debounce utility function
+const debounce = <F extends (...args: any[]) => void>(
+  func: F,
+  wait: number
+) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<F>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
 import { WeeklyTodo, User } from "@/types/weekly-todo";
 import { adminWeeklyTodoService } from "@/services/admin-weekly-todo";
 
@@ -29,6 +41,8 @@ interface GroupedTodos {
 
 export default function AdminWeeklyTodoView() {
   const t = useTranslations("weeklyTodo.adminWeeklyTodo");
+  const [allTodos, setAllTodos] = useState<WeeklyTodo[]>([]);
+  const [filteredTodos, setFilteredTodos] = useState<WeeklyTodo[]>([]);
   const [groupedTodos, setGroupedTodos] = useState<GroupedTodos>({});
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,6 +57,9 @@ export default function AdminWeeklyTodoView() {
   >("this-week");
   const [customDate, setCustomDate] = useState("");
   const [weekdayFilter, setWeekdayFilter] = useState<string>("all");
+  const [nameSearch, setNameSearch] = useState<string>("");
+  const [searchInput, setSearchInput] = useState<string>("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Get date range
   const getDateRange = () => {
@@ -85,6 +102,50 @@ export default function AdminWeeklyTodoView() {
     };
   };
 
+  // Function to filter todos based on search term
+  const filterTodos = (todos: WeeklyTodo[], search: string) => {
+    if (!search) return [...todos];
+    
+    const searchTerm = search.toLowerCase();
+    return todos.filter(todo => 
+      todo.user && (
+        todo.user.name?.toLowerCase().includes(searchTerm) ||
+        todo.user.phone?.includes(searchTerm) ||
+        todo.user.email?.toLowerCase().includes(searchTerm)
+      )
+    );
+  };
+
+  // Function to group todos by user
+  const groupTodosByUser = (todos: WeeklyTodo[]) => {
+    const grouped: GroupedTodos = {};
+    const userMap = new Map<string, User>();
+    
+    todos.forEach((todo) => {
+      if (!todo.user) return;
+
+      const userId = todo.user.id;
+      if (!grouped[userId]) {
+        grouped[userId] = {
+          user: todo.user,
+          todos: [],
+        };
+        userMap.set(userId, todo.user);
+      }
+      grouped[userId].todos.push(todo);
+    });
+
+    setUsers(Array.from(userMap.values()));
+    setGroupedTodos(grouped);
+
+    // Auto-expand if only one user or specific user selected
+    if (selectedUser !== "all") {
+      setExpandedUsers(new Set([selectedUser]));
+    } else if (Object.keys(grouped).length === 1) {
+      setExpandedUsers(new Set([Object.keys(grouped)[0]]));
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
     setError("");
@@ -99,39 +160,10 @@ export default function AdminWeeklyTodoView() {
         endDate: dateRangeValues.end || undefined,
       });
 
-      // Extract unique users from todos
-      const uniqueUsers = Array.from(
-        new Map(
-          data.todos
-            .filter((todo) => todo.user)
-            .map((todo) => [todo.user!.id, todo.user as User])
-        ).values()
-      );
-      setUsers(uniqueUsers);
-
-      // Group todos by user
-      const grouped: GroupedTodos = {};
-      data.todos.forEach((todo) => {
-        if (!todo.user) return;
-
-        const userId = todo.user.id;
-        if (!grouped[userId]) {
-          grouped[userId] = {
-            user: todo.user,
-            todos: [],
-          };
-        }
-        grouped[userId].todos.push(todo);
-      });
-
-      setGroupedTodos(grouped);
-
-      // Auto-expand if only one user or specific user selected
-      if (selectedUser !== "all") {
-        setExpandedUsers(new Set([selectedUser]));
-      } else if (Object.keys(grouped).length === 1) {
-        setExpandedUsers(new Set([Object.keys(grouped)[0]]));
-      }
+      setAllTodos(data.todos);
+      const filtered = filterTodos(data.todos, nameSearch);
+      setFilteredTodos(filtered);
+      groupTodosByUser(filtered);
     } catch (err) {
       setError(t("errors.loadFailed"));
       console.error("Error fetching data:", err);
@@ -140,8 +172,39 @@ export default function AdminWeeklyTodoView() {
     }
   };
 
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce((value: string) => {
+      const filtered = filterTodos(allTodos, value);
+      setFilteredTodos(filtered);
+      groupTodosByUser(filtered);
+      setNameSearch(value);
+    }, 300),
+    [allTodos]
+  );
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    
+    // For immediate feedback, we can show a loading state or debounce
+    // For now, we'll just use the debounced search
+    debouncedSearch(value);
+  };
+
+  // Focus the search input when component mounts
+  useEffect(() => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, []);
+
+  // Fetch data when filters change (except search)
   useEffect(() => {
     fetchData();
+    // We only want to refetch when these dependencies change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedUser, statusFilter, dateRange, customDate, weekdayFilter]);
 
   const toggleUserAccordion = (userId: string) => {
@@ -220,7 +283,24 @@ export default function AdminWeeklyTodoView() {
 
       {/* Filters Card */}
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl p-6 mb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+          {/* Name Search */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-gradient-to-r from-[#1B809B] to-[#2C9AB8] rounded-full mr-2"></div>
+                {t("filters.user")}
+              </div>
+            </label>
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchInput}
+              onChange={handleSearchChange}
+              placeholder="Search by name, email, or phone"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B809B]/50 focus:border-[#1B809B] transition-all duration-200 bg-white/50 backdrop-blur-sm"
+            />
+          </div>
           {/* User Filter */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-3">
