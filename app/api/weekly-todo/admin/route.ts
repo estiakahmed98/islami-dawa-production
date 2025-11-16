@@ -24,10 +24,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (adminUser.role !== "admin" && adminUser.role !== "centraladmin") {
+    // Allow any admin-style roles (match middleware ADMIN_ROLES)
+    const allowedAdminRoles = ["centraladmin", "superadmin", "divisionadmin", "markazadmin"];
+    if (!allowedAdminRoles.includes(adminUser.role || "")) {
       return NextResponse.json({ 
         error: "Forbidden", 
-        message: `User role is '${adminUser.role}', but 'admin' or 'centraladmin' is required` 
+        message: `User role is '${adminUser.role}', one of ${allowedAdminRoles.join(", ")} is required` 
       }, { status: 403 });
     }
 

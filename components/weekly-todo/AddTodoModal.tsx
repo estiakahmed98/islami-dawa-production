@@ -9,6 +9,7 @@ import {
 } from "@/types/weekly-todo";
 import { weeklyTodoService } from "@/services/user-weekly-todo";
 import JoditEditorComponent from "@/components/richTextEditor";
+import { toast } from "sonner";
 
 interface AddTodoModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export default function AddTodoModal({
   editingTodo,
 }: AddTodoModalProps) {
   const t = useTranslations("weeklyTodo.modal");
+  const tCommon = useTranslations("common");
   const [formData, setFormData] = useState<CreateWeeklyTodo>({
     title: "",
     details: "",
@@ -68,8 +70,10 @@ export default function AddTodoModal({
           status: formData.status,
         };
         await weeklyTodoService.updateTodo(editingTodo.id, updateData);
+        toast.success(tCommon("submittedSuccessfully"));
       } else {
         await weeklyTodoService.createTodo(formData);
+        toast.success(tCommon("submittedSuccessfully"));
       }
       onTodoAdded();
       onClose();
@@ -80,7 +84,9 @@ export default function AddTodoModal({
         status: "pending",
       });
     } catch (err) {
-      setError(isEditing ? t("errors.updateFailed") : t("errors.createFailed"));
+      const message = isEditing ? t("errors.updateFailed") : t("errors.createFailed");
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

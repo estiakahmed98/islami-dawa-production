@@ -29,16 +29,17 @@ export default function WeeklyTodoManager() {
 
     switch (range) {
       case "this-week":
-        const currentDay = now.getDay();
-        const daysUntilSaturday =
-          currentDay === 6 ? 0 : (6 - currentDay + 7) % 7;
-        start.setDate(now.getDate() - daysUntilSaturday);
+        // Week defined as Saturday (6) → Friday (5)
+        const currentDay = now.getDay(); // 0=Sun .. 6=Sat
+        const daysToSubtract = (currentDay + 1) % 7; // Sat=>0, Sun=>1, Mon=>2, ...
+        start.setDate(now.getDate() - daysToSubtract);
         end.setDate(start.getDate() + 6);
         break;
       case "last-week":
+        // Compute last week's Saturday by taking this week's Saturday and subtracting 7 days
         const currentDayForLast = now.getDay();
-        const daysSinceLastSaturday = (currentDayForLast - 6 + 7) % 7;
-        start.setDate(now.getDate() - daysSinceLastSaturday - 7);
+        const daysSinceThisWeekSaturday = (currentDayForLast + 1) % 7;
+        start.setDate(now.getDate() - daysSinceThisWeekSaturday - 7);
         end.setDate(start.getDate() + 6);
         break;
       case "custom":

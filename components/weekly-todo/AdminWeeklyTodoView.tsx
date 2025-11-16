@@ -51,19 +51,21 @@ export default function AdminWeeklyTodoView() {
 
     switch (dateRange) {
       case "this-week":
-        const currentDay = now.getDay();
-        const daysUntilSaturday =
-          currentDay === 6 ? 0 : (6 - currentDay + 7) % 7;
+        // Week defined as Saturday (6) → Friday (5)
+        // Compute how many days we should subtract from today to get the most recent Saturday
+        const currentDay = now.getDay(); // 0=Sun .. 6=Sat
+        const daysToSubtract = (currentDay + 1) % 7; // e.g. Sat=>0, Sun=>1, Mon=>2, ...
         start = new Date(now);
-        start.setDate(now.getDate() - daysUntilSaturday);
+        start.setDate(now.getDate() - daysToSubtract);
         end = new Date(start);
         end.setDate(start.getDate() + 6);
         break;
       case "last-week":
+        // Compute last week's Saturday by taking this week's Saturday and subtracting 7 days
         const currentDayForLast = now.getDay();
-        const daysSinceLastSaturday = (currentDayForLast - 6 + 7) % 7;
+        const daysSinceThisWeekSaturday = (currentDayForLast + 1) % 7; // same as daysToSubtract above
         start = new Date(now);
-        start.setDate(now.getDate() - daysSinceLastSaturday - 7);
+        start.setDate(now.getDate() - daysSinceThisWeekSaturday - 7);
         end = new Date(start);
         end.setDate(start.getDate() + 6);
         break;
