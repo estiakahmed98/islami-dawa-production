@@ -65,7 +65,7 @@
       },
       "dashboard": {
         "backToDashboard": "Back to Dashboard",
-        "comparison": "View Comparison",
+        "comparison": "Comparison & Report",
         "amoliMuhasaba": "A'mali Muhasaba",
         "moktobSubject": "Maktab Matters",
         "talimSubject": "Women's Taleem",
@@ -230,7 +230,7 @@
         "dataLoad": "Failed to load data"
       },
       "dashboard": {
-        "comparison": "View Comparison",
+        "comparison": "View Comparison & Reports",
         "amoliMuhasaba": "A'mali Muhasaba",
         "moktobSubject": "Maktab Matters",
         "talimSubject": "Women's Taleem",
@@ -632,9 +632,9 @@
     "noDataUsers": "No data available for the specified users."
   },
   "comparison": {
-    "title": "Comparison",
+    "title": "Comparison & Reports",
     "page": {
-      "title": "Comparison",
+      "title": "Comparison & Reports",
       "subtitle": "Compare metrics across dates or periods."
     },
     "controls": {
