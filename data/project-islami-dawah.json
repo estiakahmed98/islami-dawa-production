@@ -1,0 +1,23 @@
+{
+  "title": "Islami Dawah",
+  "description": "A multilingual Next.js platform for managing dawah activities, reports, and admin workflows.",
+  "longDescription": "Islami Dawah is a Next.js (App Router) + TypeScript application for coordinating and reporting Islamic outreach activities. It features role-based dashboards (admin, dayi/ambassador, assistant, and user), rich editor support for detailed reports, PDF export, task and weekly-plan management, email notifications, and i18n for Bengali/English. The UI uses Tailwind CSS and a component library; data persistence is powered by Prisma/Postgres. The app includes optimized admin APIs, batched comparison endpoints, and utilities for exporting reports as PDFs. Designed for deployment on Vercel.",
+  "technologies": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Prisma",
+    "PostgreSQL",
+    "NextAuth",
+    "Tailwind CSS",
+    "Tailwind UI / shadcn-style components",
+    "Lucide React",
+    "html2pdf.js",
+    "sonner (toasts)",
+    "next-intl",
+    "SWR/fetch (client-side)",
+    "Vercel"
+  ],
+  "image": "/assets/islami-dawah.png",
+  "link": "https://github.com/estiakahmed98/islami-dawa-production"
+}

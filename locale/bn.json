@@ -65,7 +65,7 @@
       },
       "dashboard": {
         "backToDashboard": "ড্যাশবোর্ডে ফিরে যান",
-        "comparison": "তুলনা দেখুন",
+        "comparison": "তুলনা এবং রিপোর্ট দেখুন",
         "amoliMuhasaba": "আ'মলি মুহাসাবা",
         "moktobSubject": "মক্তব বিষয়",
         "talimSubject": "মহিলাদের তালিম বিষয়",
@@ -231,7 +231,7 @@
         "dataLoad": "ডেটা লোড করতে ব্যর্থ"
       },
       "dashboard": {
-        "comparison": "তুলনা দেখুন",
+        "comparison": "তুলনা এবং রিপোর্ট দেখুন",
         "amoliMuhasaba": "আ’মলি মুহাসাবা",
         "moktobSubject": "মক্তব বিষয়",
         "talimSubject": "মহিলাদের তালিম বিষয়",
@@ -631,15 +631,16 @@
     "noDataUsers": "উল্লিখিত ব্যবহারকারীদের জন্য কোনো তথ্য নেই।"
   },
   "comparison": {
-    "title": "তুলনা",
+    "title": "তুলনা এবং রিপোর্ট",
     "page": {
-      "title": "তুলনা",
-      "subtitle": "তারিখ/সময়পর্ব ধরে পরিমাপগুলোর তুলনা করুন।"
+      "title": "তুলনা এবং রিপোর্ট",
+      "subtitle": "তারিখ/সময়পর্ব ধরে পরিমাপগুলোর তুলনা রিপোর্ট দেখুন।"
     },
     "controls": {
       "type": "তুলনার ধরন",
       "dayToDay": "দিনভিত্তিক",
       "monthToMonth": "মাসভিত্তিক",
+      "singleMonth": "এক মাসের মোট",
       "yearToYear": "বছরভিত্তিক",
       "from": "হতে",
       "to": "পর্যন্ত",

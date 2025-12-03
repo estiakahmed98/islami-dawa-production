@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 //Juwel
 
@@ -41,6 +41,7 @@ const convertToPoints = (value: any, field: string): number => {
     if (field === "zikir") {
       if (value === "সকাল-সন্ধ্যা") return 2;
       if (value === "সকাল" || value === "সন্ধ্যা") return 1;
+
       return 0;
     } else if (field === "ayat") {
       // Extract ayat number from range (e.g., "10-20")
@@ -101,33 +102,17 @@ const ComparisonDataComponent: React.FC = () => {
 
   const isFetchingRef = useRef(false);
   const yearOptions = useMemo(() => generateYearOptions(), []);
+  const bengaliFont = "'Noto Sans Bengali', 'Noto Sans', sans-serif";
 
-  // --- Label maps (mirrors UsersTable) ---
-  const AMOLI_LABELS: Record<string, string> = {
-    tahajjud: "তাহাজ্জুদ (রাকাআত)",
-    quarntilawat: "কোরআনে কারিম তিলাওয়াত",
-    zikir: "যিকির",
-    ishraq: "ইশরাক/আওয়াবীন/চাশ্ত",
-    jamat: "জামাতে নামাজ",
-    sirat: "সীরাত/হাদীস পাঠ",
-    Dua: "দোয়া",
-    ilm: "ইলম",
-    tasbih: "তাসবিহ",
-    dayeeAmol: "দা'ঈর আমল",
-    amoliSura: "আমলী সূরা",
-    ayamroja: "আয়াম-এ-বিদ",
-    hijbulBahar: "হিজবুল বাহর",
-    percentage: "পারসেন্টেজ",
-  };
   const MOKTOB_LABELS: Record<string, string> = {
     notunMoktobChalu: "নতুন মক্তব চালু",
     totalMoktob: "মোট মক্তব",
     totalStudent: "মোট ছাত্র",
     obhibhabokConference: "অভিভাবক কনফারেন্স",
-    moktoThekeMadrasaAdmission: "মক্তব থেকে মাদরাসায় ভর্তি",
-    notunBoyoskoShikkha: "নতুন বয়স্ক শিক্ষা",
-    totalBoyoskoShikkha: "মোট বয়স্ক শিক্ষা",
-    boyoskoShikkhaOnshogrohon: "বয়স্ক শিক্ষায় অংশগ্রহণ",
+    moktoThekeMadrasaAdmission: "মক্তব থেকে মাদরাসায় ভর্ত্তি",
+    notunBoyoskoShikkha: "নতুন বয়স্ক শিক্ষা",
+    totalBoyoskoShikkha: "মোট বয়স্ক শিক্ষা",
+    boyoskoShikkhaOnshogrohon: "বয়স্ক শিক্ষায় অংশগ্রহণ",
     newMuslimeDinerFikir: "নতুন মুসলিমের দিনের ফিকির",
   };
   const TALIM_LABELS: Record<string, string> = {
@@ -138,20 +123,20 @@ const ComparisonDataComponent: React.FC = () => {
     sohojogiDayeToiri: "সহযোগী দা'ঈ তৈরি",
   };
   const DAWATI_LABELS: Record<string, string> = {
-    nonMuslimDawat: "অমুসলিমকে দাওয়াত",
-    murtadDawat: "মুরতাদকে দাওয়াত",
+    nonMuslimDawat: "অমুসলিমকে দাওয়াত",
+    murtadDawat: "মুরতাদকে দাওয়াত",
     alemderSatheyMojlish: "আলেমদের সাথে মজলিশ",
     publicSatheyMojlish: "জনসাধারণের সাথে মজলিশ",
     nonMuslimSaptahikGasht: "অমুসলিম সাপ্তাহিক গাশত",
   };
   const DAWATI_MOJLISH_LABELS: Record<string, string> = {
-    dawatterGuruttoMojlish: "দাওয়াতি মজলিশ",
+    dawatterGuruttoMojlish: "দাওয়াতি গুরুত্বের মজলিশ",
     mojlisheOnshogrohon: "মজলিশে অংশগ্রহণ",
     prosikkhonKormoshalaAyojon: "প্রশিক্ষণ কর্মশালা আয়োজন",
     prosikkhonOnshogrohon: "প্রশিক্ষণে অংশগ্রহণ",
-    jummahAlochona: "জুম্মাহ আলােচনা",
+    jummahAlochona: "জুম্মাহ আলায়েচনা",
     dhormoSova: "ধর্মসভা",
-    mashwaraPoint: "মাশওয়ারা পয়েন্ট",
+    mashwaraPoint: "মাশওয়ারার পয়েন্ট",
   };
   const JAMAT_LABELS: Record<string, string> = {
     jamatBerHoise: "জামাত বের হয়েছে",
@@ -162,8 +147,8 @@ const ComparisonDataComponent: React.FC = () => {
     murtadIslamFireche: "মুরতাদ ইসলাম ফিরেছে",
   };
   const SOFOR_LABELS: Record<string, string> = {
-    madrasaVisit: "মাদ্রাসা ভিজিট",
-    madrasaVisitList: "মাদ্রাসা ভিজিট তালিকা",
+    madrasaVisit: "মাদরাসা ভিজিট",
+    madrasaVisitList: "মাদরাসা ভিজিট তালিকা",
     moktobVisit: "মক্তব ভিজিট",
     schoolCollegeVisit: "স্কুল/কলেজ ভিজিট",
     schoolCollegeVisitList: "স্কুল/কলেজ ভিজিট তালিকা",
@@ -207,6 +192,19 @@ const ComparisonDataComponent: React.FC = () => {
     fetchUsers();
   }, []);
 
+  // Ensure Bangla font is available for UI
+  useEffect(() => {
+    const fontLinkId = "noto-sans-bengali";
+    if (!document.getElementById(fontLinkId)) {
+      const link = document.createElement("link");
+      link.id = fontLinkId;
+      link.rel = "stylesheet";
+      link.href =
+        "https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap";
+      document.head.appendChild(link);
+    }
+  }, []);
+
   useEffect(() => {
     if (!users.length) return;
 
@@ -235,9 +233,17 @@ const ComparisonDataComponent: React.FC = () => {
 
   // Handle comparison button click
   const handleCompare = async () => {
-    if (!from || !to) {
-      alert(t("messages.invalidRange"));
-      return;
+    if (comparisonType === "singleMonth") {
+      if (!from) {
+        alert(t("messages.invalidRange"));
+        return;
+      }
+      setTo("");
+    } else {
+      if (!from || !to) {
+        alert(t("messages.invalidRange"));
+        return;
+      }
     }
 
     if (isFetchingRef.current) return; // prevent duplicate calls (StrictMode or repeated clicks)
@@ -278,7 +284,6 @@ const ComparisonDataComponent: React.FC = () => {
 
     try {
       const [
-        amoli,
         moktob,
         talim,
         daye,
@@ -288,40 +293,6 @@ const ComparisonDataComponent: React.FC = () => {
         dineFera,
         sofor,
       ] = await Promise.all([
-        fetchModule(
-          "amoli",
-          emailList,
-          (r, slot) => {
-            slot.tahajjud = r.tahajjud ?? "-";
-            slot.surah = r.surah ?? "-";
-            slot.ayat = r.ayat ?? "-";
-            slot.zikir = r.zikir ?? "-";
-            slot.ishraq = r.ishraq ?? "-";
-            slot.jamat = r.jamat ?? "-";
-            slot.sirat = r.sirat ?? "-";
-            slot.Dua = r.Dua ?? "-";
-            slot.ilm = r.ilm ?? "-";
-            slot.tasbih = r.tasbih ?? "-";
-            slot.dayeeAmol = r.dayeeAmol ?? "-";
-            slot.amoliSura = r.amoliSura ?? "-";
-            slot.ayamroja = r.ayamroja ?? "-";
-            slot.hijbulBahar = r.hijbulBahar ?? "-";
-            slot.percentage = r.percentage ?? "-";
-            slot.editorContent = r.editorContent || "";
-            // Map quarntilawat: stringify object if needed
-            if (r.quarntilawat) {
-              if (typeof r.quarntilawat === "object") {
-                const q = r.quarntilawat;
-                slot.quarntilawat = `${q.para ?? "-"} | ${q.pageNo ?? "-"} | ${q.ayat ?? "-"}`;
-              } else {
-                slot.quarntilawat = r.quarntilawat;
-              }
-            } else {
-              slot.quarntilawat = "-";
-            }
-          },
-          AMOLI_LABELS
-        ),
 
         fetchModule(
           "moktob",
@@ -438,7 +409,6 @@ const ComparisonDataComponent: React.FC = () => {
       ]);
 
       const allData = [
-        amoli,
         moktob,
         dawati,
         dawatiMojlish,
@@ -448,10 +418,17 @@ const ComparisonDataComponent: React.FC = () => {
         sofor,
         daye,
       ];
-      const combinedData = allData.flatMap((data) =>
-        fetchUserComparisonData(data, comparisonType, from, to)
-      );
-      setComparisonData(combinedData);
+      if (comparisonType === "singleMonth") {
+        const monthTotals = allData.flatMap((data) =>
+          fetchSingleMonthData(data, from)
+        );
+        setComparisonData(monthTotals);
+      } else {
+        const combinedData = allData.flatMap((data) =>
+          fetchUserComparisonData(data, comparisonType, from, to)
+        );
+        setComparisonData(combinedData);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -474,9 +451,8 @@ const ComparisonDataComponent: React.FC = () => {
       let totalTo = 0;
 
       emailList.forEach((email) => {
-        if (!userData.records[email]) return; // Skip if no data for user
-
         const userRecords = userData.records[email];
+        if (!userRecords) return;
 
         if (comparisonType === "day") {
           totalFrom +=
@@ -504,14 +480,14 @@ const ComparisonDataComponent: React.FC = () => {
         }
       });
 
-      // Calculate percentage change
       let change = "0%";
       if (totalFrom === 0 && totalTo > 0) {
-        change = "∞% ↑"; // Infinite increase
+        change = "∞% ↑";
       } else if (totalFrom > 0 && totalTo === 0) {
-        change = "-∞% ↓"; // Infinite decrease
+        change = "-∞% ↓";
       } else if (totalFrom !== totalTo) {
-        let percentageChange = ((totalTo - totalFrom) / (totalFrom || 1)) * 100;
+        const percentageChange =
+          ((totalTo - totalFrom) / (totalFrom || 1)) * 100;
         change = `${percentageChange.toFixed(2)}% ${percentageChange > 0 ? "↑" : "↓"}`;
       }
 
@@ -525,10 +501,58 @@ const ComparisonDataComponent: React.FC = () => {
     });
   };
 
+  // Aggregate for a single selected month (no comparison)
+  const fetchSingleMonthData = (userData: any, month: string) => {
+    if (!userData?.records || !month) return [];
+
+    return Object.keys(userData.labelMap).map((metric) => {
+      let total = 0;
+      emailList.forEach((email) => {
+        const userRecords = userData.records[email];
+        if (!userRecords) return;
+        Object.keys(userRecords).forEach((date) => {
+          if (date.startsWith(month)) {
+            total += convertToPoints(userRecords[date]?.[metric], metric) || 0;
+          }
+        });
+      });
+      return { label: userData.labelMap[metric], total };
+    });
+  };
   const getHtml2Pdf = async () => {
     const html2pdfModule = await import("html2pdf.js");
     return html2pdfModule.default || html2pdfModule; // Ensure correct function access
   };
+
+  const formatPeriodValue = (value: string, type: string) => {
+    if (!value) return "-";
+    if (type === "day") {
+      const date = new Date(value);
+      return isNaN(date.getTime())
+        ? value
+        : date.toLocaleDateString("bn-BD", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+    }
+    if (type === "month") {
+      const date = new Date(`${value}-01`);
+      return isNaN(date.getTime())
+        ? value
+        : date.toLocaleDateString("bn-BD", {
+            year: "numeric",
+            month: "long",
+          });
+    }
+    return value; // year
+  };
+
+  const isSingleMonth = comparisonType === "singleMonth";
+  const formattedFrom = isSingleMonth
+    ? formatPeriodValue(from, "month")
+    : formatPeriodValue(from, comparisonType);
+  const formattedTo = formatPeriodValue(to, comparisonType);
 
   const convertToPDF = async () => {
     if (!comparisonData.length) {
@@ -536,7 +560,37 @@ const ComparisonDataComponent: React.FC = () => {
       return;
     }
 
+    // Ensure Bangla font is available for PDF render
+    const fontLinkId = "noto-sans-bengali-pdf";
+    if (!document.getElementById(fontLinkId)) {
+      const link = document.createElement("link");
+      link.id = fontLinkId;
+      link.rel = "stylesheet";
+      link.href =
+        "https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap";
+      document.head.appendChild(link);
+    }
+    if (document.fonts?.ready) {
+      try {
+        await document.fonts.ready;
+      } catch {
+        // ignore font load wait errors
+      }
+    }
+
     const element = document.createElement("div");
+    element.setAttribute("lang", "bn");
+    element.style.fontFamily = "'Noto Sans Bengali', 'Noto Sans', sans-serif";
+
+    // For the PDF title
+    const pdfTitle = isSingleMonth
+      ? ` ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ<br>মাসিক রিপোর্ট - ${formattedFrom}`
+      : `${t("pdf.title")} (${formattedFrom} ${t("controls.to")} ${formattedTo})`;
+
+    // For the filename
+    const fileName = isSingleMonth
+      ? `ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ<br>মাসিক_রিপোর্ট_${formattedFrom}.pdf`
+      : `comparison_report_${formattedFrom}_to_${formattedTo}.pdf`;
 
     let tableHTML = `
       <html>
@@ -547,22 +601,25 @@ const ComparisonDataComponent: React.FC = () => {
             body {
               font-family: 'Noto Sans Bengali', sans-serif;
               text-align: center;
+              font-size: ${isSingleMonth ? "10px" : "12px"};
             }
             table {
               width: 100%;
               border-collapse: collapse;
-              margin-top: 20px;
+              margin-top: 16px;
               text-align: center;
+              ${isSingleMonth ? "table-layout: fixed;" : ""}
             }
             th, td {
               border: 1px solid #000;
-              padding: 10px;
+              padding: ${isSingleMonth ? "6px" : "10px"};
               text-align: center;
             }
             th {
               background-color: #16A085;
               color: white;
             }
+            td { font-weight: 600; }
             thead {
               display: table-header-group; 
             }
@@ -572,33 +629,56 @@ const ComparisonDataComponent: React.FC = () => {
           </style>
         </head>
         <body>
-          <h2>${t("pdf.title")}</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>${t("table.label")}</th>
-                <th>${from}</th>
-                <th>${to}</th>
-                <th>${t("table.difference")}</th>
-                <th>${t("table.change")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${comparisonData
-                .map(
-                  (item) => `
+          <h2>${pdfTitle}</h2>
+          ${
+            isSingleMonth
+              ? `<table>
+                  <thead>
                     <tr>
-                      <td>${item.label}</td>
-                      <td>${item.from}</td>
-                      <td>${item.to}</td>
-                      <td style="color: ${item.isIncrease ? "green" : "red"};">${item.to - item.from}</td>
-                      <td style="color: ${item.isIncrease ? "green" : "red"};">${item.change}</td>
+                      <th>${t("table.label")}</th>
+                      <th>${formattedFrom}</th>
                     </tr>
-                  `
-                )
-                .join("")}
-            </tbody>
-          </table>
+                  </thead>
+                  <tbody>
+                    ${comparisonData
+                      .map(
+                        (item) => `
+                          <tr>
+                            <td>${item.label}</td>
+                            <td>${item.total}</td>
+                          </tr>
+                        `
+                      )
+                      .join("")}
+                  </tbody>
+                </table>`
+              : `<table>
+                  <thead>
+                    <tr>
+                      <th>${t("table.label")}</th>
+                      <th>${formattedFrom}</th>
+                      <th>${formattedTo}</th>
+                      <th>${t("table.difference")}</th>
+                      <th>${t("table.change")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${comparisonData
+                      .map(
+                        (item) => `
+                          <tr>
+                            <td>${item.label}</td>
+                            <td>${item.from}</td>
+                            <td>${item.to}</td>
+                            <td style="color: ${item.isIncrease ? "green" : "red"};">${Number(item.to) - Number(item.from)}</td>
+                            <td style="color: ${item.isIncrease ? "green" : "red"};">${item.change}</td>
+                          </tr>
+                        `
+                      )
+                      .join("")}
+                  </tbody>
+                </table>`
+          }
         </body>
       </html>`;
 
@@ -609,11 +689,15 @@ const ComparisonDataComponent: React.FC = () => {
 
       html2pdf()
         .set({
-          margin: 10,
-          filename: `comparison_report.pdf`,
+          margin: isSingleMonth ? 5 : 10,
+          filename: fileName,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2 },
-          jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+          jsPDF: {
+            unit: "mm",
+            format: "a4",
+            orientation: isSingleMonth ? "portrait" : "landscape",
+          },
         })
         .from(element)
         .toPdf()
@@ -624,7 +708,7 @@ const ComparisonDataComponent: React.FC = () => {
             pdf.setPage(i);
             pdf.setFontSize(10);
             pdf.text(
-              t("pdf.page", { page: i, total: totalPages }),
+              isSingleMonth ? `Page ${i} of ${totalPages}` : `Page ${i} of ${totalPages}`,
               pdf.internal.pageSize.getWidth() - 20,
               pdf.internal.pageSize.getHeight() - 5
             );
@@ -637,7 +721,10 @@ const ComparisonDataComponent: React.FC = () => {
   };
 
   return (
-    <div className="p-2 lg:p-6 bg-white shadow-md rounded-lg">
+    <div
+      className="p-2 lg:p-6 bg-white shadow-md rounded-lg"
+      style={{ fontFamily: bengaliFont }}
+    >
       {/* <h1 className="text-2xl font-bold text-gray-800 mb-4">{t("title")}</h1> */}
       <div className="grid lg:flex lg:flex-wrap gap-4 mb-6">
         <select
@@ -652,6 +739,7 @@ const ComparisonDataComponent: React.FC = () => {
         >
           <option value="day">{t("controls.dayToDay")}</option>
           <option value="month">{t("controls.monthToMonth")}</option>
+          <option value="singleMonth">{t("controls.singleMonth")}</option>
           <option value="year">{t("controls.yearToYear")}</option>
         </select>
 
@@ -692,6 +780,17 @@ const ComparisonDataComponent: React.FC = () => {
           </>
         )}
 
+        {comparisonType === "singleMonth" && (
+          <div className="grid lg:flex gap-2">
+            <input
+              type="month"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              className="border px-4 py-2 rounded-md shadow-sm"
+            />
+          </div>
+        )}
+
         {comparisonType === "year" && (
           <>
             <div className="grid max-w-sm:w-full lg:flex lg:gap-2">
@@ -729,48 +828,79 @@ const ComparisonDataComponent: React.FC = () => {
 
       <div className="bg-gray-100 p-2 lg:p-4 rounded-lg shadow overflow-x-auto">
         {comparisonData.length > 0 ? (
-          <table className="w-full border-collapse border border-gray-300 text-sm lg:text-base">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="border px-2 lg:px-4 py-1 lg:py-2">
-                  {t("table.label")}
-                </th>
-                <th className="border px-2 lg:px-4 py-1 lg:py-2">{from}</th>
-                <th className="border px-2 lg:px-4 py-1 lg:py-2">{to}</th>
-                <th className="border px-2 lg:px-4 py-1 lg:py-2">
-                  {t("table.difference")}
-                </th>
-                <th className="border px-2 lg:px-4 py-1 lg:py-2">
-                  {t("table.change")}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {comparisonData.map((item, index) => (
-                <tr key={index} className="text-center">
-                  <td className="border px-2 lg:px-4 py-1 lg:py-2">
-                    {item.label}
-                  </td>
-                  <td className="border px-2 lg:px-4 py-1 lg:py-2">
-                    {item.from}
-                  </td>
-                  <td className="border px-2 lg:px-4 py-1 lg:py-2">
-                    {item.to}
-                  </td>
-                  <td
-                    className={`border px-2 lg:px-4 py-1 lg:py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
-                  >
-                    {item.to - item.from}
-                  </td>
-                  <td
-                    className={`border px-2 lg:px-4 py-1 lg:py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
-                  >
-                    {item.change}
-                  </td>
+          isSingleMonth ? (
+            <table className="w-full border-collapse border border-gray-300 text-sm lg:text-base">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="border px-2 lg:px-4 py-1 lg:py-2">
+                    {t("table.label")}
+                  </th>
+                  <th className="border px-2 lg:px-4 py-1 lg:py-2">
+                    {formattedFrom}
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {comparisonData.map((item: any, index) => (
+                  <tr key={index} className="text-center">
+                    <td className="border px-2 lg:px-4 py-1 lg:py-2">
+                      {item.label}
+                    </td>
+                    <td className="border px-2 lg:px-4 py-1 lg:py-2 font-bold text-emerald-700">
+                      {item.total}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <table className="w-full border-collapse border border-gray-300 text-sm lg:text-base">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="border px-2 lg:px-4 py-1 lg:py-2">
+                    {t("table.label")}
+                  </th>
+                  <th className="border px-2 lg:px-4 py-1 lg:py-2">
+                    {formattedFrom}
+                  </th>
+                  <th className="border px-2 lg:px-4 py-1 lg:py-2">
+                    {formattedTo}
+                  </th>
+                  <th className="border px-2 lg:px-4 py-1 lg:py-2">
+                    {t("table.difference")}
+                  </th>
+                  <th className="border px-2 lg:px-4 py-1 lg:py-2">
+                    {t("table.change")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonData.map((item, index) => (
+                  <tr key={index} className="text-center">
+                    <td className="border px-2 lg:px-4 py-1 lg:py-2">
+                      {item.label}
+                    </td>
+                    <td className="border px-2 lg:px-4 py-1 lg:py-2">
+                      {item.from}
+                    </td>
+                    <td className="border px-2 lg:px-4 py-1 lg:py-2">
+                      {item.to}
+                    </td>
+                    <td
+                      className={`border px-2 lg:px-4 py-1 lg:py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {item.to - item.from}
+                    </td>
+                    <td
+                      className={`border px-2 lg:px-4 py-1 lg:py-2 font-bold ${item.isIncrease ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {item.change}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )
         ) : (
           <p className="text-center text-gray-600">
             {t("messages.selectValues")}
@@ -788,7 +918,7 @@ const ComparisonDataComponent: React.FC = () => {
           </div>
         )}
       </div>
-      {comparisonData.length > 0 && (
+      {comparisonData.length > 0 && !isSingleMonth && (
         <div>
           <ComparisonTallyCard
             currentData={comparisonData.map((item) => ({

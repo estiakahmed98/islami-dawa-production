@@ -129,7 +129,7 @@ async function main() {
   const daees = [
     { name: "মাহবুবুর রহমান", email: "mahbub22888@gmail.com", markazName: "মাদরাসাতুল মাদীনাহ লিলবানাত মধুসিটি, কেরানীগঞ্জ, ঢাকা" },
     { name: "দাঈ আব্দুল বাছির", email: "addayiemedia@gmail.com", markazName: "ইসলামী দাওয়াহ ইনস্টিটিউট, বাংলাদেশ। মান্ডা, মুগদা, ঢাকা" },
-    { name: "মোঃ উসামা", email: "mdu846731@email.com", markazName: "মাদরাসাতুল মাদীনাহ লিলবানাত মধুসিটি, কেরানীগঞ্জ, ঢাকা" },
+    { name: "মোঃ উসামা", email: "mdu846731@gmail.com", markazName: "মাদরাসাতুল মাদীনাহ লিলবানাত মধুসিটি, কেরানীগঞ্জ, ঢাকা" },
     { name: "শামীম আশরাফ", email: "shamimashraf2017@gmail.com", markazName: "মাদরাসাতুল হুদা নৈশ মাদরাসা সদর, দিনাজপুর" },
     { name: "ইয়াসিন আহমদ", email: "yeasinahmad300@gmail.com", markazName: "মাদরাসাতুল ফালাহ সদর, পঞ্চগড়" },
     { name: "মাওলানা আবু সাঈদ", email: "abusaeid138358@gmail.com", markazName: "দারুল কোরআন আদর্শ মাদরাসা মির কাদিম, পৌরসভা, মুন্সিগঞ্জ" },

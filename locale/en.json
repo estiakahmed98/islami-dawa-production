@@ -641,6 +641,7 @@
       "type": "Compare by",
       "dayToDay": "Day to Day",
       "monthToMonth": "Month to Month",
+      "singleMonth": "Single Month",
       "yearToYear": "Year to Year",
       "from": "From",
       "to": "To",

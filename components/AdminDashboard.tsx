@@ -4,7 +4,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelectedUser } from "@/providers/treeProvider";
 import { useSession } from "@/lib/auth-client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/TabButton";
 import TallyAdmin from "@/components/TallyAdmin";
 import AmoliChartAdmin from "@/components/AmoliChartAdmin";
 import AdminTable from "@/components/AdminTable";
@@ -36,8 +41,8 @@ type LabeledData = {
   labelMap: LabelMap;
   meta?: {
     assistants?: Record<string, Record<string, any[]>>; // [email][date] -> Assistant[]
-    madrasa?: Record<string, Record<string, string[]>>;  // [email][date] -> string[]
-    school?: Record<string, Record<string, string[]>>;   // [email][date] -> string[]
+    madrasa?: Record<string, Record<string, string[]>>; // [email][date] -> string[]
+    school?: Record<string, Record<string, string[]>>; // [email][date] -> string[]
   };
 };
 
@@ -59,8 +64,18 @@ type EndpointDef = {
 
 // ----------------- Helpers -----------------
 const months = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 function dhakaYMD(d: Date) {
@@ -81,7 +96,8 @@ function toNumberedHTML(arr: unknown): string {
 // --- markaz normalization (single relation, legacy safe) ---
 const getMarkazId = (u?: User): string | null => {
   if (!u) return null;
-  if (u.markaz && typeof u.markaz !== "string") return u.markaz.id ?? u.markazId ?? null;
+  if (u.markaz && typeof u.markaz !== "string")
+    return u.markaz.id ?? u.markazId ?? null;
   return u.markazId ?? null;
 };
 const getMarkazName = (u?: User): string | null => {
@@ -99,7 +115,11 @@ const shareMarkaz = (a: User, b: User): boolean => {
 };
 
 // parent resolver using roles + markaz/division scopes
-const getParentEmail = (user: User, users: User[], loggedInUser: User | null): string | null => {
+const getParentEmail = (
+  user: User,
+  users: User[],
+  loggedInUser: User | null
+): string | null => {
   let parentUser: User | undefined;
 
   switch (user.role) {
@@ -111,7 +131,9 @@ const getParentEmail = (user: User, users: User[], loggedInUser: User | null): s
     }
     case "markazadmin": {
       parentUser =
-        users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+        users.find(
+          (u) => u.role === "divisionadmin" && u.division === user.division
+        ) ||
         (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
         users.find((u) => u.role === "centraladmin");
       break;
@@ -126,23 +148,34 @@ const getParentEmail = (user: User, users: User[], loggedInUser: User | null): s
     // legacy roles - keep for compatibility
     case "unionadmin": {
       parentUser =
-        users.find((u) => u.role === "upozilaadmin" && u.upazila === user.upazila) ||
-        users.find((u) => u.role === "districtadmin" && u.district === user.district) ||
-        users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+        users.find(
+          (u) => u.role === "upozilaadmin" && u.upazila === user.upazila
+        ) ||
+        users.find(
+          (u) => u.role === "districtadmin" && u.district === user.district
+        ) ||
+        users.find(
+          (u) => u.role === "divisionadmin" && u.division === user.division
+        ) ||
         users.find((u) => u.role === "centraladmin");
       break;
     }
     case "upozilaadmin": {
       parentUser =
-        users.find((u) => u.role === "districtadmin" && u.district === user.district) ||
-        users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
+        users.find(
+          (u) => u.role === "districtadmin" && u.district === user.district
+        ) ||
+        users.find(
+          (u) => u.role === "divisionadmin" && u.division === user.division
+        ) ||
         users.find((u) => u.role === "centraladmin");
       break;
     }
     case "districtadmin": {
       parentUser =
-        users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
-        users.find((u) => u.role === "centraladmin");
+        users.find(
+          (u) => u.role === "divisionadmin" && u.division === user.division
+        ) || users.find((u) => u.role === "centraladmin");
       break;
     }
     default:
@@ -167,29 +200,64 @@ const AdminDashboard: React.FC = () => {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "";
 
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(
+    new Date().getMonth()
+  );
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
   const [searchMonth, setSearchMonth] = useState<string>("");
 
   const [users, setUsers] = useState<User[]>([]);
-  const [emailList, setEmailList] = useState<string[]>(userEmail ? [userEmail] : []);
+  const [emailList, setEmailList] = useState<string[]>(
+    userEmail ? [userEmail] : []
+  );
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [amoliData, setAmoliData] = useState<LabeledData>({ records: {}, labelMap: {} });
-  const [moktobData, setMoktobData] = useState<LabeledData>({ records: {}, labelMap: {} });
-  const [dawatiData, setDawatiData] = useState<LabeledData>({ records: {}, labelMap: {} });
-  const [dawatiMojlishData, setDawatiMojlishData] = useState<LabeledData>({ records: {}, labelMap: {} });
-  const [jamatData, setJamatData] = useState<LabeledData>({ records: {}, labelMap: {} });
-  const [dineFeraData, setDineFeraData] = useState<LabeledData>({ records: {}, labelMap: {} });
-  const [talimData, setTalimData] = useState<LabeledData>({ records: {}, labelMap: {} });
-  const [soforData, setSoforData] = useState<LabeledData>({ records: {}, labelMap: {} });
-  const [dayeData, setDayeData] = useState<LabeledData>({ records: {}, labelMap: {} });
+  const [amoliData, setAmoliData] = useState<LabeledData>({
+    records: {},
+    labelMap: {},
+  });
+  const [moktobData, setMoktobData] = useState<LabeledData>({
+    records: {},
+    labelMap: {},
+  });
+  const [dawatiData, setDawatiData] = useState<LabeledData>({
+    records: {},
+    labelMap: {},
+  });
+  const [dawatiMojlishData, setDawatiMojlishData] = useState<LabeledData>({
+    records: {},
+    labelMap: {},
+  });
+  const [jamatData, setJamatData] = useState<LabeledData>({
+    records: {},
+    labelMap: {},
+  });
+  const [dineFeraData, setDineFeraData] = useState<LabeledData>({
+    records: {},
+    labelMap: {},
+  });
+  const [talimData, setTalimData] = useState<LabeledData>({
+    records: {},
+    labelMap: {},
+  });
+  const [soforData, setSoforData] = useState<LabeledData>({
+    records: {},
+    labelMap: {},
+  });
+  const [dayeData, setDayeData] = useState<LabeledData>({
+    records: {},
+    labelMap: {},
+  });
 
   // ---------- Modal state ----------
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalDateKey, setModalDateKey] = useState("");
-  const [modalType, setModalType] = useState<"assistants" | "madrasa" | "school" | null>(null);
+  const [modalType, setModalType] = useState<
+    "assistants" | "madrasa" | "school" | null
+  >(null);
   const [modalItems, setModalItems] = useState<any[]>([]);
   const t = useTranslations("dashboard.adminDashboard");
 
@@ -240,12 +308,18 @@ const AdminDashboard: React.FC = () => {
       collected = [...new Set([...collected, ...dayeEmails])];
     };
 
-    if ((loggedIn as any).role === "unionadmin") includeDayeByScope({ union: loggedIn.union });
-    else if ((loggedIn as any).role === "upozilaadmin") includeDayeByScope({ upazila: loggedIn.upazila });
-    else if ((loggedIn as any).role === "districtadmin") includeDayeByScope({ district: loggedIn.district });
-    else if (loggedIn.role === "divisionadmin") includeDayeByScope({ division: loggedIn.division });
+    if ((loggedIn as any).role === "unionadmin")
+      includeDayeByScope({ union: loggedIn.union });
+    else if ((loggedIn as any).role === "upozilaadmin")
+      includeDayeByScope({ upazila: loggedIn.upazila });
+    else if ((loggedIn as any).role === "districtadmin")
+      includeDayeByScope({ district: loggedIn.district });
+    else if (loggedIn.role === "divisionadmin")
+      includeDayeByScope({ division: loggedIn.division });
     else if (loggedIn.role === "centraladmin") {
-      const dayeAll = users.filter((u) => u.role === "daye").map((u) => u.email);
+      const dayeAll = users
+        .filter((u) => u.role === "daye")
+        .map((u) => u.email);
       collected = [...new Set([...collected, ...dayeAll])];
     }
 
@@ -267,33 +341,50 @@ const AdminDashboard: React.FC = () => {
           selEmails = [
             ...new Set([
               ...selEmails,
-              ...users.filter((u) => u.role === "daye" && u.union === chosen.union).map((u) => u.email),
+              ...users
+                .filter((u) => u.role === "daye" && u.union === chosen.union)
+                .map((u) => u.email),
             ]),
           ];
         else if ((chosen as any).role === "upozilaadmin")
           selEmails = [
             ...new Set([
               ...selEmails,
-              ...users.filter((u) => u.role === "daye" && u.upazila === chosen.upazila).map((u) => u.email),
+              ...users
+                .filter(
+                  (u) => u.role === "daye" && u.upazila === chosen.upazila
+                )
+                .map((u) => u.email),
             ]),
           ];
         else if ((chosen as any).role === "districtadmin")
           selEmails = [
             ...new Set([
               ...selEmails,
-              ...users.filter((u) => u.role === "daye" && u.district === chosen.district).map((u) => u.email),
+              ...users
+                .filter(
+                  (u) => u.role === "daye" && u.district === chosen.district
+                )
+                .map((u) => u.email),
             ]),
           ];
         else if (chosen.role === "divisionadmin")
           selEmails = [
             ...new Set([
               ...selEmails,
-              ...users.filter((u) => u.role === "daye" && u.division === chosen.division).map((u) => u.email),
+              ...users
+                .filter(
+                  (u) => u.role === "daye" && u.division === chosen.division
+                )
+                .map((u) => u.email),
             ]),
           ];
         else if (chosen.role === "centraladmin")
           selEmails = [
-            ...new Set([...selEmails, ...users.filter((u) => u.role === "daye").map((u) => u.email)]),
+            ...new Set([
+              ...selEmails,
+              ...users.filter((u) => u.role === "daye").map((u) => u.email),
+            ]),
           ];
 
         setEmailList(selEmails);
@@ -386,7 +477,9 @@ const AdminDashboard: React.FC = () => {
         labelMap: {
           dawatterGuruttoMojlish: t("dawatiMojlish.dawatterGuruttoMojlish"),
           mojlisheOnshogrohon: t("dawatiMojlish.mojlisheOnshogrohon"),
-          prosikkhonKormoshalaAyojon: t("dawatiMojlish.prosikkhonKormoshalaAyojon"),
+          prosikkhonKormoshalaAyojon: t(
+            "dawatiMojlish.prosikkhonKormoshalaAyojon"
+          ),
           prosikkhonOnshogrohon: t("dawatiMojlish.prosikkhonOnshogrohon"),
           jummahAlochona: t("dawatiMojlish.jummahAlochona"),
           dhormoSova: t("dawatiMojlish.dhormoSova"),
@@ -448,21 +541,33 @@ const AdminDashboard: React.FC = () => {
       if (key === "daye") {
         meta!.assistants = meta!.assistants || {};
         meta!.assistants[email] = meta!.assistants[email] || {};
-        meta!.assistants[email][dateKey] = Array.isArray(rec.assistants) ? rec.assistants : [];
+        meta!.assistants[email][dateKey] = Array.isArray(rec.assistants)
+          ? rec.assistants
+          : [];
       }
       if (key === "sofor") {
         meta!.madrasa = meta!.madrasa || {};
         meta!.school = meta!.school || {};
         meta!.madrasa[email] = meta!.madrasa[email] || {};
         meta!.school[email] = meta!.school[email] || {};
-        meta!.madrasa[email][dateKey] = Array.isArray(rec.madrasaVisitList) ? rec.madrasaVisitList : [];
-        meta!.school[email][dateKey] = Array.isArray(rec.schoolCollegeVisitList) ? rec.schoolCollegeVisitList : [];
+        meta!.madrasa[email][dateKey] = Array.isArray(rec.madrasaVisitList)
+          ? rec.madrasaVisitList
+          : [];
+        meta!.school[email][dateKey] = Array.isArray(rec.schoolCollegeVisitList)
+          ? rec.schoolCollegeVisitList
+          : [];
       }
 
-      if (copy.madrasaVisitList) copy.madrasaVisitList = toNumberedHTML(copy.madrasaVisitList);
-      if (copy.schoolCollegeVisitList) copy.schoolCollegeVisitList = toNumberedHTML(copy.schoolCollegeVisitList);
+      if (copy.madrasaVisitList)
+        copy.madrasaVisitList = toNumberedHTML(copy.madrasaVisitList);
+      if (copy.schoolCollegeVisitList)
+        copy.schoolCollegeVisitList = toNumberedHTML(
+          copy.schoolCollegeVisitList
+        );
       if (copy.assistants) {
-        copy.assistants = toNumberedHTML((copy.assistants as any[]).map((a) => `${a.name} (${a.phone})`));
+        copy.assistants = toNumberedHTML(
+          (copy.assistants as any[]).map((a) => `${a.name} (${a.phone})`)
+        );
         copy.assistantsList = copy.assistants;
       }
 
@@ -480,20 +585,29 @@ const AdminDashboard: React.FC = () => {
         await Promise.all(
           endpoints.map(async (ep) => {
             const meta: LabeledData["meta"] = {};
-            const res = await fetch(`${ep.url}?emails=${encodeURIComponent(emailList.join(','))}`, { cache: "no-store" });
+            const res = await fetch(
+              `${ep.url}?emails=${encodeURIComponent(emailList.join(","))}`,
+              { cache: "no-store" }
+            );
             if (!res.ok) throw new Error(`Failed ${ep.key} for emails`);
             const json = await res.json();
-            
+
             // Handle different API response formats
-            const perEmailResults = emailList.map(email => {
+            const perEmailResults = emailList.map((email) => {
               const emailData = json.records[email];
               // Check if the data is wrapped in { records: [], isSubmittedToday: boolean } format
-              const records = emailData?.records ? emailData.records : (Array.isArray(emailData) ? emailData : []);
+              const records = emailData?.records
+                ? emailData.records
+                : Array.isArray(emailData)
+                  ? emailData
+                  : [];
               return { email, records };
             });
 
             const merged: RecordsByEmail = {};
-            perEmailResults.forEach(({ email, records }) => mergeEmailRecords(merged, email, records, meta, ep.key));
+            perEmailResults.forEach(({ email, records }) =>
+              mergeEmailRecords(merged, email, records, meta, ep.key)
+            );
 
             ep.setter({ records: merged, labelMap: ep.labelMap, meta });
           })
@@ -511,16 +625,23 @@ const AdminDashboard: React.FC = () => {
   // filter to selected month/year (same shape back)
   const filterChartAndTallyData = (data: LabeledData) => {
     if (!data || !data.records) return data;
-    const filteredRecords = Object.keys(data.records).reduce<RecordsByEmail>((filtered, email) => {
-      const emailData = data.records[email];
-      const filteredDates = Object.keys(emailData).reduce<Record<string, any>>((acc, date) => {
-        const [y, m] = date.split("-").map(Number);
-        if (y === selectedYear && m === selectedMonth + 1) acc[date] = emailData[date];
-        return acc;
-      }, {});
-      if (Object.keys(filteredDates).length > 0) filtered[email] = filteredDates;
-      return filtered;
-    }, {});
+    const filteredRecords = Object.keys(data.records).reduce<RecordsByEmail>(
+      (filtered, email) => {
+        const emailData = data.records[email];
+        const filteredDates = Object.keys(emailData).reduce<
+          Record<string, any>
+        >((acc, date) => {
+          const [y, m] = date.split("-").map(Number);
+          if (y === selectedYear && m === selectedMonth + 1)
+            acc[date] = emailData[date];
+          return acc;
+        }, {});
+        if (Object.keys(filteredDates).length > 0)
+          filtered[email] = filteredDates;
+        return filtered;
+      },
+      {}
+    );
     return { ...data, records: filteredRecords };
   };
 
@@ -531,7 +652,10 @@ const AdminDashboard: React.FC = () => {
   );
 
   // ---------- click aggregator ----------
-  const openAggregatedModal = (type: "assistants" | "madrasa" | "school", dateKey: string) => {
+  const openAggregatedModal = (
+    type: "assistants" | "madrasa" | "school",
+    dateKey: string
+  ) => {
     let items: any[] = [];
     if (type === "assistants") {
       const m = dayeData.meta?.assistants || {};
@@ -562,14 +686,339 @@ const AdminDashboard: React.FC = () => {
   };
 
   // handlers passed to AdminTable
-  const handleDayeCellClick = ({ dateKey, rowKey }: { dateKey: string; rowKey: string }) => {
+  const handleDayeCellClick = ({
+    dateKey,
+    rowKey,
+  }: {
+    dateKey: string;
+    rowKey: string;
+  }) => {
     if (rowKey === "assistantsList" || rowKey === "assistants") {
       openAggregatedModal("assistants", dateKey);
     }
   };
-  const handleSoforCellClick = ({ dateKey, rowKey }: { dateKey: string; rowKey: string }) => {
+  const handleSoforCellClick = ({
+    dateKey,
+    rowKey,
+  }: {
+    dateKey: string;
+    rowKey: string;
+  }) => {
     if (rowKey === "madrasaVisitList") openAggregatedModal("madrasa", dateKey);
-    if (rowKey === "schoolCollegeVisitList") openAggregatedModal("school", dateKey);
+    if (rowKey === "schoolCollegeVisitList")
+      openAggregatedModal("school", dateKey);
+  };
+
+  // Prepare tally data for PDF - WITH MONTH/YEAR FILTERING
+  const preparePDFTallyData = () => {
+    const aggregateUserData = (
+      userData: LabeledData,
+      emails: string[],
+      month: number,
+      year: number
+    ) => {
+      if (!userData || typeof userData !== "object") return [];
+      const aggregatedData: Record<string, number> = {};
+      const labelMap: Record<string, string> = {};
+      if (userData.labelMap) {
+        Object.entries(userData.labelMap).forEach(([key, value]) => {
+          if (value !== undefined && key !== "editorContent") {
+            labelMap[key] = value;
+          }
+        });
+      }
+
+      // Initialize aggregation structure for each label
+      Object.keys(labelMap).forEach((key) => {
+        aggregatedData[key] = 0;
+      });
+
+      emails.forEach((email) => {
+        const userRecords = userData.records?.[email];
+
+        // Skip this email if no data exists for it
+        if (!userRecords) {
+          return;
+        }
+
+        // Merge data for each label from all dates for valid users
+        Object.entries(userRecords).forEach(([dateKey, dailyData]) => {
+          // Filter by selected month and year
+          const [y, m] = dateKey.split("-").map(Number);
+          if (y !== year || m !== month + 1) {
+            return; // Skip dates not matching selected month
+          }
+
+          const data = dailyData as Record<string, any>;
+          Object.entries(data).forEach(([key, value]) => {
+            if (aggregatedData[key] !== undefined) {
+              // Only sum numeric values, skip strings and other types
+              const numValue =
+                typeof value === "number"
+                  ? value
+                  : typeof value === "string"
+                    ? parseInt(value, 10)
+                    : 0;
+              if (!isNaN(numValue)) {
+                aggregatedData[key] += numValue; // Sum up values for the valid emails
+              }
+            }
+          });
+        });
+      });
+
+      // Format aggregated data for display
+      return Object.entries(aggregatedData).map(([key, totalValue]) => ({
+        label: labelMap[key] || key,
+        totalValue: totalValue,
+        max: 5000,
+        percentage: (Math.min(totalValue, 5000) / 5000) * 100,
+      }));
+    };
+
+    return [
+      {
+        title: t("moktob.title"),
+        data: aggregateUserData(
+          moktobData,
+          emailList,
+          selectedMonth,
+          selectedYear
+        ),
+      },
+      {
+        title: t("dawati.title"),
+        data: aggregateUserData(
+          dawatiData,
+          emailList,
+          selectedMonth,
+          selectedYear
+        ),
+      },
+      {
+        title: t("dawatiMojlish.title"),
+        data: aggregateUserData(
+          dawatiMojlishData,
+          emailList,
+          selectedMonth,
+          selectedYear
+        ),
+      },
+      {
+        title: t("jamat.title"),
+        data: aggregateUserData(
+          jamatData,
+          emailList,
+          selectedMonth,
+          selectedYear
+        ),
+      },
+      {
+        title: t("dineFera.title"),
+        data: aggregateUserData(
+          dineFeraData,
+          emailList,
+          selectedMonth,
+          selectedYear
+        ),
+      },
+      {
+        title: t("talim.title"),
+        data: aggregateUserData(
+          talimData,
+          emailList,
+          selectedMonth,
+          selectedYear
+        ),
+      },
+      {
+        title: t("sofor.title"),
+        data: aggregateUserData(
+          soforData,
+          emailList,
+          selectedMonth,
+          selectedYear
+        ),
+      },
+      {
+        title: t("daye.title"),
+        data: aggregateUserData(
+          dayeData,
+          emailList,
+          selectedMonth,
+          selectedYear
+        ),
+      },
+    ];
+  };
+
+  // In your AdminDashboard.tsx - Update preparePDFCategoryData function:
+  const preparePDFCategoryData = () => {
+    const processTabData = (data: LabeledData, fields: string[]) => {
+      const valuesByField: Record<string, Record<string, number>> = {};
+      const monthKey = String(selectedMonth + 1).padStart(2, "0");
+      const yearKey = String(selectedYear);
+
+      // Initialize for all fields
+      fields.forEach((field) => {
+        valuesByField[field] = {};
+      });
+
+      // Process only the selected month/year
+      Object.keys(data.records || {}).forEach((email) => {
+        const userRecords = data.records[email];
+        const normalizedRecords = Array.isArray(userRecords)
+          ? userRecords
+              .filter(
+                (record) =>
+                  record?.date &&
+                  String(record.date).startsWith(`${yearKey}-${monthKey}`)
+              )
+              .map((record) => record)
+          : Object.entries(userRecords || {})
+              .filter(([dateKey]) => dateKey.startsWith(`${yearKey}-${monthKey}`))
+              .map(([, record]) => record);
+
+        normalizedRecords.forEach((record) => {
+          fields.forEach((field) => {
+            const value = record?.[field];
+            if (value === undefined || value === null) return;
+
+            if (!valuesByField[field][email]) {
+              valuesByField[field][email] = 0;
+            }
+
+            const numValue = Number(value);
+            if (!isNaN(numValue)) {
+              valuesByField[field][email] += numValue;
+            }
+          });
+        });
+      });
+
+      return valuesByField;
+    };
+
+    // Get all field names from each category based on your endpoints
+    const getMoktobFields = () => [
+      "notunMoktobChalu",
+      "totalMoktob",
+      "totalStudent",
+      "obhibhabokConference",
+      "moktoThekeMadrasaAdmission",
+      "notunBoyoskoShikkha",
+      "totalBoyoskoShikkha",
+      "boyoskoShikkhaOnshogrohon",
+      "newMuslimeDinerFikir",
+    ];
+
+    const getTalimFields = () => ["mohilaTalim", "mohilaOnshogrohon"];
+
+    const getDawatiFields = () => [
+      "nonMuslimDawat",
+      "murtadDawat",
+      "nonMuslimSaptahikGasht",
+    ];
+
+    const getDawatiMojlishFields = () => [
+      "dawatterGuruttoMojlish",
+      "mojlisheOnshogrohon",
+      "prosikkhonKormoshalaAyojon",
+      "prosikkhonOnshogrohon",
+      "jummahAlochona",
+      "dhormoSova",
+      "mashwaraPoint",
+    ];
+
+    const getJamatFields = () => ["jamatBerHoise", "jamatSathi"];
+
+    const getDineFeraFields = () => [
+      "nonMuslimMuslimHoise",
+      "murtadIslamFireche",
+    ];
+
+    const getSoforFields = () => [
+      "moktobVisit",
+      "madrasaVisit",
+      "schoolCollegeVisit",
+    ];
+
+    const getDayeFields = () => ["sohojogiDayeToiri", "assistantsList"];
+
+    return [
+      {
+        title: "মক্তব বিষয়",
+        items: getMoktobFields()
+          .map((field) => ({
+            label: moktobData.labelMap?.[field] || field,
+            values: processTabData(moktobData, [field])[field] || {},
+          }))
+          .filter((item) => Object.values(item.values).some((val) => val > 0)), // Only include items with data
+      },
+      {
+        title: "তালীম বিষয়",
+        items: getTalimFields()
+          .map((field) => ({
+            label: talimData.labelMap?.[field] || field,
+            values: processTabData(talimData, [field])[field] || {},
+          }))
+          .filter((item) => Object.values(item.values).some((val) => val > 0)),
+      },
+      {
+        title: "দাওয়াতী বিষয়",
+        items: getDawatiFields()
+          .map((field) => ({
+            label: dawatiData.labelMap?.[field] || field,
+            values: processTabData(dawatiData, [field])[field] || {},
+          }))
+          .filter((item) => Object.values(item.values).some((val) => val > 0)),
+      },
+      {
+        title: "দাওয়াতী মজলিস",
+        items: getDawatiMojlishFields()
+          .map((field) => ({
+            label: dawatiMojlishData.labelMap?.[field] || field,
+            values: processTabData(dawatiMojlishData, [field])[field] || {},
+          }))
+          .filter((item) => Object.values(item.values).some((val) => val > 0)),
+      },
+      {
+        title: "জামাত বিষয়",
+        items: getJamatFields()
+          .map((field) => ({
+            label: jamatData.labelMap?.[field] || field,
+            values: processTabData(jamatData, [field])[field] || {},
+          }))
+          .filter((item) => Object.values(item.values).some((val) => val > 0)),
+      },
+      {
+        title: "দ্বীনের ফেরা",
+        items: getDineFeraFields()
+          .map((field) => ({
+            label: dineFeraData.labelMap?.[field] || field,
+            values: processTabData(dineFeraData, [field])[field] || {},
+          }))
+          .filter((item) => Object.values(item.values).some((val) => val > 0)),
+      },
+      {
+        title: "সফর বিষয়",
+        items: getSoforFields()
+          .map((field) => ({
+            label: soforData.labelMap?.[field] || field,
+            values: processTabData(soforData, [field])[field] || {},
+          }))
+          .filter((item) => Object.values(item.values).some((val) => val > 0)),
+      },
+      {
+        title: "দায়িত্ব বিষয়",
+        items: getDayeFields()
+          .map((field) => ({
+            label: dayeData.labelMap?.[field] || field,
+            values: processTabData(dayeData, [field])[field] || {},
+          }))
+          .filter((item) => Object.values(item.values).some((val) => val > 0)),
+      },
+    ].filter((category) => category.items.length > 0); // Only include categories with data
   };
 
   if (loading) {
@@ -609,9 +1058,13 @@ const AdminDashboard: React.FC = () => {
               className="w-full lg:w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
             >
               {months
-                .filter((m) => m.toLowerCase().includes(searchMonth.toLowerCase()))
+                .filter((m) =>
+                  m.toLowerCase().includes(searchMonth.toLowerCase())
+                )
                 .map((m, index) => (
-                  <option key={index} value={index}>{m}</option>
+                  <option key={index} value={index}>
+                    {m}
+                  </option>
                 ))}
             </select>
 
@@ -621,7 +1074,9 @@ const AdminDashboard: React.FC = () => {
               className="w-full lg:w-24 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
             >
               {Array.from({ length: 10 }, (_, i) => 2020 + i).map((y) => (
-                <option key={y} value={y}>{y}</option>
+                <option key={y} value={y}>
+                  {y}
+                </option>
               ))}
             </select>
           </div>
@@ -630,42 +1085,111 @@ const AdminDashboard: React.FC = () => {
 
       <div className="flex flex-col gap-4">
         <div className="grow grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-8 pb-4 pt-2">
-          <AmoliChartAdmin data={filteredAmoliData.records} emailList={emailList} />
-          <TallyAdmin userData={filterChartAndTallyData(moktobData)} emails={emailList} title={t("moktob.title")} />
-          <TallyAdmin userData={filterChartAndTallyData(dawatiData)} emails={emailList} title={t("dawati.title")} />
-          <TallyAdmin userData={filterChartAndTallyData(dawatiMojlishData)} emails={emailList} title={t("dawatiMojlish.title")} />
-          <TallyAdmin userData={filterChartAndTallyData(jamatData)} emails={emailList} title={t("jamat.title")} />
-          <TallyAdmin userData={filterChartAndTallyData(dineFeraData)} emails={emailList} title={t("dineFera.title")} />
-          <TallyAdmin userData={filterChartAndTallyData(talimData)} emails={emailList} title={t("talim.title")} />
-          <TallyAdmin userData={filterChartAndTallyData(soforData)} emails={emailList} title={t("sofor.title")} />
-          <TallyAdmin userData={filterChartAndTallyData(dayeData)} emails={emailList} title={t("daye.title")} />
+          <AmoliChartAdmin
+            data={filteredAmoliData.records}
+            emailList={emailList}
+          />
+          <TallyAdmin
+            userData={filterChartAndTallyData(moktobData)}
+            emails={emailList}
+            title={t("moktob.title")}
+          />
+          <TallyAdmin
+            userData={filterChartAndTallyData(dawatiData)}
+            emails={emailList}
+            title={t("dawati.title")}
+          />
+          <TallyAdmin
+            userData={filterChartAndTallyData(dawatiMojlishData)}
+            emails={emailList}
+            title={t("dawatiMojlish.title")}
+          />
+          <TallyAdmin
+            userData={filterChartAndTallyData(jamatData)}
+            emails={emailList}
+            title={t("jamat.title")}
+          />
+          <TallyAdmin
+            userData={filterChartAndTallyData(dineFeraData)}
+            emails={emailList}
+            title={t("dineFera.title")}
+          />
+          <TallyAdmin
+            userData={filterChartAndTallyData(talimData)}
+            emails={emailList}
+            title={t("talim.title")}
+          />
+          <TallyAdmin
+            userData={filterChartAndTallyData(soforData)}
+            emails={emailList}
+            title={t("sofor.title")}
+          />
+          <TallyAdmin
+            userData={filterChartAndTallyData(dayeData)}
+            emails={emailList}
+            title={t("daye.title")}
+          />
         </div>
       </div>
 
       <div className="border border-[#155E75] lg:p-6 mt-10 rounded-xl ">
         <Tabs defaultValue="amoli" className="w-full p-4">
           <TabsList className="grid grid-cols-2 md:grid-cols-4">
-            <TabsTrigger value="amoli">{t("dashboard.amoliMuhasaba")}</TabsTrigger>
-            <TabsTrigger value="moktob">{t("dashboard.moktobSubject")}</TabsTrigger>
-            <TabsTrigger value="talim">{t("dashboard.talimSubject")}</TabsTrigger>
+            <TabsTrigger value="amoli">
+              {t("dashboard.amoliMuhasaba")}
+            </TabsTrigger>
+            <TabsTrigger value="moktob">
+              {t("dashboard.moktobSubject")}
+            </TabsTrigger>
+            <TabsTrigger value="talim">
+              {t("dashboard.talimSubject")}
+            </TabsTrigger>
             <TabsTrigger value="daye">{t("dashboard.dayiSubject")}</TabsTrigger>
-            <TabsTrigger value="dawati">{t("dashboard.dawatiSubject")}</TabsTrigger>
-            <TabsTrigger value="dawatimojlish">{t("dashboard.dawatiMojlish")}</TabsTrigger>
-            <TabsTrigger value="jamat">{t("dashboard.jamatSubject")}</TabsTrigger>
-            <TabsTrigger value="dinefera">{t("dashboard.dineFera")}</TabsTrigger>
-            <TabsTrigger value="sofor">{t("dashboard.soforSubject")}</TabsTrigger>
+            <TabsTrigger value="dawati">
+              {t("dashboard.dawatiSubject")}
+            </TabsTrigger>
+            <TabsTrigger value="dawatimojlish">
+              {t("dashboard.dawatiMojlish")}
+            </TabsTrigger>
+            <TabsTrigger value="jamat">
+              {t("dashboard.jamatSubject")}
+            </TabsTrigger>
+            <TabsTrigger value="dinefera">
+              {t("dashboard.dineFera")}
+            </TabsTrigger>
+            <TabsTrigger value="sofor">
+              {t("dashboard.soforSubject")}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="amoli">
-            <AdminTable userData={amoliData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
+            <AdminTable
+              userData={amoliData}
+              emailList={emailList}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              users={users}
+            />
           </TabsContent>
 
           <TabsContent value="moktob">
-            <AdminTable userData={moktobData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
+            <AdminTable
+              userData={moktobData}
+              emailList={emailList}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              users={users}
+            />
           </TabsContent>
 
           <TabsContent value="talim">
-            <AdminTable userData={talimData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
+            <AdminTable
+              userData={talimData}
+              emailList={emailList}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              users={users}
+            />
           </TabsContent>
 
           <TabsContent value="daye">
@@ -681,19 +1205,43 @@ const AdminDashboard: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="dawati">
-            <AdminTable userData={dawatiData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
+            <AdminTable
+              userData={dawatiData}
+              emailList={emailList}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              users={users}
+            />
           </TabsContent>
 
           <TabsContent value="dawatimojlish">
-            <AdminTable userData={dawatiMojlishData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
+            <AdminTable
+              userData={dawatiMojlishData}
+              emailList={emailList}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              users={users}
+            />
           </TabsContent>
 
           <TabsContent value="jamat">
-            <AdminTable userData={jamatData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
+            <AdminTable
+              userData={jamatData}
+              emailList={emailList}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              users={users}
+            />
           </TabsContent>
 
           <TabsContent value="dinefera">
-            <AdminTable userData={dineFeraData} emailList={emailList} selectedMonth={selectedMonth} selectedYear={selectedYear} users={users} />
+            <AdminTable
+              userData={dineFeraData}
+              emailList={emailList}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              users={users}
+            />
           </TabsContent>
 
           <TabsContent value="sofor">
@@ -730,28 +1278,57 @@ const AdminDashboard: React.FC = () => {
             <div className="max-h-[70vh] overflow-auto p-6 space-y-4">
               {modalType === "assistants" ? (
                 modalItems
-                  .filter((item) => item && typeof item === 'object' && item.name)
+                  .filter(
+                    (item) => item && typeof item === "object" && item.name
+                  )
                   .map((a: any, idx: number) => (
-                    <div key={a.id || idx} className="rounded-xl border p-4 shadow-sm hover:shadow">
+                    <div
+                      key={a.id || idx}
+                      className="rounded-xl border p-4 shadow-sm hover:shadow"
+                    >
                       <div className="flex items-start justify-between">
                         <div className="text-base font-semibold">
                           {idx + 1}. {String(a.name || "")}
                         </div>
                         {a.email ? (
-                          <a className="text-sm underline hover:text-blue-700" href={`mailto:${a.email}`}>
+                          <a
+                            className="text-sm underline hover:text-blue-700"
+                            href={`mailto:${a.email}`}
+                          >
                             {String(a.email)}
                           </a>
                         ) : null}
                       </div>
                       <div className="mt-2 grid gap-1 text-sm text-gray-700">
-                        <div><span className="font-medium">ফোন:</span> {String(a.phone || "")}</div>
-                        <div><span className="font-medium">ঠিকানা:</span> {String(a.address || "")}</div>
-                        <div><span className="font-medium">বিভাগ:</span> {String(a.division || "")}</div>
-                        <div><span className="font-medium">জেলা:</span> {String(a.district || "")}</div>
-                        <div><span className="font-medium">উপজেলা:</span> {String(a.upazila || "")}</div>
-                        <div><span className="font-medium">ইউনিয়ন:</span> {String(a.union || "")}</div>
+                        <div>
+                          <span className="font-medium">ফোন:</span>{" "}
+                          {String(a.phone || "")}
+                        </div>
+                        <div>
+                          <span className="font-medium">ঠিকানা:</span>{" "}
+                          {String(a.address || "")}
+                        </div>
+                        <div>
+                          <span className="font-medium">বিভাগ:</span>{" "}
+                          {String(a.division || "")}
+                        </div>
+                        <div>
+                          <span className="font-medium">জেলা:</span>{" "}
+                          {String(a.district || "")}
+                        </div>
+                        <div>
+                          <span className="font-medium">উপজেলা:</span>{" "}
+                          {String(a.upazila || "")}
+                        </div>
+                        <div>
+                          <span className="font-medium">ইউনিয়ন:</span>{" "}
+                          {String(a.union || "")}
+                        </div>
                         {a.description ? (
-                          <div className="mt-1"><span className="font-medium">বিবরণ:</span> {String(a.description)}</div>
+                          <div className="mt-1">
+                            <span className="font-medium">বিবরণ:</span>{" "}
+                            {String(a.description)}
+                          </div>
                         ) : null}
                       </div>
                     </div>
@@ -762,9 +1339,11 @@ const AdminDashboard: React.FC = () => {
                     <div className="text-gray-600">কোনো তথ্য পাওয়া যায়নি</div>
                   ) : (
                     modalItems
-                      .filter((item) => typeof item === 'string')
+                      .filter((item) => typeof item === "string")
                       .map((text: string, idx: number) => (
-                        <div key={idx} className="rounded border p-3">{idx + 1}. {text}</div>
+                        <div key={idx} className="rounded border p-3">
+                          {idx + 1}. {text}
+                        </div>
                       ))
                   )}
                 </div>
