@@ -118,7 +118,7 @@ export default function WeeklyTodoManager() {
 
   const isWeekendToday = () => {
     const day = new Date().getDay();
-    return day === 0 || day === 6;
+    return day === 0 || day === 1; // Sunday=0, Monday=1
   };
 
   const openAddModal = (todo: WeeklyTodo | null = null) => {

@@ -1119,11 +1119,11 @@
       "onlyWeekend": "Only Saturday and Sunday are allowed.",
       "onlyWeekends": "Only Saturdays & Sundays can add plans",
       "warning": {
-        "title": "Saturday & Sunday Only",
+        "title": "Sunday and Monday only",
         "msg1": "You can only add weekly plans on",
         "and": "and",
-        "saturday": "Saturday",
-        "sunday": "Sunday",
+        "saturday": "Sunday",
+        "sunday": "Monday",
         "msg2": "Please try again next weekend.",
         "ok": "Okay, got it"
       },
