@@ -6,6 +6,7 @@ import { WeeklyTodo, DateRangeType } from "@/types/weekly-todo";
 import { weeklyTodoService } from "@/services/user-weekly-todo";
 import AddTodoModal from "./AddTodoModal";
 import TodoCard from "./TodoCard";
+import WeekendWarningModal from "./WeekendWarningModal";
 
 export default function WeeklyTodoManager() {
   const t = useTranslations("weeklyTodo.DayeWeeklyTodo");
@@ -13,6 +14,7 @@ export default function WeeklyTodoManager() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isWeekendWarningOpen, setIsWeekendWarningOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState<WeeklyTodo | null>(null);
 
   // Filter states
@@ -106,13 +108,28 @@ export default function WeeklyTodoManager() {
   };
 
   const handleEdit = (todo: WeeklyTodo) => {
-    setEditingTodo(todo);
-    setIsAddModalOpen(true);
+    openAddModal(todo);
   };
 
   const handleCloseModal = () => {
     setIsAddModalOpen(false);
     setEditingTodo(null);
+  };
+
+  const isWeekendToday = () => {
+    const day = new Date().getDay();
+    return day === 0 || day === 6;
+  };
+
+  const openAddModal = (todo: WeeklyTodo | null = null) => {
+    if (isWeekendToday()) {
+      setEditingTodo(todo);
+      setIsAddModalOpen(true);
+      return;
+    }
+    setEditingTodo(null);
+    setIsAddModalOpen(false);
+    setIsWeekendWarningOpen(true);
   };
 
   const getStats = () => {
@@ -145,10 +162,7 @@ export default function WeeklyTodoManager() {
               </p>
             </div>
             <button
-              onClick={() => {
-                setEditingTodo(null);
-                setIsAddModalOpen(true);
-              }}
+              onClick={() => openAddModal(null)}
               className="bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-xl hover:bg-white/30 border border-white/30 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl font-semibold text-lg flex items-center group"
             >
               <svg
@@ -479,10 +493,7 @@ export default function WeeklyTodoManager() {
             {t("noPlansDescription")}
           </p>
           <button
-            onClick={() => {
-              setEditingTodo(null);
-              setIsAddModalOpen(true);
-            }}
+            onClick={() => openAddModal(null)}
             className="bg-gradient-to-r from-[#1B809B] to-[#2C9AB8] text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 flex items-center mx-auto"
           >
             <svg
@@ -521,6 +532,11 @@ export default function WeeklyTodoManager() {
         onClose={handleCloseModal}
         onTodoAdded={handleTodoAdded}
         editingTodo={editingTodo}
+      />
+
+      <WeekendWarningModal
+        isOpen={isWeekendWarningOpen}
+        onClose={() => setIsWeekendWarningOpen(false)}
       />
     </div>
   );

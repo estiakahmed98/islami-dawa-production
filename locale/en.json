@@ -174,14 +174,16 @@
       "dawati": {
         "nonMuslimDawat": "Dawah to Non-Muslims",
         "murtadDawat": "Dawah to Apostates",
-        "alemderSatheyMojlish": "Majlis with Scholars",
-        "publicSatheyMojlish": "Majlis with Public",
+        "alemderSatheyMojlish": "Conversations with scholars",
+        "publicSatheyMojlish": "Conversations with Public",
         "nonMuslimSaptahikGasht": "Weekly Outreach with Non-Muslims",
         "title": "Dawah Matters"
       },
       "dawatiMojlish": {
         "dawatterGuruttoMojlish": "Majlis on Importance of Dawah",
         "mojlisheOnshogrohon": "Participation in Majlis",
+        "alemderSatheyMojlish": "Conversations with scholars",
+        "publicSatheyMojlish": "Conversations with Public",
         "prosikkhonKormoshalaAyojon": "Training Workshop Organized",
         "prosikkhonOnshogrohon": "Participation in Training",
         "jummahAlochona": "Jumu'ah Talk",
@@ -305,6 +307,8 @@
         "title": "Dawah Majlis",
         "dawatterGuruttoMojlish": "Majlis on Importance of Dawah",
         "mojlisheOnshogrohon": "Participation in Majlis",
+                "alemderSatheyMojlish": "Conversations with scholars",
+        "publicSatheyMojlish": "Conversations with Public", 
         "prosikkhonKormoshalaAyojon": "Training Workshop Organized",
         "prosikkhonOnshogrohon": "Participation in Training",
         "jummahAlochona": "Jumu'ah Talk",
@@ -1112,6 +1116,17 @@
       "addTitle": "Add New Plan",
       "editTitle": "Edit Plan",
       "close": "Close",
+      "onlyWeekend": "Only Saturday and Sunday are allowed.",
+      "onlyWeekends": "Only Saturdays & Sundays can add plans",
+      "warning": {
+        "title": "Saturday & Sunday Only",
+        "msg1": "You can only add weekly plans on",
+        "and": "and",
+        "saturday": "Saturday",
+        "sunday": "Sunday",
+        "msg2": "Please try again next weekend.",
+        "ok": "Okay, got it"
+      },
       "fields": {
         "title": "Title",
         "details": "Details",
@@ -1136,7 +1151,8 @@
       },
       "errors": {
         "createFailed": "Failed to create plan. Please try again.",
-        "updateFailed": "Failed to update plan. Please try again."
+        "updateFailed": "Failed to update plan. Please try again.",
+        "onlyWeekend": "You can only select Saturday or Sunday."
       }
     },
     "card": {
@@ -1212,51 +1228,51 @@
       }
     },
     "DayeWeeklyTodo": {
-        "title": "Weekly Plans",
-        "subtitle": "Manage your weekly tasks and activities efficiently",
-        "addPlan": "Add New Plan",
-        "loading": "Loading plans...",
-        "refresh": "Refresh",
-        "refreshing": "Refreshing...",
-        "showingPlans": "plans showing",
-        "noPlans": "No plans found",
-        "noPlansDescription": "Start by creating your first weekly plan.",
-        "stats": {
-          "total": "Total Plans",
-          "completed": "Completed",
-          "pending": "Pending",
-          "cancelled": "Cancelled"
-        },
-        "filters": {
-          "dateRange": "Date Range",
-          "selectDate": "Select Date",
-          "status": "Status Filter",
-          "allStatus": "All Status",
-          "byDay": "Filter by Day"
-        },
-        "status": {
-          "pending": "Pending",
-          "completed": "Completed",
-          "cancelled": "Cancelled"
-        },
-        "dateRange": {
-          "thisWeek": "This Week",
-          "lastWeek": "Last Week",
-          "custom": "Custom"
-        },
-        "weekdays": {
-          "fullWeek": "Full Week",
-          "saturday": "Saturday",
-          "sunday": "Sunday",
-          "monday": "Monday",
-          "tuesday": "Tuesday",
-          "wednesday": "Wednesday",
-          "thursday": "Thursday",
-          "friday": "Friday"
-        },
-        "errors": {
-          "loadFailed": "Failed to load plans. Please try again."
-        }
+      "title": "Weekly Plans",
+      "subtitle": "Manage your weekly tasks and activities efficiently",
+      "addPlan": "Add New Plan",
+      "loading": "Loading plans...",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing...",
+      "showingPlans": "plans showing",
+      "noPlans": "No plans found",
+      "noPlansDescription": "Start by creating your first weekly plan.",
+      "stats": {
+        "total": "Total Plans",
+        "completed": "Completed",
+        "pending": "Pending",
+        "cancelled": "Cancelled"
+      },
+      "filters": {
+        "dateRange": "Date Range",
+        "selectDate": "Select Date",
+        "status": "Status Filter",
+        "allStatus": "All Status",
+        "byDay": "Filter by Day"
+      },
+      "status": {
+        "pending": "Pending",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "dateRange": {
+        "thisWeek": "This Week",
+        "lastWeek": "Last Week",
+        "custom": "Custom"
+      },
+      "weekdays": {
+        "fullWeek": "Full Week",
+        "saturday": "Saturday",
+        "sunday": "Sunday",
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday"
+      },
+      "errors": {
+        "loadFailed": "Failed to load plans. Please try again."
+      }
     }
   }
 }

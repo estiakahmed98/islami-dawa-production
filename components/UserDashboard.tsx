@@ -209,6 +209,8 @@ const Dashboard: React.FC<TallyProps> = () => {
             url: `/api/dawatimojlish?email=${encodeURIComponent(userEmail)}`, setter: setUserDawatiMojlishData, labelMap: {
               dawatterGuruttoMojlish: t("dawatiMojlish.dawatterGuruttoMojlish"),
               mojlisheOnshogrohon: t("dawatiMojlish.mojlisheOnshogrohon"),
+              alemderSatheyMojlish: t("dawatiMojlish.alemderSatheyMojlish"),
+              publicSatheyMojlish: t("dawatiMojlish.publicSatheyMojlish"),
               prosikkhonKormoshalaAyojon: t("dawatiMojlish.prosikkhonKormoshalaAyojon"),
               prosikkhonOnshogrohon: t("dawatiMojlish.prosikkhonOnshogrohon"),
               jummahAlochona: t("dawatiMojlish.jummahAlochona"),

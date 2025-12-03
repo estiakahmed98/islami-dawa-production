@@ -174,13 +174,15 @@
       "dawati": {
         "nonMuslimDawat": "অমুসলিমদের দাওয়াত",
         "murtadDawat": "মুরতাদদের দাওয়াত",
-        "alemderSatheyMojlish": "আলেমদের সাথে মজলিশ",
-        "publicSatheyMojlish": "পাবলিকের সাথে মজলিশ",
+        "alemderSatheyMojlish": "আলেমদের সাথে কথপোকথন",
+        "publicSatheyMojlish": "পাবলিকের সাথে কথপোকথন",
         "nonMuslimSaptahikGasht": "অমুসলিমদের সাথে সাপ্তাহিক গাশ্ত",
         "title": "দাওয়াতি বিষয়"
       },
       "dawatiMojlish": {
         "dawatterGuruttoMojlish": "দাওয়াতি মজলিশ",
+        "alemderSatheyMojlish": "আলেমদের সাথে কথপোকথন",
+        "publicSatheyMojlish": "পাবলিকের সাথে কথপোকথন",
         "mojlisheOnshogrohon": "মজলিশে অংশগ্রহণ",
         "prosikkhonKormoshalaAyojon": "প্রশিক্ষণ কর্মশালা আয়োজন",
         "prosikkhonOnshogrohon": "প্রশিক্ষণে অংশগ্রহণ",
@@ -296,8 +298,8 @@
         "title": "দাওয়াতি বিষয়",
         "nonMuslimDawat": "অমুসলিমদের দাওয়াত",
         "murtadDawat": "মুরতাদদের দাওয়াত",
-        "alemderSatheyMojlish": "আলেমদের সাথে মজলিশ",
-        "publicSatheyMojlish": "পাবলিকের সাথে মজলিশ",
+        "alemderSatheyMojlish": "আলেমদের সাথে কথপোকথন",
+        "publicSatheyMojlish": "পাবলিকের সাথে কথপোকথন",
         "nonMuslimSaptahikGasht": "অমুসলিমদের সাথে সাপ্তাহিক গাশ্ত",
         "editorContent": "কারগুজারী"
       },
@@ -305,6 +307,8 @@
         "title": "দাওয়াতি মজলিশ",
         "dawatterGuruttoMojlish": "দাওয়াতি মজলিশ",
         "mojlisheOnshogrohon": "মজলিশে অংশগ্রহণ",
+        "alemderSatheyMojlish": "আলেমদের সাথে কথপোকথন",
+        "publicSatheyMojlish": "পাবলিকের সাথে কথপোকথন",
         "prosikkhonKormoshalaAyojon": "প্রশিক্ষণ কর্মশালা আয়োজন",
         "prosikkhonOnshogrohon": "প্রশিক্ষণে অংশগ্রহণ",
         "jummahAlochona": "জুম্মার আলোচনা",
@@ -1111,6 +1115,7 @@
       "addTitle": "নতুন প্ল্যান যোগ করুন",
       "editTitle": "প্ল্যান সম্পাদনা করুন",
       "close": "বন্ধ করুন",
+      "onlyWeekend": "শুধুমাত্র শনিবার ও রবিবার প্লান",
       "fields": {
         "title": "শিরোনাম",
         "details": "বিস্তারিত",
@@ -1136,6 +1141,15 @@
       "errors": {
         "createFailed": "প্ল্যান তৈরি করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
         "updateFailed": "প্ল্যান আপডেট করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
+      },
+      "warning": {
+        "title": "শনিবার ও রবিবার শুধুমাত্র",
+        "msg1": "আপনি শুধুমাত্র সাপ্তাহিক প্ল্যান যোগ করতে পারবেন",
+        "and": "এবং",
+        "saturday": "শনিবার",
+        "sunday": "রবিবার",
+        "msg2": "পরের সপ্তাহান্তে আবার চেষ্টা করুন।",
+        "ok": "ঠিক আছে, বুঝেছি"
       }
     },
     "card": {

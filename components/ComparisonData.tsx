@@ -125,8 +125,8 @@ const ComparisonDataComponent: React.FC = () => {
   const DAWATI_LABELS: Record<string, string> = {
     nonMuslimDawat: "অমুসলিমকে দাওয়াত",
     murtadDawat: "মুরতাদকে দাওয়াত",
-    alemderSatheyMojlish: "আলেমদের সাথে মজলিশ",
-    publicSatheyMojlish: "জনসাধারণের সাথে মজলিশ",
+    alemderSatheyMojlish: "আলেমদের সাথে কথপোকথন",
+    publicSatheyMojlish: "জনসাধারণের সাথে দাওয়াতি কথপোকথন",
     nonMuslimSaptahikGasht: "অমুসলিম সাপ্তাহিক গাশত",
   };
   const DAWATI_MOJLISH_LABELS: Record<string, string> = {
@@ -134,9 +134,9 @@ const ComparisonDataComponent: React.FC = () => {
     mojlisheOnshogrohon: "মজলিশে অংশগ্রহণ",
     prosikkhonKormoshalaAyojon: "প্রশিক্ষণ কর্মশালা আয়োজন",
     prosikkhonOnshogrohon: "প্রশিক্ষণে অংশগ্রহণ",
-    jummahAlochona: "জুম্মাহ আলায়েচনা",
+    jummahAlochona: "জুম্মার আলোচনা",
     dhormoSova: "ধর্মসভা",
-    mashwaraPoint: "মাশওয়ারার পয়েন্ট",
+    mashwaraPoint: "মাসিক মাশওয়ারার",
   };
   const JAMAT_LABELS: Record<string, string> = {
     jamatBerHoise: "জামাত বের হয়েছে",
@@ -148,10 +148,8 @@ const ComparisonDataComponent: React.FC = () => {
   };
   const SOFOR_LABELS: Record<string, string> = {
     madrasaVisit: "মাদরাসা ভিজিট",
-    madrasaVisitList: "মাদরাসা ভিজিট তালিকা",
     moktobVisit: "মক্তব ভিজিট",
     schoolCollegeVisit: "স্কুল/কলেজ ভিজিট",
-    schoolCollegeVisitList: "স্কুল/কলেজ ভিজিট তালিকা",
   };
 
   type RecordsByEmail = Record<string, Record<string, Record<string, any>>>;
@@ -392,17 +390,8 @@ const ComparisonDataComponent: React.FC = () => {
           emailList,
           (r, slot) => {
             slot.madrasaVisit = r.madrasaVisit ?? "-";
-            slot.madrasaVisitList = Array.isArray(r.madrasaVisitList)
-              ? r.madrasaVisitList.join(", ")
-              : r.madrasaVisitList || "";
             slot.moktobVisit = r.moktobVisit ?? "-";
             slot.schoolCollegeVisit = r.schoolCollegeVisit ?? "-";
-            slot.schoolCollegeVisitList = Array.isArray(
-              r.schoolCollegeVisitList
-            )
-              ? r.schoolCollegeVisitList.join(", ")
-              : r.schoolCollegeVisitList || "";
-            slot.editorContent = r.editorContent || "";
           },
           SOFOR_LABELS
         ),

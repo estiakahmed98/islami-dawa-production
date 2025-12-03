@@ -477,6 +477,8 @@ const AdminDashboard: React.FC = () => {
         labelMap: {
           dawatterGuruttoMojlish: t("dawatiMojlish.dawatterGuruttoMojlish"),
           mojlisheOnshogrohon: t("dawatiMojlish.mojlisheOnshogrohon"),
+          alemderSatheyMojlish: t("dawatiMojlish.alemderSatheyMojlish"),
+          publicSatheyMojlish: t("dawatiMojlish.publicSatheyMojlish"),
           prosikkhonKormoshalaAyojon: t(
             "dawatiMojlish.prosikkhonKormoshalaAyojon"
           ),
