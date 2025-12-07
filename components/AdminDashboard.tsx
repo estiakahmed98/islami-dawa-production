@@ -406,8 +406,6 @@ const AdminDashboard: React.FC = () => {
         labelMap: {
           tahajjud: t("amoli.tahajjud"),
           quarntilawat: t("amoli.quarntilawat"),
-          pageNo: t("amoli.pageNo"),
-          quarntilawatAyat: t("amoli.quarntilawatAyat"),
           zikir: t("amoli.zikir"),
           ishraq: t("amoli.ishraq"),
           jamat: t("amoli.jamat"),

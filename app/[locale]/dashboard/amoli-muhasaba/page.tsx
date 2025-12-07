@@ -16,8 +16,12 @@ import { useTranslations } from "next-intl";
 const AmoliMuhasabaPage: React.FC = () => {
   const { data: session } = useSession();
   const [userData, setUserData] = useState<any>({ records: [] });
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(
+    new Date().getMonth()
+  );
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
   const t = useTranslations("dashboard.UserDashboard.amoli");
   const common = useTranslations("common");
 
@@ -30,21 +34,19 @@ const AmoliMuhasabaPage: React.FC = () => {
       try {
         const res = await fetch(`/api/amoli?email=${userEmail}`);
         const json = await res.json();
-        
+
         // Transform the API response to match the expected format
         const transformedData = {
           records: {
             [userEmail]: json.records.reduce((acc: any, record: any) => {
-              const date = new Date(record.date).toISOString().split('T')[0];
+              const date = new Date(record.date).toISOString().split("T")[0];
               // Format quarntilawat JSON for display
-              const quarntilawatDisplay = record.quarntilawat 
-                ? `Para: ${record.quarntilawat.para || '-'}<br/>Page: ${record.quarntilawat.pageNo || '-'}<br/>Ayat: ${record.quarntilawat.ayat || '-'}`
-                : '- -';
-              
+              const quarntilawatDisplay = record.quarntilawat
+                ? `Para: ${record.quarntilawat.para || "-"}<br/>Page: ${record.quarntilawat.pageNo || "-"}<br/>Ayat: ${record.quarntilawat.ayat || "-"}`
+                : "- -";
+
               acc[date] = {
                 tahajjud: record.tahajjud,
-                surah: record.surah,
-                ayat: record.ayat,
                 zikir: record.zikir,
                 ishraq: record.ishraq,
                 jamat: record.jamat,
@@ -58,16 +60,15 @@ const AmoliMuhasabaPage: React.FC = () => {
                 hijbulBahar: record.hijbulBahar,
                 percentage: record.percentage,
                 editorContent: record.editorContent,
-                quarntilawat: quarntilawatDisplay
+                quarntilawat: quarntilawatDisplay,
               };
               return acc;
-            }, {})
+            }, {}),
           },
           labelMap: {
             tahajjud: t("tahajjud"),
-            surah: t("surah"),
-            ayat: t("ayat"),
             zikir: t("zikir"),
+            quarntilawat: t("quarntilawat"),
             ishraq: t("ishraq"),
             jamat: t("jamat"),
             sirat: t("sirat"),
@@ -78,11 +79,10 @@ const AmoliMuhasabaPage: React.FC = () => {
             amoliSura: t("amoliSura"),
             ayamroja: t("ayamroja"),
             hijbulBahar: t("hijbulBahar"),
-            quarntilawat: t("quarntilawat"),
             percentage: t("percentage"),
-          }
+          },
         };
-        
+
         setUserData(transformedData);
       } catch (error) {
         console.error("Failed to fetch AmoliMuhasaba data:", error);
@@ -110,7 +110,7 @@ const AmoliMuhasabaPage: React.FC = () => {
 
         <TabsContent value="report">
           <div className="bg-gray-50 rounded shadow">
-            <UniversalTableShow 
+            <UniversalTableShow
               userData={userData}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}

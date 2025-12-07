@@ -10,7 +10,6 @@ import TallyAdmin from "@/components/TallyAdmin";
 import ComparisonTallyCard from "@/components/ComparisonTallyCard";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import UserTableShowPDFButton from "@/components/UserTableShowPDFButton"; // Add this line
 
 interface TallyProps {
   userData: Record<string, any>;
@@ -153,8 +152,7 @@ const Dashboard: React.FC<TallyProps> = () => {
           {
             url: `/api/amoli?email=${encodeURIComponent(userEmail)}`, setter: setUserAmoliData, labelMap: {
               tahajjud: t("amoli.tahajjud"),
-              surah: t("amoli.surah"),
-              ayat: t("amoli.ayat"),
+              quarntilawat: t("amoli.quarntilawat"),
               zikir: t("amoli.zikir"),
               ishraq: t("amoli.ishraq"),
               jamat: t("amoli.jamat"),
@@ -275,6 +273,10 @@ const Dashboard: React.FC<TallyProps> = () => {
               if (Array.isArray(rec.schoolCollegeVisitList)) {
                 schoolByDate[dateKey] = rec.schoolCollegeVisitList; // raw array for Sofor modal
                 transformed[userEmail][dateKey].schoolCollegeVisitList = toNumberedHTML(rec.schoolCollegeVisitList);
+              }
+              // Format quarntilawat as HTML (Para, Page, Ayat)
+              if (rec.quarntilawat && typeof rec.quarntilawat === "object") {
+                transformed[userEmail][dateKey].quarntilawat = `Para: ${rec.quarntilawat.para || "-"}<br/>Page: ${rec.quarntilawat.pageNo || "-"}<br/>Ayat: ${rec.quarntilawat.ayat || "-"}`;
               }
               // Existing handling for other array fields if they are not for modals
               if (rec.assistants && !Array.isArray(rec.assistants)) { // Ensure not to overwrite if already handled for modal
@@ -836,7 +838,7 @@ const Dashboard: React.FC<TallyProps> = () => {
               {/* Tab Content */}
               <TabsContent value="Amolimusahaba">
                 <div className="bg-gray-50 rounded shadow">
-                  <AmoliTableShow userData={userAmoliData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} categories={categories} userEmail={userEmail} userName={session?.user?.name || ""} />
+                  <AmoliTableShow userData={userAmoliData} selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={onMonthChange} onYearChange={onYearChange} categories={categories} userEmail={userEmail} userName={session?.user?.name || ""} htmlFields={["quarntilawat"]} />
                 </div>
               </TabsContent>
               <TabsContent value="moktob">

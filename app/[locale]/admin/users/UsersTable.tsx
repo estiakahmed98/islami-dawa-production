@@ -116,8 +116,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 /** ------------- Label Maps (rows) ------------- */
 const AMOLI_LABELS: Record<string, string> = {
   tahajjud: "তাহাজ্জুদ (মিনিট/রাকাআত)",
-  surah: "সূরা",
-  ayat: "আয়াত",
+  quarntilawat: "কুরআন তিলাওয়াত",
   zikir: "যিকির",
   ishraq: "ইশরাক/আওয়াবীন/চাশ্ত",
   jamat: "জামাতে নামাজ",
@@ -216,8 +215,7 @@ async function fetchAmoli(emails: string[]): Promise<UserDataForAdminTable> {
       const dateKey = toDateKey(r.date);
       const slot = ensureEmailDateSlot(records, email, dateKey);
       slot.tahajjud = r.tahajjud ?? "-";
-      slot.surah = r.surah ?? "-";
-      slot.ayat = r.ayat ?? "-";
+      slot.quarntilawat = r.quarntilawat && typeof r.quarntilawat === "object" ? `Para: ${r.quarntilawat.para || "-"}<br/>Page: ${r.quarntilawat.pageNo || "-"}<br/>Ayat: ${r.quarntilawat.ayat || "-"}` : r.quarntilawat ?? "-";
       slot.zikir = r.zikir ?? "-";
       slot.ishraq = r.ishraq ?? "-";
       slot.jamat = r.jamat ?? "-";
