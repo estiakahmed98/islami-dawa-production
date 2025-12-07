@@ -81,6 +81,11 @@ const convertToPoints = (value: any, field: string): number => {
     ) {
       return value === "হ্যাঁ" ? 1 : 0;
     }
+
+    const numericValue = Number(value.replace(/[^\d.-]/g, ""));
+    if (!Number.isNaN(numericValue)) {
+      return numericValue;
+    }
   }
 
   return 0; // Default for empty/null values
@@ -125,11 +130,11 @@ const ComparisonDataComponent: React.FC = () => {
   const DAWATI_LABELS: Record<string, string> = {
     nonMuslimDawat: "অমুসলিমকে দাওয়াত",
     murtadDawat: "মুরতাদকে দাওয়াত",
-    alemderSatheyMojlish: "আলেমদের সাথে কথপোকথন",
-    publicSatheyMojlish: "জনসাধারণের সাথে দাওয়াতি কথপোকথন",
     nonMuslimSaptahikGasht: "অমুসলিম সাপ্তাহিক গাশত",
   };
   const DAWATI_MOJLISH_LABELS: Record<string, string> = {
+    alemderSatheyMojlish: "আলেমদের সাথে কথপোকথন",
+    publicSatheyMojlish: "জনসাধারণের সাথে দাওয়াতি কথপোকথন",
     dawatterGuruttoMojlish: "দাওয়াতি গুরুত্বের মজলিশ",
     mojlisheOnshogrohon: "মজলিশে অংশগ্রহণ",
     prosikkhonKormoshalaAyojon: "প্রশিক্ষণ কর্মশালা আয়োজন",
@@ -338,8 +343,6 @@ const ComparisonDataComponent: React.FC = () => {
           (r, slot) => {
             slot.nonMuslimDawat = r.nonMuslimDawat ?? "-";
             slot.murtadDawat = r.murtadDawat ?? "-";
-            slot.alemderSatheyMojlish = r.alemderSatheyMojlish ?? "-";
-            slot.publicSatheyMojlish = r.publicSatheyMojlish ?? "-";
             slot.nonMuslimSaptahikGasht = r.nonMuslimSaptahikGasht ?? "-";
             slot.editorContent = r.editorContent || "";
           },
@@ -352,6 +355,8 @@ const ComparisonDataComponent: React.FC = () => {
           (r, slot) => {
             slot.dawatterGuruttoMojlish = r.dawatterGuruttoMojlish ?? "-";
             slot.mojlisheOnshogrohon = r.mojlisheOnshogrohon ?? "-";
+            slot.alemderSatheyMojlish = r.alemderSatheyMojlish ?? "-";
+            slot.publicSatheyMojlish = r.publicSatheyMojlish ?? "-";
             slot.prosikkhonKormoshalaAyojon =
               r.prosikkhonKormoshalaAyojon ?? "-";
             slot.prosikkhonOnshogrohon = r.prosikkhonOnshogrohon ?? "-";
