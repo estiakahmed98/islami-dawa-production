@@ -5,6 +5,21 @@ import { useState, useEffect } from "react";
 import { assistantDaeeData } from "@/app/data/assistantDaeeData";
 import { Button } from "@/components/ui/button";
 
+type AssistantDaeeRecord = {
+  name: string;
+  phone: string;
+  address: string;
+  email: string;
+  division: string;
+  district: string;
+  upazila: string;
+  union: string;
+  description?: string;
+  date: string;
+  mainDaeeEmail: string;
+  dayeName?: string;
+};
+
 const AssistantDaeeList: React.FC = () => {
   const { data: session } = useSession();
   const email = session?.user?.email || "";
@@ -12,13 +27,15 @@ const AssistantDaeeList: React.FC = () => {
   const userDivision = session?.user?.division || "";
   const userDistrict = session?.user?.district || "";
 
-  const [filteredAssistants, setFilteredAssistants] = useState<any[]>([]);
+  const [filteredAssistants, setFilteredAssistants] = useState<AssistantDaeeRecord[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-    const assistants = Object.values(assistantDaeeData.records);
+    const assistants = Object.values(
+      assistantDaeeData.records
+    ) as AssistantDaeeRecord[];
     setFilteredAssistants(assistants);
   }, []);
 
@@ -27,14 +44,19 @@ const AssistantDaeeList: React.FC = () => {
     setSearchQuery(query);
 
     if (!query) {
-      setFilteredAssistants(Object.values(assistantDaeeData.records));
+      setFilteredAssistants(
+        Object.values(assistantDaeeData.records) as AssistantDaeeRecord[]
+      );
     } else {
-      const filtered = Object.values(assistantDaeeData.records).filter(
-        (assistant) =>
-          assistant.name.toLowerCase().includes(query.toLowerCase()) ||
-          assistant.phone.includes(query) ||
-          assistant.address.toLowerCase().includes(query.toLowerCase()) ||
-          assistant.dayeName?.toLowerCase().includes(query.toLowerCase())
+      const allAssistants = Object.values(
+        assistantDaeeData.records
+      ) as AssistantDaeeRecord[];
+
+      const filtered = allAssistants.filter((assistant) =>
+        assistant.name.toLowerCase().includes(query.toLowerCase()) ||
+        assistant.phone.includes(query) ||
+        assistant.address.toLowerCase().includes(query.toLowerCase()) ||
+        assistant.dayeName?.toLowerCase().includes(query.toLowerCase())
       );
       setFilteredAssistants(filtered);
     }
@@ -199,7 +221,7 @@ const AssistantDaeeList: React.FC = () => {
                   <td className="border px-4 py-2">{a.address}</td>
                   <td className="border px-4 py-2">{a.description || "-"}</td>
                   <td className="border px-4 py-2">{a.date}</td>
-                  <td className="border px-4 py-2">{a.dayeName}</td>
+                  <td className="border px-4 py-2">{a.dayeName || "-"}</td>
                 </tr>
               ))
             ) : (

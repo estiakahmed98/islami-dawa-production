@@ -248,7 +248,7 @@ const TodoListCalendar = () => {
           <TaskForm
             userEmail={userEmail}
             userRole={userRole}
-            selectedDate={selectedDate}
+            selectedDate={selectedDate?.toISOString() ?? ""}
             setIsOpen={setIsOpen}
             fetchTasks={fetchTasks}
             taskData={isEditing ? selectedTask : null}

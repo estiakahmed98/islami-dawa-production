@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // GET /api/weekly-todo/[id] - Get a specific todo
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession();
@@ -25,9 +25,11 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    const { id } = await context.params;
+
     const todo = await prisma.weeklyTodo.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user.id, // Ensure user can only access their own todos
       },
     });
@@ -49,7 +51,7 @@ export async function GET(
 // PUT /api/weekly-todo/[id] - Update a todo
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession();
@@ -68,11 +70,13 @@ export async function PUT(
     }
 
     const body = await request.json();
+
+    const { id } = await context.params;
     
     // Check if todo exists and belongs to user
     const existingTodo = await prisma.weeklyTodo.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user.id,
       },
     });
@@ -100,7 +104,7 @@ export async function PUT(
     }
 
     const updatedTodo = await prisma.weeklyTodo.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
     });
 
@@ -117,7 +121,7 @@ export async function PUT(
 // DELETE /api/weekly-todo/[id] - Delete a todo
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession();
@@ -135,10 +139,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    const { id } = await context.params;
+
     // Check if todo exists and belongs to user
     const existingTodo = await prisma.weeklyTodo.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user.id,
       },
     });
@@ -148,7 +154,7 @@ export async function DELETE(
     }
 
     await prisma.weeklyTodo.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Todo deleted successfully' });
@@ -164,7 +170,7 @@ export async function DELETE(
 // PATCH /api/weekly-todo/[id] - Partial update (useful for marking as complete)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession();
@@ -183,11 +189,13 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    
+
+    const { id } = await context.params;
+
     // Check if todo exists and belongs to user
     const existingTodo = await prisma.weeklyTodo.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user.id,
       },
     });
@@ -216,7 +224,7 @@ export async function PATCH(
     }
 
     const updatedTodo = await prisma.weeklyTodo.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
     });
 

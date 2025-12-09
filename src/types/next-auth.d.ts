@@ -9,6 +9,7 @@ declare module "next-auth" {
       role?: string | null;
       division?: string | null;
       district?: string | null;
+      area?: string | null;
       upazila?: string | null;
       union?: string | null;
       phone?: string | null;

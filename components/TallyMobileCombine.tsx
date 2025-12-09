@@ -164,7 +164,7 @@ const TallyMobileCombine: React.FC<TallyAdminProps> = ({
               <LabelList
                 dataKey="value"
                 content={<CustomValueLabel />}
-                allowEscapeViewBox={{ y: true }} // Prevents cropping
+                position="top"
               />
             </Bar>
           </BarChart>

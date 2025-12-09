@@ -39,7 +39,7 @@ const RealTree = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
   const { data: session } = useSession({ required: false });
-  const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown>>();
+  const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
 
   useEffect(() => {
     const isUser = (user: any): user is User => {
@@ -101,10 +101,11 @@ const RealTree = () => {
       .attr("class", "link")
       .attr(
         "d",
-        d3
-          .linkVertical<d3.HierarchyLink<TreeNode>>()
-          .x((d) => d.x)
-          .y((d) => d.y)
+        (d: any) => {
+          const source = d.source;
+          const target = d.target;
+          return `M${source.x},${source.y}L${target.x},${target.y}`;
+        }
       )
       .attr("fill", "none")
       .attr("stroke", "#155E75")
@@ -173,10 +174,10 @@ const RealTree = () => {
     // Center the tree initially
     const bounds = root.descendants().reduce(
       (acc, node) => ({
-        minX: Math.min(acc.minX, node.x),
-        maxX: Math.max(acc.maxX, node.x),
-        minY: Math.min(acc.minY, node.y),
-        maxY: Math.max(acc.maxY, node.y),
+        minX: Math.min(acc.minX, node.x || 0),
+        maxX: Math.max(acc.maxX, node.x || 0),
+        minY: Math.min(acc.minY, node.y || 0),
+        maxY: Math.max(acc.maxY, node.y || 0),
       }),
       { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity }
     );
@@ -336,7 +337,7 @@ const RealTree = () => {
     svg
       .transition()
       .duration(200)
-      .call(zoomRef.current.transform, newTransform);
+      .call(zoomRef.current!.transform, newTransform);
   };
 
   const handlePanStart = (e: React.MouseEvent) => {

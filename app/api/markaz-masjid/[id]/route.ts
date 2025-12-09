@@ -1,17 +1,19 @@
 // app/api/markaz-masjid/[id]/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { updateMarkazSchema } from "@/lib/validators/markaz";
 import { badRequest, notFound, serverError, requireAuth } from "@/lib/api-utils";
 
-type Params = { params: { id: string } };
+type RouteParams = { params: Promise<{ id: string }> };
 
-export async function GET(_req: Request, { params }: Params) {
+export async function GET(_req: NextRequest, context: RouteParams) {
   try {
     await requireAuth();
 
+    const { id } = await context.params;
+
     const item = await prisma.markaz.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         _count: { select: { users: true } },
         // Uncomment if you sometimes want users too
@@ -27,9 +29,11 @@ export async function GET(_req: Request, { params }: Params) {
   }
 }
 
-export async function PUT(req: Request, { params }: Params) {
+export async function PUT(req: NextRequest, context: RouteParams) {
   try {
     await requireAuth();
+
+    const { id } = await context.params;
 
     const body = await req.json();
     const parsed = updateMarkazSchema.safeParse(body);
@@ -38,7 +42,7 @@ export async function PUT(req: Request, { params }: Params) {
     }
 
     const updated = await prisma.markaz.update({
-      where: { id: params.id },
+      where: { id },
       data: parsed.data,
     });
 
@@ -54,13 +58,15 @@ export async function PUT(req: Request, { params }: Params) {
   }
 }
 
-export async function DELETE(_req: Request, { params }: Params) {
+export async function DELETE(_req: NextRequest, context: RouteParams) {
   try {
     await requireAuth();
 
+    const { id } = await context.params;
+
     // Optional guard: prevent delete if users exist
     const { _count } = await prisma.markaz.findUniqueOrThrow({
-      where: { id: params.id },
+      where: { id },
       select: { _count: { select: { users: true } } },
     });
 
@@ -68,7 +74,7 @@ export async function DELETE(_req: Request, { params }: Params) {
       return badRequest("Cannot delete: users are linked to this markaz.");
     }
 
-    await prisma.markaz.delete({ where: { id: params.id } });
+    await prisma.markaz.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     if (e?.message === "UNAUTHORIZED") return badRequest("Unauthorized");

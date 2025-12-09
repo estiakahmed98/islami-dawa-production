@@ -99,9 +99,9 @@ const Register: React.FC<Props> = ({ variant = "standard" }) => {
     return allowed.map((r) => ({ value: r, title: getRoleTitle(r, t) }));
   }, [loggedInUserRole, t, variant]);
 
-  const districtsList: LocationOption[] = formData.divisionId ? (districts[formData.divisionId] || []) : [];
-  const upazilasList: LocationOption[] = formData.districtId ? (upazilas[formData.districtId] || []) : [];
-  const unionsList: LocationOption[] = formData.upazilaId ? (unions[formData.upazilaId] || []) : [];
+  const districtsList: LocationOption[] = formData.divisionId ? (districts[formData.divisionId as unknown as keyof typeof districts] || []) : [];
+  const upazilasList: LocationOption[] = formData.districtId ? (upazilas[formData.districtId as unknown as keyof typeof upazilas] || []) : [];
+  const unionsList: LocationOption[] = formData.upazilaId ? (unions[formData.upazilaId as unknown as keyof typeof unions] || []) : [];
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
