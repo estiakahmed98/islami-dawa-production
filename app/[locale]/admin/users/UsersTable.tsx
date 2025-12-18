@@ -17,6 +17,7 @@ import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { divisions, districts, upazilas, unions } from "@/app/data/bangla";
 import AdminTable from "@/components/AdminTable";
+import { useParentEmail } from "@/hooks/useParentEmail";
 import {
   Tabs,
   TabsContent,
@@ -215,7 +216,10 @@ async function fetchAmoli(emails: string[]): Promise<UserDataForAdminTable> {
       const dateKey = toDateKey(r.date);
       const slot = ensureEmailDateSlot(records, email, dateKey);
       slot.tahajjud = r.tahajjud ?? "-";
-      slot.quarntilawat = r.quarntilawat && typeof r.quarntilawat === "object" ? `Para: ${r.quarntilawat.para || "-"}<br/>Page: ${r.quarntilawat.pageNo || "-"}<br/>Ayat: ${r.quarntilawat.ayat || "-"}` : r.quarntilawat ?? "-";
+      slot.quarntilawat =
+        r.quarntilawat && typeof r.quarntilawat === "object"
+          ? `Para: ${r.quarntilawat.para || "-"}<br/>Page: ${r.quarntilawat.pageNo || "-"}<br/>Ayat: ${r.quarntilawat.ayat || "-"}`
+          : (r.quarntilawat ?? "-");
       slot.zikir = r.zikir ?? "-";
       slot.ishraq = r.ishraq ?? "-";
       slot.jamat = r.jamat ?? "-";
@@ -451,6 +455,7 @@ async function fetchSofor(emails: string[]): Promise<UserDataForAdminTable> {
 /** ----------------- Component ----------------- */
 export default function UsersTable() {
   const t = useTranslations("usersTable");
+  const { getParentEmail, shareMarkaz, getMarkazId, getMarkazName } = useParentEmail();
 
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -837,66 +842,7 @@ export default function UsersTable() {
     );
   }
 
-  // Helpers to normalize/compare Markaz (single relation)
-  const getMarkazId = (u: any): string | null => {
-    if (!u) return null;
-    return (
-      u.markazId ||
-      (u.markaz && typeof u.markaz !== "string" ? u.markaz.id : null)
-    );
-  };
-  const getMarkazName = (u: any): string => {
-    if (!u?.markaz) return "";
-    if (typeof u.markaz === "string") return u.markaz;
-    return u.markaz.name || "";
-  };
-  const shareMarkaz = (a: any, b: any): boolean => {
-    const aId = getMarkazId(a);
-    const bId = getMarkazId(b);
-    if (aId && bId) return aId === bId;
-    const aName = getMarkazName(a);
-    const bName = getMarkazName(b);
-    if (aName && bName) return aName === bName;
-    return false;
-  };
-  // Parent resolution updated for single markaz relation
-  const getParentEmail = (
-    user: User,
-    users: User[],
-    loggedInUser: User | null
-  ): string | null => {
-    let parentUser: User | undefined;
-
-    switch (user.role) {
-      case "divisionadmin": {
-        parentUser =
-          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      case "markazadmin": {
-        parentUser =
-          users.find(
-            (u) => u.role === "divisionadmin" && u.division === user.division
-          ) ||
-          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      case "daye": {
-        parentUser =
-          users.find((u) => u.role === "markazadmin" && shareMarkaz(u, user)) ||
-          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      default:
-        return null;
-    }
-
-    return parentUser ? parentUser.email : null;
-  };
-
+  
   // View control: who can see which users in the table
   const canViewUser = (u: User): boolean => {
     // No session -> nothing to show (but upstream we guard on status/loading)

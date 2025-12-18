@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { useSession } from "@/lib/auth-client";
+import { useParentEmail } from "@/hooks/useParentEmail";
 
 // Debounce utility function
 const debounce = <F extends (...args: any[]) => void>(
@@ -16,6 +18,15 @@ const debounce = <F extends (...args: any[]) => void>(
 };
 import { WeeklyTodo, User } from "@/types/weekly-todo";
 import { adminWeeklyTodoService } from "@/services/admin-weekly-todo";
+
+interface DirectoryUser extends Omit<User, 'division' | 'district' | 'upazila' | 'union'> {
+  role: string;
+  division?: string | null;
+  district?: string | null;
+  upazila?: string | null;
+  union?: string | null;
+  markaz?: string | { name: string; id?: string } | { id: string; name: string }[] | null;
+}
 
 // Utility function to strip HTML tags
 const stripHtmlTags = (html: string): string => {
@@ -41,10 +52,15 @@ interface GroupedTodos {
 
 export default function AdminWeeklyTodoView() {
   const t = useTranslations("weeklyTodo.adminWeeklyTodo");
-  const [allTodos, setAllTodos] = useState<WeeklyTodo[]>([]);
+  const { data: session } = useSession();
+  const { getParentEmail } = useParentEmail();
+  const [apiTodos, setApiTodos] = useState<WeeklyTodo[]>([]);
   const [filteredTodos, setFilteredTodos] = useState<WeeklyTodo[]>([]);
   const [groupedTodos, setGroupedTodos] = useState<GroupedTodos>({});
   const [users, setUsers] = useState<User[]>([]);
+  const [userDirectory, setUserDirectory] = useState<DirectoryUser[]>([]);
+  const [allowedUserIds, setAllowedUserIds] = useState<string[]>([]);
+  const [allowedUserEmails, setAllowedUserEmails] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
@@ -60,6 +76,85 @@ export default function AdminWeeklyTodoView() {
   const [nameSearch, setNameSearch] = useState<string>("");
   const [searchInput, setSearchInput] = useState<string>("");
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const applyScope = useCallback(
+    (todos: WeeklyTodo[]) => {
+      if (allowedUserIds.length === 0 && allowedUserEmails.length === 0) {
+        return todos;
+      }
+
+      return todos.filter((todo) => {
+        const todoUserId = todo.user?.id || todo.userId;
+        const todoUserEmail = todo.user?.email;
+
+        if (todoUserId && allowedUserIds.includes(todoUserId)) return true;
+        if (todoUserEmail && allowedUserEmails.includes(todoUserEmail))
+          return true;
+
+        return false;
+      });
+    },
+    [allowedUserEmails, allowedUserIds]
+  );
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("/api/users", { cache: "no-store" });
+        if (!response.ok) return;
+        const payload = await response.json();
+        const fetchedUsers: DirectoryUser[] = Array.isArray(payload)
+          ? payload
+          : payload?.users || [];
+        setUserDirectory(fetchedUsers);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    if (!session?.user?.email || userDirectory.length === 0) return;
+
+    const loggedUser =
+      userDirectory.find((u) => u.email === session.user.email) || null;
+
+    if (!loggedUser) {
+      setAllowedUserEmails([session.user.email]);
+      return;
+    }
+
+    const emailSet = new Set<string>();
+    const idSet = new Set<string>();
+
+    const addUser = (user: DirectoryUser) => {
+      if (user.email) emailSet.add(user.email);
+      if (user.id) idSet.add(user.id);
+    };
+
+    addUser(loggedUser);
+
+    const collectChildren = (parentEmail: string) => {
+      userDirectory.forEach((user) => {
+        const parentEmailForUser = getParentEmail(
+          user,
+          userDirectory,
+          loggedUser
+        );
+
+        if (parentEmailForUser === parentEmail && user.email) {
+          addUser(user);
+          collectChildren(user.email);
+        }
+      });
+    };
+
+    collectChildren(loggedUser.email);
+    setAllowedUserEmails(Array.from(emailSet));
+    setAllowedUserIds(Array.from(idSet));
+  }, [session?.user?.email, userDirectory]);
 
   // Get date range
   const getDateRange = () => {
@@ -160,10 +255,7 @@ export default function AdminWeeklyTodoView() {
         endDate: dateRangeValues.end || undefined,
       });
 
-      setAllTodos(data.todos);
-      const filtered = filterTodos(data.todos, nameSearch);
-      setFilteredTodos(filtered);
-      groupTodosByUser(filtered);
+      setApiTodos(data.todos);
     } catch (err) {
       setError(t("errors.loadFailed"));
       console.error("Error fetching data:", err);
@@ -175,12 +267,9 @@ export default function AdminWeeklyTodoView() {
   // Debounced search function
   const debouncedSearch = useCallback(
     debounce((value: string) => {
-      const filtered = filterTodos(allTodos, value);
-      setFilteredTodos(filtered);
-      groupTodosByUser(filtered);
       setNameSearch(value);
     }, 300),
-    [allTodos]
+    []
   );
 
   // Handle search input change
@@ -206,6 +295,13 @@ export default function AdminWeeklyTodoView() {
     // We only want to refetch when these dependencies change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedUser, statusFilter, dateRange, customDate, weekdayFilter]);
+
+  useEffect(() => {
+    const scoped = applyScope(apiTodos);
+    const filtered = filterTodos(scoped, nameSearch);
+    setFilteredTodos(filtered);
+    groupTodosByUser(filtered);
+  }, [apiTodos, applyScope, nameSearch]);
 
   const toggleUserAccordion = (userId: string) => {
     setExpandedUsers((prev) => {

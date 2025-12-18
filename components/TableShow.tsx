@@ -69,6 +69,7 @@ const UniversalTableShow: React.FC<Props> = ({
   const [editRequestModal, setEditRequestModal] = useState<{ day: number } | null>(null)
   const [editRequestStatuses, setEditRequestStatuses] = useState<EditRequestStatus>({})
   const [tableData, setTableData] = useState<any>({})
+  const [dhakaTodayKey, setDhakaTodayKey] = useState<string>("")
   const month = useTranslations("dashboard.UserDashboard.months");
   const t = useTranslations("universalTableShow");
 
@@ -102,11 +103,21 @@ const UniversalTableShow: React.FC<Props> = ({
   }, [safeSelectedMonth, safeSelectedYear])
 
   const isFutureDate = (day: number): boolean => {
-    // Compare against *local* today to block future edits
-    const now = new Date()
-    const selected = new Date(selectedYear, selectedMonth, day, 23, 59, 59, 999)
-    return selected > now
+    // Compare against *Dhaka* today to avoid timezone mismatches
+    if (!dhakaTodayKey) return false
+    const dateKey = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    return dateKey > dhakaTodayKey
   }
+
+  useEffect(() => {
+    const today = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Dhaka",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date())
+    setDhakaTodayKey(today)
+  }, [])
 
   // Fetch edit-request statuses (by email)
   useEffect(() => {
@@ -178,11 +189,22 @@ const UniversalTableShow: React.FC<Props> = ({
     }
     monthDays.forEach((day) => {
       const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+      const isToday = dhakaTodayKey !== "" && date === dhakaTodayKey
       const requestStatus = editRequestStatuses[date]?.status
       const editedOnce = editRequestStatuses[date]?.editedOnce
       const isFuture = isFutureDate(day)
 
-      if (isFuture) {
+      if (isToday) {
+        editRow[day] = (
+          <button
+            className="text-sm bg-green-600 text-white py-1 px-3 rounded"
+            onClick={() => handleEditClick(day, transposed)}
+            title="Today's data can be edited without approval"
+          >
+            {t("edit")}
+          </button>
+        )
+      } else if (isFuture) {
         editRow[day] = (
           <button
             className="text-sm bg-gray-300 text-white py-1 px-3 rounded cursor-not-allowed opacity-50"
@@ -240,7 +262,7 @@ const UniversalTableShow: React.FC<Props> = ({
     transposed.push(editRow)
 
     setTransposedData(transposed)
-  }, [selectedMonth, selectedYear, userData, finalUserEmail, editRequestStatuses, monthDays])
+  }, [selectedMonth, selectedYear, userData, finalUserEmail, editRequestStatuses, monthDays, dhakaTodayKey])
 
   // Filtering (optional UI left out; hooks kept)
   const filteredData = useMemo(() => {
@@ -423,7 +445,9 @@ const UniversalTableShow: React.FC<Props> = ({
   // Inline edit flow
   const handleEditClick = (day: number, currentTransposed: any[]) => {
     const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-    if (editRequestStatuses[date]?.editedOnce) {
+    const isToday = dhakaTodayKey !== "" && date === dhakaTodayKey
+
+    if (!isToday && editRequestStatuses[date]?.editedOnce) {
       alert(t("youCanOnlyEditDataOnceAfterApproval"))
       return
     }
@@ -434,12 +458,13 @@ const UniversalTableShow: React.FC<Props> = ({
 
   const handleSaveEdit = async (day: number, updatedData: any) => {
     const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    const isToday = dhakaTodayKey !== "" && date === dhakaTodayKey
 
-    if (editRequestStatuses[date]?.status !== "approved") {
+    if (!isToday && editRequestStatuses[date]?.status !== "approved") {
       alert(t("youCanOnlyEditDataAfterYourRequestHasBeenApproved"))
       return
     }
-    if (editRequestStatuses[date]?.editedOnce) {
+    if (!isToday && editRequestStatuses[date]?.editedOnce) {
       alert(t("youCanOnlyEditDataOnceAfterApproval"))
       return
     }
@@ -467,17 +492,23 @@ const UniversalTableShow: React.FC<Props> = ({
       setTransposedData(newData)
       setTableData(updatedTableData)
 
-      // mark edited once
-      setEditRequestStatuses((prev) => ({
-        ...prev,
-        [date]: {
-          ...prev[date],
-          editedOnce: true,
-        },
-      }))
+      if (!isToday) {
+        // mark edited once (approval flow only)
+        setEditRequestStatuses((prev) => ({
+          ...prev,
+          [date]: {
+            ...prev[date],
+            editedOnce: true,
+          },
+        }))
+      }
 
       setEditPopup(null)
-      alert(t("dataUpdatedSuccessfullyYouCannotEditThisDateAgain"))
+      alert(
+        isToday
+          ? t("dataUpdatedSuccessfully")
+          : t("dataUpdatedSuccessfullyYouCannotEditThisDateAgain")
+      )
     } catch (error) {
       console.error("Error saving edit:", error)
       alert(t("failedToSaveEditsPleaseTryAgain"))
@@ -486,12 +517,13 @@ const UniversalTableShow: React.FC<Props> = ({
 
   const handleEditRequest = async (day: number, reason: string) => {
     if (!finalUserEmail || !user) return
-    if (isFutureDate(day)) {
+    const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    const isToday = dhakaTodayKey !== "" && date === dhakaTodayKey
+
+    if (!isToday && isFutureDate(day)) {
       alert(t("youCannotRequestEditsForFutureDates"))
       return
     }
-
-    const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
 
     try {
       const newRequest = await createEditRequest({

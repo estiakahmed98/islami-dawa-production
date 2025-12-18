@@ -4,6 +4,7 @@ import { routing } from "@/i18n/routing";
 import Header from "@/components/dashboard/header";
 import Sidebar from "@/components/dashboard/sidebar";
 import { SidebarProvider } from "@/providers/sidebar-provider";
+import { setRequestLocale } from "next-intl/server";
 
 interface Props {
   children: React.ReactNode;
@@ -18,8 +19,12 @@ export default async function DashboardLayout({ children, params }: Props) {
     notFound();
   }
 
+  // Ensure next-intl uses the same locale snapshot for SSR + hydration
+  setRequestLocale(locale);
+  const messages = (await import(`@/locale/${locale}.json`)).default;
+
   return (
-    <NextIntlClientProvider locale={locale}>
+    <NextIntlClientProvider locale={locale} messages={messages}>
       <SidebarProvider>
         <div className="flex h-screen w-full">
           <Sidebar />

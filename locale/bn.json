@@ -372,6 +372,7 @@
     "invalidDataForPDFGeneration": "PDF তৈরির জন্য ডাটা সঠিক নয়",
     "youCanOnlyEditDataOnceAfterApproval": "অনুমোদনের পর ডাটা একবারই এডিট করতে পারবেন",
     "youCanOnlyEditDataAfterYourRequestHasBeenApproved": "আপনার রিকোয়েস্ট অনুমোদিত হওয়ার পরই ডাটা এডিট করতে পারবেন",
+    "dataUpdatedSuccessfully": "ডাটা সফলভাবে আপডেট হয়েছে।",
     "dataUpdatedSuccessfullyYouCannotEditThisDateAgain": "ডাটা সফলভাবে আপডেট হয়েছে। এই তারিখটি আবার এডিট করতে পারবেন না।",
     "failedToSaveEditsPleaseTryAgain": "এডিট সংরক্ষণ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
     "youCannotRequestEditsForFutureDates": "ভবিষ্যতের তারিখের জন্য এডিট রিকোয়েস্ট করা যাবে না",

@@ -372,6 +372,7 @@
     "invalidDataForPDFGeneration": "Invalid data for PDF generation",
     "youCanOnlyEditDataOnceAfterApproval": "You can only edit data once after approval",
     "youCanOnlyEditDataAfterYourRequestHasBeenApproved": "You can only edit data after your request has been approved",
+    "dataUpdatedSuccessfully": "Data updated successfully.",
     "dataUpdatedSuccessfullyYouCannotEditThisDateAgain": "Data updated successfully. You cannot edit this date again.",
     "failedToSaveEditsPleaseTryAgain": "Failed to save edits. Please try again.",
     "youCannotRequestEditsForFutureDates": "You cannot request edits for future dates",

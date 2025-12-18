@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useSession } from "@/lib/auth-client";
+import { useParentEmail } from "@/hooks/useParentEmail";
 import {
   CheckCircle2,
   XCircle,
@@ -52,15 +54,17 @@ interface DayeSubmissionStatus {
 
 const DayeReviewComponent: React.FC = () => {
   const t = useTranslations("dayeReview");
-  const [dayees, setDayees] = useState<User[]>([]);
+  const { data: session } = useSession();
+  const { getParentEmail } = useParentEmail();
+
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [visibleUsers, setVisibleUsers] = useState<User[]>([]);
   const [submissionStatus, setSubmissionStatus] = useState<
     DayeSubmissionStatus[]
   >([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [selectedDate, setSelectedDate] = useState("");
   const [filterStatus, setFilterStatus] = useState<
     "all" | "submitted" | "not-submitted"
   >("all");
@@ -74,6 +78,12 @@ const DayeReviewComponent: React.FC = () => {
       day: "2-digit",
     }).format(d);
 
+  // Hydration-safe initial date (client only)
+  useEffect(() => {
+    setSelectedDate(dhakaYMD(new Date()));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Fetch all users (not only dayees)
   useEffect(() => {
     const fetchDayees = async () => {
@@ -84,7 +94,7 @@ const DayeReviewComponent: React.FC = () => {
         const data = await res.json();
         const users = Array.isArray(data) ? data : data.users || [];
         // Show ALL users in review, not just role === "daye"
-        setDayees(users);
+        setAllUsers(users);
       } catch (error) {
         console.error("Error fetching dayees:", error);
         toast.error(t("toast.fetchDayeesError"));
@@ -93,14 +103,59 @@ const DayeReviewComponent: React.FC = () => {
     fetchDayees();
   }, []);
 
+  // Apply hierarchy scoping (who can see whose data)
+  useEffect(() => {
+    if (!session?.user?.email || allUsers.length === 0) return;
+
+    const loggedInUser =
+      allUsers.find((u) => u.email === session.user.email) || null;
+
+    // If we can't map the logged-in user to the directory, only show self (if present)
+    if (!loggedInUser) {
+      setVisibleUsers(allUsers.filter((u) => u.email === session.user.email));
+      return;
+    }
+
+    // Central admin can see everyone
+    if (loggedInUser.role === "centraladmin") {
+      setVisibleUsers(allUsers);
+      return;
+    }
+
+    const allowedEmails = new Set<string>([loggedInUser.email]);
+
+    const collectChildren = (parentEmail: string) => {
+      allUsers.forEach((user) => {
+        const parentEmailForUser = getParentEmail(
+          user,
+          allUsers,
+          loggedInUser
+        );
+
+        if (parentEmailForUser === parentEmail && user.email) {
+          if (allowedEmails.has(user.email)) return;
+          allowedEmails.add(user.email);
+          collectChildren(user.email);
+        }
+      });
+    };
+
+    collectChildren(loggedInUser.email);
+    setVisibleUsers(allUsers.filter((u) => allowedEmails.has(u.email)));
+  }, [allUsers, getParentEmail, session?.user?.email]);
+
   // Fetch submission status for all users in list
   useEffect(() => {
     const fetchSubmissionStatus = async () => {
-      if (dayees.length === 0) return;
+      if (!selectedDate || visibleUsers.length === 0) {
+        setSubmissionStatus([]);
+        setLoading(false);
+        return;
+      }
 
       setLoading(true);
       try {
-        const emails = dayees.map((d) => d.email).join(",");
+        const emails = visibleUsers.map((d) => d.email).join(",");
 
         // Fetch all category data
         const endpoints = [
@@ -134,7 +189,7 @@ const DayeReviewComponent: React.FC = () => {
         );
 
         // Process submission status
-        const statusList: DayeSubmissionStatus[] = dayees.map((daye) => {
+        const statusList: DayeSubmissionStatus[] = visibleUsers.map((daye) => {
           const categories: any = {};
           let hasSubmittedToday = false;
           let totalSubmissions = 0;
@@ -211,7 +266,7 @@ const DayeReviewComponent: React.FC = () => {
     };
 
     fetchSubmissionStatus();
-  }, [dayees, selectedDate]);
+  }, [selectedDate, visibleUsers]);
 
   // Filter and search
   const filteredStatus = useMemo(() => {

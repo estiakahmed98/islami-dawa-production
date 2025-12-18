@@ -13,6 +13,7 @@ import { useSession } from "@/lib/auth-client";
 import { ScrollArea } from "./ui/scroll-area";
 import { PiTreeViewBold } from "react-icons/pi";
 import { useTranslations } from "next-intl";
+import { useParentEmail } from "@/hooks/useParentEmail";
 
 export const roleList = ["centraladmin", "divisionadmin", "markazadmin", "daye"];
 
@@ -46,36 +47,14 @@ const MuiTreeView: React.FC = () => {
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
   const [filteredTree, setFilteredTree] = useState<TreeNode[]>([]);
   const [expanded, setExpanded] = useState<string[]>([]);
+  const { getParentEmail, shareMarkaz, getMarkazId, getMarkazName } = useParentEmail();
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [users, setUsers] = useState<User[]>([]);
   const router = useRouter();
   const { data: session } = useSession();
 
-  // --- Helpers to normalize markaz relation (single object after schema change) ---
-  const getMarkazId = (u?: User): string | null => {
-    if (!u?.markaz) return u?.markazId ?? null;
-    if (typeof u.markaz === "string") return u.markazId ?? null; // legacy label only
-    return u.markaz.id ?? u.markazId ?? null;
-  };
-
-  const getMarkazName = (u?: User): string | null => {
-    if (!u?.markaz) return null;
-    if (typeof u.markaz === "string") return u.markaz;
-    return u.markaz.name ?? null;
-  };
-
-  const shareMarkaz = (a: User, b: User): boolean => {
-    const aId = getMarkazId(a);
-    const bId = getMarkazId(b);
-    if (aId && bId) return aId === bId;
-    // fallback by name if ids missing
-    const aName = getMarkazName(a);
-    const bName = getMarkazName(b);
-    if (aName && bName) return aName === bName;
-    return false;
-  };
-
+  
   // handle API that may return either an array or { users: [...] }
   const normalizeUsersResponse = async (res: Response): Promise<User[]> => {
     const json = await res.json();
@@ -135,42 +114,7 @@ const MuiTreeView: React.FC = () => {
     return [];
   };
 
-  // Parent resolution updated for single markaz relation
-  const getParentEmail = (
-    user: User,
-    users: User[],
-    loggedInUser: User | null
-  ): string | null => {
-    let parentUser: User | undefined;
-
-    switch (user.role) {
-      case "divisionadmin": {
-        parentUser =
-          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      case "markazadmin": {
-        parentUser =
-          users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
-          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      case "daye": {
-        parentUser =
-          users.find((u) => u.role === "markazadmin" && shareMarkaz(u, user)) ||
-          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      default:
-        return null;
-    }
-
-    return parentUser ? parentUser.email : null;
-  };
-
+  
   const handleItemClick = useCallback(
     (event: React.SyntheticEvent, nodeId: string) => {
       event.stopPropagation();

@@ -6,6 +6,7 @@ import { useSelectedUser } from "@/providers/treeProvider";
 import { useSession } from "@/lib/auth-client";
 import { Move, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "./ui/button";
+import { useParentEmail } from "@/hooks/useParentEmail";
 
 interface User {
   id: string;
@@ -40,6 +41,7 @@ const RealTree = () => {
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
   const { data: session } = useSession({ required: false });
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
+  const { getParentEmail, shareMarkaz, getMarkazId, getMarkazName } = useParentEmail();
 
   useEffect(() => {
     const isUser = (user: any): user is User => {
@@ -235,87 +237,7 @@ const RealTree = () => {
   };
 
   // --- markaz normalization (single relation, legacy safe) ---
-  const getMarkazId = (u?: User): string | null => {
-    if (!u) return null;
-    if (u.markaz && typeof u.markaz === 'object' && !Array.isArray(u.markaz)) {
-      return (u.markaz as any).id ?? (u as any).markazId ?? null;
-    }
-    return (u as any).markazId ?? null;
-  };
   
-  const getMarkazName = (u?: User): string | null => {
-    if (!u?.markaz) return null;
-    return typeof u.markaz === "string" ? u.markaz : (u.markaz as any).name ?? null;
-  };
-  
-  const shareMarkaz = (a: User, b: User): boolean => {
-    const aId = getMarkazId(a);
-    const bId = getMarkazId(b);
-    if (aId && bId) return aId === bId;
-    const aName = getMarkazName(a);
-    const bName = getMarkazName(b);
-    if (aName && bName) return aName === bName;
-    return false;
-  };
-
-  // Parent resolution updated for single markaz relation
-  const getParentEmail = (
-    user: User,
-    users: User[],
-    loggedInUser: User | null
-  ): string | null => {
-    let parentUser: User | undefined;
-
-    switch (user.role) {
-      case "divisionadmin": {
-        parentUser =
-          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      case "markazadmin": {
-        parentUser =
-          users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
-          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      case "daye": {
-        parentUser =
-          users.find((u) => u.role === "markazadmin" && shareMarkaz(u, user)) ||
-          (loggedInUser?.role === "centraladmin" ? loggedInUser : undefined) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      // legacy roles - keep for compatibility
-      case "unionadmin": {
-        parentUser =
-          users.find((u) => u.role === "upozilaadmin" && u.upazila === user.upazila) ||
-          users.find((u) => u.role === "districtadmin" && u.district === user.district) ||
-          users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      case "upozilaadmin": {
-        parentUser =
-          users.find((u) => u.role === "districtadmin" && u.district === user.district) ||
-          users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      case "districtadmin": {
-        parentUser =
-          users.find((u) => u.role === "divisionadmin" && u.division === user.division) ||
-          users.find((u) => u.role === "centraladmin");
-        break;
-      }
-      default:
-        return null;
-    }
-
-    return parentUser ? parentUser.email : null;
-  };
-
   const getNodeColor = (label: string) => {
     if (label.includes("centraladmin")) return "#4A90E2";
     if (label.includes("divisionadmin")) return "#50E3C2";
