@@ -79,6 +79,18 @@ const DayeReviewComponent: React.FC = () => {
       day: "2-digit",
     }).format(d);
 
+  // Helper: format to Month DD, YYYY in Dhaka timezone (client-side only)
+  const dhakaFormatted = (dateString: string) => {
+    if (typeof window === "undefined") return dateString; // Fallback for SSR
+    const date = new Date(dateString + "T00:00:00");
+    return new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Dhaka",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date);
+  };
+
   // Hydration-safe initial date (client only)
   useEffect(() => {
     setSelectedDate(dhakaYMD(new Date()));
@@ -176,7 +188,6 @@ const DayeReviewComponent: React.FC = () => {
               );
               if (!res.ok) return { key: ep.key, data: {} };
               const json = await res.json();
-              // robust: some endpoints return { records: { [email]: [] | {records: []} } }
               const data = (json && json.records) || {};
               return { key: ep.key, data };
             } catch {
@@ -300,29 +311,24 @@ const DayeReviewComponent: React.FC = () => {
   const exportToPDF = async () => {
     if (typeof window === "undefined") return;
 
-    const headers = [
-      "User Name",
-      "Amoli",
-      "Moktob",
-      "Talim",
-      "Daye",
-      "Dawati",
-      "Dawati Mojlish",
-      "Jamat",
-      "Dinefera",
-      "Sofor",
+    const columns: Array<{ key: string; label: string }> = [
+      { key: "name", label: "ব্যবহারকারীর নাম" },
+      { key: "amoli", label: "আমলী" },
+      { key: "moktob", label: "মক্তব" },
+      { key: "talim", label: "তালিম" },
+      { key: "daye", label: "দা'ঈ" },
+      { key: "dawati", label: "দাওয়াতি" },
+      { key: "dawatimojlish", label: "দাওয়াতি মজলিশ" },
+      { key: "jamat", label: "জামাত" },
+      { key: "dinefera", label: "দ্বীনি ফেরা" },
+      { key: "sofor", label: "সফর" },
     ];
 
     const rows = filteredStatus.map((status) => {
-      const row: Record<string, string> = { "User Name": status.name };
-      headers.slice(1).forEach((header) => {
-        const key = header
-          .toLowerCase()
-          .replace(" dawati mojlish", "dawatimojlish");
-        const categoryKey = key === "dawati" ? "dawati" : key;
-        const isDone =
-          status.categories[categoryKey as keyof typeof status.categories];
-        row[header] = isDone ? "DONE" : "NOT DONE";
+      const row: Record<string, string> = { name: status.name };
+      columns.slice(1).forEach((col) => {
+        const isDone = status.categories[col.key as keyof typeof status.categories];
+        row[col.key] = isDone ? "DONE" : "NOT DONE";
       });
       return row;
     });
@@ -341,24 +347,33 @@ const DayeReviewComponent: React.FC = () => {
                 }
 
                 body {
-                  font-family: Arial, sans-serif;
-                  padding: 4px;
+                  font-family: Arial, "Noto Sans Bengali", sans-serif;
+                  padding: 6px;
                   margin: 0;
-                  font-size: 10px;
+                  font-size: 10.5px;
+                  color: #111827;
+                  -webkit-print-color-adjust: exact;
+                  print-color-adjust: exact;
                 }
 
                 .header {
                   display: grid;
-                  grid-template-columns: repeat(3, 1fr);
-                  align-items: center;
-                  margin-bottom: 8px;
-                  text-align: center;
+                  grid-template-columns: 1fr 1fr 1fr;
+                  grid-template-rows: auto auto;
+                  column-gap: 12px;
+                  row-gap: 4px;
+                  align-items: end;
+                  margin-bottom: 10px;
                 }
 
                 h1 {
-                  color: #333;
-                  font-size: 14px;
-                  margin-bottom: 2px;
+                  grid-column: 1 / -1;
+                  text-align: center;
+                  color: #111827;
+                  font-size: 16px;
+                  font-weight: 800;
+                  letter-spacing: 0.2px;
+                  margin: 0 0 2px 0;
                 }
 
                 h2 {
@@ -369,49 +384,72 @@ const DayeReviewComponent: React.FC = () => {
                 }
 
                 h3 {
-                  color: #666;
-                  font-size: 14px;
-                  margin-top: 0;
-                  margin-bottom: 5px;
+                  color: #4b5563;
+                  font-size: 11px;
+                  font-weight: 700;
+                  margin: 0;
+                }
+
+                .header h3:first-of-type {
+                  grid-column: 2 / 3;
+                  text-align: center;
+                }
+
+                .header h3:last-of-type {
+                  grid-column: 3 / 4;
+                  text-align: right;
                 }
 
                 table {
                   width: 100%;
                   border-collapse: collapse;
-                  font-size: 9px;
+                  font-size: 9.5px;
+                  border: 1px solid #cbd5e1;
                 }
 
                 thead {
                   display: table-header-group;
-                  font-size: 12px;
                 }
 
                 tr {
-                  height: 22px;
+                  height: 26px;
                 }
 
                 th, td {
-                  border: 1px solid #bbb;
-                  padding: 4px;
+                  border: 1px solid #cbd5e1;
+                  padding: 6px;
                   text-align: center;
                   vertical-align: middle;
+                  line-height: 1.2;
                   white-space: nowrap;
                 }
 
                 th {
-                  background-color: #f2f2f2;
-                  font-weight: bold;
+                  background-color: #f3f4f6;
+                  font-weight: 800;
+                  font-size: 11px;
+                }
+
+                tbody tr:nth-child(even) {
+                  background-color: #f9fafb;
+                }
+
+                td.name-cell {
+                  font-weight: 800;
+                  font-size: 10.5px;
+                  white-space: normal;
+                  text-align: center;
+                  min-width: 140px;
                 }
 
                 .done {
-                  background-color: #2e7d32;
+                  background-color: #008080;
                   color: #ffffff;
                   font-weight: bold;
                 }
 
                 .not-done {
-                  background-color: #d32f2f;
-                  color: #ffffff;
+                  color: #333333;
                   font-weight: bold;
                 }
 
@@ -424,32 +462,43 @@ const DayeReviewComponent: React.FC = () => {
 
             <body>
               <div class="header">
-                <h1>Daye Submission Report</h1>
-                <h3>Date: ${selectedDate}</h3>
-                <h3>Generated by: ${exporterName} (${exporterRole})</h3>
+                <h1>দা'ঈ দৈনিক জমা প্রতিবেদন</h1>
+                <h3>তারিখ: ${dhakaFormatted(selectedDate)}</h3>
+                <h3>প্রতিবেদন প্রস্তুতকারী: ${exporterName} (${exporterRole})</h3>
               </div>
 
               <table>
                 <thead>
                   <tr>
-                    ${headers.map((h) => `<th>${h}</th>`).join("")}
+                    ${columns.map((c) => `<th>${c.label}</th>`).join("")}
                   </tr>
                 </thead>
-                <tbody>
+               <tbody>
                   ${rows
                     .map(
                       (row) => `
                     <tr>
-                      ${headers
-                        .map((header) => {
-                          const value = row[header] || "";
+                      ${columns
+                        .map((col, index) => {
+                          const value = row[col.key] || "";
+
+                          // ✅ FIRST COLUMN = NAME
+                          if (index === 0) {
+                             return `<td class="name-cell">${value}</td>`;
+                          }
+
+                          // ✅ STATUS COLUMNS
                           const cls =
+                            value === "DONE" ? "done" : value === "NOT DONE" ? "not-done" : "";
+
+                          const displayValue =
                             value === "DONE"
-                              ? "done"
+                              ? "সম্পন্ন"
                               : value === "NOT DONE"
-                                ? "not-done"
+                                ? "অসম্পন্ন"
                                 : "";
-                          return `<td class="${cls}">${value}</td>`;
+
+                          return `<td class="${cls}">${displayValue}</td>`;
                         })
                         .join("")}
                     </tr>
