@@ -615,7 +615,7 @@ const DayeReviewComponent: React.FC = () => {
             onClick={exportToPDF}
             size="sm"
             variant="outline"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white hover:text-white"
           >
             <Download className="h-4 w-4" />
             Export PDF
