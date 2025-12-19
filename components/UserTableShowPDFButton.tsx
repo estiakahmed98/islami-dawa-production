@@ -37,34 +37,34 @@ export function UserTableShowPDFButton({
 
     try {
       const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
       });
 
       // Define pages with their categories
       const pages = [
         [
-          categories.find(c => c.title === t("dashboard.amoliMuhasaba")),
-          categories.find(c => c.title === t("dashboard.talimSubject")),
-          categories.find(c => c.title === t("dashboard.dayiSubject")),
+          categories.find((c) => c.title === t("dashboard.amoliMuhasaba")),
+          categories.find((c) => c.title === t("dashboard.talimSubject")),
+          categories.find((c) => c.title === t("dashboard.dayiSubject")),
         ].filter(Boolean) as CategoryData[],
         [
-          categories.find(c => c.title === t("dashboard.moktobSubject")),
-          categories.find(c => c.title === t("dashboard.dawatiSubject")),
+          categories.find((c) => c.title === t("dashboard.moktobSubject")),
+          categories.find((c) => c.title === t("dashboard.dawatiSubject")),
         ].filter(Boolean) as CategoryData[],
         [
-          categories.find(c => c.title === t("dashboard.dawatiMojlish")),
-          categories.find(c => c.title === t("dashboard.jamatSubject")),
-          categories.find(c => c.title === t("dashboard.dineFera")),
-          categories.find(c => c.title === t("dashboard.soforSubject")),
+          categories.find((c) => c.title === t("dashboard.dawatiMojlish")),
+          categories.find((c) => c.title === t("dashboard.jamatSubject")),
+          categories.find((c) => c.title === t("dashboard.dineFera")),
+          categories.find((c) => c.title === t("dashboard.soforSubject")),
         ].filter(Boolean) as CategoryData[],
       ];
 
       const pageTitles = [
         "A'mali Muhasaba, Women's Taleem & Assistant Daee Matters",
         "Maktab Matters & Dawah Matters",
-        "Dawah Majlis, Jamaat Matters & Returned to Islam & Travel Matters"
+        "Dawah Majlis, Jamaat Matters & Returned to Islam & Travel Matters",
       ];
 
       let globalPageNumber = 1;
@@ -74,7 +74,7 @@ export function UserTableShowPDFButton({
         const pageCategories = pages[pageIndex];
 
         // Create hidden HTML content for this page
-        const contentDiv = document.createElement('div');
+        const contentDiv = document.createElement("div");
         contentDiv.innerHTML = generateHTMLContentForPage(
           pageCategories,
           userEmail,
@@ -84,10 +84,10 @@ export function UserTableShowPDFButton({
           pages.length,
           pageIndex + 1
         );
-        contentDiv.style.position = 'absolute';
-        contentDiv.style.left = '-9999px';
-        contentDiv.style.top = '-9999px';
-        contentDiv.style.width = '1400px';
+        contentDiv.style.position = "absolute";
+        contentDiv.style.left = "-9999px";
+        contentDiv.style.top = "-9999px";
+        contentDiv.style.width = "1400px";
         contentDiv.style.fontFamily = "'Noto Sans Bengali', Arial, sans-serif";
         document.body.appendChild(contentDiv);
 
@@ -99,7 +99,7 @@ export function UserTableShowPDFButton({
           scale: 2,
           useCORS: true,
           allowTaint: true,
-          backgroundColor: '#ffffff',
+          backgroundColor: "#ffffff",
           width: 1400,
           height: contentDiv.scrollHeight,
         });
@@ -110,11 +110,11 @@ export function UserTableShowPDFButton({
         }
 
         // Add image to PDF
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL("image/png");
         const imgWidth = 297; // A4 landscape width in mm
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
 
         // Cleanup
         document.body.removeChild(contentDiv);
@@ -123,9 +123,8 @@ export function UserTableShowPDFButton({
       }
 
       pdf.save(`${userName}_সব_ক্যাটাগরি_রিপোর্ট.pdf`);
-
     } catch (error) {
-      console.error('PDF generation error:', error);
+      console.error("PDF generation error:", error);
     } finally {
       setLoading(false);
     }
@@ -158,34 +157,35 @@ function generateHTMLContentForPage(
   pageNumber: number
 ): string {
   // Generate tables for each category
-  const tablesHTML = pageCategories.map(category => {
-    const { title, userData, selectedMonth, selectedYear } = category;
+  const tablesHTML = pageCategories
+    .map((category) => {
+      const { title, userData, selectedMonth, selectedYear } = category;
 
-    // Build table data similar to TableShow
-    const labels = userData.labelMap || {};
-    const userRecords = userData.records[userEmail] || {};
+      // Build table data similar to TableShow
+      const labels = userData.labelMap || {};
+      const userRecords = userData.records[userEmail] || {};
 
-    const monthDays = Array.from(
-      { length: new Date(selectedYear, selectedMonth + 1, 0).getDate() },
-      (_, i) => i + 1
-    );
+      const monthDays = Array.from(
+        { length: new Date(selectedYear, selectedMonth + 1, 0).getDate() },
+        (_, i) => i + 1
+      );
 
-    const transposed = Object.keys(labels).map((rowKey) => {
-      const row: { label: string; [key: number]: any } = {
-        label: labels[rowKey],
-      };
-      monthDays.forEach((day) => {
-        const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        const cellValue = userRecords[date]?.[rowKey] ?? "- -";
-        row[day] = cellValue;
+      const transposed = Object.keys(labels).map((rowKey) => {
+        const row: { label: string; [key: number]: any } = {
+          label: labels[rowKey],
+        };
+        monthDays.forEach((day) => {
+          const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+          const cellValue = userRecords[date]?.[rowKey] ?? "- -";
+          row[day] = cellValue;
+        });
+        return row;
       });
-      return row;
-    });
 
-    // Exclude rows if needed, similar to TableShow
-    const printableRows = transposed;
+      // Exclude rows if needed, similar to TableShow
+      const printableRows = transposed;
 
-    return `
+      return `
       <div style="margin-bottom: 30px;">
         <h3 style="
           font-size: 16px;
@@ -212,7 +212,9 @@ function generateHTMLContentForPage(
               font-weight: bold;
               width: 150px;
             ">লেবেল</th>
-            ${monthDays.map(day => `
+            ${monthDays
+              .map(
+                (day) => `
               <th style="
                 border: 1px solid #000;
                 padding: 6px;
@@ -221,11 +223,15 @@ function generateHTMLContentForPage(
                 color: white;
                 font-weight: bold;
               ">দিন ${day}</th>
-            `).join('')}
+            `
+              )
+              .join("")}
           </tr>
 
           <!-- Data rows -->
-          ${printableRows.map(row => `
+          ${printableRows
+            .map(
+              (row) => `
             <tr>
               <td style="
                 border: 1px solid #000;
@@ -234,19 +240,26 @@ function generateHTMLContentForPage(
                 font-weight: bold;
                 background-color: #f8f9fa;
               ">${row.label}</td>
-              ${monthDays.map(day => `
+              ${monthDays
+                .map(
+                  (day) => `
                 <td style="
                   border: 1px solid #000;
                   padding: 4px;
                   text-align: center;
-                ">${row[day] ?? '-'}</td>
-              `).join('')}
+                ">${row[day] ?? "-"}</td>
+              `
+                )
+                .join("")}
             </tr>
-          `).join('')}
+          `
+            )
+            .join("")}
         </table>
       </div>
     `;
-  }).join('');
+    })
+    .join("");
 
   return `
     <div style="

@@ -17,6 +17,7 @@ import {
   Users,
   TrendingUp,
   TrendingDown,
+  Download,
 } from "lucide-react";
 
 interface User {
@@ -126,11 +127,7 @@ const DayeReviewComponent: React.FC = () => {
 
     const collectChildren = (parentEmail: string) => {
       allUsers.forEach((user) => {
-        const parentEmailForUser = getParentEmail(
-          user,
-          allUsers,
-          loggedInUser
-        );
+        const parentEmailForUser = getParentEmail(user, allUsers, loggedInUser);
 
         if (parentEmailForUser === parentEmail && user.email) {
           if (allowedEmails.has(user.email)) return;
@@ -219,10 +216,13 @@ const DayeReviewComponent: React.FC = () => {
               }
 
               // Track last submission date across categories
-              const latest = records.reduce((acc: string | undefined, r: any) => {
-                const ymd = dhakaYMD(new Date(r.date));
-                return !acc || ymd > acc ? ymd : acc;
-              }, lastSubmissionDate);
+              const latest = records.reduce(
+                (acc: string | undefined, r: any) => {
+                  const ymd = dhakaYMD(new Date(r.date));
+                  return !acc || ymd > acc ? ymd : acc;
+                },
+                lastSubmissionDate
+              );
               lastSubmissionDate = latest;
             } else {
               categories[key] = false;
@@ -297,6 +297,171 @@ const DayeReviewComponent: React.FC = () => {
     return { total, submitted, notSubmitted, percentage };
   }, [submissionStatus]);
 
+  const exportToPDF = async () => {
+    if (typeof window === "undefined") return;
+
+    const headers = [
+      "User Name",
+      "Amoli",
+      "Moktob",
+      "Talim",
+      "Daye",
+      "Dawati",
+      "Dawati Mojlish",
+      "Jamat",
+      "Dinefera",
+      "Sofor",
+    ];
+
+    const rows = filteredStatus.map((status) => {
+      const row: Record<string, string> = { "User Name": status.name };
+      headers.slice(1).forEach((header) => {
+        const key = header
+          .toLowerCase()
+          .replace(" dawati mojlish", "dawatimojlish");
+        const categoryKey = key === "dawati" ? "dawati" : key;
+        const isDone =
+          status.categories[categoryKey as keyof typeof status.categories];
+        row[header] = isDone ? "DONE" : "NOT DONE";
+      });
+      return row;
+    });
+
+        const html = `
+          <html>
+            <head>
+              <meta charset="UTF-8">
+              <style>
+                @page {
+                  size: landscape;
+                  margin: 10mm;
+                }
+
+                body {
+                  font-family: Arial, sans-serif;
+                  padding: 4px;
+                  margin: 0;
+                  font-size: 10px;
+                }
+
+                .header {
+                  margin-bottom: 8px;
+                  text-align: left;
+                }
+
+                h1 {
+                  color: #333;
+                  font-size: 14px;
+                  margin-bottom: 2px;
+                }
+
+                h2 {
+                  color: #777;
+                  font-size: 10px;
+                  margin-top: 0;
+                  margin-bottom: 8px;
+                }
+
+                table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  font-size: 9px;
+                }
+
+                thead {
+                  display: table-header-group;
+                }
+
+                tr {
+                  height: 22px;
+                }
+
+                th, td {
+                  border: 1px solid #bbb;
+                  padding: 4px;
+                  text-align: center;
+                  vertical-align: middle;
+                  white-space: nowrap;
+                }
+
+                th {
+                  background-color: #f2f2f2;
+                  font-weight: bold;
+                }
+
+                .done {
+                  background-color: #2e7d32;
+                  color: #ffffff;
+                  font-weight: bold;
+                }
+
+                .not-done {
+                  background-color: #d32f2f;
+                  color: #ffffff;
+                  font-weight: bold;
+                }
+
+                /* 🔹 force page break after every 28 rows */
+                tbody tr:nth-child(28n) {
+                  page-break-after: always;
+                }
+              </style>
+            </head>
+
+            <body>
+              <div class="header">
+                <h1>Daye Submission Report</h1>
+                <h2>Date: ${selectedDate}</h2>
+              </div>
+
+              <table>
+                <thead>
+                  <tr>
+                    ${headers.map((h) => `<th>${h}</th>`).join("")}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows
+                    .map(
+                      (row) => `
+                    <tr>
+                      ${headers
+                        .map((header) => {
+                          const value = row[header] || "";
+                          const cls =
+                            value === "DONE"
+                              ? "done"
+                              : value === "NOT DONE"
+                                ? "not-done"
+                                : "";
+                          return `<td class="${cls}">${value}</td>`;
+                        })
+                        .join("")}
+                    </tr>
+                  `
+                    )
+                    .join("")}
+                </tbody>
+              </table>
+            </body>
+    </html>
+    `;
+
+    const element = document.createElement("div");
+    element.innerHTML = html;
+
+    const opt = {
+      margin: 10,
+      filename: `daye-report-${selectedDate}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+    };
+
+    const html2pdf = (await import("html2pdf.js")).default as any;
+    html2pdf().set(opt).from(element).save();
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -310,8 +475,12 @@ const DayeReviewComponent: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{t("header.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{t("header.subtitle")}</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+            {t("header.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t("header.subtitle")}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-gray-500" />
@@ -328,7 +497,9 @@ const DayeReviewComponent: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("stats.totalDaee")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("stats.totalDaee")}
+            </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -338,33 +509,44 @@ const DayeReviewComponent: React.FC = () => {
 
         <Card className="border-green-200 bg-green-50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-800">{t("stats.submittedTitle")}</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-800">
+              {t("stats.submittedTitle")}
+            </CardTitle>
             <CheckCircle2 className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-700">
               {stats.submitted}
             </div>
-            <p className="text-xs text-green-600 mt-1">{stats.percentage}% {t("stats.completedPercent")}</p>
+            <p className="text-xs text-green-600 mt-1">
+              {stats.percentage}% {t("stats.completedPercent")}
+            </p>
           </CardContent>
         </Card>
 
         <Card className="border-red-200 bg-red-50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-red-800">{t("stats.notSubmittedTitle")}</CardTitle>
+            <CardTitle className="text-sm font-medium text-red-800">
+              {t("stats.notSubmittedTitle")}
+            </CardTitle>
             <XCircle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-700">
               {stats.notSubmitted}
             </div>
-            <p className="text-xs text-red-600 mt-1">{(100 - parseFloat(stats.percentage)).toFixed(1)}% {t("stats.remainingPercent")}</p>
+            <p className="text-xs text-red-600 mt-1">
+              {(100 - parseFloat(stats.percentage)).toFixed(1)}%{" "}
+              {t("stats.remainingPercent")}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("stats.progress")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("stats.progress")}
+            </CardTitle>
             {parseFloat(stats.percentage) >= 50 ? (
               <TrendingUp className="h-4 w-4 text-green-600" />
             ) : (
@@ -378,7 +560,9 @@ const DayeReviewComponent: React.FC = () => {
                 style={{ width: `${stats.percentage}%` }}
               />
             </div>
-            <p className="text-xs text-muted-foreground mt-2">{t("stats.completeness")}: {stats.percentage}%</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              {t("stats.completeness")}: {stats.percentage}%
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -399,6 +583,7 @@ const DayeReviewComponent: React.FC = () => {
             variant={filterStatus === "all" ? "default" : "outline"}
             onClick={() => setFilterStatus("all")}
             size="sm"
+            className={filterStatus === "all" ? "text-white" : ""}
           >
             {t("filters.all")} ({submissionStatus.length})
           </Button>
@@ -406,7 +591,11 @@ const DayeReviewComponent: React.FC = () => {
             variant={filterStatus === "submitted" ? "default" : "outline"}
             onClick={() => setFilterStatus("submitted")}
             size="sm"
-            className="bg-green-600 text-white hover:text-white hover:bg-green-700"
+            className={
+              filterStatus === "submitted"
+                ? "text-white"
+                : "text-green-600 hover:text-white hover:bg-green-700"
+            }
           >
             {t("filters.submitted")} ({stats.submitted})
           </Button>
@@ -414,9 +603,22 @@ const DayeReviewComponent: React.FC = () => {
             variant={filterStatus === "not-submitted" ? "default" : "outline"}
             onClick={() => setFilterStatus("not-submitted")}
             size="sm"
-            className="bg-red-600 text-white hover:text-white hover:bg-red-700"
+            className={
+              filterStatus === "not-submitted"
+                ? "text-white"
+                : "text-red-600 hover:text-white hover:bg-red-700"
+            }
           >
             {t("filters.notSubmitted")} ({stats.notSubmitted})
+          </Button>
+          <Button
+            onClick={exportToPDF}
+            size="sm"
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Export PDF
           </Button>
         </div>
       </div>
@@ -446,7 +648,9 @@ const DayeReviewComponent: React.FC = () => {
                   <p className="text-sm text-muted-foreground mt-1">
                     {status.email}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">📍 {status.location || t("list.locationUnknown")}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    📍 {status.location || t("list.locationUnknown")}
+                  </p>
                 </div>
                 <Badge
                   variant={status.hasSubmittedToday ? "default" : "destructive"}
@@ -454,14 +658,18 @@ const DayeReviewComponent: React.FC = () => {
                     status.hasSubmittedToday ? "bg-green-600" : "bg-red-600"
                   }
                 >
-                  {status.hasSubmittedToday ? t("badge.completed") : t("badge.incomplete")}
+                  {status.hasSubmittedToday
+                    ? t("badge.completed")
+                    : t("badge.incomplete")}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm font-medium mb-2">{t("details.todaySummary")} ({status.totalSubmissions}/9):</p>
+                  <p className="text-sm font-medium mb-2">
+                    {t("details.todaySummary")} ({status.totalSubmissions}/9):
+                  </p>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { key: "amoli", label: t("categories.amoli") },
@@ -469,7 +677,10 @@ const DayeReviewComponent: React.FC = () => {
                       { key: "talim", label: t("categories.talim") },
                       { key: "daye", label: t("categories.daye") },
                       { key: "dawati", label: t("categories.dawati") },
-                      { key: "dawatimojlish", label: t("categories.dawatimojlish") },
+                      {
+                        key: "dawatimojlish",
+                        label: t("categories.dawatimojlish"),
+                      },
                       { key: "jamat", label: t("categories.jamat") },
                       { key: "dinefera", label: t("categories.dinefera") },
                       { key: "sofor", label: t("categories.sofor") },
@@ -492,7 +703,8 @@ const DayeReviewComponent: React.FC = () => {
                 </div>
                 {status.lastSubmissionDate && (
                   <p className="text-xs font-semibold text-green-600">
-                    {t("details.lastSubmission")} {new Date(status.lastSubmissionDate).toLocaleDateString()}
+                    {t("details.lastSubmission")}{" "}
+                    {new Date(status.lastSubmissionDate).toLocaleDateString()}
                   </p>
                 )}
               </div>
