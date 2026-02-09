@@ -2,6 +2,8 @@
 
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
+import useSWR from "swr";
+import { SWRConfig } from "swr";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -452,16 +454,20 @@ async function fetchSofor(emails: string[]): Promise<UserDataForAdminTable> {
   return { records, labelMap: SOFOR_LABELS };
 }
 
+const fetcher = async (url: string) => {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+};
+
 /** ----------------- Component ----------------- */
 export default function UsersTable() {
   const t = useTranslations("usersTable");
   const { getParentEmail, shareMarkaz, getMarkazId, getMarkazName } = useParentEmail();
 
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [divisionId, setDivisionId] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
   const [districtId, setDistrictId] = useState<string>("");
   const [upazilaId, setUpazilaId] = useState<string>("");
   const [unionId, setUnionId] = useState<string>("");
@@ -478,6 +484,20 @@ export default function UsersTable() {
   const { data, status } = useSession();
   const sessionUser = data?.user;
 
+  // Fetch users using SWR
+  const { data: usersData, error: usersError, isLoading: usersLoading, mutate: mutateUsers } = useSWR(
+    "/api/usershow",
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 300000, // 5 minutes
+    }
+  );
+
+  const users = usersData?.users || [];
+  const loading = usersLoading;
+
   const [emailList, setEmailList] = useState<string[]>([]);
   const [showFirstModal, setShowFirstModal] = useState(false);
   const [showSecondModal, setShowSecondModal] = useState(false);
@@ -485,35 +505,27 @@ export default function UsersTable() {
   const [showSaveFirstModal, setShowSaveFirstModal] = useState(false);
   const [showSaveSecondModal, setShowSaveSecondModal] = useState(false);
 
-  const [markazOptions, setMarkazOptions] = useState<
-    { value: string; title: string }[]
-  >([]);
 
-  // Load Markaz list for selects
-  useEffect(() => {
-    let aborted = false;
-    (async () => {
-      try {
-        const res = await fetch(`/api/markaz-masjid?pageSize=1000`, {
-          cache: "no-store",
-        });
-        const j = await res.json();
-        if (!res.ok) throw new Error(j?.error || "Failed to load markaz");
-        const opts = Array.isArray(j?.data)
-          ? j.data.map((m: any) => ({
-              value: m.id as string,
-              title: m.name as string,
-            }))
-          : [];
-        if (!aborted) setMarkazOptions(opts);
-      } catch (e) {
-        console.error(e);
-      }
-    })();
-    return () => {
-      aborted = true;
-    };
-  }, []);
+  // Fetch markaz options using SWR
+  const { data: markazData } = useSWR(
+    "/api/markaz-masjid?pageSize=1000",
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 600000, // 10 minutes
+    }
+  );
+
+  const markazOptions = useMemo(() => {
+    if (!markazData?.data) return [];
+    return Array.isArray(markazData.data)
+      ? markazData.data.map((m: any) => ({
+          value: m.id as string,
+          title: m.name as string,
+        }))
+      : [];
+  }, [markazData]);
 
   // LIVE datasets for AdminTable (loaded from DB)
   const [amoliData, setAmoliData] = useState<UserDataForAdminTable>({
@@ -563,30 +575,12 @@ export default function UsersTable() {
     }
   };
 
-  /** Fetch users */
-  useEffect(() => {
-    if (status === "loading" || !sessionUser) return;
-    const fetchUsers = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/usershow`);
-        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
-        const data = await response.json();
-        setUsers(data.users || []);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUsers();
-  }, [status, sessionUser]);
 
   /** Apply filters & collect email list */
   useEffect(() => {
     const filtered = users
-      .filter((user) => canViewUser(user))
-      .filter((user) =>
+      .filter((user: User) => canViewUser(user))
+      .filter((user: User) =>
         Object.entries(filters).every(
           ([key, value]) =>
             !value ||
@@ -597,7 +591,7 @@ export default function UsersTable() {
         )
       );
     setFilteredUsers(filtered);
-    setEmailList(filtered.map((user) => user.email));
+    setEmailList(filtered.map((user: User) => user.email));
   }, [filters, users, (sessionUser as any)?.email, (sessionUser as any)?.role]);
 
   /** Fetch DB datasets whenever email list changes */
@@ -725,7 +719,7 @@ export default function UsersTable() {
       );
       const res = await fetch(`/api/usershow?${params.toString()}`);
       const data = await res.json();
-      setUsers(data.users);
+      await mutateUsers({ users: data.users });
 
       setSelectedUser(null);
       toast.success(t("toasts.updateSuccess"));
@@ -818,8 +812,8 @@ export default function UsersTable() {
         );
       }
 
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
+      await mutateUsers((prevUsers: User[] | undefined) =>
+        (prevUsers || []).map((user: User) =>
           user.id === userId ? { ...user, banned: !isBanned } : user
         )
       );
@@ -857,7 +851,15 @@ export default function UsersTable() {
   };
 
   return (
-    <div className="w-full h-full mx-auto p-2">
+    <SWRConfig
+      value={{
+        fetcher,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: true,
+        dedupingInterval: 300000, // 5 minutes
+      }}
+    >
+      <div className="w-full h-full mx-auto p-2">
       <div className="h-auto mt-8 mb-8">
         <h1 className="text-2xl font-bold text-center mb-4">{t("title")}</h1>
 
@@ -962,6 +964,26 @@ export default function UsersTable() {
 
         {filters.role === "AssistantDaeeList" ? (
           <AssistantDaeeList emails={emailList} users={users} />
+        ) : loading ? (
+          <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-hidden">
+            <div className="overflow-y-auto max-h-[45vh] p-4">
+              {/* Table Header Skeleton */}
+              <div className="grid grid-cols-12 gap-2 pb-4 border-b">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                  <div key={i} className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                ))}
+              </div>
+              
+              {/* Table Rows Skeleton */}
+              {[1, 2, 3, 4, 5].map((row) => (
+                <div key={row} className="grid grid-cols-12 gap-2 py-3 border-b">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((col) => (
+                    <div key={col} className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
         ) : (
           <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-hidden">
             <div className="overflow-y-auto max-h-[45vh]">
@@ -1139,8 +1161,8 @@ export default function UsersTable() {
                       });
                       if (!response.ok)
                         throw new Error(`API error: ${response.statusText}`);
-                      setUsers((prev) =>
-                        prev.filter((u) => u.id !== userToDelete)
+                      await mutateUsers((prev: User[] | undefined) =>
+                        (prev || []).filter((u: User) => u.id !== userToDelete)
                       );
                       toast.success(t("toasts.deleteSuccess"));
                     } catch (err) {
@@ -1602,5 +1624,6 @@ export default function UsersTable() {
         </div>
       )}
     </div>
+    </SWRConfig>
   );
 }

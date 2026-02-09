@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import useSWR from "swr";
 import AmoliChart from "@/components/AmoliCharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton";
 import { useSession } from "@/lib/auth-client";
@@ -19,8 +20,12 @@ interface TallyProps {
 
 const Dashboard: React.FC<TallyProps> = () => {
   const { data: session } = useSession();
-  const userEmail = session?.user?.email || "";
+  const userEmail = useMemo(() => session?.user?.email || "", [session?.user?.email]);
   const t = useTranslations("dashboard.UserDashboard");
+  
+  const cachePrefix = "userDashboard";
+  const cacheTTLms = 5 * 60 * 1000; // 5 minutes
+  const refetchIntervalMs = 60 * 1000; // 1 minute
 
   // State for main dashboard
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
@@ -141,174 +146,363 @@ const Dashboard: React.FC<TallyProps> = () => {
     }
   };
 
-  // Fetch all data from API
-  useEffect(() => {
-    if (!userEmail) return;
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Fetch all data in parallel
-        const endpoints = [
-          {
-            url: `/api/amoli?email=${encodeURIComponent(userEmail)}`, setter: setUserAmoliData, labelMap: {
-              tahajjud: t("amoli.tahajjud"),
-              quarntilawat: t("amoli.quarntilawat"),
-              zikir: t("amoli.zikir"),
-              ishraq: t("amoli.ishraq"),
-              jamat: t("amoli.jamat"),
-              sirat: t("amoli.sirat"),
-              Dua: t("amoli.dua"),
-              ilm: t("amoli.ilm"),
-              tasbih: t("amoli.tasbih"),
-              dayeeAmol: t("amoli.dayeeAmol"),
-              amoliSura: t("amoli.amoliSura"),
-              ayamroja: t("amoli.ayamroja"),
-              hijbulBahar: t("amoli.hijbulBahar"),
-            }
-          },
-          {
-            url: `/api/moktob?email=${encodeURIComponent(userEmail)}`, setter: setUserMoktobBisoyData, labelMap: {
-              notunMoktobChalu: t("moktob.notunMoktobChalu"),
-              totalMoktob: t("moktob.totalMoktob"),
-              totalStudent: t("moktob.totalStudent"),
-              obhibhabokConference: t("moktob.obhibhabokConference"),
-              moktoThekeMadrasaAdmission: t("moktob.moktoThekeMadrasaAdmission"),
-              notunBoyoskoShikkha: t("moktob.notunBoyoskoShikkha"),
-              totalBoyoskoShikkha: t("moktob.totalBoyoskoShikkha"),
-              boyoskoShikkhaOnshogrohon: t("moktob.boyoskoShikkhaOnshogrohon"),
-              newMuslimeDinerFikir: t("moktob.newMuslimeDinerFikir"),
-            }
-          },
-          {
-            url: `/api/talim?email=${encodeURIComponent(userEmail)}`, setter: setUserTalimBisoyData, labelMap: {
-              mohilaTalim: t("talim.mohilaTalim"),
-              mohilaOnshogrohon: t("talim.mohilaOnshogrohon"),
-            }
-          },
-          {
-            url: `/api/dayi?email=${encodeURIComponent(userEmail)}`,
-            setter: setUserDayeData,
-            labelMap: {
-              sohojogiDayeToiri: t("dayi.sohojogiDayeToiri"),
-              // ADD THIS so the table shows the clickable row:
-              assistantsList: t("dayi.assistantsList"),
-            }
-          },
-          {
-            url: `/api/dawati?email=${encodeURIComponent(userEmail)}`, setter: setUserDawatiBisoyData, labelMap: {
-              nonMuslimDawat: t("dawati.nonMuslimDawat"),
-              murtadDawat: t("dawati.murtadDawat"),
-              alemderSatheyMojlish: t("dawati.alemderSatheyMojlish"),
-              publicSatheyMojlish: t("dawati.publicSatheyMojlish"),
-              nonMuslimSaptahikGasht: t("dawati.nonMuslimSaptahikGasht"),
-            }
-          },
-          {
-            url: `/api/dawatimojlish?email=${encodeURIComponent(userEmail)}`, setter: setUserDawatiMojlishData, labelMap: {
-              dawatterGuruttoMojlish: t("dawatiMojlish.dawatterGuruttoMojlish"),
-              mojlisheOnshogrohon: t("dawatiMojlish.mojlisheOnshogrohon"),
-              alemderSatheyMojlish: t("dawatiMojlish.alemderSatheyMojlish"),
-              publicSatheyMojlish: t("dawatiMojlish.publicSatheyMojlish"),
-              prosikkhonKormoshalaAyojon: t("dawatiMojlish.prosikkhonKormoshalaAyojon"),
-              prosikkhonOnshogrohon: t("dawatiMojlish.prosikkhonOnshogrohon"),
-              jummahAlochona: t("dawatiMojlish.jummahAlochona"),
-              dhormoSova: t("dawatiMojlish.dhormoSova"),
-              mashwaraPoint: t("dawatiMojlish.mashwaraPoint"),
-            }
-          },
-          {
-            url: `/api/jamat?email=${encodeURIComponent(userEmail)}`, setter: setUserJamatBisoyData, labelMap: {
-              jamatBerHoise: t("jamat.jamatBerHoise"),
-              jamatSathi: t("jamat.jamatSathi"),
-            }
-          },
-          {
-            url: `/api/dinefera?email=${encodeURIComponent(userEmail)}`, setter: setUserDineFeraData, labelMap: {
-              nonMuslimMuslimHoise: t("dineFera.nonMuslimMuslimHoise"),
-              murtadIslamFireche: t("dineFera.murtadIslamFireche"),
-            }
-          },
-          {
-            url: `/api/soforbisoy?email=${encodeURIComponent(userEmail)}`,
-            setter: setUserSoforBishoyData,
-            labelMap: {
-              moktobVisit: t("soforbisoy.moktobVisit"),
-              madrasaVisit: t("soforbisoy.madrasaVisit"),
-              schoolCollegeVisit: t("soforbisoy.schoolCollegeVisit"),
-              madrasaVisitList: t("soforbisoy.madrasaVisitList"),
-              schoolCollegeVisitList: t("soforbisoy.schoolCollegeVisitList"),
-            }
-          },
-        ];
+  const fetcher = async (url: string) => {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}`);
+    return res.json();
+  };
 
-        const fetchPromises = endpoints.map(async ({ url, setter, labelMap }) => {
-          try {
-            const res = await fetch(url, { cache: "no-store" });
-            if (!res.ok) throw new Error(`Failed to fetch ${url}`);
-            const json = await res.json();
-            const records = Array.isArray(json.records) ? json.records : [];
-            const transformed: Record<string, Record<string, any>> = { [userEmail]: {} };
+  const readPersisted = <T,>(key: string): T | null => {
+    try {
+      const raw = sessionStorage.getItem(key);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as { ts: number; data: T };
+      if (!parsed?.data || !parsed?.ts) return null;
+      if (Date.now() - parsed.ts > cacheTTLms) return null;
+      return parsed.data;
+    } catch {
+      return null;
+    }
+  };
 
-            // NEW: detail maps (attach to dataset object later)
-            const assistantsByDate: Record<string, any[]> = {};
-            const madrasaByDate: Record<string, string[]> = {};
-            const schoolByDate: Record<string, string[]> = {};
+  const writePersisted = <T,>(key: string, data: T) => {
+    try {
+      sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+    } catch {
+      // ignore
+    }
+  };
 
-            records.forEach((rec: any) => {
-              const dateKey = dhakaYMD(new Date(rec.date));
-              transformed[userEmail][dateKey] = { ...rec };
-
-              // --- Keep raw arrays for modals ---
-              if (Array.isArray(rec.assistants)) {
-                assistantsByDate[dateKey] = rec.assistants; // raw array for Daye modal
-                transformed[userEmail][dateKey].assistantsList = toNumberedHTML(
-                  rec.assistants.map((a: any) => `${a.name} (${a.phone || ""})`)
-                );
-              }
-
-              if (Array.isArray(rec.madrasaVisitList)) {
-                madrasaByDate[dateKey] = rec.madrasaVisitList; // raw array for Sofor modal
-                transformed[userEmail][dateKey].madrasaVisitList = toNumberedHTML(rec.madrasaVisitList);
-              }
-              if (Array.isArray(rec.schoolCollegeVisitList)) {
-                schoolByDate[dateKey] = rec.schoolCollegeVisitList; // raw array for Sofor modal
-                transformed[userEmail][dateKey].schoolCollegeVisitList = toNumberedHTML(rec.schoolCollegeVisitList);
-              }
-              // Format quarntilawat as HTML (Para, Page, Ayat)
-              if (rec.quarntilawat && typeof rec.quarntilawat === "object") {
-                transformed[userEmail][dateKey].quarntilawat = `Para: ${rec.quarntilawat.para || "-"}<br/>Page: ${rec.quarntilawat.pageNo || "-"}<br/>Ayat: ${rec.quarntilawat.ayat || "-"}`;
-              }
-              // Existing handling for other array fields if they are not for modals
-              if (rec.assistants && !Array.isArray(rec.assistants)) { // Ensure not to overwrite if already handled for modal
-                transformed[userEmail][dateKey].assistants = toNumberedHTML(
-                  rec.assistants.map((a: any) => `${a.name} (${a.phone})`)
-                );
-              }
-            });
-
-            // set into state WITH detail maps (they'll only exist where relevant)
-            setter({
-              records: transformed,
-              labelMap,
-              _assistantsByDate: assistantsByDate,
-              _madrasaByDate: madrasaByDate,
-              _schoolByDate: schoolByDate,
-            });
-          } catch (error) {
-            console.error(`Error fetching ${url}:`, error);
-            toast.error(t("toast.errorFetchingData"));
-          }
-        });
-        await Promise.all(fetchPromises);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-        toast.error(t("toast.errorFetchingData"));
-      } finally {
-        setLoading(false);
-      }
+  const buildUserData = (labelMap: Record<string, string | undefined>, json: any) => {
+    const records = Array.isArray(json.records) ? json.records : [];
+    const transformed: Record<string, Record<string, any>> = {
+      [userEmail]: {},
     };
-    fetchData();
-  }, [userEmail]);
+
+    const assistantsByDate: Record<string, any[]> = {};
+    const madrasaByDate: Record<string, string[]> = {};
+    const schoolByDate: Record<string, string[]> = {};
+
+    records.forEach((rec: any) => {
+      const dateKey = dhakaYMD(new Date(rec.date));
+      // Convert undefined values to empty strings, keep other types as-is
+      const cleanedRec: Record<string, any> = {};
+      Object.keys(rec).forEach(key => {
+        const value = rec[key];
+        if (value === undefined) {
+          cleanedRec[key] = "";
+        } else {
+          cleanedRec[key] = value;
+        }
+      });
+      
+      transformed[userEmail][dateKey] = cleanedRec;
+
+      if (Array.isArray(rec.assistants)) {
+        assistantsByDate[dateKey] = rec.assistants;
+        transformed[userEmail][dateKey].assistantsList = toNumberedHTML(
+          rec.assistants.map((a: any) => `${a.name} (${a.phone || ""})`)
+        );
+      }
+
+      if (Array.isArray(rec.madrasaVisitList)) {
+        madrasaByDate[dateKey] = rec.madrasaVisitList;
+        transformed[userEmail][dateKey].madrasaVisitList = toNumberedHTML(
+          rec.madrasaVisitList
+        );
+      }
+      if (Array.isArray(rec.schoolCollegeVisitList)) {
+        schoolByDate[dateKey] = rec.schoolCollegeVisitList;
+        transformed[userEmail][dateKey].schoolCollegeVisitList =
+          toNumberedHTML(rec.schoolCollegeVisitList);
+      }
+
+      if (rec.quarntilawat && typeof rec.quarntilawat === "object") {
+        transformed[userEmail][dateKey].quarntilawat = `Para: ${
+          rec.quarntilawat.para || "-"
+        }<br/>Page: ${rec.quarntilawat.pageNo || "-"}<br/>Ayat: ${
+          rec.quarntilawat.ayat || "-"
+        }`;
+      }
+      if (rec.assistants && !Array.isArray(rec.assistants)) {
+        transformed[userEmail][dateKey].assistants = toNumberedHTML(
+          rec.assistants.map((a: any) => `${a.name} (${a.phone})`)
+        );
+      }
+    });
+
+    return {
+      records: transformed,
+      labelMap,
+      _assistantsByDate: assistantsByDate,
+      _madrasaByDate: madrasaByDate,
+      _schoolByDate: schoolByDate,
+    };
+  };
+
+  const endpoints = useMemo(
+    () => [
+      {
+        key: "amoli",
+        url: `/api/amoli?email=${encodeURIComponent(userEmail)}`,
+        setter: setUserAmoliData,
+        labelMap: {
+          tahajjud: t("amoli.tahajjud"),
+          quarntilawat: t("amoli.quarntilawat"),
+          zikir: t("amoli.zikir"),
+          ishraq: t("amoli.ishraq"),
+          jamat: t("amoli.jamat"),
+          sirat: t("amoli.sirat"),
+          Dua: t("amoli.dua"),
+          ilm: t("amoli.ilm"),
+          tasbih: t("amoli.tasbih"),
+          dayeeAmol: t("amoli.dayeeAmol"),
+          amoliSura: t("amoli.amoliSura"),
+          ayamroja: t("amoli.ayamroja"),
+          hijbulBahar: t("amoli.hijbulBahar"),
+        },
+      },
+      {
+        key: "moktob",
+        url: `/api/moktob?email=${encodeURIComponent(userEmail)}`,
+        setter: setUserMoktobBisoyData,
+        labelMap: {
+          notunMoktobChalu: t("moktob.notunMoktobChalu"),
+          totalMoktob: t("moktob.totalMoktob"),
+          totalStudent: t("moktob.totalStudent"),
+          obhibhabokConference: t("moktob.obhibhabokConference"),
+          moktoThekeMadrasaAdmission: t(
+            "moktob.moktoThekeMadrasaAdmission"
+          ),
+          notunBoyoskoShikkha: t("moktob.notunBoyoskoShikkha"),
+          totalBoyoskoShikkha: t("moktob.totalBoyoskoShikkha"),
+          boyoskoShikkhaOnshogrohon: t("moktob.boyoskoShikkhaOnshogrohon"),
+          newMuslimeDinerFikir: t("moktob.newMuslimeDinerFikir"),
+        },
+      },
+      {
+        key: "talim",
+        url: `/api/talim?email=${encodeURIComponent(userEmail)}`,
+        setter: setUserTalimBisoyData,
+        labelMap: {
+          mohilaTalim: t("talim.mohilaTalim"),
+          mohilaOnshogrohon: t("talim.mohilaOnshogrohon"),
+        },
+      },
+      {
+        key: "daye",
+        url: `/api/dayi?email=${encodeURIComponent(userEmail)}`,
+        setter: setUserDayeData,
+        labelMap: {
+          sohojogiDayeToiri: t("dayi.sohojogiDayeToiri"),
+          assistantsList: t("dayi.assistantsList"),
+        },
+      },
+      {
+        key: "dawati",
+        url: `/api/dawati?email=${encodeURIComponent(userEmail)}`,
+        setter: setUserDawatiBisoyData,
+        labelMap: {
+          nonMuslimDawat: t("dawati.nonMuslimDawat"),
+          murtadDawat: t("dawati.murtadDawat"),
+          alemderSatheyMojlish: t("dawati.alemderSatheyMojlish"),
+          publicSatheyMojlish: t("dawati.publicSatheyMojlish"),
+          nonMuslimSaptahikGasht: t("dawati.nonMuslimSaptahikGasht"),
+        },
+      },
+      {
+        key: "dawatimojlish",
+        url: `/api/dawatimojlish?email=${encodeURIComponent(userEmail)}`,
+        setter: setUserDawatiMojlishData,
+        labelMap: {
+          dawatterGuruttoMojlish: t("dawatiMojlish.dawatterGuruttoMojlish"),
+          mojlisheOnshogrohon: t("dawatiMojlish.mojlisheOnshogrohon"),
+          alemderSatheyMojlish: t("dawatiMojlish.alemderSatheyMojlish"),
+          publicSatheyMojlish: t("dawatiMojlish.publicSatheyMojlish"),
+          prosikkhonKormoshalaAyojon: t(
+            "dawatiMojlish.prosikkhonKormoshalaAyojon"
+          ),
+          prosikkhonOnshogrohon: t(
+            "dawatiMojlish.prosikkhonOnshogrohon"
+          ),
+          jummahAlochona: t("dawatiMojlish.jummahAlochona"),
+          dhormoSova: t("dawatiMojlish.dhormoSova"),
+          mashwaraPoint: t("dawatiMojlish.mashwaraPoint"),
+        },
+      },
+      {
+        key: "jamat",
+        url: `/api/jamat?email=${encodeURIComponent(userEmail)}`,
+        setter: setUserJamatBisoyData,
+        labelMap: {
+          jamatBerHoise: t("jamat.jamatBerHoise"),
+          jamatSathi: t("jamat.jamatSathi"),
+        },
+      },
+      {
+        key: "dinefera",
+        url: `/api/dinefera?email=${encodeURIComponent(userEmail)}`,
+        setter: setUserDineFeraData,
+        labelMap: {
+          nonMuslimMuslimHoise: t("dineFera.nonMuslimMuslimHoise"),
+          murtadIslamFireche: t("dineFera.murtadIslamFireche"),
+        },
+      },
+      {
+        key: "sofor",
+        url: `/api/soforbisoy?email=${encodeURIComponent(userEmail)}`,
+        setter: setUserSoforBishoyData,
+        labelMap: {
+          moktobVisit: t("soforbisoy.moktobVisit"),
+          madrasaVisit: t("soforbisoy.madrasaVisit"),
+          schoolCollegeVisit: t("soforbisoy.schoolCollegeVisit"),
+          madrasaVisitList: t("soforbisoy.madrasaVisitList"),
+          schoolCollegeVisitList: t("soforbisoy.schoolCollegeVisitList"),
+        },
+      },
+    ],
+    [userEmail, t]
+  );
+
+  const useEndpoint = (key: string, url: string, labelMap: Record<string, string | undefined>) => {
+    const persistKey = userEmail ? `${cachePrefix}:${key}:${userEmail}` : "";
+    const fallback = useMemo(
+      () => (userEmail ? readPersisted<any>(persistKey) : null),
+      [persistKey, userEmail]
+    );
+    const { data, error, isLoading } = useSWR(userEmail ? url : null, fetcher, {
+      revalidateOnFocus: true,
+      refreshInterval: refetchIntervalMs,
+      keepPreviousData: true,
+      dedupingInterval: 15_000,
+      fallbackData: fallback || undefined,
+      revalidateOnMount: !fallback,
+    });
+    useEffect(() => {
+      if (data && persistKey) writePersisted(persistKey, data);
+    }, [data, persistKey]);
+    const shaped = useMemo(
+      () => (data ? buildUserData(labelMap, data) : null),
+      [data, labelMap]
+    );
+    return { shaped, error, isLoading };
+  };
+
+  const amoliSW = useEndpoint("amoli", endpoints[0]?.url, endpoints[0]?.labelMap);
+  const moktobSW = useEndpoint("moktob", endpoints[1]?.url, endpoints[1]?.labelMap);
+  const talimSW = useEndpoint("talim", endpoints[2]?.url, endpoints[2]?.labelMap);
+  const dayeSW = useEndpoint("daye", endpoints[3]?.url, endpoints[3]?.labelMap);
+  const dawatiSW = useEndpoint("dawati", endpoints[4]?.url, endpoints[4]?.labelMap);
+  const dawatiMojlishSW = useEndpoint(
+    "dawatimojlish",
+    endpoints[5]?.url,
+    endpoints[5]?.labelMap
+  );
+  const jamatSW = useEndpoint("jamat", endpoints[6]?.url, endpoints[6]?.labelMap);
+  const dineFeraSW = useEndpoint(
+    "dinefera",
+    endpoints[7]?.url,
+    endpoints[7]?.labelMap
+  );
+  const soforSW = useEndpoint("sofor", endpoints[8]?.url, endpoints[8]?.labelMap);
+
+  useEffect(() => {
+    if (amoliSW.shaped) setUserAmoliData(amoliSW.shaped);
+  }, [amoliSW.shaped]);
+  useEffect(() => {
+    if (moktobSW.shaped) setUserMoktobBisoyData(moktobSW.shaped);
+  }, [moktobSW.shaped]);
+  useEffect(() => {
+    if (talimSW.shaped) setUserTalimBisoyData(talimSW.shaped);
+  }, [talimSW.shaped]);
+  useEffect(() => {
+    if (dayeSW.shaped) setUserDayeData(dayeSW.shaped);
+  }, [dayeSW.shaped]);
+  useEffect(() => {
+    if (dawatiSW.shaped) setUserDawatiBisoyData(dawatiSW.shaped);
+  }, [dawatiSW.shaped]);
+  useEffect(() => {
+    if (dawatiMojlishSW.shaped) setUserDawatiMojlishData(dawatiMojlishSW.shaped);
+  }, [dawatiMojlishSW.shaped]);
+  useEffect(() => {
+    if (jamatSW.shaped) setUserJamatBisoyData(jamatSW.shaped);
+  }, [jamatSW.shaped]);
+  useEffect(() => {
+    if (dineFeraSW.shaped) setUserDineFeraData(dineFeraSW.shaped);
+  }, [dineFeraSW.shaped]);
+  useEffect(() => {
+    if (soforSW.shaped) setUserSoforBishoyData(soforSW.shaped);
+  }, [soforSW.shaped]);
+
+  useEffect(() => {
+    if (
+      amoliSW.error ||
+      moktobSW.error ||
+      talimSW.error ||
+      dayeSW.error ||
+      dawatiSW.error ||
+      dawatiMojlishSW.error ||
+      jamatSW.error ||
+      dineFeraSW.error ||
+      soforSW.error
+    ) {
+      toast.error(t("toast.errorFetchingData"));
+    }
+  }, [
+    amoliSW.error,
+    moktobSW.error,
+    talimSW.error,
+    dayeSW.error,
+    dawatiSW.error,
+    dawatiMojlishSW.error,
+    jamatSW.error,
+    dineFeraSW.error,
+    soforSW.error,
+    t,
+  ]);
+
+  useEffect(() => {
+    const anyLoading =
+      amoliSW.isLoading ||
+      moktobSW.isLoading ||
+      talimSW.isLoading ||
+      dayeSW.isLoading ||
+      dawatiSW.isLoading ||
+      dawatiMojlishSW.isLoading ||
+      jamatSW.isLoading ||
+      dineFeraSW.isLoading ||
+      soforSW.isLoading;
+    const anyData =
+      !!amoliSW.shaped ||
+      !!moktobSW.shaped ||
+      !!talimSW.shaped ||
+      !!dayeSW.shaped ||
+      !!dawatiSW.shaped ||
+      !!dawatiMojlishSW.shaped ||
+      !!jamatSW.shaped ||
+      !!dineFeraSW.shaped ||
+      !!soforSW.shaped;
+    setLoading(anyLoading && !anyData);
+  }, [
+    amoliSW.isLoading,
+    moktobSW.isLoading,
+    talimSW.isLoading,
+    dayeSW.isLoading,
+    dawatiSW.isLoading,
+    dawatiMojlishSW.isLoading,
+    jamatSW.isLoading,
+    dineFeraSW.isLoading,
+    soforSW.isLoading,
+    amoliSW.shaped,
+    moktobSW.shaped,
+    talimSW.shaped,
+    dayeSW.shaped,
+    dawatiSW.shaped,
+    dawatiMojlishSW.shaped,
+    jamatSW.shaped,
+    dineFeraSW.shaped,
+    soforSW.shaped,
+  ]);
 
   // Filter data by selected month and year
   const filterChartAndTallyData = (userData: any) => {
@@ -549,20 +743,14 @@ const Dashboard: React.FC<TallyProps> = () => {
         })
         .from(element)
         .toPdf()
-        .get("pdf")
-        .then((pdf) => {
-          const totalPages = pdf.internal.getNumberOfPages();
-          for (let i = 1; i <= totalPages; i++) {
-            pdf.setPage(i);
-            pdf.setFontSize(10);
-            pdf.text(
-              `Page ${i} of ${totalPages}`,
-              pdf.internal.pageSize.getWidth() - 20,
-              pdf.internal.pageSize.getHeight() - 5
-            );
-          }
-        })
-        .save();
+        .output('dataurlstring')
+        .then((pdfString) => {
+          // Create a temporary link to download the PDF
+          const link = document.createElement('a');
+          link.href = pdfString;
+          link.download = `comparison_report.pdf`;
+          link.click();
+        });
     } catch (error) {
       console.error("Error generating PDF:", error);
     }
@@ -570,8 +758,66 @@ const Dashboard: React.FC<TallyProps> = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-emerald-500"></div>
+      <div className="space-y-4">
+        {/* Header Skeleton */}
+        <div className="flex flex-col gap-4 lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl">
+          <div className="h-8 bg-gray-200 rounded w-48 animate-pulse"></div>
+          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto justify-center lg:justify-end">
+            <div className="h-10 bg-gray-200 rounded w-32 animate-pulse"></div>
+            <div className="flex gap-3 items-center w-full md:w-auto">
+              <div className="h-10 bg-gray-200 rounded w-24 animate-pulse"></div>
+              <div className="h-10 bg-gray-200 rounded w-16 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Charts Grid Skeleton */}
+        <div className="grid xl:grid-cols-3 p-2 lg:p-6 gap-6 overflow-y-auto border border-[#155E75] rounded-xl">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white p-4 rounded-lg shadow">
+              <div className="h-6 bg-gray-200 rounded w-3/4 mb-4 animate-pulse"></div>
+              <div className="space-y-2">
+                {[1, 2, 3, 4].map((j) => (
+                  <div key={j} className="flex justify-between items-center">
+                    <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Tabs Skeleton */}
+        <div className="bg-white p-2 lg:p-6 rounded-lg shadow-md">
+          {/* Tab List Skeleton */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {["Amolimusahaba", "moktob", "talim", "daye", "dawati", "dawatimojlish", "jamat", "dinefera", "sofor", "bivag"].map((tab) => (
+              <div key={tab} className="h-10 bg-gray-200 rounded w-24 animate-pulse"></div>
+            ))}
+          </div>
+
+          {/* Table Skeleton */}
+          <div className="bg-gray-50 rounded shadow p-4">
+            <div className="space-y-3">
+              {/* Table Header */}
+              <div className="grid grid-cols-5 gap-4 pb-2 border-b">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                ))}
+              </div>
+              
+              {/* Table Rows */}
+              {[1, 2, 3, 4, 5].map((row) => (
+                <div key={row} className="grid grid-cols-5 gap-4">
+                  {[1, 2, 3, 4, 5].map((col) => (
+                    <div key={col} className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

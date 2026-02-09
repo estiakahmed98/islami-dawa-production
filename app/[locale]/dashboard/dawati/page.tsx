@@ -93,36 +93,90 @@ const DawatiPage: React.FC = () => {
     fetchData();
   }, [userEmail, labelMap, tToast]);
 
-  if (loading) return <Loading />;
-
   return (
     <div>
-      <Tabs defaultValue="dataForm" className="w-full p-2 lg:p-4">
-        <div className="flex justify-between">
-          <TabsList>
-            <TabsTrigger value="dataForm">{tCommon("dataForm")}</TabsTrigger>
-            <TabsTrigger value="report">{tCommon("report")}</TabsTrigger>
-          </TabsList>
+      {loading ? (
+        // Page Skeleton Loader
+        <div className="w-full p-2 lg:p-4">
+          {/* Tab List Skeleton */}
+          <div className="flex justify-between mb-6">
+            <div className="flex gap-2">
+              <div className="h-10 bg-gray-200 rounded w-24 animate-pulse"></div>
+              <div className="h-10 bg-gray-200 rounded w-16 animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Tab Content Skeleton */}
+          <div className="bg-gray-50 lg:rounded lg:shadow p-6">
+            {/* Form Skeleton */}
+            <div className="space-y-6">
+              {/* Alert Skeleton */}
+              <div className="h-12 bg-gray-100 rounded-lg mb-8 animate-pulse"></div>
+
+              {/* Title Skeleton */}
+              <div className="h-8 bg-gray-200 rounded w-48 mb-6 animate-pulse"></div>
+
+              {/* Form Grid Skeleton */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {/* Form Field Skeletons */}
+                {[1, 2, 3].map((i) => (
+                  <div key={i}>
+                    {/* Label Skeleton */}
+                    <div className="h-5 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+                    
+                    {/* Input Field Skeleton */}
+                    <div className="h-10 bg-gray-200 rounded w-full mb-3 animate-pulse"></div>
+                    
+                    {/* Error Message Skeleton */}
+                    <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Editor Skeleton */}
+              <div className="mt-4">
+                {/* Editor Label Skeleton */}
+                <div className="h-5 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+                
+                {/* Editor Content Skeleton */}
+                <div className="h-72 bg-gray-200 rounded w-full animate-pulse"></div>
+              </div>
+
+              {/* Submit Button Skeleton */}
+              <div className="flex justify-end mt-4">
+                <div className="h-10 bg-gray-200 rounded w-24 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <TabsContent value="dataForm">
-          <div className="bg-gray-50 lg:rounded lg:shadow">
-            <DawatiForm />
+      ) : (
+        <Tabs defaultValue="dataForm" className="w-full p-2 lg:p-4">
+          <div className="flex justify-between">
+            <TabsList>
+              <TabsTrigger value="dataForm">{tCommon("dataForm")}</TabsTrigger>
+              <TabsTrigger value="report">{tCommon("report")}</TabsTrigger>
+            </TabsList>
           </div>
-        </TabsContent>
 
-        <TabsContent value="report">
-          <div className="bg-gray-50 rounded shadow">
-            <UniversalTableShow
-              userData={userData}
-              selectedMonth={selectedMonth}
-              selectedYear={selectedYear}
-              onMonthChange={setSelectedMonth}
-              onYearChange={setSelectedYear}
-            />
-          </div>
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="dataForm">
+            <div className="bg-gray-50 lg:rounded lg:shadow">
+              <DawatiForm />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="report">
+            <div className="bg-gray-50 rounded shadow">
+              <UniversalTableShow
+                userData={userData}
+                selectedMonth={selectedMonth}
+                selectedYear={selectedYear}
+                onMonthChange={setSelectedMonth}
+                onYearChange={setSelectedYear}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 };

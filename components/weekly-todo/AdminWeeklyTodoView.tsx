@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import useSWR from "swr";
 import { useTranslations } from "next-intl";
 import { useSession } from "@/lib/auth-client";
 import { useParentEmail } from "@/hooks/useParentEmail";
@@ -16,6 +17,7 @@ const debounce = <F extends (...args: any[]) => void>(
     timeout = setTimeout(() => func(...args), wait);
   };
 };
+
 import { WeeklyTodo, User } from "@/types/weekly-todo";
 import { adminWeeklyTodoService } from "@/services/admin-weekly-todo";
 
@@ -50,19 +52,57 @@ interface GroupedTodos {
   };
 }
 
+// SWR fetcher function
+const fetcher = async (url: string) => {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+};
+
+// Skeleton loader component
+const SkeletonLoader = () => (
+  <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+    {[1, 2, 3, 4, 5, 6].map((i) => (
+      <div key={i} className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+        <div className="p-6">
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1">
+              <div className="h-6 bg-gray-200 rounded w-3/4 mb-3 animate-pulse"></div>
+              <div className="flex gap-2 mb-3">
+                <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+                <div className="h-5 bg-gray-200 rounded w-20 animate-pulse"></div>
+              </div>
+              <div className="h-4 bg-gray-200 rounded w-full mb-2 animate-pulse"></div>
+              <div className="h-3 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+            </div>
+            <div className="w-6 h-6 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+        <div className="border-t border-gray-200/50 p-4">
+          <div className="space-y-3">
+            {[1, 2, 3].map((j) => (
+              <div key={j} className="p-4 bg-gray-50 rounded-lg">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-3 animate-pulse"></div>
+                <div className="h-3 bg-gray-200 rounded w-full mb-2 animate-pulse"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 export default function AdminWeeklyTodoView() {
   const t = useTranslations("weeklyTodo.adminWeeklyTodo");
   const { data: session } = useSession();
   const { getParentEmail } = useParentEmail();
-  const [apiTodos, setApiTodos] = useState<WeeklyTodo[]>([]);
   const [filteredTodos, setFilteredTodos] = useState<WeeklyTodo[]>([]);
   const [groupedTodos, setGroupedTodos] = useState<GroupedTodos>({});
   const [users, setUsers] = useState<User[]>([]);
-  const [userDirectory, setUserDirectory] = useState<DirectoryUser[]>([]);
   const [allowedUserIds, setAllowedUserIds] = useState<string[]>([]);
   const [allowedUserEmails, setAllowedUserEmails] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
 
   // Filters
@@ -76,6 +116,25 @@ export default function AdminWeeklyTodoView() {
   const [nameSearch, setNameSearch] = useState<string>("");
   const [searchInput, setSearchInput] = useState<string>("");
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // SWR for users data
+  const { data: usersData, error: usersError, isLoading: usersLoading } = useSWR(
+    "/api/users",
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 300000, // 5 minutes
+    }
+  );
+
+  // Process users data
+  const userDirectory = useMemo(() => {
+    if (!usersData) return [];
+    return Array.isArray(usersData) ? usersData : usersData.users || [];
+  }, [usersData]);
+
+  // Remove the old fetchUsers useEffect since we're using SWR
 
   const applyScope = useCallback(
     (todos: WeeklyTodo[]) => {
@@ -98,28 +157,10 @@ export default function AdminWeeklyTodoView() {
   );
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("/api/users", { cache: "no-store" });
-        if (!response.ok) return;
-        const payload = await response.json();
-        const fetchedUsers: DirectoryUser[] = Array.isArray(payload)
-          ? payload
-          : payload?.users || [];
-        setUserDirectory(fetchedUsers);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
     if (!session?.user?.email || userDirectory.length === 0) return;
 
     const loggedUser =
-      userDirectory.find((u) => u.email === session.user.email) || null;
+      userDirectory.find((u: DirectoryUser) => u.email === session.user.email) || null;
 
     if (!loggedUser) {
       setAllowedUserEmails([session.user.email]);
@@ -137,7 +178,7 @@ export default function AdminWeeklyTodoView() {
     addUser(loggedUser);
 
     const collectChildren = (parentEmail: string) => {
-      userDirectory.forEach((user) => {
+      userDirectory.forEach((user: DirectoryUser) => {
         const parentEmailForUser = getParentEmail(
           user,
           userDirectory,
@@ -241,28 +282,39 @@ export default function AdminWeeklyTodoView() {
     }
   };
 
-  const fetchData = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
+  // SWR for todos data
+  const { data: todosData, error: todosError, isLoading: todosLoading, mutate: mutateTodos } = useSWR(
+    () => {
       const dateRangeValues = getDateRange();
-      const data = await adminWeeklyTodoService.getAdminTodos({
-        status: statusFilter !== "all" ? statusFilter : undefined,
-        userId: selectedUser !== "all" ? selectedUser : undefined,
-        weekday: weekdayFilter !== "all" ? weekdayFilter : undefined,
-        startDate: dateRangeValues.start || undefined,
-        endDate: dateRangeValues.end || undefined,
-      });
-
-      setApiTodos(data.todos);
-    } catch (err) {
-      setError(t("errors.loadFailed"));
-      console.error("Error fetching data:", err);
-    } finally {
-      setLoading(false);
+      const params = new URLSearchParams();
+      if (statusFilter !== "all") params.append("status", statusFilter);
+      if (selectedUser !== "all") params.append("userId", selectedUser);
+      if (weekdayFilter !== "all") params.append("weekday", weekdayFilter);
+      if (dateRangeValues.start) params.append("startDate", dateRangeValues.start);
+      if (dateRangeValues.end) params.append("endDate", dateRangeValues.end);
+      
+      const queryString = params.toString();
+      return queryString ? `/api/weekly-todo/admin?${queryString}` : "/api/weekly-todo/admin";
+    },
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 30000, // 30 seconds - reduced for more responsive updates
+      refreshInterval: 0, // Disable auto-refresh, only manual refresh
+      mutate: undefined, // Use the mutate function from the hook
     }
-  };
+  );
+
+  // Process todos data
+  const apiTodos = useMemo(() => {
+    if (!todosData) return [];
+    return todosData.todos || [];
+  }, [todosData]);
+
+  // Combined loading state
+  const loading = usersLoading || todosLoading;
+  const error = usersError || todosError;
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -289,13 +341,7 @@ export default function AdminWeeklyTodoView() {
     }
   }, []);
 
-  // Fetch data when filters change (except search)
-  useEffect(() => {
-    fetchData();
-    // We only want to refetch when these dependencies change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedUser, statusFilter, dateRange, customDate, weekdayFilter]);
-
+  // Process and group todos when data changes
   useEffect(() => {
     const scoped = applyScope(apiTodos);
     const filtered = filterTodos(scoped, nameSearch);
@@ -354,15 +400,9 @@ export default function AdminWeeklyTodoView() {
     return locationParts.join(" → ");
   };
 
+  // Show skeleton loader while loading
   if (loading) {
-    return (
-      <div className="flex justify-center items-center py-20">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#1B809B] mx-auto mb-4"></div>
-          <p className="text-gray-600">{t("loading")}</p>
-        </div>
-      </div>
-    );
+    return <SkeletonLoader />;
   }
 
   return (
@@ -461,12 +501,13 @@ export default function AdminWeeklyTodoView() {
           {/* Action Buttons */}
           <div className="flex items-end space-x-3">
             <button
-              onClick={fetchData}
-              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
+              onClick={() => mutateTodos(undefined, { revalidate: true })}
+              disabled={todosLoading}
+              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:transform-none disabled:cursor-not-allowed"
             >
               <div className="flex items-center justify-center">
                 <svg
-                  className="w-4 h-4 mr-2"
+                  className={`w-4 h-4 mr-2 ${todosLoading ? 'animate-spin' : ''}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -478,7 +519,7 @@ export default function AdminWeeklyTodoView() {
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                   />
                 </svg>
-                {t("refresh")}
+                {todosLoading ? t("refreshing") : t("refresh")}
               </div>
             </button>
           </div>

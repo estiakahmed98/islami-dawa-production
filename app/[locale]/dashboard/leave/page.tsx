@@ -104,10 +104,14 @@ export default function LeavesPage() {
   if (!session) {
     return (
       <main className="flex flex-col items-center justify-center min-h-[80vh] p-4 md:p-6 lg:p-8 space-y-8 bg-gray-50 dark:bg-gray-900">
-        <h1 className="text-4xl font-bold text-center text-gray-800 dark:text-gray-200">
-          {t("title")}
-        </h1>
-        <p className="text-lg text-muted-foreground">{t("loadingSession")}</p>
+        {/* Page Title Skeleton */}
+        <div className="h-12 bg-gray-200 rounded w-64 animate-pulse"></div>
+        
+        {/* Loading Text Skeleton */}
+        <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+        
+        {/* Button Skeleton */}
+        <div className="h-12 bg-gray-200 rounded w-32 animate-pulse"></div>
       </main>
     );
   }
@@ -115,10 +119,14 @@ export default function LeavesPage() {
   if (!userEmail) {
     return (
       <main className="flex flex-col items-center justify-center min-h-[80vh] p-4 md:p-6 lg:p-8 space-y-8 bg-gray-50 dark:bg-gray-900">
-        <h1 className="text-4xl font-bold text-center text-gray-800 dark:text-gray-200">
-          {t("title")}
-        </h1>
-        <p className="text-lg text-muted-foreground">{t("loginPrompt")}</p>
+        {/* Page Title Skeleton */}
+        <div className="h-12 bg-gray-200 rounded w-64 animate-pulse"></div>
+        
+        {/* Login Prompt Skeleton */}
+        <div className="h-6 bg-gray-200 rounded w-56 animate-pulse"></div>
+        
+        {/* Button Skeleton */}
+        <div className="h-12 bg-gray-200 rounded w-32 animate-pulse"></div>
       </main>
     );
   }
@@ -157,10 +165,24 @@ export default function LeavesPage() {
         <LeaveStatsBar leaveRequests={statsData} />
       )}
 
-      {/* Optionally show a small loader / message while stats load or error */}
+      {/* Stats bar skeleton while loading */}
       {statsLoading && (
-        <div className="w-full flex items-center justify-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600" />
+        <div className="w-full space-y-4">
+          {/* Stats Cards Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-lg shadow p-6 border border-gray-200">
+                <div className="space-y-3">
+                  {/* Icon Skeleton */}
+                  <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                  {/* Value Skeleton */}
+                  <div className="h-6 bg-gray-200 rounded w-12 animate-pulse"></div>
+                  {/* Label Skeleton */}
+                  <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
       {statsError && (

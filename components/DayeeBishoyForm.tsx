@@ -141,7 +141,48 @@ const DayeeBishoyForm: React.FC = () => {
     }
   };
 
-  if (loading) return <Loading />;
+  if (loading) {
+    return (
+      <div className="w-full mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
+        {/* Alert Message Skeleton */}
+        <div className="h-12 bg-gray-100 rounded-lg mb-8 animate-pulse"></div>
+
+        {/* Title Skeleton */}
+        <div className="h-8 bg-gray-200 rounded w-48 mb-6 animate-pulse"></div>
+
+        {/* Form Grid Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Form Field Skeletons */}
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <div key={i}>
+              {/* Label Skeleton */}
+              <div className="h-5 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+              
+              {/* Input Field Skeleton */}
+              <div className="h-10 bg-gray-200 rounded w-full mb-3 animate-pulse"></div>
+              
+              {/* Error Message Skeleton */}
+              <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Editor Skeleton */}
+        <div className="mt-4">
+          {/* Editor Label Skeleton */}
+          <div className="h-5 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+          
+          {/* Editor Content Skeleton */}
+          <div className="h-72 bg-gray-200 rounded w-full animate-pulse"></div>
+        </div>
+
+        {/* Submit Button Skeleton */}
+        <div className="flex justify-end mt-4">
+          <div className="h-10 bg-gray-200 rounded w-24 animate-pulse"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-4 lg:p-10 shadow-lg">

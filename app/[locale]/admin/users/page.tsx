@@ -1,10 +1,28 @@
-import UsersTable from "./UsersTable";
+"use client";
 
-const UserPage = async () => {
+import UsersTable from "./UsersTable";
+import { SWRConfig } from "swr";
+
+const fetcher = async (url: string) => {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+};
+
+const UserPage = () => {
   return (
-    <div className="h-screen">
-      <UsersTable />
-    </div>
+    <SWRConfig
+      value={{
+        fetcher,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: true,
+        dedupingInterval: 300000, // 5 minutes
+      }}
+    >
+      <div className="h-screen">
+        <UsersTable />
+      </div>
+    </SWRConfig>
   );
 };
 

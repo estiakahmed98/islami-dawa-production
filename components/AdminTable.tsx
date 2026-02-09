@@ -68,7 +68,6 @@ const AdminTable: React.FC<AdminTableProps> = ({
   const selectedMonth = selectedMonthProp ?? internalMonth;
   const selectedYear = selectedYearProp ?? internalYear;
 
-  const [transposedData, setTransposedData] = useState<any[]>([]);
   const [motamotPopup, setMotamotPopup] = useState<string | null>(null);
   const [filterLabel, setFilterLabel] = useState<string>("");
   const [filterValue, setFilterValue] = useState<string>("");
@@ -177,8 +176,9 @@ const AdminTable: React.FC<AdminTableProps> = ({
     return 0;
   };
 
-  useEffect(() => {
-    if (!userData || !userData.records || !emailList.length) return;
+
+  const transposedData = useMemo(() => {
+    if (!userData || !userData.records || !emailList.length) return [];
 
     const labelsMap: Record<string, string> = userData.labelMap || {};
     const labelKeys = Object.keys(labelsMap);
@@ -192,12 +192,10 @@ const AdminTable: React.FC<AdminTableProps> = ({
       monthDays.forEach((day) => {
         const date = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         if (emailList.length === 1) {
-          // single user: show raw value (not aggregated)
           const email = emailList[0];
           const raw = userData.records[email]?.[date]?.[labelKey];
           row[day] = raw ?? "- -";
         } else {
-          // aggregated: existing behavior (sum points)
           const sum = emailList.reduce((tot, email) => {
             const val = userData.records[email]?.[date]?.[labelKey];
             return tot + convertToPoints(val, labelKey);
@@ -209,8 +207,6 @@ const AdminTable: React.FC<AdminTableProps> = ({
       return row;
     });
 
-    // If single user, add a কারগুজারী (editorContent) row (eye button -> popup)
-    // Avoid adding if the labelMap already contains an `editorContent` key
     if (emailList.length === 1 && !labelKeys.includes("editorContent")) {
       const motamotRow: { label: string; labelKey: string; [key: number]: any } = {
         label: t("motamot"),
@@ -224,7 +220,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
         motamotRow[day] =
           motamotText !== "- -" ? (
             <button onClick={() => setMotamotPopup(motamotText)} title="See note">
-              👁️
+              ðŸ‘ï¸
             </button>
           ) : (
             "- -"
@@ -233,9 +229,8 @@ const AdminTable: React.FC<AdminTableProps> = ({
       transposed.push(motamotRow);
     }
 
-    setTransposedData(transposed);
-  }, [selectedMonth, selectedYear, userData, emailList, monthDays]);
-
+    return transposed;
+  }, [userData, emailList, monthDays, selectedMonth, selectedYear]);
   const filteredData = useMemo(() => {
     return transposedData.filter((row) => {
       const matchesLabel = filterLabel

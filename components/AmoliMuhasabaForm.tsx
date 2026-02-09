@@ -293,7 +293,49 @@ const AmoliMuhasabaForm = () => {
   };
 
   // Render loading state
-  if (loading) return <Loading />;
+  if (loading) {
+    return (
+      <div className="mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
+        {/* Title Skeleton */}
+        <div className="h-8 bg-gray-200 rounded w-48 mb-8 animate-pulse"></div>
+        
+        {/* Alert Message Skeleton */}
+        <div className="h-12 bg-gray-100 rounded-lg mb-8 animate-pulse"></div>
+        
+        {/* Form Grid Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Form Fields Skeleton */}
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].map((i) => (
+            <div key={i} className="mb-4">
+              {/* Label Skeleton */}
+              <div className="h-5 bg-gray-200 rounded w-24 mb-2 animate-pulse"></div>
+              
+              {/* Input Field Skeleton */}
+              <div className="h-10 bg-gray-200 rounded w-full mb-2 animate-pulse"></div>
+              
+              {/* Points Display Skeleton */}
+              <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Textarea Skeleton */}
+        <div className="mb-4 mt-8">
+          <div className="h-5 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+          <div className="h-32 bg-gray-200 rounded w-full animate-pulse"></div>
+        </div>
+        
+        {/* Submit Section Skeleton */}
+        <div className="mt-6 flex items-center justify-between">
+          {/* Total Points Skeleton */}
+          <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+          
+          {/* Submit Button Skeleton */}
+          <div className="h-10 bg-gray-200 rounded w-24 animate-pulse"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
@@ -358,57 +400,6 @@ const AmoliMuhasabaForm = () => {
                 />
                 <div className="text-gray-600">Points: {points.jamat}</div>
               </div>
-
-              {/* <div className="mb-2">
-                <label className="mb-2 block text-gray-700">{t("surah")}</label>
-                <Field
-                  name="surah"
-                  as="select"
-                  disabled={isSubmittedToday}
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                  onChange={(
-                    e:
-                      | ChangeEvent<HTMLInputElement | HTMLSelectElement>
-                      | ChangeEvent<HTMLSelectElement>
-                  ) => handleInputChange(e, "surah", setFieldValue)}
-                >
-                  <option value="">{common("selectOption")}</option>
-                  {surahOptions.map((option) => (
-                    <option key={option.value} value={option.label}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Field>
-                <ErrorMessage
-                  name="surah"
-                  component="div"
-                  className="text-red-500"
-                />
-                <div className="text-gray-600">Points: {points.surah}</div>
-              </div>
-              <div className="mb-2">
-                <label className="mb-2 block text-gray-700">{t("ayat")}</label>
-                <Field
-                  name="ayat"
-                  type="text"
-                  placeholder="Start - End"
-                  className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
-                  onChange={(
-                    e:
-                      | ChangeEvent<HTMLInputElement | HTMLSelectElement>
-                      | ChangeEvent<HTMLSelectElement>
-                  ) => handleInputChange(e, "ayat", setFieldValue)}
-                  disabled={isSubmittedToday}
-                />
-                <ErrorMessage
-                  name="ayat"
-                  component="div"
-                  className="text-red-500"
-                />
-                <div className="text-gray-600">
-                  {common("points")}: {points.ayat}
-                </div>
-              </div> */}
 
               <div className="grid grid-cols-1 md:grid-cols-3 lg:col-span-2 gap-4">
                 <div className="mb-2">

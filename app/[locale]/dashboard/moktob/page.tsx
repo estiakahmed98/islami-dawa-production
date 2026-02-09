@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useMemo, useRef } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/TabButton"
 import { useSession } from "@/lib/auth-client"
 import UniversalTableShow from "@/components/TableShow"
@@ -27,12 +27,12 @@ function dhakaYMD(d: Date) {
 
 const MoktobPage: React.FC = () => {
   const { data: session } = useSession()
-  const userEmail = session?.user?.email ?? ""
+  const userEmail = useMemo(() => session?.user?.email ?? "", [session?.user?.email])
 
   const t = useTranslations("dashboard.UserDashboard.moktob")
   const common = useTranslations("common")
 
-  const labelMap: LabelMap = {
+  const labelMap: LabelMap = useMemo(() => ({
     notunMoktobChalu: t("notunMoktobChalu"),
     totalMoktob: t("totalMoktob"),
     totalStudent: t("totalStudent"),
@@ -42,7 +42,7 @@ const MoktobPage: React.FC = () => {
     totalBoyoskoShikkha: t("totalBoyoskoShikkha"),
     boyoskoShikkhaOnshogrohon: t("boyoskoShikkhaOnshogrohon"),
     newMuslimeDinerFikir: t("newMuslimeDinerFikir"),
-  }
+  }), [t])
 
   const [userData, setUserData] = React.useState<{ records: RecordsByUserAndDate; labelMap: LabelMap }>({
     records: {},
@@ -50,12 +50,19 @@ const MoktobPage: React.FC = () => {
   })
   const [selectedMonth, setSelectedMonth] = React.useState<number>(new Date().getMonth())
   const [selectedYear, setSelectedYear] = React.useState<number>(new Date().getFullYear())
+  
+  // Track fetched emails to prevent duplicate calls
+  const fetchedEmails = useRef<Set<string>>(new Set());
 
   React.useEffect(() => {
     if (!userEmail) {
       setUserData({ records: {}, labelMap })
       return
     }
+
+    // Prevent duplicate calls for the same email
+    if (fetchedEmails.current.has(userEmail)) return;
+    fetchedEmails.current.add(userEmail);
 
     const ac = new AbortController()
 
@@ -102,7 +109,34 @@ const MoktobPage: React.FC = () => {
     })()
 
     return () => ac.abort()
-  }, [userEmail, labelMap])
+  }, [userEmail, labelMap, common])
+
+  // Cleanup function to reset fetched emails when component unmounts
+  React.useEffect(() => {
+    return () => {
+      fetchedEmails.current.clear();
+    };
+  }, []);
+
+  // Listen for data refresh events from the form
+  React.useEffect(() => {
+    const handleDataRefresh = () => {
+      // Clear the fetched emails to allow fresh data fetch
+      fetchedEmails.current.clear();
+      // Trigger a re-fetch by changing userEmail temporarily
+      if (userEmail) {
+        setUserData({ records: {}, labelMap });
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('moktob-data-refresh', handleDataRefresh);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('moktob-data-refresh', handleDataRefresh);
+    };
+  }, [userEmail, labelMap]);
 
   return (
     <div>

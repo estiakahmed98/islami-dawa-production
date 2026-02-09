@@ -360,8 +360,22 @@ export default function EditRequestsPage() {
 
           <div ref={tableRef} className="overflow-x-auto bg-white shadow-md rounded-lg border border-gray-200">
             {isLoading ? (
-              <div className="flex justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+              <div className="p-6 space-y-4">
+                {/* Table Header Skeleton */}
+                <div className="grid grid-cols-6 gap-4 pb-4 border-b">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                  ))}
+                </div>
+                
+                {/* Table Rows Skeleton */}
+                {[1, 2, 3, 4, 5].map((row) => (
+                  <div key={row} className="grid grid-cols-6 gap-4 py-3 border-b">
+                    {[1, 2, 3, 4, 5, 6].map((col) => (
+                      <div key={col} className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                    ))}
+                  </div>
+                ))}
               </div>
             ) : (
               <Table>

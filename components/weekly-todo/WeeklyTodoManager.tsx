@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { WeeklyTodo, DateRangeType } from "@/types/weekly-todo";
 import { weeklyTodoService } from "@/services/user-weekly-todo";
@@ -11,7 +11,16 @@ import WeekendWarningModal from "./WeekendWarningModal";
 export default function WeeklyTodoManager() {
   const t = useTranslations("weeklyTodo.DayeWeeklyTodo");
   const [todos, setTodos] = useState<WeeklyTodo[]>([]);
+  const [totalTodos, setTotalTodos] = useState(0);
+  const [stats, setStats] = useState({
+    total: 0,
+    completed: 0,
+    pending: 0,
+    cancelled: 0,
+  });
   const [loading, setLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
+  const hasLoadedRef = useRef(false);
   const [error, setError] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isWeekendWarningOpen, setIsWeekendWarningOpen] = useState(false);
@@ -22,6 +31,8 @@ export default function WeeklyTodoManager() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [customDate, setCustomDate] = useState("");
   const [weekdayFilter, setWeekdayFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
+  const pageSize = 50;
 
   // Get date range based on selection
   const getDateRange = (range: DateRangeType) => {
@@ -61,7 +72,12 @@ export default function WeeklyTodoManager() {
   };
 
   const fetchTodos = async () => {
-    setLoading(true);
+    const isInitialLoad = !hasLoadedRef.current;
+    if (isInitialLoad) {
+      setLoading(true);
+    } else {
+      setIsFetching(true);
+    }
     setError("");
 
     try {
@@ -81,19 +97,30 @@ export default function WeeklyTodoManager() {
         params.endDate = dateRangeValues.end;
       }
 
+      params.page = page;
+      params.limit = pageSize;
+
       const data = await weeklyTodoService.getTodos(params);
-      setTodos(data);
+      setTodos(data.items);
+      setTotalTodos(data.total);
+      setStats(data.stats);
+      hasLoadedRef.current = true;
     } catch (err) {
       setError(t("errors.loadFailed"));
       console.error("Error fetching todos:", err);
     } finally {
       setLoading(false);
+      setIsFetching(false);
     }
   };
 
   useEffect(() => {
-    fetchTodos();
+    setPage(1);
   }, [dateRange, statusFilter, customDate, weekdayFilter]);
+
+  useEffect(() => {
+    fetchTodos();
+  }, [dateRange, statusFilter, customDate, weekdayFilter, page]);
 
   const handleTodoAdded = () => {
     fetchTodos();
@@ -132,20 +159,13 @@ export default function WeeklyTodoManager() {
     setIsWeekendWarningOpen(true);
   };
 
-  const getStats = () => {
-    const total = todos.length;
-    const completed = todos.filter(
-      (todo) => todo.status === "completed"
-    ).length;
-    const pending = todos.filter((todo) => todo.status === "pending").length;
-    const cancelled = todos.filter(
-      (todo) => todo.status === "cancelled"
-    ).length;
+  const totalPages = Math.max(Math.ceil(totalTodos / pageSize), 1);
 
-    return { total, completed, pending, cancelled };
-  };
-
-  const stats = getStats();
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-emerald-50/20">
@@ -186,97 +206,112 @@ export default function WeeklyTodoManager() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-6 text-center">
-          <div className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg">
-            <svg
-              className="w-7 h-7 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        {loading ? (
+          Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={`stats-skeleton-${index}`}
+              className="bg-white/70 rounded-2xl border border-white/30 shadow-xl p-6 text-center animate-pulse"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              />
-            </svg>
-          </div>
-          <div className="text-3xl font-bold text-gray-900 mb-2">
-            {stats.total}
-          </div>
-          <div className="text-gray-600 font-medium">{t("stats.total")}</div>
-        </div>
+              <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-gray-200/80"></div>
+              <div className="h-8 w-16 mx-auto mb-3 rounded bg-gray-200/80"></div>
+              <div className="h-4 w-24 mx-auto rounded bg-gray-200/70"></div>
+            </div>
+          ))
+        ) : (
+          <>
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-6 text-center">
+              <div className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg">
+                <svg
+                  className="w-7 h-7 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
+                </svg>
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-2">
+                {stats.total}
+              </div>
+              <div className="text-gray-600 font-medium">{t("stats.total")}</div>
+            </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-6 text-center">
-          <div className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 shadow-lg">
-            <svg
-              className="w-7 h-7 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <div className="text-3xl font-bold text-green-600 mb-2">
-            {stats.completed}
-          </div>
-          <div className="text-gray-600 font-medium">
-            {t("stats.completed")}
-          </div>
-        </div>
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-6 text-center">
+              <div className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 shadow-lg">
+                <svg
+                  className="w-7 h-7 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div className="text-3xl font-bold text-green-600 mb-2">
+                {stats.completed}
+              </div>
+              <div className="text-gray-600 font-medium">
+                {t("stats.completed")}
+              </div>
+            </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-6 text-center">
-          <div className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 shadow-lg">
-            <svg
-              className="w-7 h-7 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <div className="text-3xl font-bold text-yellow-600 mb-2">
-            {stats.pending}
-          </div>
-          <div className="text-gray-600 font-medium">{t("stats.pending")}</div>
-        </div>
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-6 text-center">
+              <div className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 shadow-lg">
+                <svg
+                  className="w-7 h-7 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div className="text-3xl font-bold text-yellow-600 mb-2">
+                {stats.pending}
+              </div>
+              <div className="text-gray-600 font-medium">{t("stats.pending")}</div>
+            </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-6 text-center">
-          <div className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 shadow-lg">
-            <svg
-              className="w-7 h-7 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </div>
-          <div className="text-3xl font-bold text-red-600 mb-2">
-            {stats.cancelled}
-          </div>
-          <div className="text-gray-600 font-medium">
-            {t("stats.cancelled")}
-          </div>
-        </div>
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 p-6 text-center">
+              <div className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 shadow-lg">
+                <svg
+                  className="w-7 h-7 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </div>
+              <div className="text-3xl font-bold text-red-600 mb-2">
+                {stats.cancelled}
+              </div>
+              <div className="text-gray-600 font-medium">
+                {t("stats.cancelled")}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Filters Card */}
@@ -382,19 +417,19 @@ export default function WeeklyTodoManager() {
         {/* Summary and Refresh */}
         <div className="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-gray-200/50">
           <div className="text-sm text-gray-600 mb-4 sm:mb-0">
-            <span className="font-semibold text-[#1B809B]">{todos.length}</span>{" "}
+            <span className="font-semibold text-[#1B809B]">{totalTodos}</span>{" "}
             {t("showingPlans")}
           </div>
           <button
             onClick={fetchTodos}
-            disabled={loading}
+            disabled={loading || isFetching}
             className={`px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 transform hover:-translate-y-0.5 flex items-center ${
-              loading
+              loading || isFetching
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                 : "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-xl"
             }`}
           >
-            {loading ? (
+            {loading || isFetching ? (
               <>
                 <svg
                   className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
@@ -462,12 +497,22 @@ export default function WeeklyTodoManager() {
       )}
 
       {/* Todos Grid */}
-      {loading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#1B809B] mx-auto mb-4"></div>
-            <p className="text-gray-600 font-medium">{t("loading")}</p>
-          </div>
+      {loading || isFetching ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div
+              key={`todo-skeleton-${index}`}
+              className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/30 shadow-xl p-6 animate-pulse"
+            >
+              <div className="h-5 w-3/4 rounded bg-gray-200/80 mb-4"></div>
+              <div className="h-4 w-full rounded bg-gray-200/70 mb-2"></div>
+              <div className="h-4 w-5/6 rounded bg-gray-200/70 mb-6"></div>
+              <div className="flex items-center justify-between">
+                <div className="h-8 w-20 rounded bg-gray-200/80"></div>
+                <div className="h-8 w-24 rounded bg-gray-200/80"></div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : todos.length === 0 ? (
         <div className="text-center py-16 bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl">
@@ -513,17 +558,53 @@ export default function WeeklyTodoManager() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {todos.map((todo) => (
-            <TodoCard
-              key={todo.id}
-              todo={todo}
-              onTodoUpdated={handleTodoUpdated}
-              onTodoDeleted={handleTodoDeleted}
-              onEdit={handleEdit}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {todos.map((todo) => (
+              <TodoCard
+                key={todo.id}
+                todo={todo}
+                onTodoUpdated={handleTodoUpdated}
+                onTodoDeleted={handleTodoDeleted}
+                onEdit={handleEdit}
+              />
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
+              <div className="text-sm text-gray-600">
+                Page <span className="font-semibold text-[#1B809B]">{page}</span>{" "}
+                of <span className="font-semibold text-[#1B809B]">{totalPages}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage((current) => Math.max(current - 1, 1))}
+                  disabled={page === 1}
+                  className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                    page === 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  Prev
+                </button>
+                <button
+                  onClick={() =>
+                    setPage((current) => Math.min(current + 1, totalPages))
+                  }
+                  disabled={page === totalPages}
+                  className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                    page === totalPages
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Add Todo Modal */}

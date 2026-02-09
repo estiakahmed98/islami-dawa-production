@@ -313,7 +313,7 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users, filterDate }) => {
 
     try {
       const html2pdf = await getHtml2Pdf();
-      html2pdf()
+      const pdf = await html2pdf()
         .set({
           margin: 10,
           filename: `assistant_daee_${new Date().toISOString().slice(0, 10)}.pdf`,
@@ -323,20 +323,20 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users, filterDate }) => {
         })
         .from(el)
         .toPdf()
-        .get("pdf")
-        .then((pdf: any) => {
-          const total = pdf.internal.getNumberOfPages();
-          for (let i = 1; i <= total; i++) {
-            pdf.setPage(i);
-            pdf.setFontSize(10);
-            pdf.text(
-              `Page ${i} of ${total}`,
-              pdf.internal.pageSize.getWidth() - 20,
-              pdf.internal.pageSize.getHeight() - 10
-            );
-          }
-        })
-        .save();
+        .get("pdf");
+      
+      const total = pdf.internal.getNumberOfPages();
+      for (let i = 1; i <= total; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(10);
+        pdf.text(
+          `Page ${i} of ${total}`,
+          pdf.internal.pageSize.getWidth() - 20,
+          pdf.internal.pageSize.getHeight() - 10
+        );
+      }
+      
+      pdf.save();
     } catch (err) {
       console.error("PDF generation failed:", err);
     }
@@ -373,11 +373,22 @@ const AssistantDaeeList: React.FC<Props> = ({ emails, users, filterDate }) => {
 
           <TableBody>
             {loading && (
-              <TableRow>
-                <TableCell colSpan={10} className="text-center py-6">
-                  {t("status.loading")}
-                </TableCell>
-              </TableRow>
+              <>
+                {[1, 2, 3, 4, 5].map((row) => (
+                  <TableRow key={row}>
+                    <TableCell><div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div></TableCell>
+                    <TableCell><div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div></TableCell>
+                    <TableCell><div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div></TableCell>
+                    <TableCell><div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div></TableCell>
+                    <TableCell><div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div></TableCell>
+                    <TableCell><div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div></TableCell>
+                    <TableCell><div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div></TableCell>
+                    <TableCell><div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div></TableCell>
+                    <TableCell><div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div></TableCell>
+                    <TableCell><div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div></TableCell>
+                  </TableRow>
+                ))}
+              </>
             )}
 
             {!loading && rows.length === 0 && (

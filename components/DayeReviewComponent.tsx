@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
+import useSWR from "swr";
+import { SWRConfig } from "swr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useSession } from "@/lib/auth-client";
@@ -53,17 +56,43 @@ interface DayeSubmissionStatus {
   location: string;
 }
 
+const fetcher = async (url: string) => {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+};
+
 const DayeReviewComponent: React.FC = () => {
   const t = useTranslations("dayeReview");
   const { data: session } = useSession();
   const { getParentEmail } = useParentEmail();
 
-  const [allUsers, setAllUsers] = useState<User[]>([]);
+  // SWR fetcher function for category data
+  const fetchCategoryData = async (url: string): Promise<any> => {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return {};
+    const json = await res.json();
+    return (json && json.records) || {};
+  };
+
+  // Fetch all users using SWR
+  const { data: usersData, error: usersError } = useSWR(
+    "/api/users",
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 300000, // 5 minutes
+    }
+  );
+
+  // Process users data
+  const allUsers = useMemo(() => {
+    if (!usersData) return [];
+    const users = Array.isArray(usersData) ? usersData : usersData.users || [];
+    return users;
+  }, [usersData]);
   const [visibleUsers, setVisibleUsers] = useState<User[]>([]);
-  const [submissionStatus, setSubmissionStatus] = useState<
-    DayeSubmissionStatus[]
-  >([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [filterStatus, setFilterStatus] = useState<
@@ -97,35 +126,18 @@ const DayeReviewComponent: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch all users (not only dayees)
-  useEffect(() => {
-    const fetchDayees = async () => {
-      try {
-        const res = await fetch("/api/users", { cache: "no-store" });
-        if (!res.ok) throw new Error("Failed to fetch users");
-
-        const data = await res.json();
-        const users = Array.isArray(data) ? data : data.users || [];
-        // Show ALL users in review, not just role === "daye"
-        setAllUsers(users);
-      } catch (error) {
-        console.error("Error fetching dayees:", error);
-        toast.error(t("toast.fetchDayeesError"));
-      }
-    };
-    fetchDayees();
-  }, []);
+  // Remove the old fetchDayees useEffect since we're using SWR
 
   // Apply hierarchy scoping (who can see whose data)
   useEffect(() => {
     if (!session?.user?.email || allUsers.length === 0) return;
 
     const loggedInUser =
-      allUsers.find((u) => u.email === session.user.email) || null;
+      allUsers.find((u: User) => u.email === session.user.email) || null;
 
     // If we can't map the logged-in user to the directory, only show self (if present)
     if (!loggedInUser) {
-      setVisibleUsers(allUsers.filter((u) => u.email === session.user.email));
+      setVisibleUsers(allUsers.filter((u: User) => u.email === session.user.email));
       return;
     }
 
@@ -138,7 +150,7 @@ const DayeReviewComponent: React.FC = () => {
     const allowedEmails = new Set<string>([loggedInUser.email]);
 
     const collectChildren = (parentEmail: string) => {
-      allUsers.forEach((user) => {
+      allUsers.forEach((user: User) => {
         const parentEmailForUser = getParentEmail(user, allUsers, loggedInUser);
 
         if (parentEmailForUser === parentEmail && user.email) {
@@ -150,134 +162,130 @@ const DayeReviewComponent: React.FC = () => {
     };
 
     collectChildren(loggedInUser.email);
-    setVisibleUsers(allUsers.filter((u) => allowedEmails.has(u.email)));
+    setVisibleUsers(allUsers.filter((u: User) => allowedEmails.has(u.email)));
   }, [allUsers, getParentEmail, session?.user?.email]);
 
-  // Fetch submission status for all users in list
-  useEffect(() => {
-    const fetchSubmissionStatus = async () => {
-      if (!selectedDate || visibleUsers.length === 0) {
-        setSubmissionStatus([]);
-        setLoading(false);
-        return;
-      }
+  // Fetch submission status for all users using SWR
+  const { data: submissionData, error: submissionError, isLoading: submissionLoading } = useSWR(
+    selectedDate && visibleUsers.length > 0
+      ? [
+          "submission-status",
+          selectedDate,
+          visibleUsers.map((u) => u.email).join(",")
+        ]
+      : null,
+    async () => {
+      if (!selectedDate || visibleUsers.length === 0) return [];
+      
+      const emails = visibleUsers.map((d) => d.email).join(",");
+      
+      // Fetch all category data
+      const endpoints = [
+        { key: "amoli", url: "/api/amoli" },
+        { key: "moktob", url: "/api/moktob" },
+        { key: "talim", url: "/api/talim" },
+        { key: "daye", url: "/api/dayi" },
+        { key: "dawati", url: "/api/dawati" },
+        { key: "dawatimojlish", url: "/api/dawatimojlish" },
+        { key: "jamat", url: "/api/jamat" },
+        { key: "dinefera", url: "/api/dinefera" },
+        { key: "sofor", url: "/api/soforbisoy" },
+      ];
 
-      setLoading(true);
-      try {
-        const emails = visibleUsers.map((d) => d.email).join(",");
+      const results = await Promise.all(
+        endpoints.map(async (ep) => {
+          try {
+            const data = await fetchCategoryData(`${ep.url}?emails=${encodeURIComponent(emails)}`);
+            return { key: ep.key, data };
+          } catch {
+            return { key: ep.key, data: {} };
+          }
+        })
+      );
 
-        // Fetch all category data
-        const endpoints = [
-          { key: "amoli", url: "/api/amoli" },
-          { key: "moktob", url: "/api/moktob" },
-          { key: "talim", url: "/api/talim" },
-          { key: "daye", url: "/api/dayi" },
-          { key: "dawati", url: "/api/dawati" },
-          { key: "dawatimojlish", url: "/api/dawatimojlish" },
-          { key: "jamat", url: "/api/jamat" },
-          { key: "dinefera", url: "/api/dinefera" },
-          { key: "sofor", url: "/api/soforbisoy" },
-        ];
+      // Process submission status
+      const statusList: DayeSubmissionStatus[] = visibleUsers.map((daye) => {
+        const categories: any = {};
+        let hasSubmittedToday = false;
+        let totalSubmissions = 0;
+        let lastSubmissionDate: string | undefined;
 
-        const results = await Promise.all(
-          endpoints.map(async (ep) => {
-            try {
-              const res = await fetch(
-                `${ep.url}?emails=${encodeURIComponent(emails)}`,
-                { cache: "no-store" }
-              );
-              if (!res.ok) return { key: ep.key, data: {} };
-              const json = await res.json();
-              const data = (json && json.records) || {};
-              return { key: ep.key, data };
-            } catch {
-              return { key: ep.key, data: {} };
+        results.forEach(({ key, data }) => {
+          const emailData = (data as any)[daye.email];
+
+          // Normalize records array
+          let records: any[] = [];
+          if (Array.isArray(emailData)) {
+            records = emailData;
+          } else if (emailData && Array.isArray(emailData.records)) {
+            records = emailData.records;
+          }
+
+          if (records.length > 0) {
+            // Check per selectedDate (Dhaka)
+            const hasOnSelected = records.some((r) => {
+              const ymd = dhakaYMD(new Date(r.date));
+              return ymd === selectedDate;
+            });
+            categories[key] = hasOnSelected;
+            if (hasOnSelected) {
+              hasSubmittedToday = true;
+              totalSubmissions++;
             }
-          })
-        );
 
-        // Process submission status
-        const statusList: DayeSubmissionStatus[] = visibleUsers.map((daye) => {
-          const categories: any = {};
-          let hasSubmittedToday = false;
-          let totalSubmissions = 0;
-          let lastSubmissionDate: string | undefined;
-
-          results.forEach(({ key, data }) => {
-            const emailData = (data as any)[daye.email];
-
-            // Normalize records array
-            let records: any[] = [];
-            if (Array.isArray(emailData)) {
-              records = emailData;
-            } else if (emailData && Array.isArray(emailData.records)) {
-              records = emailData.records;
-            }
-
-            if (records.length > 0) {
-              // Check per selectedDate (Dhaka)
-              const hasOnSelected = records.some((r) => {
+            // Track last submission date across categories
+            const latest = records.reduce(
+              (acc: string | undefined, r: any) => {
                 const ymd = dhakaYMD(new Date(r.date));
-                return ymd === selectedDate;
-              });
-              categories[key] = hasOnSelected;
-              if (hasOnSelected) {
-                hasSubmittedToday = true;
-                totalSubmissions++;
-              }
-
-              // Track last submission date across categories
-              const latest = records.reduce(
-                (acc: string | undefined, r: any) => {
-                  const ymd = dhakaYMD(new Date(r.date));
-                  return !acc || ymd > acc ? ymd : acc;
-                },
-                lastSubmissionDate
-              );
-              lastSubmissionDate = latest;
-            } else {
-              categories[key] = false;
-            }
-          });
-
-          const getMarkazName = (u: User): string => {
-            if (!u.markaz) return "";
-            return typeof u.markaz === "string"
-              ? u.markaz
-              : u.markaz.name || "";
-          };
-
-          const location = [
-            daye.division,
-            daye.district,
-            daye.upazila,
-            getMarkazName(daye),
-          ]
-            .filter(Boolean)
-            .join(", ");
-
-          return {
-            email: daye.email,
-            name: daye.name,
-            hasSubmittedToday,
-            lastSubmissionDate,
-            categories,
-            totalSubmissions,
-            location,
-          };
+                return !acc || ymd > acc ? ymd : acc;
+              },
+              lastSubmissionDate
+            );
+            lastSubmissionDate = latest;
+          } else {
+            categories[key] = false;
+          }
         });
 
-        setSubmissionStatus(statusList);
-      } catch (error) {
-        console.error("Error fetching submission status:", error);
-        toast.error(t("toast.fetchStatusError"));
-      } finally {
-        setLoading(false);
-      }
-    };
+        const getMarkazName = (u: User): string => {
+          if (!u.markaz) return "";
+          return typeof u.markaz === "string"
+            ? u.markaz
+            : u.markaz.name || "";
+        };
 
-    fetchSubmissionStatus();
-  }, [selectedDate, visibleUsers]);
+        const location = [
+          daye.division,
+          daye.district,
+          daye.upazila,
+          getMarkazName(daye),
+        ]
+          .filter(Boolean)
+          .join(", ");
+
+        return {
+          email: daye.email,
+          name: daye.name,
+          hasSubmittedToday,
+          lastSubmissionDate,
+          categories,
+          totalSubmissions,
+          location,
+        };
+      });
+
+      return statusList;
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 60000, // 1 minute
+    }
+  );
+
+  // Update submission status from SWR data
+  const submissionStatus = submissionData || [];
+  const loading = submissionLoading || !allUsers.length;
 
   // Filter and search
   const filteredStatus = useMemo(() => {
@@ -528,14 +536,95 @@ const DayeReviewComponent: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-emerald-500" />
+      <div className="space-y-6 p-4 md:p-6">
+        {/* Header Skeleton */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-5 w-5" />
+            <Skeleton className="h-10 w-40" />
+          </div>
+        </div>
+
+        {/* Statistics Cards Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-12" />
+                <Skeleton className="h-3 w-16 mt-2" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Filters Skeleton */}
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Skeleton className="h-10 w-full pl-10" />
+            <Skeleton className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2" />
+          </div>
+          <div className="flex gap-2">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-9 w-20" />
+            ))}
+          </div>
+        </div>
+
+        {/* Daye List Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-6 w-32" />
+                      <Skeleton className="h-5 w-5" />
+                    </div>
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-3 w-40" />
+                  </div>
+                  <Skeleton className="h-6 w-20" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div>
+                    <Skeleton className="h-4 w-40 mb-2" />
+                    <div className="grid grid-cols-3 gap-2">
+                      {[...Array(9)].map((_, j) => (
+                        <Skeleton key={j} className="h-6 w-full" />
+                      ))}
+                    </div>
+                  </div>
+                  <Skeleton className="h-3 w-32" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <SWRConfig
+      value={{
+        fetcher,
+        revalidateOnFocus: false,
+        revalidateOnReconnect: true,
+        dedupingInterval: 300000, // 5 minutes
+      }}
+    >
+      <div className="space-y-6 p-4 md:p-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -785,6 +874,7 @@ const DayeReviewComponent: React.FC = () => {
         </Card>
       )}
     </div>
+    </SWRConfig>
   );
 };
 

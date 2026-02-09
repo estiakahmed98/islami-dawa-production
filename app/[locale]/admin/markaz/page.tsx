@@ -172,7 +172,24 @@ export default function MarkazPage() {
         {/* mobile cards (md:hidden) */}
         <div className="md:hidden max-h-[calc(100vh-280px)] overflow-y-auto overscroll-contain p-2 space-y-3">
           {loading ? (
-            <div className="text-center py-6 text-sm">{t("messages.loading")}</div>
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="bg-white rounded-lg border p-4 shadow-sm">
+                  <div className="space-y-3">
+                    <div className="h-6 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+                    <div className="flex justify-between items-center">
+                      <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                      <div className="flex gap-2">
+                        <div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div>
+                        <div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : items.length === 0 ? (
             <div className="text-center py-6 text-sm">{t("messages.noData")}</div>
           ) : (
@@ -267,9 +284,36 @@ export default function MarkazPage() {
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={7}>{t("messages.loading")}</TableCell>
-                    </TableRow>
+                    <>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <TableRow key={i}>
+                          <TableCell>
+                            <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div>
+                              <div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </>
                   ) : items.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7}>{t("messages.noData")}</TableCell>

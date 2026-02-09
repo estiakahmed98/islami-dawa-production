@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import useSWR from "swr";
 import { useSelectedUser } from "@/providers/treeProvider";
 import { useSession } from "@/lib/auth-client";
 import {
@@ -119,10 +120,6 @@ const AdminDashboard: React.FC = () => {
   );
   const [searchMonth, setSearchMonth] = useState<string>("");
 
-  const [users, setUsers] = useState<User[]>([]);
-  const [emailList, setEmailList] = useState<string[]>(
-    userEmail ? [userEmail] : []
-  );
   const [loading, setLoading] = useState<boolean>(false);
 
   const [amoliData, setAmoliData] = useState<LabeledData>({
@@ -171,29 +168,72 @@ const AdminDashboard: React.FC = () => {
   >(null);
   const [modalItems, setModalItems] = useState<any[]>([]);
   const t = useTranslations("dashboard.adminDashboard");
+  
+  const cachePrefix = "adminDashboard";
+  const cacheTTLms = 5 * 60 * 1000; // 5 minutes
+  const refetchIntervalMs = 60 * 1000; // 1 minute
+
+  const fetcher = async (url: string) => {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}`);
+    return res.json();
+  };
+
+  const readPersisted = <T,>(key: string): T | null => {
+    try {
+      const raw = sessionStorage.getItem(key);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as { ts: number; data: T };
+      if (!parsed?.data || !parsed?.ts) return null;
+      if (Date.now() - parsed.ts > cacheTTLms) return null;
+      return parsed.data;
+    } catch {
+      return null;
+    }
+  };
+
+  const writePersisted = <T,>(key: string, data: T) => {
+    try {
+      sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+    } catch {
+      // ignore
+    }
+  };
 
   // ---------- fetch users ----------
+  const usersCacheKey = `${cachePrefix}:users`;
+  const usersFallback = readPersisted<any>(usersCacheKey);
+  const { data: usersRaw, error: usersError } = useSWR("/api/users", fetcher, {
+    revalidateOnFocus: true,
+    refreshInterval: refetchIntervalMs,
+    keepPreviousData: true,
+    fallbackData: usersFallback || undefined,
+    revalidateOnMount: !usersFallback,
+  });
+  const users: User[] = useMemo(() => {
+    if (!usersRaw) return [];
+    if (Array.isArray(usersRaw)) return usersRaw as User[];
+    if (Array.isArray(usersRaw?.users)) return usersRaw.users as User[];
+    return [];
+  }, [usersRaw]);
+
   useEffect(() => {
-    const go = async () => {
-      try {
-        const res = await fetch("/api/users", { cache: "no-store" });
-        if (!res.ok) throw new Error("Failed to fetch users");
-        const usersData = await readUsers(res);
-        setUsers(usersData);
-      } catch (e) {
-        console.error(e);
-        toast.error(t("error.userLoad"));
-      }
-    };
-    go();
-  }, [t]);
+    if (usersError) {
+      console.error(usersError);
+      toast.error(t("error.userLoad"));
+    }
+  }, [usersError, t]);
+
+  useEffect(() => {
+    if (usersRaw) writePersisted(usersCacheKey, usersRaw);
+  }, [usersRaw, usersCacheKey]);
 
   // ---------- compute emailList ----------
-  useEffect(() => {
-    if (!userEmail || users.length === 0) return;
+  const emailList = useMemo(() => {
+    if (!userEmail || users.length === 0) return [];
 
     const loggedIn = users.find((u) => u.email === userEmail) || null;
-    if (!loggedIn) return;
+    if (!loggedIn) return [];
 
     let collected: string[] = [loggedIn.email];
 
@@ -298,12 +338,12 @@ const AdminDashboard: React.FC = () => {
             ]),
           ];
 
-        setEmailList(selEmails);
+        return selEmails;
       } else {
-        setEmailList([selectedUser]);
+        return [selectedUser];
       }
     } else {
-      setEmailList(collected);
+      return collected;
     }
   }, [selectedUser, users, userEmail]);
 
@@ -487,51 +527,167 @@ const AdminDashboard: React.FC = () => {
     return acc;
   };
 
-  // fetch everything whenever emailList changes
+  const emailListKey = useMemo(
+    () => (emailList.length ? [...emailList].sort().join(",") : ""),
+    [emailList]
+  );
+
+  const buildEndpointData = (
+    ep: EndpointDef,
+    json: any
+  ): LabeledData => {
+    const meta: LabeledData["meta"] = {};
+    const perEmailResults = emailList.map((email) => {
+      const emailData = json.records[email];
+      const records = emailData?.records
+        ? emailData.records
+        : Array.isArray(emailData)
+          ? emailData
+          : [];
+      return { email, records };
+    });
+
+    const merged: RecordsByEmail = {};
+    perEmailResults.forEach(({ email, records }) =>
+      mergeEmailRecords(merged, email, records, meta, ep.key)
+    );
+
+    return { records: merged, labelMap: ep.labelMap, meta };
+  };
+
+  const useEndpoint = (ep: EndpointDef) => {
+    const key = emailListKey
+      ? `${ep.url}?emails=${encodeURIComponent(emailList.join(","))}`
+      : null;
+    const persistKey = key ? `${cachePrefix}:${ep.key}:${emailListKey}` : "";
+    const fallback = key ? readPersisted<any>(persistKey) : null;
+    const { data, error, isLoading } = useSWR(key, fetcher, {
+      revalidateOnFocus: true,
+      refreshInterval: refetchIntervalMs,
+      keepPreviousData: true,
+      dedupingInterval: 15_000,
+      fallbackData: fallback || undefined,
+      revalidateOnMount: !fallback,
+    });
+    const shaped = useMemo(
+      () => (data ? buildEndpointData(ep, data) : null),
+      [data, ep]
+    );
+    useEffect(() => {
+      if (data && persistKey) writePersisted(persistKey, data);
+    }, [data, persistKey]);
+    return { shaped, error, isLoading };
+  };
+
+  const amoliSW = useEndpoint(endpoints.find((e) => e.key === "amoli")!);
+  const moktobSW = useEndpoint(endpoints.find((e) => e.key === "moktob")!);
+  const talimSW = useEndpoint(endpoints.find((e) => e.key === "talim")!);
+  const dayeSW = useEndpoint(endpoints.find((e) => e.key === "daye")!);
+  const dawatiSW = useEndpoint(endpoints.find((e) => e.key === "dawati")!);
+  const dawatiMojlishSW = useEndpoint(
+    endpoints.find((e) => e.key === "dawatimojlish")!
+  );
+  const jamatSW = useEndpoint(endpoints.find((e) => e.key === "jamat")!);
+  const dineFeraSW = useEndpoint(endpoints.find((e) => e.key === "dinefera")!);
+  const soforSW = useEndpoint(endpoints.find((e) => e.key === "sofor")!);
+
   useEffect(() => {
-    const go = async () => {
-      if (!emailList.length) return;
-      setLoading(true);
-      try {
-        await Promise.all(
-          endpoints.map(async (ep) => {
-            const meta: LabeledData["meta"] = {};
-            const res = await fetch(
-              `${ep.url}?emails=${encodeURIComponent(emailList.join(","))}`,
-              { cache: "no-store" }
-            );
-            if (!res.ok) throw new Error(`Failed ${ep.key} for emails`);
-            const json = await res.json();
+    if (amoliSW.shaped) setAmoliData(amoliSW.shaped);
+  }, [amoliSW.shaped]);
+  useEffect(() => {
+    if (moktobSW.shaped) setMoktobData(moktobSW.shaped);
+  }, [moktobSW.shaped]);
+  useEffect(() => {
+    if (talimSW.shaped) setTalimData(talimSW.shaped);
+  }, [talimSW.shaped]);
+  useEffect(() => {
+    if (dayeSW.shaped) setDayeData(dayeSW.shaped);
+  }, [dayeSW.shaped]);
+  useEffect(() => {
+    if (dawatiSW.shaped) setDawatiData(dawatiSW.shaped);
+  }, [dawatiSW.shaped]);
+  useEffect(() => {
+    if (dawatiMojlishSW.shaped) setDawatiMojlishData(dawatiMojlishSW.shaped);
+  }, [dawatiMojlishSW.shaped]);
+  useEffect(() => {
+    if (jamatSW.shaped) setJamatData(jamatSW.shaped);
+  }, [jamatSW.shaped]);
+  useEffect(() => {
+    if (dineFeraSW.shaped) setDineFeraData(dineFeraSW.shaped);
+  }, [dineFeraSW.shaped]);
+  useEffect(() => {
+    if (soforSW.shaped) setSoforData(soforSW.shaped);
+  }, [soforSW.shaped]);
 
-            // Handle different API response formats
-            const perEmailResults = emailList.map((email) => {
-              const emailData = json.records[email];
-              // Check if the data is wrapped in { records: [], isSubmittedToday: boolean } format
-              const records = emailData?.records
-                ? emailData.records
-                : Array.isArray(emailData)
-                  ? emailData
-                  : [];
-              return { email, records };
-            });
+  useEffect(() => {
+    if (
+      amoliSW.error ||
+      moktobSW.error ||
+      talimSW.error ||
+      dayeSW.error ||
+      dawatiSW.error ||
+      dawatiMojlishSW.error ||
+      jamatSW.error ||
+      dineFeraSW.error ||
+      soforSW.error
+    ) {
+      toast.error(t("error.dataLoad"));
+    }
+  }, [
+    amoliSW.error,
+    moktobSW.error,
+    talimSW.error,
+    dayeSW.error,
+    dawatiSW.error,
+    dawatiMojlishSW.error,
+    jamatSW.error,
+    dineFeraSW.error,
+    soforSW.error,
+    t,
+  ]);
 
-            const merged: RecordsByEmail = {};
-            perEmailResults.forEach(({ email, records }) =>
-              mergeEmailRecords(merged, email, records, meta, ep.key)
-            );
-
-            ep.setter({ records: merged, labelMap: ep.labelMap, meta });
-          })
-        );
-      } catch (e) {
-        console.error("Admin dashboard fetch error:", e);
-        toast.error(t("error.dataLoad"));
-      } finally {
-        setLoading(false);
-      }
-    };
-    go();
-  }, [emailList, endpoints, t]);
+  useEffect(() => {
+    const anyLoading =
+      amoliSW.isLoading ||
+      moktobSW.isLoading ||
+      talimSW.isLoading ||
+      dayeSW.isLoading ||
+      dawatiSW.isLoading ||
+      dawatiMojlishSW.isLoading ||
+      jamatSW.isLoading ||
+      dineFeraSW.isLoading ||
+      soforSW.isLoading;
+    const anyData =
+      !!amoliSW.shaped ||
+      !!moktobSW.shaped ||
+      !!talimSW.shaped ||
+      !!dayeSW.shaped ||
+      !!dawatiSW.shaped ||
+      !!dawatiMojlishSW.shaped ||
+      !!jamatSW.shaped ||
+      !!dineFeraSW.shaped ||
+      !!soforSW.shaped;
+    setLoading(anyLoading && !anyData);
+  }, [
+    amoliSW.isLoading,
+    moktobSW.isLoading,
+    talimSW.isLoading,
+    dayeSW.isLoading,
+    dawatiSW.isLoading,
+    dawatiMojlishSW.isLoading,
+    jamatSW.isLoading,
+    dineFeraSW.isLoading,
+    soforSW.isLoading,
+    amoliSW.shaped,
+    moktobSW.shaped,
+    talimSW.shaped,
+    dayeSW.shaped,
+    dawatiSW.shaped,
+    dawatiMojlishSW.shaped,
+    jamatSW.shaped,
+    dineFeraSW.shaped,
+    soforSW.shaped,
+  ]);
 
   // filter to selected month/year (same shape back)
   const filterChartAndTallyData = (data: LabeledData) => {
@@ -934,8 +1090,69 @@ const AdminDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-emerald-500" />
+      <div className="space-y-4 h-[calc(100vh-100px)] overflow-y-auto">
+        {/* Header Skeleton */}
+        <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl space-y-4 lg:space-y-0 lg:space-x-4">
+          {/* Welcome Message Skeleton */}
+          <div className="h-8 bg-gray-200 rounded w-64 animate-pulse"></div>
+          
+          {/* Action Buttons Skeleton */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+            <div className="h-10 bg-gray-200 rounded w-32 animate-pulse"></div>
+            <div className="flex gap-3 items-center w-full md:w-auto">
+              <div className="h-10 bg-gray-200 rounded w-32 animate-pulse"></div>
+              <div className="h-10 bg-gray-200 rounded w-10 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Charts Grid Skeleton */}
+        <div className="grid xl:grid-cols-3 p-2 lg:p-6 gap-6 overflow-y-auto border border-[#155E75] rounded-xl">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white p-4 rounded-lg shadow">
+              <div className="h-6 bg-gray-200 rounded w-3/4 mb-4 animate-pulse"></div>
+              <div className="space-y-2">
+                {[1, 2, 3, 4].map((j) => (
+                  <div key={j} className="flex justify-between items-center">
+                    <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Tabs Skeleton */}
+        <div className="bg-white p-2 lg:p-6 rounded-lg shadow-md">
+          {/* Tab List Skeleton */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {["Amolimusahaba", "moktob", "talim", "daye", "dawati", "dawatimojlish", "jamat", "dinefera", "sofor", "bivag"].map((tab) => (
+              <div key={tab} className="h-10 bg-gray-200 rounded w-24 animate-pulse"></div>
+            ))}
+          </div>
+
+          {/* Table Skeleton */}
+          <div className="bg-gray-50 rounded shadow p-4">
+            <div className="space-y-3">
+              {/* Table Header */}
+              <div className="grid grid-cols-5 gap-4 pb-2 border-b">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                ))}
+              </div>
+              
+              {/* Table Rows */}
+              {[1, 2, 3, 4, 5].map((row) => (
+                <div key={row} className="grid grid-cols-5 gap-4">
+                  {[1, 2, 3, 4, 5].map((col) => (
+                    <div key={col} className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

@@ -9,13 +9,28 @@ export const weeklyTodoService = {
     startDate?: string;
     endDate?: string;
     weekday?: string;
-  }): Promise<WeeklyTodo[]> {
+    page?: number;
+    limit?: number;
+  }): Promise<{
+    items: WeeklyTodo[];
+    total: number;
+    page: number;
+    limit: number;
+    stats: {
+      total: number;
+      completed: number;
+      pending: number;
+      cancelled: number;
+    };
+  }> {
     const queryParams = new URLSearchParams();
     
     if (params?.status) queryParams.append('status', params.status);
     if (params?.startDate) queryParams.append('startDate', params.startDate);
     if (params?.endDate) queryParams.append('endDate', params.endDate);
     if (params?.weekday) queryParams.append('weekday', params.weekday);
+    if (params?.page) queryParams.append('page', String(params.page));
+    if (params?.limit) queryParams.append('limit', String(params.limit));
 
     const response = await fetch(`${API_BASE_URL}?${queryParams}`);
     
