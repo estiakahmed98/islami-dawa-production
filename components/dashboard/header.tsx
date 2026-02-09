@@ -6,10 +6,10 @@ import dynamic from "next/dynamic";
 import { useSidebar } from "@/providers/sidebar-provider";
 import { useEffect, useState } from "react";
 import moment from "moment-hijri";
-import LanguageSwitcher from "../language-switcher";
 import { useTranslations } from "next-intl";
 
 const HeaderMenu = dynamic(() => import("./HeaderMenu"), { ssr: false });
+const LanguageSwitcher = dynamic(() => import("../language-switcher"), { ssr: false });
 
 function getInitials(name?: string | null, email?: string | null) {
   if (name && name.trim()) {
