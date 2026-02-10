@@ -1,0 +1,1279 @@
+{
+  "header": {
+    "toggleSidebar": "تبديل الشريط الجانبي",
+    "instituteName": "معهد الدعوة الإسلامي بنغلاديش",
+    "dawahYear": "سنة الدعوة",
+    "leaveSubject": "تم إرسال طلب الإجازة الخاص بك",
+    "leaveSubjectApproved": "تم إرسال طلب الإجازة الخاص بك بنجاح",
+    "gregorian": "ميلادي",
+    "hijri": "هجري",
+    "openAccountMenu": "فتح قائمة الحساب",
+    "profile": "الملف الشخصي",
+    "user": "مستخدم",
+    "logout": "تسجيل الخروج",
+    "signingOut": "جارٍ تسجيل الخروج...",
+    "roles": {
+      "centraladmin": "مشرف مركزي",
+      "divisionadmin": "مشرف القسم",
+      "markazadmin": "مشرف المركز",
+      "daye": "داعية",
+      "user": "مستخدم"
+    }
+  },
+  "dashboard": {
+    "sideBar": {
+      "dashBoard": "لوحة التحكم",
+      "noRole": "لا توجد صلاحية",
+      "gotoUserMode": "الانتقال لوضع المستخدم",
+      "gotoAdminMode": "الانتقال لوضع المشرف",
+      "amoliMuhasaba": "محاسبة الأعمال",
+      "moktobSubject": "شؤون المكتب",
+      "talimSubject": "شؤون التعليم",
+      "dayiSubject": "شؤون الداعية المساعد",
+      "dawatiSubject": "شؤون الدعوة",
+      "dawatiMojlish": "مجلس الدعوة",
+      "jamatSubject": "شؤون الجماعة",
+      "dineFera": "العودة إلى الإسلام",
+      "soforSubject": "شؤون السفر",
+      "dayeReview": "مراجعة الداعية",
+      "kargojariSubject": "كارغوجاري",
+      "leaveSubject": "شؤون الإجازات",
+      "weeklyTodo": "الخطة الأسبوعية",
+      "calendar": "البرنامج",
+      "addDayi": "إضافة داعية",
+      "viewDayi": "عرض الداعية",
+      "leaveMatters": "شؤون الإجازات",
+      "realTree": "الشجرة الحقيقية",
+      "editRequest": "طلب تعديل",
+      "markaz": "المركز"
+    },
+    "UserDashboard": {
+      "welcome": "مرحبًا",
+      "months": {
+        "january": "يناير",
+        "february": "فبراير",
+        "march": "مارس",
+        "april": "أبريل",
+        "may": "مايو",
+        "june": "يونيو",
+        "july": "يوليو",
+        "august": "أغسطس",
+        "september": "سبتمبر",
+        "october": "أكتوبر",
+        "november": "نوفمبر",
+        "december": "ديسمبر"
+      },
+      "dashboard": {
+        "backToDashboard": "العودة إلى لوحة التحكم",
+        "comparison": "المقارنة والتقرير",
+        "amoliMuhasaba": "محاسبة الأعمال",
+        "moktobSubject": "شؤون المكتب",
+        "talimSubject": "تعليم النساء",
+        "dayiSubject": "شؤون الداعية المساعد",
+        "dawatiSubject": "شؤون الدعوة",
+        "dawatiMojlish": "مجلس الدعوة",
+        "jamatSubject": "شؤون الجماعة",
+        "dineFera": "العودة إلى الإسلام",
+        "soforSubject": "شؤون السفر",
+        "phone": "الهاتف",
+        "address": "العنوان",
+        "division": "القسم",
+        "district": "المنطقة",
+        "upazila": "أوبازيلا",
+        "union": "الاتحاد",
+        "description": "الوصف",
+        "noData": "لم يتم العثور على معلومات",
+        "close": "إغلاق"
+      },
+      "comparison": {
+        "missingDates": "يرجى تحديد قيمتي \"من\" و\"إلى\".",
+        "day": "حسب اليوم",
+        "month": "حسب الشهر",
+        "year": "حسب السنة",
+        "from": "من",
+        "compare": "قارن",
+        "downloadPdf": "تنزيل PDF",
+        "label": "التسمية",
+        "difference": "الفرق",
+        "change": "التغيير",
+        "noData": "لا توجد بيانات"
+      },
+      "tabs": {
+        "amoli": "محاسبة الأعمال",
+        "moktob": "شؤون المكتب",
+        "talim": "تعليم النساء",
+        "daye": "داعية مساعد",
+        "dawati": "شؤون الدعوة",
+        "dawatimojlish": "مجلس الدعوة",
+        "jamat": "شؤون الجماعة",
+        "dinefera": "العودة إلى الإسلام",
+        "sofor": "شؤون السفر"
+      },
+      "detailModal": {
+        "title": "تفاصيل الداعية المساعد",
+        "close": "إغلاق",
+        "noData": "لم يتم العثور على معلومات"
+      },
+      "toast": {
+        "errorFetchingData": "فشل تحميل البيانات"
+      },
+      "amoli": {
+        "tahajjud": "تهجد",
+        "surah": "سورة",
+        "ayat": "آية",
+        "tilawat": "تلاوة",
+        "pageNo": "رقم الصفحة",
+        "zikir": "ذكر",
+        "ishraq": "إشراق/أوابين/شاشت",
+        "jamat": "جماعة",
+        "sirat": "السيرة",
+        "dua": "دعاء",
+        "ilm": "علم",
+        "tasbih": "تسبيح",
+        "dayeeAmol": "أعمال الداعية",
+        "amoliSura": "السورة العملية",
+        "ayamroja": "صيام الأيام البيض",
+        "hijbulBahar": "حزب البحر",
+        "quarntilawat": "تلاوة القرآن",
+        "percentage": "النسبة المئوية",
+        "title": "محاسبة الأعمال"
+      },
+      "moktob": {
+        "notunMoktobChalu": "افتتاح مكتب جديد",
+        "totalMoktob": "إجمالي المكاتب",
+        "totalStudent": "إجمالي الطلاب",
+        "obhibhabokConference": "عُقد مؤتمر أولياء الأمور",
+        "moktoThekeMadrasaAdmission": "الالتحاق بالمدرسة الدينية من المكتب",
+        "notunBoyoskoShikkha": "تعليم للكبار جديد",
+        "totalBoyoskoShikkha": "إجمالي تعليم الكبار",
+        "boyoskoShikkhaOnshogrohon": "المشاركة في تعليم الكبار",
+        "newMuslimeDinerFikir": "رعاية المسلمين الجدد",
+        "title": "شؤون المكتب"
+      },
+      "talim": {
+        "mohilaTalim": "إقامة تعليم النساء",
+        "mohilaOnshogrohon": "مشاركة النساء",
+        "title": "تعليم النساء"
+      },
+      "dayi": {
+        "sohojogiDayeToiri": "تم إنشاء داعية مساعد",
+        "assistantsList": "قائمة الدعاة المساعدين",
+        "title": "داعية مساعد",
+        "assistant": "مساعد",
+        "name": "الاسم",
+        "phone": "الهاتف",
+        "address": "العنوان",
+        "email": "البريد الإلكتروني",
+        "description": "الوصف",
+        "division": "القسم",
+        "district": "المنطقة",
+        "upazila": "أوبازيلا",
+        "union": "الاتحاد",
+        "submit": "إرسال"
+      },
+      "dawati": {
+        "nonMuslimDawat": "الدعوة لغير المسلمين",
+        "murtadDawat": "الدعوة للمرتدين",
+        "alemderSatheyMojlish": "لقاءات مع العلماء",
+        "publicSatheyMojlish": "لقاءات مع العامة",
+        "nonMuslimSaptahikGasht": "جولة دعوية أسبوعية مع غير المسلمين",
+        "title": "شؤون الدعوة"
+      },
+      "dawatiMojlish": {
+        "dawatterGuruttoMojlish": "مجلس عن أهمية الدعوة",
+        "mojlisheOnshogrohon": "المشاركة في المجلس",
+        "alemderSatheyMojlish": "لقاءات مع العلماء",
+        "publicSatheyMojlish": "لقاءات مع العامة",
+        "prosikkhonKormoshalaAyojon": "تنظيم ورشة تدريبية",
+        "prosikkhonOnshogrohon": "المشاركة في التدريب",
+        "jummahAlochona": "كلمة الجمعة",
+        "dhormoSova": "مجلس ديني",
+        "mashwaraPoint": "نقاط المشورة",
+        "title": "مجلس الدعوة"
+      },
+      "jamat": {
+        "jamatBerHoise": "تم إرسال جماعة",
+        "jamatSathi": "رفاق الجماعة",
+        "title": "شؤون الجماعة"
+      },
+      "dineFera": {
+        "nonMuslimMuslimHoise": "غير مسلم أصبح مسلمًا",
+        "murtadIslamFireche": "مرتد عاد إلى الإسلام",
+        "title": "العودة إلى الإسلام"
+      },
+      "soforbisoy": {
+        "moktobVisit": "زيارة مكتب قائم",
+        "madrasaVisit": "زيارة مدرسة دينية",
+        "schoolCollegeVisit": "زيارة مدرسة/كلية",
+        "madrasaVisitList": "قائمة المدارس الدينية",
+        "schoolCollegeVisitList": "قائمة المدارس/الكليات",
+        "title": "شؤون السفر"
+      }
+    },
+    "adminDashboard": {
+      "welcome": "مرحبًا",
+      "searchMonth": "بحث عن شهر",
+      "months": {
+        "january": "يناير",
+        "february": "فبراير",
+        "march": "مارس",
+        "april": "أبريل",
+        "may": "مايو",
+        "june": "يونيو",
+        "july": "يوليو",
+        "august": "أغسطس",
+        "september": "سبتمبر",
+        "october": "أكتوبر",
+        "november": "نوفمبر",
+        "december": "ديسمبر"
+      },
+      "error": {
+        "userLoad": "فشل تحميل المستخدمين",
+        "dataLoad": "فشل تحميل البيانات"
+      },
+      "dashboard": {
+        "comparison": "عرض المقارنة والتقارير",
+        "amoliMuhasaba": "محاسبة الأعمال",
+        "moktobSubject": "شؤون المكتب",
+        "talimSubject": "تعليم النساء",
+        "dayiSubject": "شؤون الداعية المساعد",
+        "dawatiSubject": "شؤون الدعوة",
+        "dawatiMojlish": "مجلس الدعوة",
+        "jamatSubject": "شؤون الجماعة",
+        "dineFera": "العودة إلى الإسلام",
+        "soforSubject": "شؤون السفر",
+        "title": "لوحة التحكم"
+      },
+      "modalTitle": {
+        "assistants": "تفاصيل الداعية المساعد",
+        "madrasa": "قائمة المدارس الدينية",
+        "school": "قائمة المدارس/الكليات"
+      },
+      "amoli": {
+        "tahajjud": "تهجد",
+        "surah": "سورة",
+        "ayat": "آية",
+        "zikir": "ذكر",
+        "ishraq": "إشراق/أوابين/شاشت",
+        "jamat": "جماعة",
+        "sirat": "السيرة",
+        "dua": "دعاء",
+        "ilm": "علم",
+        "tasbih": "تسبيح",
+        "dayeeAmol": "أعمال الداعية",
+        "amoliSura": "السورة العملية",
+        "ayamroja": "صيام الأيام البيض",
+        "hijbulBahar": "حزب البحر",
+        "quarntilawat": "تلاوة القرآن",
+        "pageNo": "رقم الصفحة",
+        "quarntilawatAyat": "آيات تلاوة القرآن",
+        "editorContent": "كارغوجاري"
+      },
+      "moktob": {
+        "title": "شؤون المكتب",
+        "notunMoktobChalu": "افتتاح مكتب جديد",
+        "totalMoktob": "إجمالي المكاتب",
+        "totalStudent": "إجمالي الطلاب",
+        "obhibhabokConference": "عُقد مؤتمر أولياء الأمور",
+        "moktoThekeMadrasaAdmission": "الالتحاق بالمدرسة الدينية من المكتب",
+        "notunBoyoskoShikkha": "تعليم للكبار جديد",
+        "totalBoyoskoShikkha": "إجمالي تعليم الكبار",
+        "boyoskoShikkhaOnshogrohon": "المشاركة في تعليم الكبار",
+        "newMuslimeDinerFikir": "رعاية المسلمين الجدد",
+        "editorContent": "كارغوجاري"
+      },
+      "talim": {
+        "title": "تعليم النساء",
+        "mohilaTalim": "إقامة تعليم النساء",
+        "mohilaOnshogrohon": "مشاركة النساء",
+        "editorContent": "كارغوجاري"
+      },
+      "daye": {
+        "title": "داعية مساعد",
+        "sohojogiDayeToiri": "تم إنشاء داعية مساعد",
+        "assistantsList": "قائمة الدعاة المساعدين",
+        "editorContent": "كارغوجاري"
+      },
+      "dawati": {
+        "title": "شؤون الدعوة",
+        "nonMuslimDawat": "الدعوة لغير المسلمين",
+        "murtadDawat": "الدعوة للمرتدين",
+        "alemderSatheyMojlish": "لقاءات مع العلماء",
+        "publicSatheyMojlish": "لقاءات مع العامة",
+        "nonMuslimSaptahikGasht": "جولة دعوية أسبوعية مع غير المسلمين",
+        "editorContent": "كارغوجاري"
+      },
+      "dawatiMojlish": {
+        "title": "مجلس الدعوة",
+        "dawatterGuruttoMojlish": "مجلس عن أهمية الدعوة",
+        "mojlisheOnshogrohon": "المشاركة في المجلس",
+                "alemderSatheyMojlish": "لقاءات مع العلماء",
+        "publicSatheyMojlish": "لقاءات مع العامة", 
+        "prosikkhonKormoshalaAyojon": "تنظيم ورشة تدريبية",
+        "prosikkhonOnshogrohon": "المشاركة في التدريب",
+        "jummahAlochona": "كلمة الجمعة",
+        "dhormoSova": "مجلس ديني",
+        "mashwaraPoint": "نقاط المشورة",
+        "editorContent": "كارغوجاري"
+      },
+      "jamat": {
+        "title": "شؤون الجماعة",
+        "jamatBerHoise": "تم إرسال جماعة",
+        "jamatSathi": "رفاق الجماعة",
+        "editorContent": "كارغوجاري"
+      },
+      "dineFera": {
+        "title": "العودة إلى الإسلام",
+        "nonMuslimMuslimHoise": "غير مسلم أصبح مسلمًا",
+        "murtadIslamFireche": "مرتد عاد إلى الإسلام",
+        "editorContent": "كارغوجاري"
+      },
+      "sofor": {
+        "title": "شؤون السفر",
+        "moktobVisit": "زيارة مكتب قائم",
+        "madrasaVisit": "زيارة مدرسة دينية",
+        "schoolCollegeVisit": "زيارة مدرسة/كلية",
+        "madrasaVisitList": "قائمة المدارس الدينية",
+        "schoolCollegeVisitList": "قائمة المدارس/الكليات",
+        "editorContent": "كارغوجاري"
+      }
+    }
+  },
+  "treeView": {
+    "searchPlaceholder": "ابحث عن المستخدمين...",
+    "expandAll": "توسيع الكل",
+    "collapseAll": "طيّ الكل",
+    "fetchError": "فشل جلب المستخدمين",
+    "roles": {
+      "centraladmin": "مشرف مركزي",
+      "divisionadmin": "مشرف القسم",
+      "markazadmin": "مشرف المركز",
+      "daye": "داعية",
+      "null": "بدون دور"
+    }
+  },
+  "universalTableShow": {
+    "title": "عرض الجدول العام",
+    "errorFetchingEditRequestStatuses": "خطأ في جلب حالات طلبات التعديل",
+    "editDataForDay": "تعديل بيانات اليوم",
+    "noteYouCanOnlyEditThisDataOnceAfterApproval": "ملاحظة: يمكنك تعديل هذه البيانات مرة واحدة فقط بعد الموافقة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "motamot": "كارغوجاري",
+    "motamotPopup": "نافذة كارغوجاري",
+    "label": "التسمية",
+    "day": "اليوم",
+    "edit": "تعديل",
+    "edited": "تم التعديل",
+    "pending": "قيد الانتظار",
+    "rejected": "مرفوض",
+    "requestEdit": "طلب تعديل",
+    "invalidDataForPDFGeneration": "بيانات غير صالحة لإنشاء PDF",
+    "youCanOnlyEditDataOnceAfterApproval": "يمكنك تعديل البيانات مرة واحدة فقط بعد الموافقة",
+    "youCanOnlyEditDataAfterYourRequestHasBeenApproved": "يمكنك تعديل البيانات فقط بعد الموافقة على طلبك",
+    "dataUpdatedSuccessfully": "تم تحديث البيانات بنجاح.",
+    "dataUpdatedSuccessfullyYouCannotEditThisDateAgain": "تم تحديث البيانات بنجاح. لا يمكنك تعديل هذا التاريخ مرة أخرى.",
+    "failedToSaveEditsPleaseTryAgain": "فشل حفظ التعديلات. يرجى المحاولة مرة أخرى.",
+    "youCannotRequestEditsForFutureDates": "لا يمكنك طلب تعديل لتواريخ مستقبلية",
+    "editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval": "تم إرسال طلب التعديل بنجاح. يرجى انتظار موافقة المشرف.",
+    "failedToSubmitEditRequestPleaseTryAgain": "فشل إرسال طلب التعديل. يرجى المحاولة مرة أخرى.",
+    "editRequestFailed": "فشل طلب التعديل",
+    "totalPoints": "إجمالي النقاط",
+    "tryAgain": "حاول مرة أخرى",
+    "error": "خطأ",
+    "accountBanned": "تم حظر هذا الحساب. يرجى التواصل مع الدعم للمساعدة."
+  },
+  "SigninForm": {
+    "title": "تسجيل الدخول إلى حسابك",
+    "description": "أدخل بريدك الإلكتروني وكلمة المرور أدناه لتسجيل الدخول",
+    "fields": {
+      "email": {
+        "label": "البريد الإلكتروني",
+        "placeholder": "name@example.com"
+      },
+      "password": {
+        "label": "كلمة المرور",
+        "placeholder": "••••••••"
+      }
+    },
+    "errors": {
+      "alreadyLoggedInElsewhere": "تم تسجيل الدخول مسبقًا على جهاز آخر.",
+      "lockError": "تعذر التحقق من قفل الجلسة. يرجى المحاولة مرة أخرى.",
+      "sessionLockFailed": "فشل التحقق من قفل الجلسة",
+      "accountBanned": "تم حظر هذا الحساب. يرجى التواصل مع الدعم للمساعدة."
+    },
+    "buttons": {
+      "signingIn": "جارٍ تسجيل الدخول...",
+      "signIn": "تسجيل الدخول",
+      "signInWithGoogle": "تسجيل الدخول عبر Google"
+    },
+    "links": {
+      "forgotPassword": "نسيت كلمة المرور؟"
+    },
+    "toasts": {
+      "loginSuccessful": "تم تسجيل الدخول بنجاح",
+      "googleLoginFailed": "فشل تسجيل الدخول عبر Google. حاول مرة أخرى."
+    }
+  },
+  "common": {
+    "percentage": "النسبة المئوية",
+    "dataForm": "نموذج البيانات",
+    "report": "تقرير",
+    "points": "النقاط",
+    "submit": "إرسال",
+    "submitting": "جارٍ الإرسال...",
+    "editorContent": "محتوى المحرر",
+    "editorTitle": "عنوان المحرر",
+    "editorContentPlaceholder": "نص محتوى المحرر",
+    "selectOption": "اختر خيارًا",
+    "youHaveAlreadySubmittedToday": "لقد قمت بالإرسال اليوم بالفعل",
+    "userEmailIsNotSet": "البريد الإلكتروني للمستخدم غير مضبوط",
+    "failedToValidateExistingSubmissions": "فشل التحقق من الإرسالات السابقة",
+    "errorValidatingExistingRecords": "خطأ أثناء التحقق من السجلات الموجودة",
+    "submittedSuccessfully": "تم الإرسال بنجاح",
+    "formSubmissionFailed": "فشل إرسال النموذج",
+    "youCannotRequestEditsForFutureDates": "لا يمكنك طلب تعديل لتواريخ مستقبلية",
+    "editRequestSubmittedSuccessfullyPleaseWaitForAdminApproval": "تم إرسال طلب التعديل بنجاح. يرجى انتظار موافقة المشرف.",
+    "failedToSubmitEditRequestPleaseTryAgain": "فشل إرسال طلب التعديل. يرجى المحاولة مرة أخرى.",
+    "editRequestFailed": "فشل طلب التعديل",
+    "totalPoints": "إجمالي النقاط",
+    "close": "إغلاق",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "tryAgain": "حاول مرة أخرى",
+    "error": "خطأ"
+  },
+  "editRequest": {
+    "title": "طلب إذن التعديل",
+    "description": "تحتاج إلى موافقة المشرف لتعديل بيانات يوم {day}. يرجى توضيح سبب حاجتك لإجراء التغييرات.",
+    "reasonLabel": "سبب التعديل",
+    "reasonPlaceholder": "يرجى توضيح سبب حاجتك لتعديل هذه البيانات...",
+    "reasonRequired": "يرجى إدخال سبب لطلب التعديل",
+    "submit": "إرسال الطلب",
+    "cancel": "إلغاء",
+    "close": "إغلاق"
+  },
+  "leaveTable": {
+    "title": "طلبات الإجازة الخاصة بك",
+    "subtitle": "اطّلع على حالات الطلبات المقدمة بسرعة.",
+    "subtitleNow": "الطلبات المقدمة والحالة الحالية",
+    "loading": "جارٍ تحميل البيانات…",
+    "errorSubtitle": "حدثت مشكلة أثناء تحميل البيانات.",
+    "errorPrefix": "خطأ:",
+    "stats": {
+      "totalRequests": "إجمالي الطلبات",
+      "title": "إحصائيات الإجازات",
+      "allowances": "مخصصات الإجازة",
+      "total": "الإجمالي",
+      "remaining": "المتبقي",
+      "totalremaining": "إجمالي المتبقي",
+      "approvedShort": "مقبول",
+      "pendingShort": "قيد الانتظار",
+      "day": "يوم",
+      "rejectedShort": "مرفوض",
+      "totalapplied": "إجمالي المقدم",
+      "daysRequested": "الأيام المطلوبة",
+      "totalappilied": "إجمالي المقدم",
+      "daysApproved": "الأيام المقبولة",
+      "upcomingLeave": "الإجازات المقبولة القادمة",
+      "daysSummary": "ملخص الأيام",
+      "rejectionRate": "معدل الرفض",
+      "popularType": "النوع الأكثر شيوعًا",
+      "none": "—",
+      "hint": "بناءً على طلباتك المقدمة.",
+      "types": {
+        "casual": "إجازة عارضة",
+        "sick": "إجازة مرضية",
+        "maternity": "إجازة أمومة",
+        "paternity": "إجازة أبوة",
+        "annual": "إجازة سنوية",
+        "other": "أخرى"
+      }
+    },
+    "page": {
+      "title": "إدارة الإجازات",
+      "subtitle": "قدم و تتبع طلبات إجازتك.",
+      "openForm": "تقديم طلب إجازة",
+      "dialog": {
+        "title": "تقديم طلب إجازة",
+        "description": "املأ النموذج أدناه لتقديم طلب الإجازة."
+      },
+      "loadingSession": "جارٍ تحميل جلسة المستخدم...",
+      "loginPrompt": "يرجى تسجيل الدخول لإدارة طلبات الإجازة الخاصة بك."
+    },
+    "errors": {
+      "fetchFailed": "فشل جلب قائمة الإجازات.",
+      "unknown": "خطأ غير معروف",
+      "toastPrefix": "فشل التحميل:"
+    },
+    "empty": {
+      "title": "لم يتم العثور على طلبات إجازة",
+      "subtitle": "ستظهر الطلبات الجديدة هنا."
+    },
+    "table": {
+      "leaveType": "نوع الإجازة",
+      "from": "تاريخ البدء",
+      "to": "تاريخ الانتهاء",
+      "days": "الأيام",
+      "reason": "السبب",
+      "status": "الحالة",
+      "requestDate": "تاريخ الطلب",
+      "approvedBy": "تمت الموافقة بواسطة"
+    },
+    "status": {
+      "approved": "مقبول",
+      "pending": "قيد الانتظار",
+      "rejected": "مرفوض"
+    },
+    "types": {
+      "casual": "عارضة",
+      "sick": "مرضية",
+      "maternity": "أمومة",
+      "paternity": "أبوة",
+      "annual": "سنوية",
+      "other": "أخرى"
+    },
+    "actions": {
+      "viewRejection": "عرض سبب الرفض",
+      "close": "إغلاق",
+      "ok": "حسنًا"
+    },
+    "rejectionModal": {
+      "title": "سبب الرفض"
+    },
+    "noRejectionReason": "لم يتم تقديم سبب"
+  },
+  "leaveForm": {
+    "title": "طلب إجازة",
+    "autofillNote": "يتم سحب اسمك وهاتفك من ملفك الشخصي.",
+    "computedDays": {
+      "title": "محسوب من التواريخ المحددة",
+      "label": "إجمالي الأيام"
+    },
+    "name": "الاسم",
+    "nameHelp": "يؤخذ هذا من ملفك الشخصي.",
+    "phone": "رقم الهاتف",
+    "phoneFormatHelp": "التنسيق: 01XXXXXXXXX (بنغلاديش)",
+    "phonePatternTitle": "جوال بنغلاديشي: سلسلة 013–019، 11 رقمًا",
+    "typeLabel": "نوع الإجازة",
+    "typePlaceholder": "اختر نوع الإجازة",
+    "types": {
+      "casual": "إجازة عارضة",
+      "sick": "إجازة مرضية",
+      "paternity": "إجازة أبوة",
+      "annual": "إجازة سنوية",
+      "other": "أخرى"
+    },
+    "dates": {
+      "from": "تاريخ البدء",
+      "to": "تاريخ الانتهاء",
+      "badRange": "نطاق غير صالح. يجب أن يكون تاريخ البدء قبل أو يساوي تاريخ الانتهاء.",
+      "hint": "يتم احتساب عدد الأيام بشكل شامل (يُحسب يوم البداية ويوم النهاية)."
+    },
+    "reason": {
+      "label": "السبب",
+      "placeholder": "صف باختصار سبب حاجتك لهذه الإجازة…",
+      "hint": "كن واضحًا وموجزًا. أضف مراجع إذا لزم الأمر.",
+      "appliedDuration": "المدة المقدمة",
+      "days": "يوم"
+    },
+    "actions": {
+      "cancel": "إلغاء",
+      "submit": "إرسال طلب الإجازة",
+      "submitting": "جارٍ الإرسال…"
+    },
+    "toasts": {
+      "submitted": "تم إرسال طلب الإجازة بنجاح!"
+    },
+    "errors": {
+      "typeRequired": "يرجى اختيار نوع الإجازة.",
+      "dateRequired": "يرجى اختيار كلا التاريخين.",
+      "badRange": "نطاق التاريخ غير صالح.",
+      "reasonRequired": "يرجى تقديم سبب لإجازتك.",
+      "generic": "فشل إرسال طلب الإجازة."
+    }
+  },
+  "calendar": {
+    "page": {
+      "title": "عرض التقويم"
+    },
+    "component": {
+      "untitledEvent": "حدث بدون عنوان",
+      "eventDetailsTitle": "تفاصيل الحدث",
+      "labels": {
+        "title": "العنوان",
+        "creatorEmail": "بريد المنشئ",
+        "visibility": "الرؤية",
+        "time": "الوقت",
+        "description": "الوصف"
+      },
+      "actions": {
+        "close": "إغلاق",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "formTitle": {
+        "create": "إنشاء حدث",
+        "edit": "تعديل الحدث"
+      },
+      "rbc": {
+        "today": "اليوم",
+        "previous": "السابق",
+        "next": "التالي",
+        "month": "شهر",
+        "week": "أسبوع",
+        "day": "يوم",
+        "agenda": "جدول الأعمال",
+        "showMore": "+{total} المزيد"
+      }
+    }
+  },
+  "amoliChart": {
+    "title": "المحاسبة العملية",
+    "closed": "مغلق",
+    "remaining": "متبقي",
+    "noDataUser": "لا توجد بيانات متاحة للمستخدم المحدد.",
+    "noDataUsers": "لا توجد بيانات متاحة للمستخدمين المحددين."
+  },
+  "comparison": {
+    "title": "المقارنة والتقارير",
+    "page": {
+      "title": "المقارنة والتقارير",
+      "subtitle": "قارن المؤشرات عبر التواريخ أو الفترات."
+    },
+    "controls": {
+      "type": "المقارنة حسب",
+      "dayToDay": "يوم بيوم",
+      "monthToMonth": "شهر بشهر",
+      "singleMonth": "شهر واحد",
+      "yearToYear": "سنة بسنة",
+      "from": "من",
+      "to": "إلى",
+      "toWord": "إلى",
+      "compare": "قارن",
+      "downloadPdf": "تنزيل PDF",
+      "loading": "جارٍ تحميل المقارنة..."
+    },
+    "table": {
+      "label": "التسمية",
+      "fromHeader": "من",
+      "toHeader": "إلى",
+      "difference": "الفرق",
+      "change": "التغيير"
+    },
+    "messages": {
+      "selectValues": "حدد القيم وانقر على \"قارن\" لرؤية النتائج.",
+      "noData": "لا توجد بيانات متاحة للمقارنة.",
+      "invalidRange": "يرجى اختيار قيمتي 'من' و 'إلى'.",
+      "noDataForPdf": "لا توجد بيانات متاحة لإنشاء PDF."
+    },
+    "pdf": {
+      "title": "تقرير المقارنة",
+      "page": "الصفحة {page} من {total}"
+    },
+    "tally": {
+      "title": "مقارنة",
+      "current": "الحالي",
+      "previous": "السابق",
+      "change": "التغيير"
+    }
+  },
+  "register": {
+    "tabs": {
+      "standard": "إضافة داعية",
+      "special": "إضافة داعية خاص"
+    },
+    "titles": {
+      "standard": "إضافة داعية جديد",
+      "special": "إضافة داعية خاص"
+    },
+    "fields": {
+      "name": "الاسم الكامل",
+      "role": "الدور",
+      "division": "القسم",
+      "district": "المقاطعة",
+      "upazila": "أوبازيلا",
+      "union": "الاتحاد",
+      "markaz": "المركز",
+      "phone": "رقم الهاتف المحمول",
+      "email": "البريد الإلكتروني",
+      "password": "إنشاء كلمة مرور جديدة"
+    },
+    "roles": {
+      "superadmin": "المشرف العام",
+      "centraladmin": "المشرف المركزي",
+      "divisionadmin": "مشرف القسم",
+      "markazadmin": "مشرف المركز",
+      "daye": "داعية"
+    },
+    "buttons": {
+      "addUser": "إضافة مستخدم",
+      "processing": "جارٍ المعالجة..."
+    },
+    "select": "اختر",
+    "toasts": {
+      "created": "تم إنشاء المستخدم!",
+      "error": "حدث خطأ ما!"
+    },
+    "errors": {
+      "nameRequired": "الاسم مطلوب",
+      "emailInvalid": "بريد إلكتروني غير صالح",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "passwordMin": "يجب أن تكون كلمة المرور على الأقل 8 أحرف",
+      "passwordRequired": "كلمة المرور مطلوبة",
+      "roleRequired": "الدور مطلوب",
+      "phoneRequired": "الهاتف مطلوب",
+      "divisionRequired": "القسم مطلوب",
+      "districtRequired": "المقاطعة مطلوبة",
+      "upazilaRequired": "الأوبازيلا مطلوبة",
+      "unionRequired": "الاتحاد مطلوب",
+      "markazRequired": "المركز مطلوب"
+    }
+  },
+  "usersTable": {
+    "title": "عرض جميع المشرفين والدعاة",
+    "filters": {
+      "allRoles": "جميع الأدوار",
+      "roleOptions": {
+        "centraladmin": "المشرف المركزي",
+        "divisionadmin": "مشرف القسم",
+        "districtadmin": "مشرف المقاطعة",
+        "upozilaadmin": "مشرف الأوبازيلا",
+        "unionadmin": "مشرف الاتحاد",
+        "markazadmin": "مشرف المركز",
+        "daye": "داعية",
+        "assistantList": "مساعد داعية",
+        "null": "بدون دور"
+      },
+      "placeholders": {
+        "name": "الاسم",
+        "division": "القسم",
+        "district": "المقاطعة",
+        "upazila": "الأوبازيلا",
+        "union": "الاتحاد"
+      }
+    },
+    "export": {
+      "title": "تقرير المستخدمين",
+      "download": "تنزيل PDF",
+      "generatedOn": "تم الإنشاء في {date}"
+    },
+    "columns": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "role": "الدور",
+      "division": "القسم",
+      "district": "المقاطعة",
+      "upazila": "الأوبازيلا",
+      "union": "الاتحاد",
+      "phone": "الهاتف",
+      "markaz": "المركز",
+      "adminAssigned": "المشرف المعين",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "status": {
+      "active": "نشط",
+      "banned": "محظور",
+      "authenticating": "جارٍ التحقق..."
+    },
+    "actions": {
+      "ban": "حظر",
+      "unban": "إلغاء الحظر",
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "modals": {
+      "deleteConfirmTitle": "هل أنت متأكد أنك تريد حذف هذا المستخدم؟",
+      "deleteWarningTitle": "إذا كنت متأكدًا أنك تريد حذف هذا المستخدم",
+      "firstContactDev": "يرجى التواصل مع المطور أولاً.",
+      "delete": "حذف",
+      "contactDev": "تواصل",
+      "yes": "نعم",
+      "no": "لا",
+      "editNoteLabel": "ملاحظة (سبب التغييرات)",
+      "save": "حفظ التغييرات",
+      "cancel": "إلغاء",
+      "saveConfirmTitle": "هل أنت متأكد أنك تريد حفظ هذه التغييرات؟",
+      "saveConfirmProceed": "تغيير",
+      "saveWarningTitle": "إذا كنت متأكدًا أنك تريد تغيير معلومات هذا المستخدم فـ"
+    },
+    "toasts": {
+      "updateSuccess": "تم تحديث المستخدم بنجاح",
+      "updateFailed": "فشل تحديث المستخدم",
+      "deleteSuccess": "تم حذف المستخدم بنجاح!",
+      "deleteFailed": "فشل حذف المستخدم.",
+      "banFailed": "فشل تحديث حالة المستخدم.",
+      "banUpdated": "تم {action} المستخدم بنجاح!"
+    },
+    "tabs": {
+      "amoli": "المحاسبة العملية",
+      "moktob": "شؤون المكاتب",
+      "talim": "تعليم النساء",
+      "daye": "مساعد الداعية",
+      "dawati": "شؤون الدعوة",
+      "dawatimojlish": "مجلس الدعوة",
+      "jamat": "شؤون الجماعة",
+      "dinefera": "عائدون إلى الإسلام",
+      "sofor": "شؤون السفر"
+    },
+    "totalsTitle": "عرض البيانات المجمعة"
+  },
+  "assistantDaeeList": {
+    "unknownUser": "(مستخدم غير معروف)",
+    "summary": "قائمة مساعدي الدعاة — الإجمالي {total} (الداعية الرئيسي: {parents})",
+    "buttons": {
+      "exportPdf": "تصدير PDF",
+      "exportCsv": "تصدير CSV"
+    },
+    "table": {
+      "headers": {
+        "parent": "اسم الداعية",
+        "assistant": "اسم المساعد",
+        "phone": "الهاتف",
+        "email": "البريد الإلكتروني",
+        "address": "العنوان",
+        "division": "القسم",
+        "district": "المقاطعة",
+        "upazila": "الأوبازيلا",
+        "union": "الاتحاد",
+        "date": "تاريخ السجل"
+      }
+    },
+    "status": {
+      "loading": "جارٍ التحميل..."
+    },
+    "empty": {
+      "noRows": "لم يتم العثور على مساعدين لهذا الفلتر."
+    },
+    "errors": {
+      "loadFailed": "فشل تحميل المساعدين",
+      "partial": "تعذر تحميل بعض البيانات. يتم عرض الباقي."
+    },
+    "pdf": {
+      "title": "تقرير مساعدي الدعاة",
+      "totalParents": "إجمالي الدعاة الرئيسيين",
+      "totalAssistants": "إجمالي المساعدين",
+      "printed": "مطبوع",
+      "pageXofY": "الصفحة {current} من {total}"
+    }
+  },
+  "leaveAdmin": {
+    "title": "لوحة إدارة الإجازات",
+    "subtitle": "نظرة عامة وإدارة جميع طلبات الإجازات المقدمة.",
+    "search": {
+      "placeholder": "البحث بالاسم، البريد الإلكتروني، الهاتف، النوع، السبب، أو الحالة...",
+      "clear": "مسح البحث"
+    },
+    "buttons": {
+      "downloadSummary": "تنزيل الملخص",
+      "generating": "جارٍ الإنشاء...",
+      "downloadSingle": "تنزيل هذا الطلب",
+      "cancel": "إلغاء",
+      "close": "إغلاق",
+      "ok": "حسنًا"
+    },
+    "columns": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "casual": "عارضة",
+      "casualRemaining": "المتبقي عارضة",
+      "sick": "مرضية",
+      "sickRemaining": "المتبقي مرضية",
+      "totalRemaining": "إجمالي المتبقي",
+      "other": "أخرى",
+      "total": "الإجمالي",
+      "type": "النوع",
+      "from": "من",
+      "to": "إلى",
+      "days": "الأيام",
+      "reason": "السبب",
+      "status": "الحالة",
+      "requestedOn": "طلب في",
+      "approvedBy": "وافق عليه",
+      "actions": "الإجراءات"
+    },
+    "types": {
+      "casual": "عارضة",
+      "sick": "مرضية",
+      "maternity": "أمومة",
+      "paternity": "أبوة",
+      "annual": "سنوية",
+      "other": "أخرى"
+    },
+    "status": {
+      "pending": "قيد الانتظار",
+      "approved": "مقبول",
+      "rejected": "مرفوض"
+    },
+    "details": {
+      "title": "تفاصيل الإجازة",
+      "viewRejection": "عرض سبب الرفض",
+      "noRejectionReason": "لم يتم تقديم سبب",
+      "rejectionTitle": "سبب الرفض"
+    },
+    "reject": {
+      "title": "رفض الإجازة",
+      "subtitle": "يرجى تقديم سبب. سيتم حفظ هذا مع الطلب.",
+      "reasonLabel": "سبب الرفض",
+      "reasonPlaceholder": "اكتب سبب الرفض...",
+      "reasonRequired": "يرجى تقديم سبب الرفض.",
+      "saveAndReject": "حفظ السبب ورفض"
+    },
+    "labels": {
+      "na": "غير متاح",
+      "pending": "قيد الانتظار",
+      "reason": "السبب",
+      "rejectionReason": "سبب الرفض"
+    },
+    "tooltips": {
+      "pending": "طلبات قيد الانتظار",
+      "newPending": "طلبات جديدة قيد الانتظار خلال آخر 48 ساعة"
+    },
+    "empty": "لم يتم العثور على سجلات إجازات",
+    "toasts": {
+      "fetchFailed": "فشل جلب طلبات الإجازة: {msg}",
+      "fetchUnexpected": "حدث خطأ غير متوقع أثناء جلب طلبات الإجازات.",
+      "summarySuccess": "تم إنشاء ملف PDF الملخص بنجاح!",
+      "summaryFail": "فشل إنشاء ملف PDF. يرجى المحاولة مرة أخرى.",
+      "singleSuccess": "تم إنشاء ملف PDF لطلب الإجازة بنجاح!",
+      "singleFail": "فشل إنشاء ملف PDF. يرجى المحاولة مرة أخرى.",
+      "statusUpdated": "تم تحديث حالة الإجازة بنجاح!",
+      "statusFailed": "فشل تحديث الحالة: {msg}",
+      "statusUnexpected": "حدث خطأ غير متوقع أثناء تحديث الحالة."
+    },
+    "pdf": {
+      "summaryTitle": "ملخص الإجازات",
+      "singleTitle": "طلب إجازة",
+      "generatedOn": "تم الإنشاء في",
+      "totalPeople": "إجمالي الأشخاص",
+      "employeeInfo": "معلومات الموظف",
+      "leaveDetails": "تفاصيل الإجازة",
+      "employeeSign": "توقيع الموظف",
+      "adminSign": "توقيع المشرف"
+    }
+  },
+  "editRequests": {
+    "page": {
+      "title": "إدارة طلبات التعديل",
+      "subtitle": "نظرة عامة وإدارة جميع طلبات إذن التعديل."
+    },
+    "search": {
+      "placeholder": "البحث بالاسم، البريد الإلكتروني، الهاتف، الدور أو السبب...",
+      "clear": "مسح البحث"
+    },
+    "actions": {
+      "downloadSummary": "تنزيل الملخص",
+      "generating": "جارٍ الإنشاء…"
+    },
+    "table": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "role": "الدور",
+      "pending": "قيد الانتظار",
+      "approved": "مقبول",
+      "rejected": "مرفوض",
+      "total": "الإجمالي"
+    },
+    "details": {
+      "title": "تفاصيل طلب التعديل",
+      "date": "التاريخ",
+      "location": "الموقع",
+      "reason": "السبب",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "status": {
+      "pending": "قيد الانتظار",
+      "approved": "مقبول",
+      "rejected": "مرفوض"
+    },
+    "badges": {
+      "pendingHint": "الطلبات قيد الانتظار (تنبض الجديدة لمدة 48 ساعة)"
+    },
+    "messages": {
+      "noData": "لم يتم العثور على طلبات تعديل"
+    },
+    "toasts": {
+      "fetchError": "فشل جلب طلبات التعديل.",
+      "statusUpdated": "تم تحديث الحالة بنجاح!",
+      "statusUpdateFailed": "فشل تحديث الحالة.",
+      "pdfSuccess": "تم إنشاء ملف PDF الملخص بنجاح!",
+      "pdfFailed": "فشل إنشاء ملف PDF."
+    },
+    "pdf": {
+      "title": "ملخص طلبات التعديل",
+      "generatedAt": "تم الإنشاء:",
+      "totalUsers": "إجمالي المستخدمين:"
+    }
+  },
+  "markaz": {
+    "title": "مركز المسجد",
+    "searchPlaceholder": "ابحث هنا...",
+    "buttons": {
+      "add": "إضافة مركز",
+      "search": "بحث",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "cancel": "إلغاء",
+      "create": "إنشاء",
+      "update": "تحديث"
+    },
+    "table": {
+      "name": "الاسم",
+      "division": "القسم",
+      "district": "المقاطعة",
+      "upazila": "الأوبازيلا",
+      "union": "الاتحاد",
+      "users": "المستخدمون",
+      "actions": "الإجراءات"
+    },
+    "dialogs": {
+      "createTitle": "إنشاء مركز",
+      "editTitle": "تعديل المركز",
+      "deleteTitle": "حذف المركز",
+      "deleteConfirm": "هل أنت متأكد أنك تريد حذف <b>{name}</b>؟ لا يمكن التراجع عن هذا الإجراء."
+    },
+    "messages": {
+      "loading": "جارٍ التحميل...",
+      "noData": "لا توجد بيانات",
+      "fetchFailed": "فشل الجلب",
+      "loadFailed": "فشل التحميل",
+      "saveFailed": "فشل الحفظ",
+      "created": "تم الإنشاء",
+      "updated": "تم التحديث",
+      "deleted": "تم الحذف"
+    },
+    "labels": {
+      "name": "الاسم",
+      "division": "القسم",
+      "district": "المقاطعة",
+      "upazila": "الأوبازيلا",
+      "union": "الاتحاد",
+      "selectDivision": "اختر القسم",
+      "selectDistrict": "اختر المقاطعة",
+      "selectUpazila": "اختر الأوبازيلا",
+      "selectUnion": "اختر الاتحاد"
+    },
+    "validation": {
+      "required": "مطلوب"
+    }
+  },
+  "dayeReview": {
+    "header": {
+      "title": "مراجعة الداعية",
+      "subtitle": "مراجعة تقدم العمل"
+    },
+    "stats": {
+      "totalDaee": "إجمالي الدعاة",
+      "submittedTitle": "العمل المقدم",
+      "completedPercent": "مكتمل",
+      "notSubmittedTitle": "غير مقدم",
+      "remainingPercent": "متبقي",
+      "progress": "التقدم",
+      "completeness": "اكتمال"
+    },
+    "filters": {
+      "searchPlaceholder": "البحث بالاسم، البريد الإلكتروني أو الموقع...",
+      "all": "الكل",
+      "submitted": "مقدم",
+      "notSubmitted": "غير مُرسل"
+    },
+    "list": {
+      "locationUnknown": "الموقع غير محدد"
+    },
+    "badge": {
+      "completed": "مكتمل",
+      "incomplete": "غير مكتمل"
+    },
+    "details": {
+      "todaySummary": "ملخص عمل اليوم",
+      "lastSubmission": "آخر إرسال:"
+    },
+    "categories": {
+      "amoli": "عملي",
+      "moktob": "مكتب",
+      "talim": "تعليم",
+      "daye": "داعية",
+      "dawati": "دعوي",
+      "dawatimojlish": "مجلس",
+      "jamat": "جماعة",
+      "dinefera": "عائد للإيمان",
+      "sofor": "السفر"
+    },
+    "empty": {
+      "noResults": "لم يتم العثور على دعاة"
+    },
+    "toast": {
+      "fetchDayeesError": "فشل تحميل معلومات الداعية",
+      "fetchStatusError": "فشل تحميل حالة الإرسال"
+    }
+  },
+  "weeklyTodo": {
+    "modal": {
+      "addTitle": "إضافة خطة جديدة",
+      "editTitle": "تعديل الخطة",
+      "close": "إغلاق",
+      "onlyWeekend": "يُسمح فقط بالسبت والأحد.",
+      "onlyWeekends": "يمكن إضافة الخطط فقط يومي السبت والأحد",
+      "warning": {
+        "title": "الأحد والإثنين فقط",
+        "msg1": "يمكنك إضافة الخطط الأسبوعية فقط في",
+        "and": "و",
+        "saturday": "الأحد",
+        "sunday": "الإثنين",
+        "msg2": "يرجى المحاولة مرة أخرى نهاية الأسبوع القادمة.",
+        "ok": "حسنًا، فهمت"
+      },
+      "fields": {
+        "title": "العنوان",
+        "details": "التفاصيل",
+        "scheduledDate": "التاريخ المخطط",
+        "status": "الحالة"
+      },
+      "placeholders": {
+        "title": "أدخل عنوان الخطة",
+        "details": "أدخل تفاصيل الخطة"
+      },
+      "status": {
+        "pending": "قيد الانتظار",
+        "completed": "مكتمل",
+        "cancelled": "ملغى"
+      },
+      "buttons": {
+        "cancel": "إلغاء",
+        "create": "إنشاء خطة",
+        "update": "تحديث الخطة",
+        "creating": "جارٍ الإنشاء...",
+        "updating": "جارٍ التحديث..."
+      },
+      "errors": {
+        "createFailed": "فشل إنشاء الخطة. يرجى المحاولة مرة أخرى.",
+        "updateFailed": "فشل تحديث الخطة. يرجى المحاولة مرة أخرى.",
+        "onlyWeekend": "يمكنك اختيار السبت أو الأحد فقط."
+      }
+    },
+    "card": {
+      "notScheduled": "غير مجدول",
+      "status": {
+        "pending": "قيد الانتظار",
+        "completed": "مكتمل",
+        "cancelled": "ملغى"
+      },
+      "expand": "توسيع",
+      "collapse": "طي",
+      "readMore": "قراءة المزيد",
+      "date": "التاريخ",
+      "completed": "مكتمل",
+      "created": "تم الإنشاء",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "deleteModal": {
+        "title": "تأكيد الحذف",
+        "description": "هل أنت متأكد أنك تريد حذف هذه الخطة؟ لا يمكن التراجع عن هذا الإجراء.",
+        "cancel": "إلغاء",
+        "confirm": "حذف",
+        "deleting": "جارٍ الحذف..."
+      }
+    },
+    "adminWeeklyTodo": {
+      "title": "الخطط الأسبوعية - عرض المشرف",
+      "subtitle": "عرض وإدارة جميع الخطط الأسبوعية للمستخدمين",
+      "loading": "جارٍ تحميل الخطط...",
+      "refresh": "تحديث",
+      "expandAll": "توسيع الكل",
+      "collapseAll": "طي الكل",
+      "totalUsers": "إجمالي المستخدمين",
+      "plans": "خطط",
+      "noPlans": "لا توجد خطط متاحة",
+      "noData": "لم يتم العثور على بيانات",
+      "noDataDescription": "لا توجد خطط تطابق عوامل التصفية الحالية.",
+      "date": "التاريخ",
+      "completed": "مكتمل",
+      "created": "تم الإنشاء",
+      "notScheduled": "غير مجدول",
+      "filters": {
+        "user": "المستخدم",
+        "allUsers": "جميع المستخدمين",
+        "status": "الحالة",
+        "allStatus": "جميع الحالات",
+        "dateRange": "نطاق التاريخ",
+        "selectDate": "اختر التاريخ",
+        "byDay": "التصفية حسب اليوم"
+      },
+      "status": {
+        "pending": "قيد الانتظار",
+        "completed": "مكتمل",
+        "cancelled": "ملغى"
+      },
+      "dateRange": {
+        "thisWeek": "هذا الأسبوع",
+        "lastWeek": "الأسبوع الماضي",
+        "custom": "مخصص"
+      },
+      "weekdays": {
+        "fullWeek": "أسبوع كامل",
+        "saturday": "السبت",
+        "sunday": "الأحد",
+        "monday": "الإثنين",
+        "tuesday": "الثلاثاء",
+        "wednesday": "الأربعاء",
+        "thursday": "الخميس",
+        "friday": "الجمعة"
+      },
+      "errors": {
+        "loadFailed": "فشل تحميل البيانات. يرجى المحاولة مرة أخرى."
+      }
+    },
+    "DayeWeeklyTodo": {
+      "title": "الخطط الأسبوعية",
+      "subtitle": "إدارة مهامك وأنشطتك الأسبوعية بكفاءة",
+      "addPlan": "إضافة خطة جديدة",
+      "loading": "جارٍ تحميل الخطط...",
+      "refresh": "تحديث",
+      "refreshing": "جارٍ التحديث...",
+      "showingPlans": "خطط معروضة",
+      "noPlans": "لم يتم العثور على خطط",
+      "noPlansDescription": "ابدأ بإنشاء خطتك الأسبوعية الأولى.",
+      "stats": {
+        "total": "إجمالي الخطط",
+        "completed": "مكتمل",
+        "pending": "قيد الانتظار",
+        "cancelled": "ملغى"
+      },
+      "filters": {
+        "dateRange": "نطاق التاريخ",
+        "selectDate": "اختر التاريخ",
+        "status": "تصفية الحالة",
+        "allStatus": "جميع الحالات",
+        "byDay": "التصفية حسب اليوم"
+      },
+      "status": {
+        "pending": "قيد الانتظار",
+        "completed": "مكتمل",
+        "cancelled": "ملغى"
+      },
+      "dateRange": {
+        "thisWeek": "هذا الأسبوع",
+        "lastWeek": "الأسبوع الماضي",
+        "custom": "مخصص"
+      },
+      "weekdays": {
+        "fullWeek": "أسبوع كامل",
+        "saturday": "السبت",
+        "sunday": "الأحد",
+        "monday": "الإثنين",
+        "tuesday": "الثلاثاء",
+        "wednesday": "الأربعاء",
+        "thursday": "الخميس",
+        "friday": "الجمعة"
+      },
+      "errors": {
+        "loadFailed": "فشل تحميل الخطط. يرجى المحاولة مرة أخرى."
+      }
+    }
+  }
+}

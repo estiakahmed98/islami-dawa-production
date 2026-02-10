@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { useSidebar } from "@/providers/sidebar-provider";
 import { useEffect, useState } from "react";
 import moment from "moment-hijri";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 const HeaderMenu = dynamic(() => import("./HeaderMenu"), { ssr: false });
 const LanguageSwitcher = dynamic(() => import("../language-switcher"), { ssr: false });
@@ -25,6 +25,7 @@ function getInitials(name?: string | null, email?: string | null) {
 const Header = () => {
   const { toggleSidebar } = useSidebar();
   const t = useTranslations("header");
+  const locale = useLocale();
   // Hydration-safe date text
   const [mounted, setMounted] = useState(false);
   const [gregorian, setGregorian] = useState<string>("");
@@ -32,12 +33,12 @@ const Header = () => {
 
   useEffect(() => {
     setMounted(true);
-    moment.locale("bn");
+    moment.locale(locale);
     const t = new Date();
     const g = `${String(t.getDate()).padStart(2, "0")}-${String(t.getMonth() + 1).padStart(2, "0")}-${t.getFullYear()}`;
     setGregorian(g);
     setHijri(moment().subtract(1, "day").format(" iD iMMMM iYYYY"));
-  }, []);
+  }, [locale]);
 
   // header no longer manages session or profile; HeaderMenu handles account menu client-side
 

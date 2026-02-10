@@ -60,7 +60,6 @@ type EndpointDef = {
     | "dinefera"
     | "sofor";
   url: string;
-  setter: React.Dispatch<React.SetStateAction<LabeledData>>;
   labelMap: LabelMap;
 };
 
@@ -122,42 +121,7 @@ const AdminDashboard: React.FC = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [amoliData, setAmoliData] = useState<LabeledData>({
-    records: {},
-    labelMap: {},
-  });
-  const [moktobData, setMoktobData] = useState<LabeledData>({
-    records: {},
-    labelMap: {},
-  });
-  const [dawatiData, setDawatiData] = useState<LabeledData>({
-    records: {},
-    labelMap: {},
-  });
-  const [dawatiMojlishData, setDawatiMojlishData] = useState<LabeledData>({
-    records: {},
-    labelMap: {},
-  });
-  const [jamatData, setJamatData] = useState<LabeledData>({
-    records: {},
-    labelMap: {},
-  });
-  const [dineFeraData, setDineFeraData] = useState<LabeledData>({
-    records: {},
-    labelMap: {},
-  });
-  const [talimData, setTalimData] = useState<LabeledData>({
-    records: {},
-    labelMap: {},
-  });
-  const [soforData, setSoforData] = useState<LabeledData>({
-    records: {},
-    labelMap: {},
-  });
-  const [dayeData, setDayeData] = useState<LabeledData>({
-    records: {},
-    labelMap: {},
-  });
+  // Data comes directly from SWR (avoid mirroring into state to prevent render loops)
 
   // ---------- Modal state ----------
   const [modalOpen, setModalOpen] = useState(false);
@@ -353,7 +317,6 @@ const AdminDashboard: React.FC = () => {
       {
         key: "amoli",
         url: "/api/amoli",
-        setter: setAmoliData,
         labelMap: {
           tahajjud: t("amoli.tahajjud"),
           quarntilawat: t("amoli.quarntilawat"),
@@ -374,7 +337,6 @@ const AdminDashboard: React.FC = () => {
       {
         key: "moktob",
         url: "/api/moktob",
-        setter: setMoktobData,
         labelMap: {
           notunMoktobChalu: t("moktob.notunMoktobChalu"),
           totalMoktob: t("moktob.totalMoktob"),
@@ -391,7 +353,6 @@ const AdminDashboard: React.FC = () => {
       {
         key: "talim",
         url: "/api/talim",
-        setter: setTalimData,
         labelMap: {
           mohilaTalim: t("talim.mohilaTalim"),
           mohilaOnshogrohon: t("talim.mohilaOnshogrohon"),
@@ -401,7 +362,6 @@ const AdminDashboard: React.FC = () => {
       {
         key: "daye",
         url: "/api/dayi",
-        setter: setDayeData,
         labelMap: {
           sohojogiDayeToiri: t("daye.sohojogiDayeToiri"),
           assistantsList: t("daye.assistantsList"),
@@ -411,7 +371,6 @@ const AdminDashboard: React.FC = () => {
       {
         key: "dawati",
         url: "/api/dawati",
-        setter: setDawatiData,
         labelMap: {
           nonMuslimDawat: t("dawati.nonMuslimDawat"),
           murtadDawat: t("dawati.murtadDawat"),
@@ -422,7 +381,6 @@ const AdminDashboard: React.FC = () => {
       {
         key: "dawatimojlish",
         url: "/api/dawatimojlish",
-        setter: setDawatiMojlishData,
         labelMap: {
           dawatterGuruttoMojlish: t("dawatiMojlish.dawatterGuruttoMojlish"),
           mojlisheOnshogrohon: t("dawatiMojlish.mojlisheOnshogrohon"),
@@ -441,7 +399,6 @@ const AdminDashboard: React.FC = () => {
       {
         key: "jamat",
         url: "/api/jamat",
-        setter: setJamatData,
         labelMap: {
           jamatBerHoise: t("jamat.jamatBerHoise"),
           jamatSathi: t("jamat.jamatSathi"),
@@ -451,7 +408,6 @@ const AdminDashboard: React.FC = () => {
       {
         key: "dinefera",
         url: "/api/dinefera",
-        setter: setDineFeraData,
         labelMap: {
           nonMuslimMuslimHoise: t("dineFera.nonMuslimMuslimHoise"),
           murtadIslamFireche: t("dineFera.murtadIslamFireche"),
@@ -461,7 +417,6 @@ const AdminDashboard: React.FC = () => {
       {
         key: "sofor",
         url: "/api/soforbisoy",
-        setter: setSoforData,
         labelMap: {
           moktobVisit: t("sofor.moktobVisit"),
           madrasaVisit: t("sofor.madrasaVisit"),
@@ -591,33 +546,19 @@ const AdminDashboard: React.FC = () => {
   const dineFeraSW = useEndpoint(endpoints.find((e) => e.key === "dinefera")!);
   const soforSW = useEndpoint(endpoints.find((e) => e.key === "sofor")!);
 
-  useEffect(() => {
-    if (amoliSW.shaped) setAmoliData(amoliSW.shaped);
-  }, [amoliSW.shaped]);
-  useEffect(() => {
-    if (moktobSW.shaped) setMoktobData(moktobSW.shaped);
-  }, [moktobSW.shaped]);
-  useEffect(() => {
-    if (talimSW.shaped) setTalimData(talimSW.shaped);
-  }, [talimSW.shaped]);
-  useEffect(() => {
-    if (dayeSW.shaped) setDayeData(dayeSW.shaped);
-  }, [dayeSW.shaped]);
-  useEffect(() => {
-    if (dawatiSW.shaped) setDawatiData(dawatiSW.shaped);
-  }, [dawatiSW.shaped]);
-  useEffect(() => {
-    if (dawatiMojlishSW.shaped) setDawatiMojlishData(dawatiMojlishSW.shaped);
-  }, [dawatiMojlishSW.shaped]);
-  useEffect(() => {
-    if (jamatSW.shaped) setJamatData(jamatSW.shaped);
-  }, [jamatSW.shaped]);
-  useEffect(() => {
-    if (dineFeraSW.shaped) setDineFeraData(dineFeraSW.shaped);
-  }, [dineFeraSW.shaped]);
-  useEffect(() => {
-    if (soforSW.shaped) setSoforData(soforSW.shaped);
-  }, [soforSW.shaped]);
+  const emptyData = useMemo<LabeledData>(
+    () => ({ records: {}, labelMap: {} }),
+    []
+  );
+  const amoliData = amoliSW.shaped ?? emptyData;
+  const moktobData = moktobSW.shaped ?? emptyData;
+  const talimData = talimSW.shaped ?? emptyData;
+  const dayeData = dayeSW.shaped ?? emptyData;
+  const dawatiData = dawatiSW.shaped ?? emptyData;
+  const dawatiMojlishData = dawatiMojlishSW.shaped ?? emptyData;
+  const jamatData = jamatSW.shaped ?? emptyData;
+  const dineFeraData = dineFeraSW.shaped ?? emptyData;
+  const soforData = soforSW.shaped ?? emptyData;
 
   useEffect(() => {
     if (

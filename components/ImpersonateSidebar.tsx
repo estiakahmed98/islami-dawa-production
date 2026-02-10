@@ -18,11 +18,13 @@ import { useLocale, useTranslations } from "next-intl";
 import { PiMosqueDuotone } from "react-icons/pi";
 import { TbReport } from "react-icons/tb";
 import { GrPlan } from "react-icons/gr";
+import { useSidebar } from "@/providers/sidebar-provider";
 
 const ImpersonateSidebar: React.FC = () => {
   const t = useTranslations("dashboard.sideBar");
   const t2 = useTranslations("header");
   const locale = useLocale();
+  const { open } = useSidebar();
 
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -163,7 +165,7 @@ const ImpersonateSidebar: React.FC = () => {
 
   return (
     <div className="flex h-screen font-tiro">
-      {!isMobile && (
+      {open && !isMobile && (
         <div
           className={`fixed h-full overflow-y-auto bg-sky-900 transition-all duration-300 md:relative ${isCollapsed ? "w-[70px]" : "w-72"
             }`}
