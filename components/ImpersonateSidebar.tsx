@@ -24,7 +24,7 @@ const ImpersonateSidebar: React.FC = () => {
   const t = useTranslations("dashboard.sideBar");
   const t2 = useTranslations("header");
   const locale = useLocale();
-  const { open } = useSidebar();
+  useSidebar();
 
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -165,7 +165,7 @@ const ImpersonateSidebar: React.FC = () => {
 
   return (
     <div className="flex h-screen font-tiro">
-      {open && !isMobile && (
+      {!isMobile && (
         <div
           className={`fixed h-full overflow-y-auto bg-sky-900 transition-all duration-300 md:relative ${isCollapsed ? "w-[70px]" : "w-72"
             }`}
