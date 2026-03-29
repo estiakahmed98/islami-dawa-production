@@ -44,6 +44,8 @@ const localizer = dateFnsLocalizer({
 export default function GoogleCalendar() {
   const [events, setEvents] = useState<GoogleEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<GoogleEvent | null>(null);
+  const [eventPendingDelete, setEventPendingDelete] = useState<GoogleEvent | null>(null);
+  const [isInstructionOpen, setIsInstructionOpen] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
@@ -160,6 +162,7 @@ export default function GoogleCalendar() {
     try {
       await fetch(`/api/calendar?eventId=${eventId}`, { method: "DELETE" });
       fetchEvents(currentDateRange.start, currentDateRange.end);
+      setEventPendingDelete(null);
       setSelectedEvent(null);
     } catch (error) {
       console.error("Error deleting event:", error);
@@ -250,6 +253,21 @@ export default function GoogleCalendar() {
         messages={messages}
       />
 
+      <Dialog open={isInstructionOpen} onOpenChange={setIsInstructionOpen}>
+        <DialogContent>
+          <DialogTitle className="text-xl font-bold">{t("instructionModal.title")}</DialogTitle>
+          <div className="space-y-4">
+            <p>{t("instructionModal.description")}</p>
+            <p className="text-sm text-muted-foreground">{t("instructionModal.hint")}</p>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setIsInstructionOpen(false)}>
+                {t("instructionModal.close")}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Event Details Modal */}
       <Dialog open={!!selectedEvent && !isFormOpen} onOpenChange={() => setSelectedEvent(null)}>
         <DialogContent>
@@ -304,12 +322,38 @@ export default function GoogleCalendar() {
                   </Button>
                   <Button
                     variant="destructive"
-                    onClick={() => selectedEvent?.id && handleDeleteEvent(selectedEvent.id)}
+                    onClick={() => setEventPendingDelete(selectedEvent)}
                   >
                     {t("actions.delete")}
                   </Button>
                 </div>
               )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!eventPendingDelete}
+        onOpenChange={(open) => {
+          if (!open) setEventPendingDelete(null);
+        }}
+      >
+        <DialogContent>
+          <DialogTitle className="text-xl font-bold">{t("deleteModal.title")}</DialogTitle>
+          <div className="space-y-4">
+            <p>{t("deleteModal.description")}</p>
+            <p className="text-sm text-red-600">{t("deleteModal.warning")}</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEventPendingDelete(null)}>
+                {t("deleteModal.cancel")}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => eventPendingDelete?.id && handleDeleteEvent(eventPendingDelete.id)}
+              >
+                {t("deleteModal.confirm")}
+              </Button>
             </div>
           </div>
         </DialogContent>
