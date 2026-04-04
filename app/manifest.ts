@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Da'e & Dawah",
-    short_name: "Da'e & Dawah",
+    name: "দা'ঈ ও দাওয়াহ",
+    short_name: "দা'ঈ ও দাওয়াহ",
     id: "/",
     start_url: "/",
     scope: "/",
