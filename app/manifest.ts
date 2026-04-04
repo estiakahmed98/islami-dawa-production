@@ -12,25 +12,25 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#000000",
     icons: [
       {
-        src: "/PWD Logo 192.png",
+        src: "/icons/pwd-logo-192.png",
         sizes: "192x192",
         type: "image/png",
       },
       {
-        src: "/PWD Logo 512.png",
+        src: "/icons/pwd-logo-512.png",
         sizes: "512x512",
         type: "image/png",
       },
     ],
     screenshots: [
       {
-        src: "/dashboard-mobile.png",
+        src: "/icons/dashboard-mobile.png",
         sizes: "390x844",
         type: "image/png",
         form_factor: "narrow",
       },
       {
-        src: "/dashboard-desktop.png",
+        src: "/icons/dashboard-desktop.png",
         sizes: "1280x720",
         type: "image/png",
         form_factor: "wide",

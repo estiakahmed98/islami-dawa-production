@@ -1,11 +1,17 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono, Anek_Bangla, Tiro_Bangla } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "@/providers/theme-provider";
-import AppSessionProvider from "@/providers/session-provider";
-import { Toaster } from "@/components/ui/sonner";
-import TreeProvider from "@/providers/treeProvider";
+import type { Metadata, Viewport } from "next";
+import {
+  Geist,
+  Geist_Mono,
+  Anek_Bangla,
+  Tiro_Bangla,
+} from "next/font/google";
 import { getLocale } from "next-intl/server";
+import { Toaster } from "@/components/ui/sonner";
+import AppSessionProvider from "@/providers/session-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
+import TreeProvider from "@/providers/treeProvider";
+import PwaRegister from "./pwa-register";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,7 +23,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Bangla
 const anekBangla = Anek_Bangla({
   weight: ["400", "500", "600", "700"],
   subsets: ["bengali"],
@@ -32,8 +37,13 @@ const tiroBangla = Tiro_Bangla({
 });
 
 export const metadata: Metadata = {
-  title: "ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ",
-  description: "ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ",
+  title: "ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ",
+  description: "ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ",
+  manifest: "/manifest.webmanifest",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 export default async function RootLayout({
@@ -41,13 +51,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-   const locale = await getLocale();
+  const locale = await getLocale();
   const dir = locale === "ar" ? "rtl" : "ltr";
+
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${anekBangla.className} ${tiroBangla.variable} antialiased`}
       >
+        <PwaRegister />
         <AppSessionProvider>
           <ThemeProvider
             attribute="class"
