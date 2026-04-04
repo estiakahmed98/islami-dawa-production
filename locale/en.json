@@ -795,7 +795,8 @@
       "ban": "Ban",
       "unban": "Unban",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "changePassword": "Change Password"
     },
     "modals": {
       "deleteConfirmTitle": "Are you sure you want to delete this user?",
@@ -810,7 +811,12 @@
       "cancel": "Cancel",
       "saveConfirmTitle": "Are you sure you want to save these changes?",
       "saveConfirmProceed": "Change",
-      "saveWarningTitle": "If you are sure that you want to change this user's information then"
+      "saveWarningTitle": "If you are sure that you want to change this user's information then",
+      "changePassword": "Change Password",
+      "newPassword": "New Password",
+      "enterNewPassword": "Enter new password",
+      "changePasswordDescription": "Set a new password for this user. The user will be able to login with this new password.",
+      "changing": "Changing..."
     },
     "toasts": {
       "updateSuccess": "User updated successfully",
@@ -818,7 +824,9 @@
       "deleteSuccess": "User deleted successfully!",
       "deleteFailed": "Failed to delete user.",
       "banFailed": "Failed to update user status.",
-      "banUpdated": "User {action} successfully!"
+      "banUpdated": "User {action} successfully!",
+      "passwordChangeSuccess": "Password changed successfully!",
+      "passwordChangeFailed": "Failed to change password."
     },
     "tabs": {
       "amoli": "A'mali Muhasaba",

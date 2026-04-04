@@ -31,7 +31,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { signIn, getSession } from "@/lib/auth-client";
 import { FcGoogle } from "react-icons/fc";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 type SigninFormProps = {
@@ -45,6 +45,7 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
   const [formError, setFormError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   // Map URL error codes -> human messages shown in the UI
@@ -180,12 +181,27 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
                   <FormItem>
                     <FormLabel>{t("fields.password.label")}</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder={t("fields.password.placeholder")}
-                        autoComplete="current-password"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder={t("fields.password.placeholder")}
+                          autoComplete="current-password"
+                          className="pr-10"
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 bg-teal-700 hover:bg-teal-800"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -7,6 +7,7 @@ import { SWRConfig } from "swr";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -504,6 +505,8 @@ export default function UsersTable() {
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [showSaveFirstModal, setShowSaveFirstModal] = useState(false);
   const [showSaveSecondModal, setShowSaveSecondModal] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
 
   // Fetch markaz options using SWR
@@ -793,6 +796,38 @@ export default function UsersTable() {
     setFilters((prev) => ({ ...prev, [name]: value.toString() }));
   };
 
+  const handlePasswordChange = async () => {
+    if (!selectedUser || !newPassword.trim()) {
+      toast.error("Please enter a new password");
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const response = await fetch("/api/change-user-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          userId: selectedUser.id, 
+          newPassword: newPassword.trim() 
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Password change failed");
+      }
+
+      toast.success(t("toasts.passwordChangeSuccess"));
+      setNewPassword("");
+    } catch (error: any) {
+      console.error("Password change error:", error);
+      toast.error(error.message || t("toasts.passwordChangeFailed"));
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
   const toggleBan = async (userId: string, isBanned: boolean) => {
     try {
       const response = await fetch("/api/banuser", {
@@ -977,9 +1012,14 @@ export default function UsersTable() {
               {/* Table Rows Skeleton */}
               {[1, 2, 3, 4, 5].map((row) => (
                 <div key={row} className="grid grid-cols-12 gap-2 py-3 border-b">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((col) => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((col) => (
                     <div key={col} className="h-4 bg-gray-200 rounded animate-pulse"></div>
                   ))}
+                  <div className="h-4 bg-gray-200 rounded animate-pulse flex gap-1 items-center justify-center">
+                    <div className="w-8 h-4 bg-gray-300 rounded animate-pulse"></div>
+                    <div className="w-8 h-4 bg-gray-300 rounded animate-pulse"></div>
+                    <div className="w-8 h-4 bg-gray-300 rounded animate-pulse"></div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1070,7 +1110,7 @@ export default function UsersTable() {
                         {user.banned ? t("status.banned") : t("status.active")}
                       </TableCell>
                       <TableCell className="px-2 py-2">
-                        <div className="flex flex-col space-y-1 items-center">
+                        <div className="flex gap-1 items-center">
                           <Button
                             onClick={() => toggleBan(user.id, user.banned)}
                             className={`text-xs px-2 py-1 ${
@@ -1364,12 +1404,57 @@ export default function UsersTable() {
                       />
                     </div>
                   )}
+
+                  {sessionUser?.role === "centraladmin" && (
+                    <div className="md:col-span-2 border-t pt-4">
+                      <h3 className="text-lg font-semibold mb-3">
+                        {t("actions.changePassword")}
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            {t("modals.newPassword")}
+                          </label>
+                          <Input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            placeholder={t("modals.enterNewPassword")}
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="flex items-end">
+                          <Button
+                            type="button"
+                            onClick={handlePasswordChange}
+                            disabled={isChangingPassword || !newPassword.trim()}
+                            className="bg-blue-600 hover:bg-blue-700 w-full"
+                          >
+                            {isChangingPassword ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                {t("modals.changing")}
+                              </>
+                            ) : (
+                              t("modals.changePassword")
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2">
+                        {t("modals.changePasswordDescription")}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-4 flex justify-end gap-2">
                   <Button
                     type="button"
-                    onClick={() => setSelectedUser(null)}
+                    onClick={() => {
+                      setSelectedUser(null);
+                      setNewPassword("");
+                    }}
                     variant="outline"
                   >
                     {t("modals.cancel")}

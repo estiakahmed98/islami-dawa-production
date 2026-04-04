@@ -795,7 +795,8 @@
       "ban": "حظر",
       "unban": "إلغاء الحظر",
       "edit": "تعديل",
-      "delete": "حذف"
+      "delete": "حذف",
+      "changePassword": "تغيير كلمة المرور"
     },
     "modals": {
       "deleteConfirmTitle": "هل أنت متأكد أنك تريد حذف هذا المستخدم؟",
@@ -810,7 +811,12 @@
       "cancel": "إلغاء",
       "saveConfirmTitle": "هل أنت متأكد أنك تريد حفظ هذه التغييرات؟",
       "saveConfirmProceed": "تغيير",
-      "saveWarningTitle": "إذا كنت متأكدًا أنك تريد تغيير معلومات هذا المستخدم فـ"
+      "saveWarningTitle": "إذا كنت متأكدًا أنك تريد تغيير معلومات هذا المستخدم فـ",
+      "changePassword": "تغيير كلمة المرور",
+      "newPassword": "كلمة المرور الجديدة",
+      "enterNewPassword": "أدخل كلمة المرور الجديدة",
+      "changePasswordDescription": "قم بتعيين كلمة مرور جديدة لهذا المستخدم. سيتمكن المستخدم من تسجيل الدخول باستخدام كلمة المرور الجديدة.",
+      "changing": "جارٍ التغيير..."
     },
     "toasts": {
       "updateSuccess": "تم تحديث المستخدم بنجاح",
@@ -818,7 +824,9 @@
       "deleteSuccess": "تم حذف المستخدم بنجاح!",
       "deleteFailed": "فشل حذف المستخدم.",
       "banFailed": "فشل تحديث حالة المستخدم.",
-      "banUpdated": "تم {action} المستخدم بنجاح!"
+      "banUpdated": "تم {action} المستخدم بنجاح!",
+      "passwordChangeSuccess": "تم تغيير كلمة المرور بنجاح!",
+      "passwordChangeFailed": "فشل تغيير كلمة المرور."
     },
     "tabs": {
       "amoli": "المحاسبة العملية",
