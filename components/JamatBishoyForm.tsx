@@ -29,8 +29,10 @@ const JamatBishoyForm: React.FC = () => {
 
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const today = new Date().toISOString().split("T")[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
 
-  // Check if the user has already submitted today (server computes Dhaka day)
   useEffect(() => {
     if (!email) {
       setIsSubmittedToday(false);
@@ -42,12 +44,12 @@ const JamatBishoyForm: React.FC = () => {
     (async () => {
       try {
         const res = await fetch(
-          `/api/jamat?email=${encodeURIComponent(email)}&mode=today`,
+          `/api/jamat?email=${encodeURIComponent(email)}&date=${selectedDate}`,
           { cache: "no-store", signal: ac.signal }
         );
         if (!res.ok) throw new Error("Failed to check today's status");
         const json = await res.json();
-        setIsSubmittedToday(!!json.isSubmittedToday);
+        setIsSubmittedToday(!!json.isSubmittedForDate);
       } catch (err: any) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Submission status error:", err);
@@ -59,7 +61,7 @@ const JamatBishoyForm: React.FC = () => {
     })();
 
     return () => ac.abort();
-  }, [email, tToast]);
+  }, [email, selectedDate, tToast]);
 
   const handleSubmit = async (values: FormValues, { setSubmitting }: any) => {
     if (!email) {
@@ -76,6 +78,7 @@ const JamatBishoyForm: React.FC = () => {
       jamatBerHoise: Number(values.jamatBerHoise) || 0,
       jamatSathi: Number(values.jamatSathi) || 0,
       editorContent: values.editorContent || "",
+      date: selectedDate,
     };
 
     try {
@@ -94,7 +97,7 @@ const JamatBishoyForm: React.FC = () => {
 
       toast.success(common("submittedSuccessfully"));
       setIsSubmittedToday(true);
-      window.location.reload();
+      router.refresh();
     } catch (error) {
       console.error("Submit error:", error);
       toast.error(common("formSubmissionFailed"));
@@ -148,13 +151,25 @@ const JamatBishoyForm: React.FC = () => {
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-4 lg:p-10 shadow-lg">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h2 className="text-2xl">{tJamat("title")}</h2>
+        <div className="flex items-center space-x-2">
+          <label className="text-gray-700">জমা তারিখ</label>
+          <input
+            type="date"
+            max={today}
+            min={yesterday}
+            className="rounded border border-gray-300 px-3 py-1"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </div>
+      </div>
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
           {common("youHaveAlreadySubmittedToday")}
         </div>
       )}
-
-      <h2 className="mb-6 text-2xl">{tJamat("title")}</h2>
 
       <Formik<FormValues>
         initialValues={{ ...(initialFormData as any), editorContent: "" }}

@@ -2,6 +2,11 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+function parseDhakaDate(dateValue?: string | null) {
+  if (!dateValue || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) return null;
+  return dateValue;
+}
+
 /** Start/end of the current Dhaka day (Asia/Dhaka) */
 function getDhakaDayRange(now = new Date()) {
   const fmt = new Intl.DateTimeFormat("en-CA", {
@@ -17,6 +22,13 @@ function getDhakaDayRange(now = new Date()) {
   return { start, end };
 }
 
+function dhakaDayRangeFromISODate(yyyyMmDd: string) {
+  const [y, m, d] = yyyyMmDd.split("-");
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`);
+  return { start, end };
+}
+
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
@@ -26,6 +38,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       editorContent = "",
       assistants = [],
       userInfo = {},
+      date,
     } = body ?? {};
 
     if (!email) {
@@ -47,7 +60,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // Build Dhaka day window
-    const { start, end } = getDhakaDayRange();
+    const selectedDate = parseDhakaDate(date);
+    const { start, end } = selectedDate
+      ? dhakaDayRangeFromISODate(selectedDate)
+      : getDhakaDayRange();
 
     // Check for existing submission
     const existing = await prisma.dayeeBishoyRecord.findFirst({
@@ -61,10 +77,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const result = await prisma.$transaction(async (tx) => {
+      // Use selected date at midnight UTC for consistency with other forms
+      const selectedDateTime = selectedDate
+        ? new Date(`${selectedDate}T00:00:00.000Z`) // midnight UTC
+        : new Date();
+
       const newRecord = await tx.dayeeBishoyRecord.create({
         data: {
           userId: user.id,
-          date: start, // store normalized start-of-day if desired
+          date: selectedDateTime, // selected date at midnight UTC
           sohojogiDayeToiri: sohojogiDayeToiriNum,
           editorContent: String(editorContent ?? ""),
         },
@@ -112,6 +133,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const { searchParams } = new URL(req.url);
     const emailsParam = searchParams.get("emails");
     const email = searchParams.get("email");
+    const selectedDate = parseDhakaDate(searchParams.get("date"));
 
     let emailList: string[] = [];
     if (emailsParam) {
@@ -123,6 +145,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     const records: Record<string, any[]> = {};
+    let isSubmittedForDate = false;
 
     for (const em of emailList) {
       const user = await prisma.users.findUnique({ where: { email: em } });
@@ -138,6 +161,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       });
 
       records[em] = userRecords;
+
+      if (selectedDate && email === em) {
+        const { start, end } = dhakaDayRangeFromISODate(selectedDate);
+        isSubmittedForDate = userRecords.some(
+          (record) => record.date >= start && record.date < end
+        );
+      }
     }
 
     if (emailsParam) {
@@ -145,7 +175,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ records }, { status: 200 });
     } else {
       // Single email: return { records: array }
-      return NextResponse.json({ records: records[email!] }, { status: 200 });
+      return NextResponse.json(
+        { records: records[email!], isSubmittedForDate },
+        { status: 200 }
+      );
     }
   } catch (error: any) {
     console.error("GET /api/dayi error stack:", error?.stack || error);

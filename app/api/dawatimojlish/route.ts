@@ -2,6 +2,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+function parseDhakaDate(dateValue?: string | null) {
+  if (!dateValue || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) return null;
+  return dateValue;
+}
+
 /** Start/end of the current Dhaka (Asia/Dhaka) calendar day */
 function getDhakaDayRange(now = new Date()) {
   const fmt = new Intl.DateTimeFormat("en-CA", {
@@ -41,6 +46,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       dhormoSova = 0,
       mashwaraPoint = 0,
       editorContent = "",
+      date,
     } = body ?? {};
 
     if (!email) {
@@ -53,7 +59,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // Enforce one submission per Dhaka day
-    const { start, end } = getDhakaDayRange();
+    const selectedDate = parseDhakaDate(date);
+    const { start, end } = selectedDate
+      ? dhakaDayRangeFromISODate(selectedDate)
+      : getDhakaDayRange();
     const exists = await prisma.dawatiMojlishRecord.findFirst({
       where: { userId: user.id, date: { gte: start, lt: end } },
       select: { id: true },
@@ -65,13 +74,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Save real submission instant for BOTH createdAt and date
-    const now = new Date();
+    // Save the real submission instant for createdAt, but keep date as selected date at midnight UTC
+    const actualCreatedAt = new Date();
+    const selectedDateTime = selectedDate
+      ? new Date(`${selectedDate}T00:00:00.000Z`)  // midnight UTC
+      : actualCreatedAt;
     const created = await prisma.dawatiMojlishRecord.create({
       data: {
         userId: user.id,
-        createdAt: now, // mirror
-        date: now,      // EXACT same timestamp as createdAt
+        createdAt: actualCreatedAt,    // real creation time
+        date: selectedDateTime,         // selected date at midnight UTC
         dawatterGuruttoMojlish,
         mojlisheOnshogrohon,
         alemderSatheyMojlish,
@@ -101,6 +113,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const emailsParam = searchParams.get("emails");
     const email = searchParams.get("email");
     const mode = searchParams.get("mode"); // "today" or null
+    const selectedDate = parseDhakaDate(searchParams.get("date"));
     const sort = (searchParams.get("sort") ?? "desc") as "asc" | "desc";
     const from = searchParams.get("from"); // YYYY-MM-DD (Dhaka)
     const to = searchParams.get("to");     // YYYY-MM-DD (Dhaka)
@@ -127,13 +140,17 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         continue;
       }
 
-      if (mode === "today") {
-        const { start, end } = getDhakaDayRange();
+      if (mode === "today" || selectedDate) {
+        const { start, end } = selectedDate
+          ? dhakaDayRangeFromISODate(selectedDate)
+          : getDhakaDayRange();
         const existing = await prisma.dawatiMojlishRecord.findFirst({
           where: { userId: user.id, date: { gte: start, lt: end } },
           select: { id: true },
         });
-        records[em] = { isSubmittedToday: Boolean(existing) };
+        records[em] = selectedDate
+          ? { isSubmittedForDate: Boolean(existing) }
+          : { isSubmittedToday: Boolean(existing) };
         continue;
       }
 
@@ -165,7 +182,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ records }, { status: 200 });
     } else {
       // Single email: return the data directly for today mode, otherwise { records: array }
-      if (mode === "today") {
+      if (mode === "today" || selectedDate) {
         return NextResponse.json(records[email!], { status: 200 });
       } else {
         return NextResponse.json({ records: records[email!] }, { status: 200 });

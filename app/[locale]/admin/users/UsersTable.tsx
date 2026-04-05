@@ -7,7 +7,7 @@ import { SWRConfig } from "swr";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -507,6 +507,7 @@ export default function UsersTable() {
   const [showSaveSecondModal, setShowSaveSecondModal] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
 
   // Fetch markaz options using SWR
@@ -1134,7 +1135,7 @@ export default function UsersTable() {
                               setUserToDelete(user.id);
                               setShowFirstModal(true);
                             }}
-                            className="text-xs px-2 py-1 bg-red-800 hover:bg-red-900"
+                            className="text-xs px-2 py-1 hidden xl:block bg-red-800 hover:bg-red-900"
                           >
                             {t("actions.delete")}
                           </Button>
@@ -1415,13 +1416,26 @@ export default function UsersTable() {
                           <label className="block text-sm font-medium mb-1">
                             {t("modals.newPassword")}
                           </label>
-                          <Input
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            placeholder={t("modals.enterNewPassword")}
-                            className="w-full"
-                          />
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              placeholder={t("modals.enterNewPassword")}
+                              className="w-full pr-10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </button>
+                          </div>
                         </div>
                         <div className="flex items-end">
                           <Button

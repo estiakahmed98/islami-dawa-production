@@ -5,7 +5,7 @@ import { ErrorMessage, Field, Formik, Form } from "formik";
 import { initialFormData, validationSchema } from "@/app/data/MoktobBishoyData";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
 import Loading from "@/app/[locale]/dashboard/loading";
@@ -13,33 +13,15 @@ import { useTranslations } from "next-intl";
 
 type FormValues = typeof initialFormData & { editorContent: string };
 
-/** Format a date to YYYY-MM-DD in Dhaka time */
-function dhakaYMD(d: Date) {
-  if (!(d instanceof Date) || isNaN(d.getTime())) return "";
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Dhaka",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(d);
-}
-
-/** Compare two dates based on Dhaka calendar date */
-function isSameDhakaDay(recordDateISO: string | Date, now = new Date()) {
-  const left = dhakaYMD(new Date(recordDateISO));
-  const right = dhakaYMD(now);
-  return left !== "" && right !== "" && left === right;
-}
-
 const MoktobBishoyForm = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const email = session?.user?.email || "";
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  // Track fetched emails to prevent duplicate calls
-  const fetchedEmails = useRef<Set<string>>(new Set());
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const today = new Date().toISOString().split("T")[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
 
   // i18n
   const tMoktob = useTranslations("dashboard.UserDashboard.moktob");
@@ -59,7 +41,6 @@ const MoktobBishoyForm = () => {
     { name: "newMuslimeDinerFikir", label: tMoktob("newMuslimeDinerFikir") },
   ];
 
-  // Check if user already submitted today
   useEffect(() => {
     if (!email) {
       setIsSubmittedToday(false);
@@ -67,24 +48,16 @@ const MoktobBishoyForm = () => {
       return;
     }
 
-    // Prevent duplicate calls for the same email
-    if (fetchedEmails.current.has(email)) return;
-    fetchedEmails.current.add(email);
-
     const ac = new AbortController();
     (async () => {
       try {
-        const res = await fetch(`/api/moktob?email=${encodeURIComponent(email)}`, {
+        const res = await fetch(`/api/moktob?email=${encodeURIComponent(email)}&date=${selectedDate}`, {
           cache: "no-store",
           signal: ac.signal,
         });
         if (!res.ok) throw new Error("Failed to fetch records");
         const json = await res.json();
-        const records: Array<{ date: string | Date }> = Array.isArray(json)
-          ? json
-          : json.records ?? [];
-        const todaySubmitted = records.some((r) => isSameDhakaDay(r.date));
-        setIsSubmittedToday(todaySubmitted);
+        setIsSubmittedToday(!!json.isSubmittedForDate);
       } catch (err: any) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Today check error:", err);
@@ -96,14 +69,7 @@ const MoktobBishoyForm = () => {
     })();
 
     return () => ac.abort();
-  }, [email, tToast]);
-
-  // Cleanup function to reset fetched emails when component unmounts
-  useEffect(() => {
-    return () => {
-      fetchedEmails.current.clear();
-    };
-  }, []);
+  }, [email, selectedDate, tToast]);
 
   const handleSubmit = async (values: FormValues) => {
     if (!email) {
@@ -128,6 +94,7 @@ const MoktobBishoyForm = () => {
       totalBoyoskoShikkha: Number(values.totalBoyoskoShikkha) || 0,
       boyoskoShikkhaOnshogrohon: Number(values.boyoskoShikkhaOnshogrohon) || 0,
       newMuslimeDinerFikir: Number(values.newMuslimeDinerFikir) || 0,
+      date: selectedDate,
     };
 
     try {
@@ -145,10 +112,7 @@ const MoktobBishoyForm = () => {
 
       toast.success(common("submittedSuccessfully"));
       setIsSubmittedToday(true);
-      // Reset the fetched emails ref to allow fresh data on next visit
-      fetchedEmails.current.clear();
-      // Notify parent component to refresh data
-      window.dispatchEvent(new CustomEvent('moktob-data-refresh'));
+      router.refresh();
     } catch (error: any) {
       console.error("Submit error:", error);
       toast.error(error.message || common("formSubmissionFailed"));
@@ -200,12 +164,25 @@ const MoktobBishoyForm = () => {
 
   return (
     <div className="w-full mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h2 className="text-2xl">{tMoktob("title")}</h2>
+        <div className="flex items-center space-x-2">
+          <label className="text-gray-700">জমা তারিখ</label>
+          <input
+            type="date"
+            max={today}
+            min={yesterday}
+            className="rounded border border-gray-300 px-3 py-1"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </div>
+      </div>
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
           {common("youHaveAlreadySubmittedToday")}
         </div>
       )}
-      <h2 className="mb-6 text-2xl">{tMoktob("title")}</h2>
 
       <Formik<FormValues>
         initialValues={{ ...initialFormData, editorContent: "" }}

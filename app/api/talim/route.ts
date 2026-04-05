@@ -4,6 +4,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+function parseDhakaDate(dateValue?: string | null) {
+  if (!dateValue || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) return null;
+  return dateValue;
+}
+
 /** Start/end of the current Dhaka day (Asia/Dhaka) */
 function getDhakaDayRange(now = new Date()) {
   const fmt = new Intl.DateTimeFormat("en-CA", {
@@ -19,11 +24,19 @@ function getDhakaDayRange(now = new Date()) {
   return { start, end };
 }
 
+function dhakaDayRangeFromISODate(yyyyMmDd: string) {
+  const [y, m, d] = yyyyMmDd.split("-");
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`);
+  return { start, end };
+}
+
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
-    const { email, ...data } = body as {
+    const { email, date, ...data } = body as {
       email: string;
+      date?: string;
       mohilaTalim?: number;
       mohilaOnshogrohon?: number;
       editorContent?: string;
@@ -40,7 +53,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // Dhaka-day duplicate check
-    const { start, end } = getDhakaDayRange();
+    const selectedDate = parseDhakaDate(date);
+    const { start, end } = selectedDate
+      ? dhakaDayRangeFromISODate(selectedDate)
+      : getDhakaDayRange();
     const already = await prisma.talimBisoyRecord.findFirst({
       where: {
         userId: user.id,
@@ -56,14 +72,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Make date EXACTLY the same instant as createdAt
-    const now = new Date();
+    // Save real creation time for createdAt, but keep date as selected date at midnight UTC
+    const actualCreatedAt = new Date();
+    const selectedDateTime = selectedDate
+      ? new Date(`${selectedDate}T00:00:00.000Z`)  // midnight UTC
+      : actualCreatedAt;
 
     const newRecord = await prisma.talimBisoyRecord.create({
       data: {
         userId: user.id,
-        createdAt: now,                 // mirror createdAt
-        date: now,                      // EXACT same timestamp
+        createdAt: actualCreatedAt,       // real creation time
+        date: selectedDateTime,            // selected date at midnight UTC
         mohilaTalim: data.mohilaTalim ?? 0,
         mohilaOnshogrohon: data.mohilaOnshogrohon ?? 0,
         editorContent: data.editorContent ?? "",
@@ -87,6 +106,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const { searchParams } = new URL(req.url);
     const emailsParam = searchParams.get("emails");
     const email = searchParams.get("email");
+    const selectedDate = parseDhakaDate(searchParams.get("date"));
 
     let emailList: string[] = [];
     if (emailsParam) {
@@ -120,9 +140,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ records }, { status: 200 });
     } else {
       // Single email: check if submitted today and return { records: array, isSubmittedToday: boolean }
-      const { start, end } = getDhakaDayRange();
+      const { start, end } = selectedDate
+        ? dhakaDayRangeFromISODate(selectedDate)
+        : getDhakaDayRange();
       const user = await prisma.users.findUnique({ where: { email: email! } });
       let isSubmittedToday = false;
+      let isSubmittedForDate = false;
       if (user) {
         const todayRecord = await prisma.talimBisoyRecord.findFirst({
           where: {
@@ -132,8 +155,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           select: { id: true },
         });
         isSubmittedToday = !!todayRecord;
+        isSubmittedForDate = !!todayRecord;
       }
-      return NextResponse.json({ records: records[email!], isSubmittedToday }, { status: 200 });
+      return NextResponse.json(
+        { records: records[email!], isSubmittedToday, isSubmittedForDate },
+        { status: 200 }
+      );
     }
   } catch (error) {
     console.error("Error in GET /api/talim:", error);

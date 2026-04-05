@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+function parseDhakaDate(dateValue?: string | null) {
+  if (!dateValue || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) return null;
+  return dateValue;
+}
+
 /** Start/end of a Dhaka (Asia/Dhaka) calendar day */
 function getDhakaDayRange(now = new Date()) {
   const fmt = new Intl.DateTimeFormat("en-CA", {
@@ -46,6 +51,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       // legacy names (from your current FE)
       madrasaVisits,                // string[]
       schoolCollegeVisits,          // string[]
+      date,
     } = body ?? {};
 
     if (!email) {
@@ -88,7 +94,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const moktobCount = Number(moktobVisit) || 0;
 
     // Enforce one submission per Dhaka calendar day
-    const { start, end } = getDhakaDayRange();
+    const selectedDate = parseDhakaDate(date);
+    const { start, end } = selectedDate
+      ? dhakaDayRangeFromISODate(selectedDate)
+      : getDhakaDayRange();
     const exists = await prisma.soforBisoyRecord.findFirst({
       where: { userId: user.id, date: { gte: start, lt: end } },
       select: { id: true },
@@ -100,13 +109,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Save exact submission instant to BOTH date and createdAt
-    const now = new Date();
+    // Save real creation time for createdAt, but keep date as selected date at midnight UTC
+    const actualCreatedAt = new Date();
+    const selectedDateTime = selectedDate
+      ? new Date(`${selectedDate}T00:00:00.000Z`)  // midnight UTC
+      : actualCreatedAt;
     const created = await prisma.soforBisoyRecord.create({
       data: {
         userId: user.id,
-        createdAt: now,
-        date: now, // EXACT same timestamp as createdAt
+        createdAt: actualCreatedAt,    // real creation time
+        date: selectedDateTime,         // selected date at midnight UTC
 
         madrasaVisit: madrasaCount,
         madrasaVisitList: madrasaList.map((s) => String(s).trim()).filter(Boolean),
@@ -137,6 +149,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const emailsParam = searchParams.get("emails");
     const email = searchParams.get("email");
     const mode = searchParams.get("mode"); // "today" or null
+    const selectedDate = parseDhakaDate(searchParams.get("date"));
     const sort = (searchParams.get("sort") ?? "desc") as "asc" | "desc";
     const from = searchParams.get("from"); // YYYY-MM-DD (Dhaka)
     const to = searchParams.get("to");     // YYYY-MM-DD (Dhaka)
@@ -163,13 +176,17 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         continue;
       }
 
-      if (mode === "today") {
-        const { start, end } = getDhakaDayRange();
+      if (mode === "today" || selectedDate) {
+        const { start, end } = selectedDate
+          ? dhakaDayRangeFromISODate(selectedDate)
+          : getDhakaDayRange();
         const existing = await prisma.soforBisoyRecord.findFirst({
           where: { userId: user.id, date: { gte: start, lt: end } },
           select: { id: true },
         });
-        records[em] = { isSubmittedToday: Boolean(existing) };
+        records[em] = selectedDate
+          ? { isSubmittedForDate: Boolean(existing) }
+          : { isSubmittedToday: Boolean(existing) };
         continue;
       }
 
@@ -201,7 +218,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ records }, { status: 200 });
     } else {
       // Single email: return the data directly for today mode, otherwise { records: array }
-      if (mode === "today") {
+      if (mode === "today" || selectedDate) {
         return NextResponse.json(records[email!], { status: 200 });
       } else {
         return NextResponse.json({ records: records[email!] }, { status: 200 });

@@ -31,10 +31,12 @@ const TalimForm: React.FC<{
   const [isSubmittedToday, setIsSubmittedToday] = useState<boolean>(!!submittedProp);
   const [loading, setLoading] = useState(true);
   const [editorContent, setEditorContent] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const today = new Date().toISOString().split("T")[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
 
   useEffect(() => setIsSubmittedToday(!!submittedProp), [submittedProp]);
 
-  // Check if already submitted today (server-calculated)
   useEffect(() => {
     const ac = new AbortController();
     (async () => {
@@ -43,14 +45,14 @@ const TalimForm: React.FC<{
         return;
       }
       try {
-        const res = await fetch(`/api/talim?email=${encodeURIComponent(email)}`, {
+        const res = await fetch(`/api/talim?email=${encodeURIComponent(email)}&date=${selectedDate}`, {
           cache: 'no-store',
           signal: ac.signal,
         });
         if (!res.ok) throw new Error('check failed');
         const data = await res.json();
-        setIsSubmittedToday(!!data.isSubmittedToday);
-        setSubmittedProp?.(!!data.isSubmittedToday);
+        setIsSubmittedToday(!!data.isSubmittedForDate);
+        setSubmittedProp?.(!!data.isSubmittedForDate);
       } catch (e) {
         if (!(e instanceof DOMException && e.name === 'AbortError')) {
           console.error('Error checking submission status:', e);
@@ -61,7 +63,7 @@ const TalimForm: React.FC<{
       }
     })();
     return () => ac.abort();
-  }, [email, setSubmittedProp, tToast]);
+  }, [email, selectedDate, setSubmittedProp, tToast]);
 
   const handleSubmit = async (values: TalimFormValues) => {
     if (!email) {
@@ -78,6 +80,7 @@ const TalimForm: React.FC<{
       mohilaTalim: Number(values.mohilaTalim) || 0,
       mohilaOnshogrohon: Number(values.mohilaOnshogrohon) || 0,
       editorContent,
+      date: selectedDate,
     };
 
     try {
@@ -95,7 +98,7 @@ const TalimForm: React.FC<{
       setIsSubmittedToday(true);
       setSubmittedProp?.(true);
       toast.success(common('submittedSuccessfully'));
-      window.location.reload();
+      router.refresh();
     } catch (error: any) {
       console.error('Error during submission:', error);
       toast.error(error.message || common('formSubmissionFailed'));
@@ -147,13 +150,25 @@ const TalimForm: React.FC<{
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-4 lg:p-10 shadow-lg">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h2 className="text-2xl">{tTalim('title')}</h2>
+        <div className="flex items-center space-x-2">
+          <label className="text-gray-700">জমা তারিখ</label>
+          <input
+            type="date"
+            max={today}
+            min={yesterday}
+            className="rounded border border-gray-300 px-3 py-1"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </div>
+      </div>
       {isSubmittedToday && (
         <div className="mb-8 rounded-lg bg-red-50 p-4 text-red-500">
           {common('youHaveAlreadySubmittedToday')}
         </div>
       )}
-
-      <h2 className="mb-6 text-2xl">{tTalim('title')}</h2>
 
       <Formik<TalimFormValues>
         initialValues={{ ...(initialFormData as any), editorContent: '' }}

@@ -344,6 +344,12 @@ const DayeReviewComponent: React.FC = () => {
     const exporterName = session?.user?.name || "Unknown";
     const exporterRole = session?.user?.role || "Unknown";
 
+    const chunkSize = 23;
+    const rowChunks: Array<typeof rows> = [];
+    for (let i = 0; i < rows.length; i += chunkSize) {
+      rowChunks.push(rows.slice(i, i + chunkSize));
+    }
+
     const html = `
           <html>
             <head>
@@ -461,6 +467,14 @@ const DayeReviewComponent: React.FC = () => {
                   font-weight: bold;
                 }
 
+                .page {
+                  page-break-after: always;
+                }
+
+                .page:last-child {
+                  page-break-after: auto;
+                }
+
                 /* 🔹 force page break after every 28 rows */
                 tbody tr:nth-child(28n) {
                   page-break-after: always;
@@ -469,52 +483,60 @@ const DayeReviewComponent: React.FC = () => {
             </head>
 
             <body>
-              <div class="header">
-                <h1>দা'ঈ দৈনিক জমা প্রতিবেদন</h1>
-                <h3>তারিখ: ${dhakaFormatted(selectedDate)}</h3>
-                <h3>প্রতিবেদন প্রস্তুতকারী: ${exporterName} (${exporterRole})</h3>
-              </div>
+              ${rowChunks
+                .map(
+                  (chunkRows) => `
+                <div class="page">
+                  <div class="header">
+                    <h1>দা'ঈদের দৈনিক প্রতিবেদন</h1>
+                    <h3>তারিখ: ${dhakaFormatted(selectedDate)}</h3>
+                    <h3>প্রতিবেদন প্রস্তুতকারী: ${exporterName} (${exporterRole})</h3>
+                  </div>
 
-              <table>
-                <thead>
-                  <tr>
-                    ${columns.map((c) => `<th>${c.label}</th>`).join("")}
-                  </tr>
-                </thead>
-               <tbody>
-                  ${rows
-                    .map(
-                      (row) => `
-                    <tr>
-                      ${columns
-                        .map((col, index) => {
-                          const value = row[col.key] || "";
+                  <table>
+                    <thead>
+                      <tr>
+                        ${columns.map((c) => `<th>${c.label}</th>`).join("")}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${chunkRows
+                        .map(
+                          (row) => `
+                        <tr>
+                          ${columns
+                            .map((col, index) => {
+                              const value = row[col.key] || "";
 
-                          // ✅ FIRST COLUMN = NAME
-                          if (index === 0) {
-                             return `<td class="name-cell">${value}</td>`;
-                          }
+                              // ✅ FIRST COLUMN = NAME
+                              if (index === 0) {
+                                 return `<td class="name-cell">${value}</td>`;
+                              }
 
-                          // ✅ STATUS COLUMNS
-                          const cls =
-                            value === "DONE" ? "done" : value === "NOT DONE" ? "not-done" : "";
+                              // ✅ STATUS COLUMNS
+                              const cls =
+                                value === "DONE" ? "done" : value === "NOT DONE" ? "not-done" : "";
 
-                          const displayValue =
-                            value === "DONE"
-                              ? "সম্পন্ন"
-                              : value === "NOT DONE"
-                                ? "অসম্পন্ন"
-                                : "";
+                              const displayValue =
+                                value === "DONE"
+                                  ? "সম্পন্ন"
+                                  : value === "NOT DONE"
+                                    ? "অসম্পন্ন"
+                                    : "";
 
-                          return `<td class="${cls}">${displayValue}</td>`;
-                        })
+                              return `<td class="${cls}">${displayValue}</td>`;
+                            })
+                            .join("")}
+                        </tr>
+                      `
+                        )
                         .join("")}
-                    </tr>
-                  `
-                    )
-                    .join("")}
-                </tbody>
-              </table>
+                    </tbody>
+                  </table>
+                </div>
+              `
+                )
+                .join("")}
             </body>
     </html>
     `;

@@ -35,26 +35,26 @@ const DayeeBishoyForm: React.FC = () => {
   const [editorContent, setEditorContent] = useState('');
   const [assistantCount, setAssistantCount] = useState(0);
   const [assistants, setAssistants] = useState<AssistantDaee[]>([]);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const today = new Date().toISOString().split("T")[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
 
   const handleContentChange = (content: string) => setEditorContent(content);
 
   useEffect(() => {
     const checkSubmission = async () => {
       if (!email) {
+        setIsSubmittedToday(false);
         setLoading(false);
         return;
       }
+      setLoading(true);
       try {
-        const res = await fetch(`/api/dayi?email=${encodeURIComponent(email)}`);
+        const res = await fetch(`/api/dayi?email=${encodeURIComponent(email)}&date=${selectedDate}`);
         if (!res.ok) throw new Error('Failed to fetch records');
 
         const data = await res.json();
-        const today = new Date().toDateString();
-        const hasTodaySubmission = data.records?.some(
-          (record: any) => new Date(record.date).toDateString() === today
-        );
-
-        setIsSubmittedToday(!!hasTodaySubmission);
+        setIsSubmittedToday(Boolean(data?.isSubmittedForDate));
       } catch (err) {
         console.error('Submission check error:', err);
         toast.error(common('errorValidatingExistingRecords'));
@@ -64,7 +64,7 @@ const DayeeBishoyForm: React.FC = () => {
     };
 
     checkSubmission();
-  }, [email, common]);
+  }, [email, common, selectedDate]);
 
   const handleAssistantCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const count = Math.max(0, parseInt(e.target.value) || 0);
@@ -117,6 +117,7 @@ const DayeeBishoyForm: React.FC = () => {
       sohojogiDayeToiri: Number(values.sohojogiDayeToiri) || 0,
       editorContent,
       assistants,
+      date: selectedDate,
     };
 
     try {
@@ -134,7 +135,7 @@ const DayeeBishoyForm: React.FC = () => {
 
       toast.success(common('submittedSuccessfully'));
       setIsSubmittedToday(true);
-      window.location.reload();
+      router.refresh();
     } catch (error: any) {
       console.error('Submission error:', error);
       toast.error(error.message || common('formSubmissionFailed'));
@@ -186,13 +187,25 @@ const DayeeBishoyForm: React.FC = () => {
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-4 lg:p-10 shadow-lg">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h2 className="text-2xl font-semibold text-gray-800">{tDayi('title')}</h2>
+        <div className="flex items-center space-x-2">
+          <label className="text-gray-700">জমা তারিখ</label>
+          <input
+            type="date"
+            max={today}
+            min={yesterday}
+            className="rounded border border-gray-300 px-3 py-1"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </div>
+      </div>
       {isSubmittedToday && (
         <div className="mb-8 rounded-lg bg-red-50 p-4 text-red-500">
           {common('youHaveAlreadySubmittedToday')}
         </div>
       )}
-
-      <h2 className="mb-6 text-2xl font-semibold text-gray-800">{tDayi('title')}</h2>
 
       <Formik initialValues={initialFormData} validationSchema={validationSchema} onSubmit={handleSubmit}>
         {({ setFieldValue, isSubmitting }) => (

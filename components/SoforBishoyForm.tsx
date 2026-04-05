@@ -68,16 +68,14 @@ const SoforBishoyForm: React.FC<Props> = ({
 
   const [isSubmittedTodayLocal, setIsSubmittedTodayLocal] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
+  const [selectedDate, setSelectedDate] = React.useState(new Date().toISOString().split("T")[0]);
+  const today = new Date().toISOString().split("T")[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
 
   const effectiveSubmitted = propSubmitted ?? isSubmittedTodayLocal;
   const setEffectiveSubmitted = setPropSubmitted ?? setIsSubmittedTodayLocal;
 
-  // Only fetch if parent didn't pass isSubmittedToday
   React.useEffect(() => {
-    if (propSubmitted !== undefined) {
-      setLoading(false);
-      return;
-    }
     if (!email) {
       setIsSubmittedTodayLocal(false);
       setLoading(false);
@@ -87,12 +85,13 @@ const SoforBishoyForm: React.FC<Props> = ({
     (async () => {
       try {
         const res = await fetch(
-          `/api/soforbisoy?email=${encodeURIComponent(email)}&mode=today`,
+          `/api/soforbisoy?email=${encodeURIComponent(email)}&date=${selectedDate}`,
           { cache: "no-store", signal: ac.signal }
         );
         if (!res.ok) throw new Error("Failed to check submission status");
         const data = await res.json();
-        setIsSubmittedTodayLocal(!!data.isSubmittedToday);
+        setIsSubmittedTodayLocal(!!data.isSubmittedForDate);
+        setPropSubmitted?.(!!data.isSubmittedForDate);
       } catch (err: any) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Submission status check failed:", err);
@@ -103,7 +102,7 @@ const SoforBishoyForm: React.FC<Props> = ({
       }
     })();
     return () => ac.abort();
-  }, [email, propSubmitted, tToast]);
+  }, [email, selectedDate, setPropSubmitted, tToast]);
 
   if (loading) {
     return (
@@ -150,13 +149,25 @@ const SoforBishoyForm: React.FC<Props> = ({
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-4 lg:p-10 shadow-lg">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h2 className="text-2xl">{tSofor("title")}</h2>
+        <div className="flex items-center space-x-2">
+          <label className="text-gray-700">জমা তারিখ</label>
+          <input
+            type="date"
+            max={today}
+            min={yesterday}
+            className="rounded border border-gray-300 px-3 py-1"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </div>
+      </div>
       {effectiveSubmitted && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
           {tCommon("youHaveAlreadySubmittedToday")}
         </div>
       )}
-
-      <h2 className="mb-6 text-2xl">{tSofor("title")}</h2>
 
       <Formik<FormValues>
         initialValues={initialValues}
@@ -181,6 +192,7 @@ const SoforBishoyForm: React.FC<Props> = ({
             schoolCollegeVisit: Number(values.schoolCollegeVisit) || 0,
             schoolCollegeVisitList: values.schoolCollegeVisitList.map((s) => s.trim()).filter(Boolean),
             editorContent: values.editorContent || "",
+            date: selectedDate,
           };
 
           try {
@@ -199,7 +211,7 @@ const SoforBishoyForm: React.FC<Props> = ({
             toast.success(tCommon("submittedSuccessfully"));
             resetForm();
             setEffectiveSubmitted(true);
-            window.location.reload();
+            router.refresh();
           } catch (err) {
             console.error("Submit error:", err);
             toast.error(tCommon("formSubmissionFailed"));

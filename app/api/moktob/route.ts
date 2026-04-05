@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+function parseDhakaDate(dateValue?: string | null) {
+  if (!dateValue || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) return null;
+  return dateValue;
+}
+
 /** Start/end of the current Dhaka day for duplicate checks */
 function getDhakaDayRange(now = new Date()) {
   const fmt = new Intl.DateTimeFormat("en-CA", {
@@ -16,11 +21,18 @@ function getDhakaDayRange(now = new Date()) {
   return { start, end };
 }
 
+function dhakaDayRangeFromISODate(yyyyMmDd: string) {
+  const [y, m, d] = yyyyMmDd.split("-");
+  const start = new Date(`${y}-${m}-${d}T00:00:00+06:00`);
+  const end = new Date(`${y}-${m}-${d}T24:00:00+06:00`);
+  return { start, end };
+}
+
 // POST: Submit MoktobBisoy Data
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
-    const { email, editorContent = "", ...data } = body;
+    const { email, editorContent = "", date, ...data } = body;
 
     if (!email || Object.keys(data).length === 0) {
       return NextResponse.json(
@@ -35,7 +47,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // ✅ Dhaka-day duplicate check (don’t save normalized midnight)
-    const { start, end } = getDhakaDayRange();
+    const selectedDate = parseDhakaDate(date);
+    const { start, end } = selectedDate
+      ? dhakaDayRangeFromISODate(selectedDate)
+      : getDhakaDayRange();
     const existing = await prisma.moktobBisoyRecord.findFirst({
       where: {
         userId: user.id,
@@ -51,14 +66,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // ✅ Make date EXACTLY the same as createdAt (same instant)
-    const now = new Date();
+    // ✅ Save real creation time for createdAt, but keep date as selected date at midnight UTC
+    const actualCreatedAt = new Date();
+    const selectedDateTime = selectedDate
+      ? new Date(`${selectedDate}T00:00:00.000Z`)  // midnight UTC
+      : actualCreatedAt;
 
     const created = await prisma.moktobBisoyRecord.create({
       data: {
         userId: user.id,
-        createdAt: now,  // mirror createdAt
-        date: now,       // EXACT same timestamp
+        createdAt: actualCreatedAt,    // real creation time
+        date: selectedDateTime,         // selected date at midnight UTC
         editorContent,
         ...data,
       },
@@ -83,6 +101,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const { searchParams } = new URL(req.url);
     const emailsParam = searchParams.get("emails");
     const email = searchParams.get("email");
+    const selectedDate = parseDhakaDate(searchParams.get("date"));
 
     let emailList: string[] = [];
     if (emailsParam) {
@@ -94,6 +113,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     const records: Record<string, any[]> = {};
+    let isSubmittedForDate = false;
 
     for (const em of emailList) {
       const user = await prisma.users.findUnique({ where: { email: em } });
@@ -108,6 +128,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       });
 
       records[em] = userRecords;
+
+      if (selectedDate && email === em) {
+        const { start, end } = dhakaDayRangeFromISODate(selectedDate);
+        isSubmittedForDate = userRecords.some(
+          (record) => record.date >= start && record.date < end
+        );
+      }
     }
 
     if (emailsParam) {
@@ -115,7 +142,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ records }, { status: 200 });
     } else {
       // Single email: return { records: array }
-      return NextResponse.json({ records: records[email!] }, { status: 200 });
+      return NextResponse.json(
+        { records: records[email!], isSubmittedForDate },
+        { status: 200 }
+      );
     }
   } catch (error) {
     console.error("GET /api/moktob error:", error);

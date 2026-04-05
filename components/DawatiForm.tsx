@@ -9,7 +9,6 @@ import { useSession } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
 import JoditEditorComponent from "./richTextEditor";
 import { toast } from "sonner";
-import Loading from "@/app/[locale]/dashboard/loading";
 import { useTranslations } from "next-intl";
 
 interface DawatiFormData {
@@ -25,26 +24,30 @@ const DawatiForm: React.FC = () => {
   const email = session?.user?.email || "";
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const today = new Date().toISOString().split("T")[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
 
   const tDawati = useTranslations("dashboard.UserDashboard.dawati");
   const tToast = useTranslations("dashboard.UserDashboard.toast");
   const common = useTranslations("common");
 
-  // Check if already submitted today (server should return Asia/Dhaka aware flag)
   useEffect(() => {
     const checkToday = async () => {
       if (!email) {
+        setIsSubmittedToday(false);
         setLoading(false);
         return;
       }
+      setLoading(true);
       try {
         const res = await fetch(
-          `/api/dawati?email=${encodeURIComponent(email)}&mode=today`,
+          `/api/dawati?email=${encodeURIComponent(email)}&date=${selectedDate}`,
           { cache: "no-store" }
         );
         if (!res.ok) throw new Error("Failed to check submission status");
         const data = await res.json();
-        setIsSubmittedToday(Boolean(data?.isSubmittedToday));
+        setIsSubmittedToday(Boolean(data?.isSubmittedForDate));
       } catch (err) {
         console.error("Submission check error:", err);
         toast.error(tToast("errorFetchingData"));
@@ -53,7 +56,7 @@ const DawatiForm: React.FC = () => {
       }
     };
     checkToday();
-  }, [email, tToast]);
+  }, [email, selectedDate, tToast]);
 
   const handleSubmit = async (values: DawatiFormData) => {
     if (!email) {
@@ -71,6 +74,7 @@ const DawatiForm: React.FC = () => {
       murtadDawat: Number(values.murtadDawat) || 0,
       nonMuslimSaptahikGasht: Number(values.nonMuslimSaptahikGasht) || 0,
       editorContent: values.editorContent || "",
+      date: selectedDate,
     };
 
     try {
@@ -85,7 +89,7 @@ const DawatiForm: React.FC = () => {
       if (res.status === 201) {
         toast.success(common("submittedSuccessfully"));
         setIsSubmittedToday(true);
-        window.location.reload();
+        router.refresh();
         return;
       }
       if (res.status === 409) {
@@ -145,13 +149,25 @@ const DawatiForm: React.FC = () => {
 
   return (
     <div className="w-full mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h2 className="text-2xl">{tDawati("title") ?? "Dawah Matters"}</h2>
+        <div className="flex items-center space-x-2">
+          <label className="text-gray-700">জমা তারিখ</label>
+          <input
+            type="date"
+            max={today}
+            min={yesterday}
+            className="rounded border border-gray-300 px-3 py-1"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </div>
+      </div>
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
           {common("youHaveAlreadySubmittedToday")}
         </div>
       )}
-
-      <h2 className="mb-6 text-2xl">{tDawati("title") ?? "Dawah Matters"}</h2>
 
       <Formik
         initialValues={{ ...initialFormData, editorContent: "" }}

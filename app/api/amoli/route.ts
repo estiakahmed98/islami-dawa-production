@@ -2,6 +2,25 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+const parseSubmissionDate = (dateValue?: string | null) => {
+  if (!dateValue || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+    return null;
+  }
+
+  const normalizedDate = new Date(`${dateValue}T00:00:00.000Z`);
+  return Number.isNaN(normalizedDate.getTime()) ? null : normalizedDate;
+};
+
+const getDayRangeUtc = (date: Date) => {
+  const start = new Date(date);
+  start.setUTCHours(0, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 1);
+
+  return { start, end };
+};
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -29,6 +48,7 @@ export async function POST(req: NextRequest) {
       ayamroja,
       hijbulBahar,
       quarntilawat,
+      date,
     } = body;
 
     // quarntilawat is already the JSON object from the form
@@ -48,26 +68,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const submissionDate = parseSubmissionDate(date) ?? (() => {
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      return today;
+    })();
+
+    const { start, end } = getDayRangeUtc(submissionDate);
+
     const user = await prisma.users.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const today = new Date();
-
-    const existing = await prisma.amoliMuhasaba.findUnique({
+    const existing = await prisma.amoliMuhasaba.findFirst({
       where: {
-        userId_date: {
-          userId: user.id,
-          date: today,
+        userId: user.id,
+        date: {
+          gte: start,
+          lt: end,
         },
       },
     });
 
     if (existing) {
       return NextResponse.json(
-        { error: "Already submitted today." },
-        { status: 400 }
+        { error: "Already submitted for this date." },
+        { status: 409 }
       );
     }
 
@@ -75,7 +102,7 @@ export async function POST(req: NextRequest) {
     const created = await prisma.amoliMuhasaba.create({
       data: {
         userId: user.id,
-        date: today,
+        date: submissionDate,
         percentage: percentage ?? undefined,
         editorContent: editorContent ?? undefined,
         tahajjud: typeof tahajjud !== "undefined" && tahajjud !== null ? Number(tahajjud) : undefined,
@@ -116,6 +143,8 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const emailsParam = searchParams.get("emails");
     const email = searchParams.get("email");
+    const dateParam = searchParams.get("date");
+    const selectedDate = parseSubmissionDate(dateParam);
 
     let emailList: string[] = [];
     if (emailsParam) {
@@ -147,8 +176,35 @@ export async function GET(req: NextRequest) {
       // Multiple emails: return { records: { email: array } }
       return NextResponse.json({ records }, { status: 200 });
     } else {
+      let isSubmittedForDate = false;
+
+      if (selectedDate && email) {
+        const user = await prisma.users.findUnique({ where: { email } });
+
+        if (user) {
+          const { start, end } = getDayRangeUtc(selectedDate);
+          const existing = await prisma.amoliMuhasaba.findFirst({
+            where: {
+              userId: user.id,
+              date: {
+                gte: start,
+                lt: end,
+              },
+            },
+          });
+
+          isSubmittedForDate = Boolean(existing);
+        }
+      }
+
       // Single email: return { records: array }
-      return NextResponse.json({ records: records[email!] }, { status: 200 });
+      return NextResponse.json(
+        {
+          records: records[email!],
+          isSubmittedForDate,
+        },
+        { status: 200 }
+      );
     }
   } catch (error) {
     console.error("GET /api/amoli error:", error);

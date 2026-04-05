@@ -20,7 +20,6 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import moment from "moment-hijri";
 import { toast } from "sonner";
-import Loading from "@/app/[locale]/dashboard/loading"; // Assuming this path is correct
 import { useTranslations } from "next-intl";
 
 interface AmoliMuhasabaFormValues {
@@ -42,6 +41,7 @@ interface AmoliMuhasabaFormValues {
   quarntilawatAyat: string;
   pageNo: string;
   editorContent: string;
+  submissionDate: string;
 }
 
 const initialFormData: AmoliMuhasabaFormValues = {
@@ -63,6 +63,7 @@ const initialFormData: AmoliMuhasabaFormValues = {
   quarntilawatAyat: "",
   pageNo: "",
   editorContent: "",
+  submissionDate: new Date().toISOString().split('T')[0],
 };
 
 const validationSchema = Yup.object({
@@ -87,6 +88,7 @@ const validationSchema = Yup.object({
   quarntilawatAyat: Yup.string().optional(),
   pageNo: Yup.string().optional(),
   editorContent: Yup.string().optional(),
+  submissionDate: Yup.string().required("Date is required"),
 });
 
 const AmoliMuhasabaForm = () => {
@@ -95,8 +97,9 @@ const AmoliMuhasabaForm = () => {
   const common = useTranslations("common");
   const { data: session } = useSession();
   const email = session?.user?.email || "";
-  const [isSubmittedToday, setIsSubmittedToday] = useState(false);
+  const [isSubmittedForSelectedDate, setIsSubmittedForSelectedDate] = useState(false);
   const [loading, setLoading] = useState(true); // Added loading state
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [points, setPoints] = useState({
     tahajjud: 0,
     surah: 0,
@@ -116,6 +119,11 @@ const AmoliMuhasabaForm = () => {
     quarntilawatAyat: 0,
     pageNo: 0,
   });
+  
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  const formatRecordDate = (dateValue: string | Date) =>
+    new Date(dateValue).toISOString().split("T")[0];
 
   moment.locale("en");
   const hijriDate = moment().format("iD");
@@ -139,9 +147,9 @@ const AmoliMuhasabaForm = () => {
       if (value >= 1 && value <= 5) return value;
       return 0;
     } else if (field === "tahajjud") {
-      if (value >= 20) return 5;
-      if (value >= 10) return 3;
-      if (value >= 1) return 2;
+      if (value >= 8) return 5;
+      if (value >= 4) return 3;
+      if (value >= 2) return 2;
       return 0;
     } else if (field === "pageNo") {
       return value && value.toString().trim() ? 5 : 0;
@@ -183,24 +191,30 @@ const AmoliMuhasabaForm = () => {
   const maxPoints = showAyamRojaSection ? 70 : 65; // Dynamically set max points
   const percentage = ((totalPoints / maxPoints) * 100).toFixed(2);
 
-  // Consolidated useEffect for checking submission status and managing loading state
   useEffect(() => {
     const checkSubmissionStatus = async () => {
       if (!email) {
-        setLoading(false); // If no email, stop loading and assume not submitted
+        setIsSubmittedForSelectedDate(false);
+        setLoading(false);
         return;
       }
+
+      setLoading(true);
+
       try {
-        const response = await fetch(`/api/amoli?email=${email}`);
+        const response = await fetch(
+          `/api/amoli?email=${encodeURIComponent(email)}&date=${selectedDate}`,
+          { cache: "no-store" }
+        );
+
         if (response.ok) {
           const data = await response.json();
           const records = data.records || [];
-          const today = new Date().toDateString();
-          const hasTodaySubmission = records.some((record: any) => {
-            const recordDate = new Date(record.date).toDateString();
-            return recordDate === today;
-          });
-          setIsSubmittedToday(hasTodaySubmission);
+          const hasSelectedDateSubmission =
+            typeof data?.isSubmittedForDate === "boolean"
+              ? data.isSubmittedForDate
+              : records.some((record: any) => formatRecordDate(record.date) === selectedDate);
+          setIsSubmittedForSelectedDate(hasSelectedDateSubmission);
         } else {
           toast.error(common("failedToCheckSubmissionStatus"));
         }
@@ -208,11 +222,11 @@ const AmoliMuhasabaForm = () => {
         console.error("Error checking submission status:", error);
         toast.error(common("errorCheckingSubmissionStatus"));
       } finally {
-        setLoading(false); // Always set loading to false after check
+        setLoading(false);
       }
     };
     checkSubmissionStatus();
-  }, [email]);
+  }, [common, email, selectedDate]);
 
   const handleSubmit = async (
     values: AmoliMuhasabaFormValues,
@@ -224,22 +238,23 @@ const AmoliMuhasabaForm = () => {
       return;
     }
 
-    // Double-check today's submission before posting
     try {
-      const res = await fetch(`/api/amoli?email=${email}`);
+      const res = await fetch(
+        `/api/amoli?email=${encodeURIComponent(email)}&date=${selectedDate}`,
+        { cache: "no-store" }
+      );
+
       if (res.ok) {
         const data = await res.json();
         const records = data.records || [];
-        const today = new Date().toDateString();
-
-        const alreadySubmitted = records.some((record: any) => {
-          const recordDate = new Date(record.date).toDateString();
-          return recordDate === today;
-        });
+        const alreadySubmitted =
+          typeof data?.isSubmittedForDate === "boolean"
+            ? data.isSubmittedForDate
+            : records.some((record: any) => formatRecordDate(record.date) === selectedDate);
 
         if (alreadySubmitted) {
           toast.error(common("youHaveAlreadySubmittedToday"));
-          setIsSubmittedToday(true); // update UI immediately
+          setIsSubmittedForSelectedDate(true);
           setSubmitting(false);
           return;
         }
@@ -255,7 +270,6 @@ const AmoliMuhasabaForm = () => {
       return;
     }
 
-    // If passed check, submit form
     const quarntilawatJson = {
       para: values.quarntilawat,
       pageNo: values.pageNo,
@@ -266,6 +280,7 @@ const AmoliMuhasabaForm = () => {
       quarntilawat: quarntilawatJson,
       email,
       percentage,
+      date: selectedDate,
     };
 
     try {
@@ -279,10 +294,16 @@ const AmoliMuhasabaForm = () => {
 
       if (response.ok) {
         toast.success(common("submittedSuccessfully"));
-        setIsSubmittedToday(true); // update UI state
-        window.location.reload();
+        setIsSubmittedForSelectedDate(true);
+        router.refresh();
       } else {
-        toast.error(common("formSubmissionFailed"));
+        const errorData = await response.json().catch(() => null);
+        if (response.status === 409) {
+          setIsSubmittedForSelectedDate(true);
+          toast.error(errorData?.error || common("youHaveAlreadySubmittedToday"));
+        } else {
+          toast.error(errorData?.error || common("formSubmissionFailed"));
+        }
       }
     } catch (error) {
       console.error("Form submission error:", error);
@@ -339,14 +360,30 @@ const AmoliMuhasabaForm = () => {
 
   return (
     <div className="mx-auto mt-8 rounded bg-white p-4 lg:p-10 shadow-lg">
-      <h2 className="mb-2 text-2xl">{t("title")}</h2>
-      {isSubmittedToday && (
+      <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row items-start md:items-center md:justify-between mb-2">
+        <h2 className="text-2xl">{t("title")}</h2>
+        <div className="flex items-center space-x-2">
+          <label className="text-gray-700">
+            জমা তারিখ
+          </label>
+          <input
+            type="date"
+            max={today}
+            min={yesterday}
+            className="rounded border border-gray-300 px-3 py-1"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </div>
+      </div>
+      {isSubmittedForSelectedDate && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8">
           {common("youHaveAlreadySubmittedToday")}
         </div>
       )}
       <Formik
-        initialValues={initialFormData}
+        enableReinitialize
+        initialValues={{...initialFormData, submissionDate: selectedDate}}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
@@ -368,7 +405,7 @@ const AmoliMuhasabaForm = () => {
                       | ChangeEvent<HTMLInputElement | HTMLSelectElement>
                       | ChangeEvent<HTMLSelectElement>
                   ) => handleInputChange(e, "tahajjud", setFieldValue)}
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedForSelectedDate}
                 />
                 <ErrorMessage
                   name="tahajjud"
@@ -391,7 +428,7 @@ const AmoliMuhasabaForm = () => {
                       | ChangeEvent<HTMLInputElement | HTMLSelectElement>
                       | ChangeEvent<HTMLSelectElement>
                   ) => handleInputChange(e, "jamat", setFieldValue)}
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedForSelectedDate}
                 />
                 <ErrorMessage
                   name="jamat"
@@ -416,7 +453,7 @@ const AmoliMuhasabaForm = () => {
                         | ChangeEvent<HTMLInputElement | HTMLSelectElement>
                         | ChangeEvent<HTMLSelectElement>
                     ) => handleInputChange(e, "quarntilawat", setFieldValue)}
-                    disabled={isSubmittedToday}
+                    disabled={isSubmittedForSelectedDate}
                   />
                   <ErrorMessage
                     name="quarntilawat"
@@ -434,7 +471,7 @@ const AmoliMuhasabaForm = () => {
                     name="pageNo"
                     type="text"
                     placeholder="Start - End"
-                    disabled={isSubmittedToday}
+                    disabled={isSubmittedForSelectedDate}
                     className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                     onChange={(
                       e:
@@ -468,7 +505,7 @@ const AmoliMuhasabaForm = () => {
                     ) =>
                       handleInputChange(e, "quarntilawatAyat", setFieldValue)
                     }
-                    disabled={isSubmittedToday}
+                    disabled={isSubmittedForSelectedDate}
                   />
                   <ErrorMessage
                     name="quarntilawatAyat"
@@ -486,7 +523,7 @@ const AmoliMuhasabaForm = () => {
                 <Field
                   name="zikir"
                   as="select"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedForSelectedDate}
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                   onChange={(
                     e:
@@ -515,7 +552,7 @@ const AmoliMuhasabaForm = () => {
                 <Field
                   name="ishraq"
                   as="select"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedForSelectedDate}
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                   onChange={(
                     e:
@@ -546,7 +583,7 @@ const AmoliMuhasabaForm = () => {
                   name="sirat"
                   type="text"
                   placeholder="Enter text"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedForSelectedDate}
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                   onChange={(
                     e:
@@ -568,7 +605,7 @@ const AmoliMuhasabaForm = () => {
                 <Field
                   name="Dua"
                   as="select"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedForSelectedDate}
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                   onChange={(
                     e:
@@ -598,7 +635,7 @@ const AmoliMuhasabaForm = () => {
                   name="ilm"
                   type="text"
                   placeholder="Enter text"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedForSelectedDate}
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                   onChange={(
                     e:
@@ -622,7 +659,7 @@ const AmoliMuhasabaForm = () => {
                 <Field
                   name="tasbih"
                   as="select"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedForSelectedDate}
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                   onChange={(
                     e:
@@ -653,7 +690,7 @@ const AmoliMuhasabaForm = () => {
                 <Field
                   name="dayeeAmol"
                   as="select"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedForSelectedDate}
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                   onChange={(
                     e:
@@ -684,7 +721,7 @@ const AmoliMuhasabaForm = () => {
                 <Field
                   name="amoliSura"
                   as="select"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedForSelectedDate}
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                   onChange={(
                     e:
@@ -714,7 +751,7 @@ const AmoliMuhasabaForm = () => {
                   <Field
                     name="ayamroja"
                     as="select"
-                    disabled={isSubmittedToday}
+                    disabled={isSubmittedForSelectedDate}
                     className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                     onChange={(
                       e:
@@ -746,7 +783,7 @@ const AmoliMuhasabaForm = () => {
                 <Field
                   name="hijbulBahar"
                   as="select"
-                  disabled={isSubmittedToday}
+                  disabled={isSubmittedForSelectedDate}
                   className="w-full rounded border border-gray-300 px-4 py-2 mb-3"
                   onChange={(
                     e:
@@ -781,7 +818,7 @@ const AmoliMuhasabaForm = () => {
                 placeholder={common("editorContentPlaceholder")}
                 rows={6}
                 className="w-full rounded border border-gray-300 px-4 py-2"
-                disabled={isSubmittedToday}
+                disabled={isSubmittedForSelectedDate}
               />
               <ErrorMessage
                 name="editorContent"
@@ -798,9 +835,9 @@ const AmoliMuhasabaForm = () => {
               </div>
               <button
                 type="submit"
-                disabled={isSubmitting || isSubmittedToday}
+                disabled={isSubmitting || isSubmittedForSelectedDate}
                 className={`px-6 py-2 text-white ${
-                  isSubmittedToday
+                  isSubmittedForSelectedDate
                     ? "bg-gray-300"
                     : "bg-blue-500 hover:bg-blue-700"
                 } rounded`}

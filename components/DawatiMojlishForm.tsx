@@ -28,22 +28,26 @@ const DawatiMojlishForm: React.FC = () => {
 
   const [isSubmittedToday, setIsSubmittedToday] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const today = new Date().toISOString().split("T")[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
 
-  // Check if already submitted today (Asia/Dhaka aware on server)
   useEffect(() => {
     const checkSubmissionStatus = async () => {
       if (!email) {
+        setIsSubmittedToday(false);
         setLoading(false);
         return;
       }
+      setLoading(true);
       try {
         const res = await fetch(
-          `/api/dawatimojlish?email=${encodeURIComponent(email)}&mode=today`,
+          `/api/dawatimojlish?email=${encodeURIComponent(email)}&date=${selectedDate}`,
           { cache: "no-store" }
         );
         if (!res.ok) throw new Error("status check failed");
         const data = await res.json();
-        setIsSubmittedToday(Boolean(data?.isSubmittedToday));
+        setIsSubmittedToday(Boolean(data?.isSubmittedForDate));
       } catch (error) {
         console.error("Error checking submission status:", error);
         toast.error(tToast("errorFetchingData"));
@@ -52,7 +56,7 @@ const DawatiMojlishForm: React.FC = () => {
       }
     };
     checkSubmissionStatus();
-  }, [email, tToast]);
+  }, [email, selectedDate, tToast]);
 
   const handleSubmit = async (values: DawatiFormData, { setSubmitting }: any) => {
     if (!email) {
@@ -77,6 +81,7 @@ const DawatiMojlishForm: React.FC = () => {
       dhormoSova: Number(values.dhormoSova) || 0,
       mashwaraPoint: Number(values.mashwaraPoint) || 0,
       editorContent: values.editorContent || "",
+      date: selectedDate,
     };
 
     try {
@@ -91,7 +96,7 @@ const DawatiMojlishForm: React.FC = () => {
       if (res.status === 201) {
         toast.success(common("submittedSuccessfully"));
         setIsSubmittedToday(true);
-        window.location.reload();
+        router.refresh();
         return;
       }
       if (res.status === 409) {
@@ -153,13 +158,25 @@ const DawatiMojlishForm: React.FC = () => {
 
   return (
     <div className="mx-auto mt-8 w-full rounded bg-white p-4 lg:p-10 shadow-lg">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h2 className="text-2xl">{tDM("title")}</h2>
+        <div className="flex items-center space-x-2">
+          <label className="text-gray-700">জমা তারিখ</label>
+          <input
+            type="date"
+            max={today}
+            min={yesterday}
+            className="rounded border border-gray-300 px-3 py-1"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </div>
+      </div>
       {isSubmittedToday && (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-8 z-30">
           {common("youHaveAlreadySubmittedToday")}
         </div>
       )}
-
-      <h2 className="mb-6 text-2xl">{tDM("title")}</h2>
 
       <Formik
         initialValues={{ ...initialFormData, editorContent: "" }}
