@@ -13,6 +13,7 @@
     "logout": "Logout",
     "signingOut": "Signing Out...",
     "roles": {
+      "admin": "Admin",
       "centraladmin": "Central Admin",
       "divisionadmin": "Division Admin",
       "markazadmin": "Markaz Admin",

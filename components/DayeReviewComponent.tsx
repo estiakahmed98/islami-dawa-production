@@ -41,6 +41,7 @@ interface DayeSubmissionStatus {
   name: string;
   hasSubmittedToday: boolean;
   lastSubmissionDate?: string;
+  onLeave?: boolean;
   categories: {
     amoli?: boolean;
     moktob?: boolean;
@@ -54,6 +55,17 @@ interface DayeSubmissionStatus {
   };
   totalSubmissions: number;
   location: string;
+}
+
+interface LeaveRequest {
+  id: string;
+  status: string;
+  fromDate: string;
+  toDate: string;
+  user?: {
+    email?: string | null;
+  } | null;
+  email?: string | null;
 }
 
 const fetcher = async (url: string) => {
@@ -118,6 +130,12 @@ const DayeReviewComponent: React.FC = () => {
       month: "long",
       day: "numeric",
     }).format(date);
+  };
+
+  const isOnLeaveForSelectedDate = (leave: LeaveRequest, selectedYmd: string) => {
+    const fromYmd = dhakaYMD(new Date(leave.fromDate));
+    const toYmd = dhakaYMD(new Date(leave.toDate));
+    return fromYmd <= selectedYmd && selectedYmd <= toYmd;
   };
 
   // Hydration-safe initial date (client only)
@@ -283,8 +301,49 @@ const DayeReviewComponent: React.FC = () => {
     }
   );
 
+  // Fetch approved leaves for the selected date
+  const { data: leavesData } = useSWR(
+    selectedDate && visibleUsers.length > 0
+      ? ["approved-leaves", selectedDate, visibleUsers.map((u) => u.email).join(",")]
+      : null,
+    async () => {
+      if (!selectedDate || visibleUsers.length === 0) return [] as LeaveRequest[];
+
+      // Query by date window so backend only returns overlapping leaves
+      const res = await fetch(
+        `/api/leaves?status=approved&fromDate=${encodeURIComponent(selectedDate)}&toDate=${encodeURIComponent(selectedDate)}`,
+        { cache: "no-store" }
+      );
+      if (!res.ok) return [] as LeaveRequest[];
+      const json = await res.json();
+      const list = (json && (json.leaveRequests as LeaveRequest[])) || [];
+      return Array.isArray(list) ? list : ([] as LeaveRequest[]);
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 60000,
+    }
+  );
+
+  const leaveEmailSet = useMemo(() => {
+    const set = new Set<string>();
+    const list = (leavesData || []) as LeaveRequest[];
+    list.forEach((lr) => {
+      const email = (lr.user && lr.user.email) || lr.email;
+      if (!email) return;
+      if (lr.status !== "approved") return;
+      if (!isOnLeaveForSelectedDate(lr, selectedDate)) return;
+      set.add(email);
+    });
+    return set;
+  }, [leavesData, selectedDate]);
+
   // Update submission status from SWR data
-  const submissionStatus = submissionData || [];
+  const submissionStatus = useMemo(() => {
+    const list = (submissionData || []) as DayeSubmissionStatus[];
+    return list.map((s) => ({ ...s, onLeave: leaveEmailSet.has(s.email) }));
+  }, [submissionData, leaveEmailSet]);
   const loading = submissionLoading || !allUsers.length;
 
   // Filter and search
@@ -335,6 +394,10 @@ const DayeReviewComponent: React.FC = () => {
     const rows = filteredStatus.map((status) => {
       const row: Record<string, string> = { name: status.name };
       columns.slice(1).forEach((col) => {
+        if (status.onLeave) {
+          row[col.key] = "LEAVE";
+          return;
+        }
         const isDone = status.categories[col.key as keyof typeof status.categories];
         row[col.key] = isDone ? "DONE" : "NOT DONE";
       });
@@ -467,6 +530,12 @@ const DayeReviewComponent: React.FC = () => {
                   font-weight: bold;
                 }
 
+                .leave {
+                  background-color: #fde68a;
+                  color: #111827;
+                  font-weight: 800;
+                }
+
                 .page {
                   page-break-after: always;
                 }
@@ -515,13 +584,21 @@ const DayeReviewComponent: React.FC = () => {
 
                               // ✅ STATUS COLUMNS
                               const cls =
-                                value === "DONE" ? "done" : value === "NOT DONE" ? "not-done" : "";
+                                value === "DONE"
+                                  ? "done"
+                                  : value === "NOT DONE"
+                                    ? "not-done"
+                                    : value === "LEAVE"
+                                      ? "leave"
+                                      : "";
 
                               const displayValue =
                                 value === "DONE"
                                   ? "সম্পন্ন"
                                   : value === "NOT DONE"
                                     ? "অসম্পন্ন"
+                                    : value === "LEAVE"
+                                      ? "ছুটিতে"
                                     : "";
 
                               return `<td class="${cls}">${displayValue}</td>`;
@@ -804,9 +881,11 @@ const DayeReviewComponent: React.FC = () => {
           <Card
             key={status.email}
             className={`transition-all ${
-              status.hasSubmittedToday
-                ? "border-green-200 bg-green-50/30"
-                : "border-red-200 bg-red-50/30"
+              status.onLeave
+                ? "border-amber-200 bg-amber-50/30"
+                : status.hasSubmittedToday
+                  ? "border-green-200 bg-green-50/30"
+                  : "border-red-200 bg-red-50/30"
             }`}
           >
             <CardHeader>
@@ -814,7 +893,7 @@ const DayeReviewComponent: React.FC = () => {
                 <div className="flex-1">
                   <CardTitle className="text-lg flex items-center gap-2">
                     {status.name}
-                    {status.hasSubmittedToday ? (
+                    {status.onLeave ? null : status.hasSubmittedToday ? (
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
                     ) : (
                       <XCircle className="h-5 w-5 text-red-600" />
@@ -828,14 +907,20 @@ const DayeReviewComponent: React.FC = () => {
                   </p>
                 </div>
                 <Badge
-                  variant={status.hasSubmittedToday ? "default" : "destructive"}
+                  variant={status.onLeave ? "outline" : status.hasSubmittedToday ? "default" : "destructive"}
                   className={
-                    status.hasSubmittedToday ? "bg-green-600" : "bg-red-600"
+                    status.onLeave
+                      ? "bg-amber-200 text-amber-900 border-amber-300"
+                      : status.hasSubmittedToday
+                        ? "bg-green-600"
+                        : "bg-red-600"
                   }
                 >
-                  {status.hasSubmittedToday
-                    ? t("badge.completed")
-                    : t("badge.incomplete")}
+                  {status.onLeave
+                    ? "ছুটিতে"
+                    : status.hasSubmittedToday
+                      ? t("badge.completed")
+                      : t("badge.incomplete")}
                 </Badge>
               </div>
             </CardHeader>

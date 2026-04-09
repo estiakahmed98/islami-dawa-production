@@ -13,6 +13,7 @@
     "logout": "تسجيل الخروج",
     "signingOut": "جارٍ تسجيل الخروج...",
     "roles": {
+      "admin": "مشرف",
       "centraladmin": "مشرف مركزي",
       "divisionadmin": "مشرف القسم",
       "markazadmin": "مشرف المركز",
