@@ -30,17 +30,14 @@ export const signIn = {
   social: async (opts: any, hooks?: any) => {
     try {
       hooks?.onRequest?.();
-      // provider is expected to be "google"; do not auto-redirect so caller can route by role
-      const res = await nextSignIn(opts.provider || "google", {
-        redirect: false,
+      await nextSignIn(opts.provider || "google", {
         callbackUrl: opts.callbackURL || "/",
       });
-      if (res?.error) hooks?.onError?.({ error: { message: res.error } });
-      else hooks?.onSuccess?.(res);
     } catch (err: any) {
       hooks?.onError?.({
         error: { message: err.message || "Social signin failed" },
       });
+      throw err;
     } finally {
       hooks?.onFinally?.();
     }

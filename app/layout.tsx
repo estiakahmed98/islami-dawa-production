@@ -36,7 +36,12 @@ const tiroBangla = Tiro_Bangla({
   variable: "--font-tiro-bangla",
 });
 
+const metadataBase = process.env.NEXTAUTH_URL
+  ? new URL(process.env.NEXTAUTH_URL)
+  : undefined;
+
 export const metadata: Metadata = {
+  metadataBase,
   title: "ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ",
   description: "ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ",
   manifest: "/manifest.webmanifest",

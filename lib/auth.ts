@@ -237,8 +237,8 @@ export const nextAuthOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: "/auth/signin",
-    error: "/auth/signin", // Redirect to signin page on errors
+    signIn: "/",
+    error: "/", // Locale middleware will resolve this to the active login page
   },
   debug: process.env.NODE_ENV === 'development', // Enable debug in development
   logger: {

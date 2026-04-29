@@ -26,7 +26,7 @@ const AdmindLayout = async ({ children, params }: Props) => {
   const session = await getServerAuthSession();
 
   if (!roleList.includes(session?.user?.role as string)) {
-    redirect("/dashboard");
+    redirect(`/${locale}/dashboard`);
   }
 
   return (

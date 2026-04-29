@@ -114,16 +114,8 @@ const SigninForm = ({ initialError = "" }: SigninFormProps) => {
     setFormError("");
     try {
       await signIn.social(
-        { provider: "google", callbackURL: `/${locale}/dashboard` },
+        { provider: "google", callbackURL: `/${locale}` },
         {
-          onSuccess: async () => {
-            const s = await getSession();
-            const role = (s?.user as any)?.role as string | undefined;
-            const target = role === "daye" ? `/${locale}/dashboard` : `/${locale}/admin`;
-            toast.success(t("toasts.loginSuccessful"));
-            router.push(target);
-            router.refresh();
-          },
           onError: (ctx: { error: { message: string } }) => setFormError(ctx.error.message),
         }
       );

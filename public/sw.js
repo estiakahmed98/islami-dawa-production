@@ -1,25 +1,56 @@
-const CACHE_NAME = "islami-dawa-cache-v1";
-const urlsToCache = [
-  "/",
+const CACHE_NAME = "islami-dawa-static-v2";
+const PRECACHE_URLS = [
   "/manifest.webmanifest",
   "/icons/pwd-logo-192.png",
   "/icons/pwd-logo-512.png",
 ];
 
-// Install and cache core assets.
+const CACHEABLE_DESTINATIONS = new Set([
+  "style",
+  "script",
+  "worker",
+  "image",
+  "font",
+]);
+
+function isSameOrigin(url) {
+  return url.origin === self.location.origin;
+}
+
+function isStaticAssetRequest(request) {
+  const url = new URL(request.url);
+
+  if (request.method !== "GET" || !isSameOrigin(url)) {
+    return false;
+  }
+
+  if (request.mode === "navigate") {
+    return false;
+  }
+
+  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/api/auth/")) {
+    return false;
+  }
+
+  if (PRECACHE_URLS.includes(url.pathname)) {
+    return true;
+  }
+
+  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/")) {
+    return true;
+  }
+
+  return CACHEABLE_DESTINATIONS.has(request.destination);
+}
+
 self.addEventListener("install", (event) => {
-  console.log("Service Worker installing...");
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
   );
   self.skipWaiting();
 });
 
-// Activate and clean old caches.
 self.addEventListener("activate", (event) => {
-  console.log("Service Worker activating...");
   event.waitUntil(
     caches.keys().then((cacheNames) =>
       Promise.all(
@@ -36,27 +67,29 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Serve cached responses first, then update from network.
 self.addEventListener("fetch", (event) => {
+  if (!isStaticAssetRequest(event.request)) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
 
-      return fetch(event.request)
-        .then((response) => {
-          const responseClone = response.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-
+      return fetch(event.request).then((response) => {
+        if (!response || !response.ok) {
           return response;
-        })
-        .catch(() => {
-          return caches.match("/");
-        });
+        }
+
+        const responseClone = response.clone();
+        event.waitUntil(
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone))
+        );
+
+        return response;
+      });
     })
   );
 });

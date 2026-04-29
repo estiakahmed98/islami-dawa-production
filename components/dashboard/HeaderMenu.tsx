@@ -3,10 +3,10 @@
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { signOut, useSession } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogOut, UserRound } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useLocale } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,7 +30,7 @@ function getInitials(name?: string | null, email?: string | null) {
 
 export default function HeaderMenu() {
   const t = useTranslations("header");
-  const router = useRouter();
+  const locale = useLocale();
   const { data: session } = useSession();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -112,12 +112,20 @@ export default function HeaderMenu() {
               if (isSigningOut) return;
               setIsSigningOut(true);
               try {
-                await signOut({ redirect: false });
+                if ("caches" in window) {
+                  const cacheNames = await caches.keys();
+                  await Promise.all(
+                    cacheNames
+                      .filter((name) => name.startsWith("islami-dawa-"))
+                      .map((name) => caches.delete(name))
+                  );
+                }
+
+                await signOut({ callbackUrl: `/${locale}` });
               } catch (err) {
-                // ignore
+                window.location.assign(`/${locale}`);
               } finally {
                 setIsSigningOut(false);
-                router.replace("/");
               }
             }}
             disabled={isSigningOut}
