@@ -2,14 +2,14 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "দা'ঈ ও দাওয়াহ",
-    short_name: "দা'ঈ ও দাওয়াহ",
+    name: "ইসলামি দাওয়াহ ইনস্টিটিউট বাংলাদেশ",
+    short_name: "ইসলামি দাওয়াহ ইনস্টিটিউট",
     id: "/",
     start_url: "/",
     scope: "/",
     display: "standalone",
-    background_color: "#000000",
-    theme_color: "#000000",
+    background_color: "#ffffff",
+    theme_color: "#ffffff",
     icons: [
       {
         src: "/icons/pwd-logo-192.png",

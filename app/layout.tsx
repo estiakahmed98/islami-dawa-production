@@ -1,10 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import {
-  Geist,
-  Geist_Mono,
-  Anek_Bangla,
-  Tiro_Bangla,
-} from "next/font/google";
+import React, { Suspense } from "react";
+import { Geist, Geist_Mono, Anek_Bangla, Tiro_Bangla } from "next/font/google";
 import { getLocale } from "next-intl/server";
 import { Toaster } from "@/components/ui/sonner";
 import AppSessionProvider from "@/providers/session-provider";
@@ -12,6 +8,8 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import TreeProvider from "@/providers/treeProvider";
 import PwaRegister from "./pwa-register";
 import "./globals.css";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
+import GlobalLoading from "@/components/GlobalLoading";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -71,7 +69,10 @@ export default async function RootLayout({
             defaultTheme="light"
             disableTransitionOnChange
           >
-            <TreeProvider>{children}</TreeProvider>
+            <GlobalLoading />
+            <Suspense fallback={<LoadingSkeleton />}>
+              <TreeProvider>{children}</TreeProvider>
+            </Suspense>
             <Toaster />
           </ThemeProvider>
         </AppSessionProvider>
