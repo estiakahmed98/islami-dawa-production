@@ -435,8 +435,8 @@ const UniversalTableShow: React.FC<Props> = ({
               pdf.internal.pageSize.getHeight() - 10,
             )
           }
+          return pdf.save()
         })
-        .save()
     } catch (error) {
       console.error("Error generating PDF:", error)
     }

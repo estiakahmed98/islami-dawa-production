@@ -8,6 +8,7 @@ import "@fontsource/noto-sans-bengali";
 import { useSelectedUser } from "@/providers/treeProvider";
 import { useTranslations } from "next-intl";
 import { MonthlyUserReportButton } from "@/components/MonthlyReportPDF";
+import UserTableShowPDFButton from "./UserTableShowPDFButton";
 
 interface User {
   id: string;
@@ -77,6 +78,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
 
   const month = useTranslations("dashboard.UserDashboard.months");
   const t = useTranslations("universalTableShow");
+  const td = useTranslations("dashboard.adminDashboard.dashboard");
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -126,6 +128,76 @@ const AdminTable: React.FC<AdminTableProps> = ({
     month("november"),
     month("december"),
   ];
+
+  const pdfCategories = useMemo(() => {
+    if (!allTabsData || emailList.length !== 1) return [];
+
+    return [
+      {
+        key: "amoli",
+        title: td("amoliMuhasaba"),
+        userData,
+        selectedMonth,
+        selectedYear,
+      },
+      {
+        key: "moktob",
+        title: td("moktobSubject"),
+        userData: allTabsData.moktobData,
+        selectedMonth,
+        selectedYear,
+      },
+      {
+        key: "talim",
+        title: td("talimSubject"),
+        userData: allTabsData.talimData,
+        selectedMonth,
+        selectedYear,
+      },
+      {
+        key: "daye",
+        title: td("dayiSubject"),
+        userData: allTabsData.dayeData,
+        selectedMonth,
+        selectedYear,
+      },
+      {
+        key: "dawati",
+        title: td("dawatiSubject"),
+        userData: allTabsData.dawatiData,
+        selectedMonth,
+        selectedYear,
+      },
+      {
+        key: "dawatimojlish",
+        title: td("dawatiMojlish"),
+        userData: allTabsData.dawatiMojlishData,
+        selectedMonth,
+        selectedYear,
+      },
+      {
+        key: "jamat",
+        title: td("jamatSubject"),
+        userData: allTabsData.jamatData,
+        selectedMonth,
+        selectedYear,
+      },
+      {
+        key: "dinefera",
+        title: td("dineFera"),
+        userData: allTabsData.dineFeraData,
+        selectedMonth,
+        selectedYear,
+      },
+      {
+        key: "sofor",
+        title: td("soforSubject"),
+        userData: allTabsData.soforData,
+        selectedMonth,
+        selectedYear,
+      },
+    ].filter((category) => category.userData?.records);
+  }, [allTabsData, emailList.length, selectedMonth, selectedYear, td, userData]);
 
   const monthDays = useMemo(() => {
     return Array.from(
@@ -506,10 +578,75 @@ const AdminTable: React.FC<AdminTableProps> = ({
     onCellClick?.({ dateKey, rowKey });
   };
 
+  const toolbar = (
+    <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl gap-4">
+      <div className="flex items-center gap-4">
+        {selectedMonthProp === undefined && selectedYearProp === undefined ? (
+          <>
+            <select
+              value={internalMonth}
+              onChange={(e) => setInternalMonth(parseInt(e.target.value))}
+              className="w-40 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
+            >
+              {months.map((m, i) => (
+                <option key={i} value={i}>
+                  {m}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={internalYear}
+              onChange={(e) => setInternalYear(parseInt(e.target.value))}
+              className="w-24 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-emerald-300 focus:border-emerald-500 cursor-pointer"
+            >
+              {Array.from({ length: 10 }, (_, i) => 2020 + i).map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          </>
+        ) : (
+          <div className="text-sm text-gray-600">
+            {months[selectedMonth]} {selectedYear}
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex gap-4">
+        {pdfCategories.length > 0 && (
+          <UserTableShowPDFButton
+            categories={pdfCategories}
+            userEmail={emailList[0]}
+            userName={selectedUserData?.name || allUserDetails[emailList[0]]?.name || emailList[0]}
+          />
+        )}
+        {selectedMonthProp === undefined &&
+          selectedYearProp === undefined &&
+          allTabsData && (
+            <MonthlyUserReportButton
+              monthName={months[selectedMonth]}
+              year={selectedYear}
+              emailList={emailList}
+              usersData={Object.fromEntries(
+                Object.entries(allUserDetails).map(([email, details]) => [
+                  email,
+                  details.name,
+                ])
+              )}
+              categoryData={preparePDFData()}
+            />
+          )}
+      </div>
+    </div>
+  );
+
   return (
     <div>
+      {toolbar}
       {/* if parent controls month/year, hide selectors; else show them */}
-      {selectedMonthProp === undefined && selectedYearProp === undefined ? (
+      {false ? (
         <div className="flex flex-col lg:flex-row justify-between items-center bg-white shadow-md p-6 rounded-xl gap-4">
           <div className="flex items-center gap-4">
             <select

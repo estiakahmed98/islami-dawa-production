@@ -559,6 +559,16 @@ const AdminDashboard: React.FC = () => {
   const jamatData = jamatSW.shaped ?? emptyData;
   const dineFeraData = dineFeraSW.shaped ?? emptyData;
   const soforData = soforSW.shaped ?? emptyData;
+  const allTabsData = {
+    moktobData,
+    talimData,
+    dayeData,
+    dawatiData,
+    dawatiMojlishData,
+    jamatData,
+    dineFeraData,
+    soforData,
+  };
 
   useEffect(() => {
     if (
@@ -1237,6 +1247,7 @@ const AdminDashboard: React.FC = () => {
               emailList={emailList}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
+              allTabsData={allTabsData}
               users={users}
             />
           </TabsContent>
@@ -1247,6 +1258,7 @@ const AdminDashboard: React.FC = () => {
               emailList={emailList}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
+              allTabsData={allTabsData}
               users={users}
             />
           </TabsContent>
@@ -1257,6 +1269,7 @@ const AdminDashboard: React.FC = () => {
               emailList={emailList}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
+              allTabsData={allTabsData}
               users={users}
             />
           </TabsContent>
@@ -1269,6 +1282,7 @@ const AdminDashboard: React.FC = () => {
               selectedYear={selectedYear}
               clickableFields={["assistantsList", "assistants"]}
               onCellClick={handleDayeCellClick}
+              allTabsData={allTabsData}
               users={users}
             />
           </TabsContent>
@@ -1279,6 +1293,7 @@ const AdminDashboard: React.FC = () => {
               emailList={emailList}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
+              allTabsData={allTabsData}
               users={users}
             />
           </TabsContent>
@@ -1289,6 +1304,7 @@ const AdminDashboard: React.FC = () => {
               emailList={emailList}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
+              allTabsData={allTabsData}
               users={users}
             />
           </TabsContent>
@@ -1299,6 +1315,7 @@ const AdminDashboard: React.FC = () => {
               emailList={emailList}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
+              allTabsData={allTabsData}
               users={users}
             />
           </TabsContent>
@@ -1309,6 +1326,7 @@ const AdminDashboard: React.FC = () => {
               emailList={emailList}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
+              allTabsData={allTabsData}
               users={users}
             />
           </TabsContent>
@@ -1321,6 +1339,7 @@ const AdminDashboard: React.FC = () => {
               selectedYear={selectedYear}
               clickableFields={["madrasaVisitList", "schoolCollegeVisitList"]}
               onCellClick={handleSoforCellClick}
+              allTabsData={allTabsData}
               users={users}
             />
           </TabsContent>

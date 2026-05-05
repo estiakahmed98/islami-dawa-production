@@ -32,6 +32,13 @@ export function UserTableShowPDFButton({
   const [loading, setLoading] = useState(false);
   const t = useTranslations("dashboard.UserDashboard");
 
+  const findCategory = (key: string, title: string) => {
+    return (
+      categories.find((c: any) => c?.key === key) ||
+      categories.find((c) => c.title === title)
+    );
+  };
+
   const generatePDF = async () => {
     setLoading(true);
 
@@ -45,26 +52,26 @@ export function UserTableShowPDFButton({
       // Define pages with their categories
       const pages = [
         [
-          categories.find((c) => c.title === t("dashboard.amoliMuhasaba")),
-          categories.find((c) => c.title === t("dashboard.talimSubject")),
-          categories.find((c) => c.title === t("dashboard.dayiSubject")),
+          findCategory("amoli", t("dashboard.amoliMuhasaba")),
+          findCategory("talim", t("dashboard.talimSubject")),
+          findCategory("daye", t("dashboard.dayiSubject")),
         ].filter(Boolean) as CategoryData[],
         [
-          categories.find((c) => c.title === t("dashboard.moktobSubject")),
-          categories.find((c) => c.title === t("dashboard.dawatiSubject")),
+          findCategory("moktob", t("dashboard.moktobSubject")),
+          findCategory("dawati", t("dashboard.dawatiSubject")),
         ].filter(Boolean) as CategoryData[],
         [
-          categories.find((c) => c.title === t("dashboard.dawatiMojlish")),
-          categories.find((c) => c.title === t("dashboard.jamatSubject")),
-          categories.find((c) => c.title === t("dashboard.dineFera")),
-          categories.find((c) => c.title === t("dashboard.soforSubject")),
+          findCategory("dawatimojlish", t("dashboard.dawatiMojlish")),
+          findCategory("jamat", t("dashboard.jamatSubject")),
+          findCategory("dinefera", t("dashboard.dineFera")),
+          findCategory("sofor", t("dashboard.soforSubject")),
         ].filter(Boolean) as CategoryData[],
       ];
 
       const pageTitles = [
-        "A'mali Muhasaba, Women's Taleem & Assistant Daee Matters",
-        "Maktab Matters & Dawah Matters",
-        "Dawah Majlis, Jamaat Matters & Returned to Islam & Travel Matters",
+        "আমালি মুহাসাবা, নারীদের তালীম এবং সহকারী দায়ী সংক্রান্ত বিষয়াবলী",
+        "মক্তব সংক্রান্ত বিষয়াবলী এবং দাওয়াহ সংক্রান্ত বিষয়াবলী",
+        "দাওয়াহ মজলিস, জামাত সংক্রান্ত বিষয়াবলী, দ্বীনে ফিরে এসেছে এবং সফর সংক্রান্ত বিষয়াবলী",
       ];
 
       let globalPageNumber = 1;
@@ -82,7 +89,7 @@ export function UserTableShowPDFButton({
           pageTitles[pageIndex],
           globalPageNumber,
           pages.length,
-          pageIndex + 1
+          pageIndex + 1,
         );
         contentDiv.style.position = "absolute";
         contentDiv.style.left = "-9999px";
@@ -94,6 +101,14 @@ export function UserTableShowPDFButton({
         // Wait for fonts to load
         await document.fonts.load("12px 'Noto Sans Bengali'");
 
+        await new Promise((r) => setTimeout(r, 50));
+
+        const captureHeight = Math.max(
+          contentDiv.scrollHeight,
+          contentDiv.offsetHeight,
+          800,
+        );
+
         // Generate canvas
         const canvas = await html2canvas(contentDiv, {
           scale: 2,
@@ -101,7 +116,7 @@ export function UserTableShowPDFButton({
           allowTaint: true,
           backgroundColor: "#ffffff",
           width: 1400,
-          height: contentDiv.scrollHeight,
+          height: captureHeight,
         });
 
         // Add page to PDF (except first page)
@@ -154,8 +169,15 @@ function generateHTMLContentForPage(
   pageTitle: string,
   currentPage: number,
   totalPages: number,
-  pageNumber: number
+  pageNumber: number,
 ): string {
+  // Get month name and year from first category (all should have same month/year)
+  const firstCategory = pageCategories[0];
+  const { selectedMonth, selectedYear } = firstCategory;
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const monthName = monthNames[selectedMonth] || "Unknown";
+  const dateText = `${monthName}, ${selectedYear}`;
+
   // Generate tables for each category
   const tablesHTML = pageCategories
     .map((category) => {
@@ -167,7 +189,7 @@ function generateHTMLContentForPage(
 
       const monthDays = Array.from(
         { length: new Date(selectedYear, selectedMonth + 1, 0).getDate() },
-        (_, i) => i + 1
+        (_, i) => i + 1,
       );
 
       const transposed = Object.keys(labels).map((rowKey) => {
@@ -223,7 +245,7 @@ function generateHTMLContentForPage(
                 color: white;
                 font-weight: bold;
               ">দিন ${day}</th>
-            `
+            `,
               )
               .join("")}
           </tr>
@@ -248,11 +270,11 @@ function generateHTMLContentForPage(
                   padding: 4px;
                   text-align: center;
                 ">${row[day] ?? "-"}</td>
-              `
+              `,
                 )
                 .join("")}
             </tr>
-          `
+          `,
             )
             .join("")}
         </table>
@@ -295,7 +317,7 @@ function generateHTMLContentForPage(
           margin-top: 5px;
           font-family: 'Noto Sans Bengali', Arial, sans-serif;
         ">
-          ${userName} - পৃষ্ঠা ${currentPage}/${totalPages}
+          ${dateText} | ${userName} - পৃষ্ঠা ${currentPage}/${totalPages}
         </div>
       </div>
 
