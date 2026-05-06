@@ -193,40 +193,50 @@ const DayeReviewComponent: React.FC = () => {
     async () => {
       const monthKey = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}`;
       const daysInMonth = monthlyStartEnd.daysInMonth;
+      const emails = visibleUsers.map((user) => user.email).join(",");
 
       const results = await Promise.all(
         categoryOptions.map(async (cat) => {
-          const userResults = await Promise.all(
-            visibleUsers.map(async (user) => {
-              try {
-                const res = await fetch(
-                  `${cat.url}?email=${encodeURIComponent(user.email)}`,
-                  { cache: "no-store" },
-                );
+          try {
+            const params = new URLSearchParams({
+              emails,
+              from: monthlyStartEnd.start,
+              to: monthlyStartEnd.end,
+            });
 
-                if (!res.ok) {
-                  return { email: user.email, records: [] as any[] };
-                }
+            const res = await fetch(`${cat.url}?${params.toString()}`, {
+              cache: "no-store",
+            });
 
-                const json = await res.json();
+            if (!res.ok) {
+              return { key: cat.key, users: {} as Record<string, any[]> };
+            }
 
-                const records = Array.isArray(json)
-                  ? json
-                  : Array.isArray((json as any)?.records)
-                    ? (json as any).records
+            const json = await res.json();
+            const rawRecords = (json && json.records) || {};
+            const users = Object.fromEntries(
+              visibleUsers.map((user) => {
+                const userRecords = rawRecords?.[user.email];
+                const records = Array.isArray(userRecords)
+                  ? userRecords
+                  : Array.isArray(userRecords?.records)
+                    ? userRecords.records
                     : [];
 
-                return { email: user.email, records };
-              } catch {
-                return { email: user.email, records: [] as any[] };
-              }
-            }),
-          );
+                return [user.email, records];
+              }),
+            );
 
-          return {
-            key: cat.key,
-            users: userResults,
-          };
+            return {
+              key: cat.key,
+              users,
+            };
+          } catch {
+            return {
+              key: cat.key,
+              users: {} as Record<string, any[]>,
+            };
+          }
         }),
       );
 
@@ -247,13 +257,11 @@ const DayeReviewComponent: React.FC = () => {
 
         categoryOptions.forEach((cat) => {
           const categoryResult = results.find((r) => r.key === cat.key);
-          const userResult = categoryResult?.users.find(
-            (u) => u.email === user.email,
-          );
+          const userRecords = categoryResult?.users?.[user.email] || [];
 
           const submittedDaySet = new Set<number>();
 
-          userResult?.records.forEach((record: any) => {
+          userRecords.forEach((record: any) => {
             if (!record?.date) return;
 
             const ymd = dhakaYMD(new Date(record.date));
