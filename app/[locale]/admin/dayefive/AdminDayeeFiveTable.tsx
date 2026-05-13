@@ -931,7 +931,7 @@ export default function AdminDayeeFiveTable() {
         </div>
       )}
 
-      <style jsx global>{`
+      <style>{`
         @media print {
           .no-print {
             display: none !important;
