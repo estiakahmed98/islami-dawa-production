@@ -4,6 +4,7 @@ import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
 import { memo } from "react";
 import { Bell } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
 
 type MenuItemProps = {
   icon: React.ReactNode;
@@ -11,9 +12,10 @@ type MenuItemProps = {
   url: string;
   notificationCount?: number;
   showNotification?: boolean;
+  roles?: string[];
 };
 
-const MenuItem = ({ icon, title, url, notificationCount, showNotification }: MenuItemProps) => {
+const MenuItem = ({ icon, title, url, notificationCount, showNotification, roles }: MenuItemProps) => {
   const pathName = usePathname();
   const locale = useLocale();
   const localeUrl = `/${locale}${url}`;
@@ -21,6 +23,18 @@ const MenuItem = ({ icon, title, url, notificationCount, showNotification }: Men
   const active = isRootExactOnly
     ? pathName === localeUrl
     : pathName === localeUrl || pathName.startsWith(`${localeUrl}/`);
+
+  // Get user session to check role
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
+
+  // Check if user has required role for this menu item
+  const hasRequiredRole = !roles || roles.includes(userRole as string);
+
+  // Don't render if user doesn't have required role
+  if (!hasRequiredRole) {
+    return null;
+  }
 
   return (
     <Link

@@ -10,7 +10,10 @@ import {
   FaQuran,
   FaTree,
 } from "react-icons/fa";
-import { LiaChalkboardTeacherSolid } from "react-icons/lia";
+import {
+  LiaChalkboardTeacherSolid,
+  LiaNetworkWiredSolid,
+} from "react-icons/lia";
 import { FcAcceptDatabase, FcLeave } from "react-icons/fc";
 import {
   MdOutlinePeopleAlt,
@@ -67,15 +70,15 @@ const SidebarMenu = () => {
   ];
   const adminRoutesLocale = adminRoutes.map((p) => `/${locale}${p}`);
   const userRoutesLocale = userRoutes.map(
-    (p) => `/${locale}${p.replace("*", "")}`
+    (p) => `/${locale}${p.replace("*", "")}`,
   );
 
   const [isAdminMode, setIsAdminMode] = useState<boolean>(
-    adminRoutesLocale.includes(currentRoute)
+    adminRoutesLocale.includes(currentRoute),
   );
 
   const [buttText, setButtonText] = useState<string>(
-    isAdmin ? t("gotoUserMode") : t("gotoAdminMode")
+    isAdmin ? t("gotoUserMode") : t("gotoAdminMode"),
   );
 
   // Initialize mode based on current route
@@ -101,7 +104,7 @@ const SidebarMenu = () => {
       if (!res.ok) throw new Error("bad status");
       const data = await res.json();
       setPendingLeaveCount(
-        Array.isArray(data?.leaveRequests) ? data.leaveRequests.length : 0
+        Array.isArray(data?.leaveRequests) ? data.leaveRequests.length : 0,
       );
     } catch {
       setPendingLeaveCount(0);
@@ -157,9 +160,9 @@ const SidebarMenu = () => {
       url: "/dashboard",
     },
     {
-      url: "/dashboard/weekly-todo",
-      icon: <GrPlan className="size-5" />,
       title: t("weeklyTodo"),
+      icon: <GrPlan className="size-5" />,
+      url: "/dashboard/weekly-todo",
     },
     {
       title: t("amoliMuhasaba"),
@@ -206,11 +209,12 @@ const SidebarMenu = () => {
       icon: <MdOutlineTravelExplore className="size-5" />,
       url: "/dashboard/sofor",
     },
-    // {
-    //   title: t("kargojariSubject"),
-    //   icon: <TbReport className="size-5" />,
-    //   url: "/dashboard/kargojari",
-    // },
+    {
+      title: t("dayeFive"),
+      icon: <LiaNetworkWiredSolid className="size-5" />,
+      url: "/dashboard/dayefive",
+      roles: ["divisionadmin"],
+    },
     {
       title: t("leaveSubject"),
       icon: <FcLeave className="size-5" />,
@@ -229,7 +233,7 @@ const SidebarMenu = () => {
       icon: <LuLayoutDashboard className="size-6" />,
       title: `${t("dashBoard")} (${session?.user?.role || t("noRole")})`,
     },
-        {
+    {
       url: "/admin/register",
       icon: <IoPersonAddSharp className="size-6" />,
       title: t("addDayi"),
@@ -248,6 +252,12 @@ const SidebarMenu = () => {
       url: "/admin/weekly-todo",
       icon: <GrPlan className="size-5" />,
       title: t("weeklyTodo"),
+    },
+    {
+      url: "/admin/dayefive",
+      icon: <LiaNetworkWiredSolid className="size-5" />,
+      title: t("dayeFive"),
+      roles: ["divisionadmin"],
     },
     {
       url: "/admin/leave",

@@ -31,25 +31,26 @@ model users {
   accounts      accounts[]
   CalendarEvent CalendarEvent[]
 
-  activeDeviceId   String?
-  activeSessionId  String?
-  
+  activeDeviceId  String?
+  activeSessionId String?
+
   // Relations with new data models
-  amoliData        AmoliMuhasaba[]
-  dawatiBisoyData  DawatiBisoyRecord[]
+  amoliData         AmoliMuhasaba[]
+  dawatiBisoyData   DawatiBisoyRecord[]
   dawatiMojlishData DawatiMojlishRecord[]
-  jamatBisoyData   JamatBisoyRecord[]
-  dineFeraData     DineFeraRecord[]
-  soforBisoyData   SoforBisoyRecord[]
-  talimBisoyData   TalimBisoyRecord[]
-  dayeRecords      DayeeBishoyRecord[]
-  moktobBisoyData  MoktobBisoyRecord[]
-  leaveRequests    LeaveRequest[]
-  tasks            Task[]
-  editRequests     EditRequest[]
-  markazId         String?
-  markaz           Markaz?      @relation("MarkazToUsers", fields: [markazId], references: [id])
-  WeeklyTodos     WeeklyTodo[]
+  jamatBisoyData    JamatBisoyRecord[]
+  dineFeraData      DineFeraRecord[]
+  soforBisoyData    SoforBisoyRecord[]
+  talimBisoyData    TalimBisoyRecord[]
+  dayeRecords       DayeeBishoyRecord[]
+  moktobBisoyData   MoktobBisoyRecord[]
+  leaveRequests     LeaveRequest[]
+  tasks             Task[]
+  editRequests      EditRequest[]
+  markazId          String?
+  markaz            Markaz?               @relation("MarkazToUsers", fields: [markazId], references: [id])
+  WeeklyTodos       WeeklyTodo[]
+  dayeeFiveRecords  DayeeFiveRecord[]
 }
 
 model sessions {
@@ -111,29 +112,29 @@ model verifications {
 
 // ============== AMOLI MUHASABA ==============
 model AmoliMuhasaba {
-  id          String   @id @default(cuid())
-  userId      String
-  user        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  date        DateTime
-  tahajjud    Int?     
-  surah       String?  
-  ayat        String?  
-  quarntilawat Json?
-  zikir       String?  
-  ishraq      String?  
-  jamat       Int?     
-  sirat       String?  
-  Dua         String?  
-  ilm         String?  
-  tasbih      String?  
-  dayeeAmol   String?  
-  amoliSura   String?  
-  ayamroja    String? 
-  hijbulBahar String? 
-  percentage  String? 
-  editorContent String? @db.Text 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  userId        String
+  user          users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date          DateTime
+  tahajjud      Int?
+  surah         String?
+  ayat          String?
+  quarntilawat  Json?
+  zikir         String?
+  ishraq        String?
+  jamat         Int?
+  sirat         String?
+  Dua           String?
+  ilm           String?
+  tasbih        String?
+  dayeeAmol     String?
+  amoliSura     String?
+  ayamroja      String?
+  hijbulBahar   String?
+  percentage    String?
+  editorContent String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@unique([userId, date])
   @@index([userId])
@@ -218,18 +219,18 @@ model DineFeraRecord {
 
 // ============== SOFOR BISOY ==============
 model SoforBisoyRecord {
-  id                 String   @id @default(cuid())
-  userId             String
-  user               users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  date               DateTime
-  madrasaVisit       Int      @default(0)
-  madrasaVisitList   String[] @default([])
-  moktobVisit        Int      @default(0)
-  schoolCollegeVisit Int      @default(0)
+  id                     String   @id @default(cuid())
+  userId                 String
+  user                   users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date                   DateTime
+  madrasaVisit           Int      @default(0)
+  madrasaVisitList       String[] @default([])
+  moktobVisit            Int      @default(0)
+  schoolCollegeVisit     Int      @default(0)
   schoolCollegeVisitList String[] @default([])
-  editorContent      String?  @db.Text
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  editorContent          String?  @db.Text
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
   @@unique([userId, date])
   @@index([userId])
@@ -271,20 +272,20 @@ model DayeeBishoyRecord {
 }
 
 model AssistantDaee {
-  id                  String            @id @default(cuid())
-  name                String
-  phone               String
-  address             String
-  email               String?
-  description         String?
-  division            String
-  district            String
-  upazila             String
-  union               String
-  dayeeBishoyRecord   DayeeBishoyRecord @relation(fields: [dayeeBishoyId], references: [id], onDelete: Cascade)
-  dayeeBishoyId       String
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  id                String            @id @default(cuid())
+  name              String
+  phone             String
+  address           String
+  email             String?
+  description       String?
+  division          String
+  district          String
+  upazila           String
+  union             String
+  dayeeBishoyRecord DayeeBishoyRecord @relation(fields: [dayeeBishoyId], references: [id], onDelete: Cascade)
+  dayeeBishoyId     String
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@index([dayeeBishoyId])
 }
@@ -295,15 +296,15 @@ model MoktobBisoyRecord {
   userId                     String
   user                       users    @relation(fields: [userId], references: [id], onDelete: Cascade)
   date                       DateTime
-  notunMoktobChalu           Int      @default(0) 
-  totalMoktob                Int      @default(0) 
-  totalStudent               Int      @default(0) 
-  obhibhabokConference       Int      @default(0) 
-  moktoThekeMadrasaAdmission Int      @default(0) 
-  notunBoyoskoShikkha        Int      @default(0) 
-  totalBoyoskoShikkha        Int      @default(0) 
-  boyoskoShikkhaOnshogrohon  Int      @default(0) 
-  newMuslimeDinerFikir       Int      @default(0) 
+  notunMoktobChalu           Int      @default(0)
+  totalMoktob                Int      @default(0)
+  totalStudent               Int      @default(0)
+  obhibhabokConference       Int      @default(0)
+  moktoThekeMadrasaAdmission Int      @default(0)
+  notunBoyoskoShikkha        Int      @default(0)
+  totalBoyoskoShikkha        Int      @default(0)
+  boyoskoShikkhaOnshogrohon  Int      @default(0)
+  newMuslimeDinerFikir       Int      @default(0)
   editorContent              String?  @db.Text
   createdAt                  DateTime @default(now())
   updatedAt                  DateTime @updatedAt
@@ -313,24 +314,49 @@ model MoktobBisoyRecord {
   @@index([date])
 }
 
+model DayeeFiveRecord {
+  id String @id @default(cuid())
+
+  userId String
+  user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  month Int // 1-12
+  year  Int // 2026
+
+  shobgojariDate DateTime?
+  mashwaraDate   DateTime?
+  trainingDates  DateTime[] @default([])
+
+  jamatCount Int @default(0)
+  gashtCount Int @default(0)
+
+  editorContent String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, month, year])
+  @@index([userId])
+  @@index([month, year])
+}
+
 // ============== LEAVE MANAGEMENT ==============
 model LeaveRequest {
-  id          String   @id @default(cuid())
-  userId      String
-  user        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  leaveType   String   
-  fromDate    DateTime
-  toDate      DateTime
-  days        Int
-  reason      String   @db.Text
-  approvedBy  String?
-  status      String   @default("pending") 
-  rejectionReason  String?
-  phone       String?
-  name        String?
-  requestDate DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String
+  user            users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leaveType       String
+  fromDate        DateTime
+  toDate          DateTime
+  days            Int
+  reason          String   @db.Text
+  approvedBy      String?
+  status          String   @default("pending")
+  rejectionReason String?
+  phone           String?
+  name            String?
+  requestDate     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
@@ -346,7 +372,7 @@ model Task {
   description String?  @db.Text
   date        DateTime
   time        String?
-  visibility  String   @default("private") 
+  visibility  String   @default("private")
   division    String?
   district    String?
   upazila     String?
@@ -364,23 +390,23 @@ model Task {
 
 // ============== EDIT REQUEST MANAGEMENT ==============
 model EditRequest {
-  id        String   @id @default(cuid())
-  userId    String
-  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  email     String
-  name      String
-  phone     String
-  date      DateTime  
-  reason    String   @db.Text
-  division  String
-  district  String
-  upazila   String
-  union     String
-  role      String
-  status    String   @default("pending") 
-  editedOnce Boolean @default(false) 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  userId     String
+  user       users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email      String
+  name       String
+  phone      String
+  date       DateTime
+  reason     String   @db.Text
+  division   String
+  district   String
+  upazila    String
+  union      String
+  role       String
+  status     String   @default("pending")
+  editedOnce Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([userId])
   @@index([email])
@@ -407,16 +433,17 @@ enum TodoStatus {
 }
 
 model WeeklyTodo {
-  id            String      @id @default(cuid())
+  id            String     @id @default(cuid())
   userId        String
-  user          users       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          users      @relation(fields: [userId], references: [id], onDelete: Cascade)
   title         String
-  details       String?     @db.Text
-  scheduledDate DateTime?   
-  status        TodoStatus  @default(pending)
+  details       String?    @db.Text
+  scheduledDate DateTime?
+  status        TodoStatus @default(pending)
   completedAt   DateTime?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
   @@index([userId])
   @@index([status])
 }

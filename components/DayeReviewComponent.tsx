@@ -634,6 +634,14 @@ const DayeReviewComponent: React.FC = () => {
     (reviewMode === "daily" ? submissionLoading : monthlyLoading) ||
     !allUsers.length;
 
+  const centralAdminEmailSet = useMemo(() => {
+    return new Set(
+      allUsers
+        .filter((user: User) => user.role?.toLowerCase() === "centraladmin")
+        .map((user: User) => user.email),
+    );
+  }, [allUsers]);
+
   // Filter and search
   const filteredStatus = useMemo(() => {
     if (reviewMode !== "daily") return [] as DayeSubmissionStatus[];
@@ -684,7 +692,19 @@ const DayeReviewComponent: React.FC = () => {
       { key: "sofor", label: "সফর" },
     ];
 
-    const rows = filteredStatus.map((status) => {
+    const pdfStatuses = filteredStatus.filter(
+      (status) => !centralAdminEmailSet.has(status.email),
+    );
+
+    if (pdfStatuses.length === 0) {
+      toast.dismiss();
+      toast.error(
+        "PDF export করার মতো কোনো non-centraladmin data পাওয়া যায়নি।",
+      );
+      return;
+    }
+
+    const rows = pdfStatuses.map((status) => {
       const row: Record<string, string> = {
         name: status.name,
       };
@@ -824,10 +844,10 @@ const DayeReviewComponent: React.FC = () => {
                 }
 
                 .not-done {
-                  color: #333333;
+                  background-color: #fee2e2;
+                  color: #991b1b;
                   font-weight: bold;
                 }
-
                 .leave {
                   background-color: #fde68a;
                   color: #111827;
@@ -886,14 +906,14 @@ const DayeReviewComponent: React.FC = () => {
                                   ? "done"
                                   : value === "LEAVE"
                                     ? "leave"
-                                    : "";
+                                    : "not-done";
 
                               const displayValue =
                                 value === "DONE"
                                   ? "সম্পন্ন"
                                   : value === "LEAVE"
                                     ? "ছুটিতে আছে"
-                                    : "";
+                                    : "জমা দেয়নি";
 
                               return `<td class="${cls}">${displayValue}</td>`;
                             })
@@ -934,7 +954,9 @@ const DayeReviewComponent: React.FC = () => {
       const y = selectedYear;
       const mLabel = monthOptions[selectedMonth] || String(selectedMonth + 1);
       const daysInMonth = monthlyStartEnd.daysInMonth;
-      const users = monthlyUsersWithLeave;
+      const users = monthlyUsersWithLeave.filter(
+        (user) => !centralAdminEmailSet.has(user.email),
+      );
 
       if (!users || users.length === 0) {
         toast.dismiss();
@@ -1073,6 +1095,12 @@ const DayeReviewComponent: React.FC = () => {
               font-weight: bold;
               font-size: 7px;
             }
+            .not-done {
+              background-color: #fee2e2;
+              color: #991b1b;
+              font-weight: bold;
+              font-size: 7px;
+            }
 
             .leave {
               background-color: #fde68a;
@@ -1127,7 +1155,7 @@ const DayeReviewComponent: React.FC = () => {
                             return `<td class="day-cell leave">ছুটি</td>`;
                           }
                           if (submitted === 0) {
-                            return `<td class="day-cell"></td>`;
+                            return `<td class="day-cell not-done"></td>`;
                           }
                           return `<td class="day-cell done">${submitted}/9</td>`;
                         })
